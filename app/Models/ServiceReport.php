@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Service;
 use App\Traits\UploadTrait;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +23,7 @@ class ServiceReport extends Model
         return $value ? asset('storage/' . $value) : null;
     }
 
-    // دالة لحفظ الملفات  
+    // دالة لحفظ الملفات
     protected function StoreFile($directory, $file)
     {
         try {
@@ -33,6 +32,16 @@ class ServiceReport extends Model
             \Log::error('File storage error: ' . $e->getMessage());
             return null;
         }
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ServiceReportImage::class , 'service_report_id');
+    }
+
+    public function latestImage()
+    {
+        return $this->hasOne(ServiceReportImage::class)->latestOfMany();
     }
 
 }

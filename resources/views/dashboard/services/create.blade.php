@@ -143,9 +143,8 @@
                                     @foreach ($reports as $index => $report)
                                         <div class="row align-reports-center reports-item-row mb-2" data-order="{{ $report->order }}">
                                             <div class="col-1">
-                                                @if ($report->image)
-                                                    <img src="{{ asset($report->image) }}" alt=""
-                                                        class="preview-image" style="width:50px;height:50px;">
+                                                @if ($latest = $report->latestImage)
+                                                    <img src="{{ asset('storage/' . $latest->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
                                                 @else
                                                     <img src="" alt="" class="preview-image"
                                                         style="width:50px;height:50px;display:none;">
@@ -168,14 +167,16 @@
                                                     required>
                                             </div>
                                             <div class="col-2">
-                                                <input type="file" name="reports_images[]" accept="image/*"
-                                                    class="form-control form-control-lg form-control-solid image-upload">
-                                                <div class="progress mt-2 d-none">
-                                                    <div class="progress-bar" role="progressbar" style="width: 0%;"
+                                                <input type="file" name="reports_images[{{ $index }}][]" accept="image/*" class="form-control form-control-lg form-control-solid image-upload" multiple id="imageInput">
+
+                                                <div class="progress mt-2 d-none" id="progressWrapper">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                                        style="width: 0%;" id="progressBar"
                                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <div class="col-2">
                                                 <button type="button" class="btn btn-sm btn-light-primary move-up"
                                                         {{ $index == 0 ? 'disabled' : '' }}>
@@ -233,7 +234,49 @@
 @endsection
 @section('scripts')
 <script>
+    function attachProgressListeners() {
+        document.querySelectorAll('.image-upload').forEach(input => {
+        if (input._hasProgressListener) return;
+        input._hasProgressListener = true;
+
+        input.addEventListener('change', () => {
+            const files = input.files;
+            if (!files.length) return;
+
+            const row     = input.closest('.reports-item-row');
+            const wrapper = row.querySelector('.progress');
+            const bar     = row.querySelector('.progress-bar');
+
+            wrapper.classList.remove('d-none');
+            bar.style.width    = '0%';
+            bar.innerText      = '0%';
+            bar.setAttribute('aria-valuenow', 0);
+
+            let progress = 0;
+            const interval = setInterval(() => {
+            progress += 5;
+            bar.style.width    = progress + '%';
+            bar.innerText      = progress + '%';
+            bar.setAttribute('aria-valuenow', progress);
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                wrapper.classList.add('d-none');
+                bar.style.width    = '0%';
+                bar.innerText      = '0%';
+                bar.setAttribute('aria-valuenow', 0);
+                }, 1500);
+            }
+            }, 100);
+        });
+        });
+    }
+
     $(document).ready(function() {
+
+        attachProgressListeners();
+
         $('#add-stock-item').click(function() {
             var newRowCount = $('.stock-item-row').length + 1; // تحديث الترقيم
             var newRow = `
@@ -277,6 +320,7 @@
         // ...
 
         $('#add-report-item').click(function() {
+            attachProgressListeners();
             var newRowCount = $('.reports-item-row').length + 1; // تحديث الترقيم
             var newRow = `
             <div class="row align-reports-center reports-item-row mb-2" data-index="${newRowCount}">
@@ -290,7 +334,7 @@
                     <input type="number" name="reports_counts[]" min="1" class="form-control form-control-lg form-control-solid" placeholder="@lang('dashboard.count')" required>
                 </div>
                 <div class="col-2">
-                    <input type="file" name="reports_images[]" accept="image/*" class="form-control form-control-lg form-control-solid image-upload">
+                    <input type="file" name="reports_images[${newRowCount}][]" accept="image/*" class="form-control form-control-lg form-control-solid image-upload">
                     <div class="progress mt-2 d-none">
                         <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                     </div>

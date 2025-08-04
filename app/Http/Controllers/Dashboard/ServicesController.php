@@ -29,7 +29,7 @@ class ServicesController extends Controller
     public function store(Request $request)
 {
     try {
-        // التحقق من صحة البيانات الواردة  
+        // التحقق من صحة البيانات الواردة
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable',
@@ -48,16 +48,16 @@ class ServicesController extends Controller
             'reports_images' => 'nullable|array',
             'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'report_orders' => 'nullable|array',
-            'report_orders.*' => 'nullable|integer'
+            'report_orders.*' => 'nullable|integer',
         ]);
 
         // تحديد الحقول المطلوبة فقط لإنشاء الخدمة
         $serviceData = $request->only(['name', 'description', 'price', 'hours', 'hour_from', 'hour_to']);
 
-        // إنشاء الخدمة  
+        // إنشاء الخدمة
         $service = Service::create($serviceData);
 
-        // التعامل مع المخزون  
+        // التعامل مع المخزون
         if (isset($request->stocks) && isset($request->counts)) {
             $stocksData = array_combine($request->stocks, $request->counts);
             $service->stocks()->sync([]);
@@ -67,20 +67,27 @@ class ServicesController extends Controller
             }
         }
 
-        // التعامل مع التقارير  
+        // التعامل مع التقارير
         if (isset($request->reports) && isset($request->reports_counts)) {
             foreach ($request->reports as $index => $reportName) {
                 $count = $request->reports_counts[$index];
-                $image = $request->file('reports_images')[$index] ?? null; // استخدام file() للحصول على الملف
                 $order = $request->report_orders[$index] ?? $index;
 
-                // إنشاء التقرير  
-                $service->reports()->create([
+                // إنشاء التقرير
+                $newReport = $service->reports()->create([
                     'name' => $reportName,
                     'count' => $count,
-                    'image' => $image, // سيتم معالجتها بواسطة Mutator
                     'report_orders' => $order
                 ]);
+
+                if ($files = $request->file("reports_images.{$index}")) {
+                    foreach ($files as $file) {
+                        $path = $file->store('reports', 'public');
+                        $newReport->images()->create([
+                            'image' => $path
+                        ]);
+                    }
+                }
             }
         }
 
@@ -112,7 +119,7 @@ class ServicesController extends Controller
     {
         $service = Service::findOrFail($service);
         $stocks = Stock::all();
-        $reports = ServiceReport::where('service_id', $service->id)->orderBy('id')->get();
+        $reports = ServiceReport::with('images')->where('service_id', $service->id)->orderBy('id')->get();
 
         return view('dashboard.services.create', compact('service', 'stocks', 'reports'));
     }
@@ -134,7 +141,9 @@ class ServicesController extends Controller
             'counts' => 'nullable|array',
             'counts.*' => 'nullable|integer|min:1',
             'report_orders' => 'nullable|array',
-            'report_orders.*' => 'nullable|integer'
+            'report_orders.*' => 'nullable|integer',
+            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         unset($validatedData['stocks']);
@@ -176,11 +185,10 @@ class ServicesController extends Controller
 
                     // Update image only if a new one is provided
                     if ($request->hasFile("reports_images.{$index}")) {
-                        // Handle file upload
-                        $file = $request->file("reports_images.{$index}");
-                        $path = $file->store('reports', 'public');
-                        $report->image = $path;
-                        $report->save();
+                        foreach ($request->file("reports_images.{$index}") as $file) {
+                            $path = $file->store('reports', 'public');
+                            $report->images()->create(['image' => $path]);
+                        }
                     }
 
                     $updatedReports[] = $reportId;
@@ -188,8 +196,10 @@ class ServicesController extends Controller
                 } else {
                     // Create new report
                     if ($request->hasFile("reports_images.{$index}")) {
-                        $file = $request->file("reports_images.{$index}");
-                        $reportData['image'] = $file->store('reports', 'public');
+                        foreach ($request->file("reports_images.{$index}") as $file) {
+                            $path = $file->store('reports', 'public');
+                            $report->images()->create(['image' => $path]);
+                        }
                     }
                     $newReport = ServiceReport::create($reportData);
                     $updatedReports[] = $newReport->id;
