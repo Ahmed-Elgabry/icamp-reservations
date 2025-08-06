@@ -7,7 +7,7 @@ use App\Models\Service;
 use App\Models\ServiceReport;
 use App\Models\Stock;
 use Illuminate\Http\Request;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 class ServicesController extends Controller
 {
@@ -81,12 +81,10 @@ class ServicesController extends Controller
                 ]);
 
                 if ($files = $request->file("reports_images.{$index}")) {
-                    foreach ($files as $file) {
-                        $path = $file->store('reports', 'public');
-                        $newReport->images()->create([
-                            'image' => $path
-                        ]);
-                    }
+                    $path = $files->store('reports', 'public');
+                    $newReport->create([
+                        'image' => $path
+                    ]);
                 }
             }
         }
@@ -119,7 +117,7 @@ class ServicesController extends Controller
     {
         $service = Service::findOrFail($service);
         $stocks = Stock::all();
-        $reports = ServiceReport::with('images')->where('service_id', $service->id)->orderBy('id')->get();
+        $reports = ServiceReport::where('service_id', $service->id)->orderBy('id')->get();
 
         return view('dashboard.services.create', compact('service', 'stocks', 'reports'));
     }
@@ -168,7 +166,6 @@ class ServicesController extends Controller
 
             foreach ($request->reports as $index => $reportName) {
                 $count = $request->reports_counts[$index];
-                $order = $request->report_orders[$index] ?? $index;
                 $reportId = $request->report_ids[$index] ?? null;
 
                 $reportData = [
@@ -178,38 +175,43 @@ class ServicesController extends Controller
                     'service_id' => $service->id
                 ];
 
-                if ($reportId && isset($existingReports[$reportId])) {
-                    // Update existing report
-                    $report = ServiceReport::find($reportId);
-                    $report->update($reportData);
+  if ($reportId && isset($existingReports[$reportId])) {
+    // Update existing report
+    $report = ServiceReport::findOrFail($reportId);
+    $report->update($reportData);
 
-                    // Update image only if a new one is provided
-                    if ($request->hasFile("reports_images.{$index}")) {
-                        foreach ($request->file("reports_images.{$index}") as $file) {
-                            $path = $file->store('reports', 'public');
-                            $report->images()->create(['image' => $path]);
-                        }
-                    }
+    // Get the image for this index correctly
+    $file = $request->file('reports_images')[$index] ?? null;
 
-                    $updatedReports[] = $reportId;
-                    unset($existingReports[$reportId]);
-                } else {
-                    // Create new report
-                    if ($request->hasFile("reports_images.{$index}")) {
-                        foreach ($request->file("reports_images.{$index}") as $file) {
-                            $path = $file->store('reports', 'public');
-                            $report->images()->create(['image' => $path]);
-                        }
-                    }
-                    $newReport = ServiceReport::create($reportData);
-                    $updatedReports[] = $newReport->id;
-                }
+    if ($file instanceof \Illuminate\Http\UploadedFile) {
+        // Delete the old image if it exists
+        if ($report->image && Storage::disk('public')->exists($report->image)) {
+            Storage::disk('public')->delete($report->image);
+        }
+
+        // Store new image
+        $path = $file->store('reports', 'public');
+        $report->update(['image' => $path]);
+    }
+
+    $updatedReports[] = $reportId;
+    unset($existingReports[$reportId]);
+} else {
+    // Creating a new report
+    $file = $request->file('reports_images')[$index] ?? null;
+
+    if ($file instanceof \Illuminate\Http\UploadedFile) {
+        $reportData['image'] = $file->store('reports', 'public');
+    }
+
+    $newReport = ServiceReport::create($reportData);
+    $updatedReports[] = $newReport->id;
+}
+
             }
 
-            // Delete reports that were not updated or created
             ServiceReport::whereIn('id', array_keys($existingReports))->delete();
         } else {
-            // If no reports data is provided, delete all existing reports
             $service->reports()->delete();
         }
 

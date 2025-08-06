@@ -363,7 +363,7 @@
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                        <span class="menu-title">@lang('apis.delegate_accept_orders')</span>
+                        <span class="menu-title">@lang('dashboard.delegate_accept_orders')</span>
                     </a>
                 </div>
                 <div class="menu-item">
@@ -376,12 +376,12 @@
                     </a>
                 </div>
                 <div class="menu-item">
-                    <a href="{{ route('orders.index', ['status' => 'rejected']) }}" title="@lang('dashboard.rejected_desc')"
-                        class="menu-link py-3 {{isActiveURLSegment('rejected', 2)}}">
+                    <a href="{{ route('orders.index', ['status' => 'delayed']) }}" title="@lang('dashboard.delayed_desc')"
+                        class="menu-link py-3 {{isActiveURLSegment('delayed', 2)}}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                        <span class="menu-title">@lang('apis.rejected_orders')</span>
+                        <span class="menu-title">@lang('dashboard.delayed_orders')</span>
                     </a>
                 </div>
                 <div class="menu-item">

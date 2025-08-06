@@ -26,6 +26,9 @@ return [
     'full_confiscation_message' => 'Full Confiscation Message',
     'confiscation_note' => 'Confiscation Note',
     'confiscated_full' => 'Full Confiscation',
+    'order_details' => 'Order Details',
+    'order_id' => 'Order ID',
+    'order_date_rev' => 'Order Date',
     'confiscated_partial' => 'Partial Confiscation',
     'confiscation_details' => 'Confiscation Details',
     'partial_confiscation_amount' => 'Partial Confiscation Amount',
@@ -206,7 +209,7 @@ return [
     'cash' => 'Cash',
     'visa' => 'Bank Transfer',
     'services' => 'Services',
-    'price' => 'Price',
+    'rate_order' => 'Rate Order',
     'invoice' => 'Invoice',
     'days' => 'Days',
     'count' => 'Count',
@@ -426,6 +429,7 @@ return [
     'voice_note' => 'Voice note',
     'start_recording' => 'Start recording',
     'stop_recording' => 'Stop recording',
+    'recording' => 'Recording',
     'load_saved_audio' => 'Load saved recording',
     'delete_saved_audio' => 'Delete saved recording',
     'record_voice_note_instruction' => 'Record a voice note using your device\'s microphone.',
@@ -434,30 +438,38 @@ return [
     'rate' => 'Rate',
     'rating' => 'Rating',
     'rating_desc' => 'Rating',
+    'pending_and_show_price_desc' => 'Pending and Show Price',
+    'pending_and_Initial_reservation' => 'Pending and Initial Reservation',
+    'delayed' => 'Delayed',
     'review' => 'Review',
-
+    'delayed_orders' => 'Delayed Orders',
+    'delayed_desc' => 'Indicates that the order or request has been delayed beyond the expected time, often used in e-commerce or service management.',
+    'review_placeholder' => 'Write your review here...',
+    'send_review' => 'Send Review',
+    'delegate_accept_orders' => 'Accepted Orders',
     'Questionnaires' => 'Questionnaires',
-    'Terms_desc' => '<h3>Terms and Conditions</h3>  
-    <p>A deposit of AED 500 must be paid to confirm the reservation.</p>  
-    <p>Payment method: bank transfer.</p>  
-    <p>Camp rental duration is 8 hours.</p>  
-    <p>Camp pickup time is 4:00 or 5:00 pm.</p>  
-    <p>The tenant can receive the camp before 4 pm, by paying an additional amount of AED 200 per hour.</p>  
-    <p>Check-out from the camps takes place at 12 or 1 midnight according to what was agreed upon.</p>  
-    <p>The renter can delay check-out from the camps by paying an amount of AED 200 for each additional hour.</p>  
-    <p>The tenant must pay a deposit of AED 500, which will be refunded within 24 hours, after ensuring that the camp’s belongings are intact.</p>  
-    <p>An amount will be deducted from the paid deposit if one of the camp’s belongings is damaged or the place is left unclean.</p>  
-    <p>The reservation date cannot be changed after confirmation and payment of the deposit.</p>  
-    <p>The deposit is non-refundable except in the event of bad weather.</p>  
-    <p>The camping location is in the Emirate of Dubai only, and the customer will be notified at the time of booking of the available areas, noting that the setting up location is subject to change based on the weather condition or directives from the competent authorities.</p>  
-    <p>Maintaining the cleanliness of the place is mandatory.</p>  
-    <p>Do not light a fire except in places designated for it, and barbecue only in places designated for barbecuing.</p>  
-    <p>Lower the volume of your headphones and do not disturb others.</p>  
-    <p>Drinking alcohol is strictly prohibited in the camp.</p>  
-    <p>If you are late in delivering the session to us at the specified time by a quarter of an hour or more, an amount of AED 250 will be deducted from the insurance.</p>  
-    <p>If, for example, the camp package chosen includes a maximum of only 15 people, and it is noted that the number of attendees exceeds that number, this is considered a breach of the agreement, and Fun Camp has the right to confiscate an amount of AED 250 from the insurance.</p>  
-    <p>We (FunCamp) disclaim our responsibility for any violations issued by the competent authorities against you regarding, but not limited to: (disturbing others, using firecrackers, etc.), and we have the right to demand any compensation that may cause us harm as a result of those actions.</p>  
-    <p>We (FunCamp) disclaim any responsibility for any human or material injuries that may occur to the tenant due to his negligence, and he alone is responsible for that towards himself and towards others.</p>  
+    'Terms_desc' => '<h3>Terms and Conditions</h3>
+
+    <p>A deposit of AED 500 must be paid to confirm the reservation.</p>
+    <p>Payment method: bank transfer.</p>
+    <p>Camp rental duration is 8 hours.</p>
+    <p>Camp pickup time is 4:00 or 5:00 pm.</p>
+    <p>The tenant can receive the camp before 4 pm, by paying an additional amount of AED 200 per hour.</p>
+    <p>Check-out from the camps takes place at 12 or 1 midnight according to what was agreed upon.</p>
+    <p>The renter can delay check-out from the camps by paying an amount of AED 200 for each additional hour.</p>
+    <p>The tenant must pay a deposit of AED 500, which will be refunded within 24 hours, after ensuring that the camp’s belongings are intact.</p>
+    <p>An amount will be deducted from the paid deposit if one of the camp’s belongings is damaged or the place is left unclean.</p>
+    <p>The reservation date cannot be changed after confirmation and payment of the deposit.</p>
+    <p>The deposit is non-refundable except in the event of bad weather.</p>
+    <p>The camping location is in the Emirate of Dubai only, and the customer will be notified at the time of booking of the available areas, noting that the setting up location is subject to change based on the weather condition or directives from the competent authorities.</p>
+    <p>Maintaining the cleanliness of the place is mandatory.</p>
+    <p>Do not light a fire except in places designated for it, and barbecue only in places designated for barbecuing.</p>
+    <p>Lower the volume of your headphones and do not disturb others.</p>
+    <p>Drinking alcohol is strictly prohibited in the camp.</p>
+    <p>If you are late in delivering the session to us at the specified time by a quarter of an hour or more, an amount of AED 250 will be deducted from the insurance.</p>
+    <p>If, for example, the camp package chosen includes a maximum of only 15 people, and it is noted that the number of attendees exceeds that number, this is considered a breach of the agreement, and Fun Camp has the right to confiscate an amount of AED 250 from the insurance.</p>
+    <p>We (FunCamp) disclaim our responsibility for any violations issued by the competent authorities against you regarding, but not limited to: (disturbing others, using firecrackers, etc.), and we have the right to demand any compensation that may cause us harm as a result of those actions.</p>
+    <p>We (FunCamp) disclaim any responsibility for any human or material injuries that may occur to the tenant due to his negligence, and he alone is responsible for that towards himself and towards others.</p>
     <p>Any other requests as agreed upon.</p>  ',
 
 ];

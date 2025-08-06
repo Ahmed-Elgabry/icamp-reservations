@@ -42,7 +42,7 @@ class PaymentsController extends Controller
                 $query->whereNotNull('id');
             })
             ->whereNotNull('order_id') // يتحقق من وجود order_id
-            ->whereNotNull('account_id') // يتحقق من وجود account_id 
+            ->whereNotNull('account_id') // يتحقق من وجود account_id
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -177,7 +177,7 @@ class PaymentsController extends Controller
 
         $payments = $query->get();
 
-        $orders = Order::all();
+        $orders = Order::whereNot('insurance_status' , 'returned')->get();
         $customers = Customer::all(); // Assuming you have a Customer model
         return view('dashboard.payments.index', compact('payments', 'customers', 'orders'));
     }
@@ -225,7 +225,7 @@ public function accountsStore(Request $request)
             'balance' => $transfareTo->balance + $request->amount
         ]);
     }
-    
+
     return response()->json(['message' => 'Transaction successful'], 200);
 }
 
@@ -251,24 +251,24 @@ public function accountsStore(Request $request)
         $payment->update($validatedData);
         $oldBankAccount = BankAccount::find($account_id);
 
-        // return money to the accounts  
-        // back money to the sender account_id 
+        // return money to the accounts
+        // back money to the sender account_id
         $newBalance = $oldBankAccount->balance + $disccountFormAccount;
         BankAccount::where('id', $account_id)->update(['balance' => $newBalance]);
-        // take money form resever account 
-        // back money to resever 
+        // take money form resever account
+        // back money to resever
         $oldResever = BankAccount::find($receiver);
         $newBalance = $oldResever->balance - $paymentAmount;
         BankAccount::where('id', $receiver)->update(['balance' => $newBalance]);
 
 
-        // save them again , take money form 
+        // save them again , take money form
         $bankAccount = BankAccount::find($request->account_id);
         $bankAccount->update([
             'balance' => $bankAccount->balance - $disccountFormAccount
         ]);
 
-        // send money to 
+        // send money to
         $transfareTo = BankAccount::find($request->receiver_id);
         ;
         $transfareTo->update([
@@ -355,7 +355,7 @@ public function accountsStore(Request $request)
         ]);
 
         $oldBankAccount = BankAccount::find($payment->account_id);
-        //  return money back 
+        //  return money back
         $oldBankAccount->update([
             'balance' => $oldBankAccount->balance - $payment->price
         ]);
@@ -364,7 +364,7 @@ public function accountsStore(Request $request)
 
 
         $bankAccount = BankAccount::findOrFail($request->account_id);
-        // take money form bank 
+        // take money form bank
         $bankAccount->update([
             'balance' => $bankAccount->balance + $request->price
         ]);

@@ -14,7 +14,7 @@ return [
     'done_order'                                      => 'الطلب مكتمل',
     'pending_orders'                                  => 'طلبات المعلقة',
     'rejected_orders'                                  => 'طلبات مرفوضة',
-    'delegate_accept_orders'                          => 'طلبات مقبولة',
+    'delegate_accept_orders'                          => 'طلبات معتمدة',
     'preparing_orders'                                => 'طلبات تحت التنفيذ',
     'cancelled_orders'                                => 'طلبات ملغاة',
     'done_orders'                                     => 'طلبات مكتملة',

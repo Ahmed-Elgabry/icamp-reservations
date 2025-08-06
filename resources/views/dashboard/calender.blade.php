@@ -4,6 +4,32 @@
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-xxl">
         <div class="card card-flush">
+            <div class="card card-header d-flex" style="flex-direction: row;justify-content: center;align-items: center;">
+                <div class="pending" style="margin-left: 12px;">
+                    <span class="dotted-pending"></span>
+                    <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.pending_and_show_price_desc') }}</span>
+                </div>
+                <div class="pending" style="margin-left: 12px;">
+                    <span class="dotted-pending"></span>
+                    <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.pending_and_Initial_reservation') }}</span>
+                </div>
+                <div class="approved" style="margin-left: 12px;">
+                    <span class="dotted-approved"></span>
+                    <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.approved') }}</span>
+                </div>
+                <div class="canceled" style="margin-left: 12px;">
+                    <span class="dotted-canceled"></span>
+                    <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.canceled') }}</span>
+                </div>
+                <div class="delayed" style="margin-left: 12px;">
+                    <span class="dotted-delayed"></span>
+                    <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.delayed') }}</span>
+                </div>
+                <div class="completed" style="margin-left: 12px;">
+                    <span class="dotted-completed"></span>
+                    <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.completed') }}</span>
+                </div>
+            </div>
             <div class="card-body">
                 <div id="calendar"></div>
             </div>
@@ -16,6 +42,41 @@
 <link href="{{ asset('css/fullcalendar.css') }}" rel="stylesheet" type="text/css" />
 <link href="{{ asset('css/fullcalendar.min.css') }}" rel="stylesheet" type="text/css" />
 <style>
+    .dotted-pending {
+        background-color: #009ef7;
+        color: white;
+        padding:6px 16px;
+        border-radius: 9px;
+    }
+
+    .dotted-approved {
+        background-color: green;
+        color: white;
+        padding:6px 16px;
+        border-radius: 9px;
+    }
+
+    .dotted-canceled {
+        background-color: red;
+        color: white;
+        padding:6px 16px;
+        border-radius: 9px;
+    }
+
+    .dotted-delayed {
+        background-color: orange;
+        color: white;
+        padding:6px 16px;
+        border-radius: 9px;
+    }
+
+    .dotted-completed {
+        background-color: gray;
+        color: white;
+        padding:6px 16px;
+        border-radius: 9px;
+    }
+
     .fc-event-title.fc-sticky {
         font-size: 11px;
         text-align: right;
@@ -48,6 +109,7 @@
             eventDidMount: function (info) {
                 var status = info.event.extendedProps.status;
                 var titleElement = info.el.querySelector('.fc-event-title');
+                console.log(status);
 
                 // ضبط لون اسم العميل حسب الحالة
                 if (status === 'pending') {
@@ -62,11 +124,11 @@
                     info.el.style.backgroundColor = 'gray';
                     info.el.style.borderColor = 'darkgray';
                     titleElement.style.color = 'white';
-                } else if (status === 'canceled') {
-                    info.el.style.backgroundColor = 'orenge';
+                } else if (status === 'delayed') {
+                    info.el.style.backgroundColor = 'orange';
                     info.el.style.borderColor = 'darkorenge';
                     titleElement.style.color = 'white';
-                } else if (status === 'rejected') {
+                } else if (status === 'canceled') {
                     info.el.style.backgroundColor = 'red';
                     info.el.style.borderColor = 'darkred';
                     titleElement.style.color = 'white';

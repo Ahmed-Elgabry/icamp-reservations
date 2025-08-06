@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تقييم الطلب</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Cairo", sans-serif;
             background-color: #f2f2f2;
             margin: 0;
             padding: 0;
@@ -137,7 +140,7 @@
         }
     </style>
 </head>
-<body>
+<body style="direction: @if (app()->getLocale() == 'ar') rtl @else ltr @endif" >
 <div class="rating-form-container">
     <!-- Display return messages -->
     @if(session('success'))
@@ -153,33 +156,43 @@
         @endforeach
     @endif
 
-    <div class="order-details">
-        <h2>Order Details</h2>
-        <p>Order ID: {{ $order->id }}</p>
-        <p>Order Date: {{ $order->date }}</p>
-        <p>Customer: {{ $order->customer->name }}</p>
+    {{-- Switch lang to ar and en  --}}
+    <div>
+        @if (app()->getLocale() == 'ar')
+            <a href="{{ route('set-lang', 'en') }}" >English</a>
+        @else
+            <a href="{{route('set-lang','ar')}}">العربية</a>
+        @endif
     </div>
 
-    <div class="rating-form-header">Rate Order</div>
+
+    <div class="order-details">
+        <h2>{{ __('dashboard.order_details') }}</h2>
+        <p>{{ __('dashboard.order_id') }}: {{ $order->id }}</p>
+        <p>{{ __('dashboard.order_date_rev') }}: {{ $order->date }}</p>
+        <p>{{ __('dashboard.customer') }}: {{ $order->customer->name }}</p>
+    </div>
+
+    <div class="rating-form-header">{{ __('dashboard.rate_order') }}</div>
     <div class="rating-form-body">
         <form action="{{ route('rate.save') }}" method="POST">
             @csrf
             <input type="hidden" name="order_id" value="{{ $order->id }}">
 
             <div class="rating-form-group">
-                <label class="rating-form-label">Rate</label>
+                <label class="rating-form-label">{{ __('dashboard.Rate') }}</label>
                 <div class="rating-form-stars">
                     @for($i = 5; $i >= 1;$i--)
-                    <input type="radio" 
+                    <input type="radio"
                         id="star{{$i}}" name="rating" value="{{$i}}"><label  @if($order->rate)
-                                             {{$order->rate->rating >= $i ? "class=checked" : ''}} 
+                                             {{$order->rate->rating >= $i ? "class=checked" : ''}}
                                         @endif  for="star{{$i}}">★</label>
                     @endfor
                 </div>
             </div>
             <div class="rating-form-group">
-                <label for="review" class="rating-form-label">Review</label>
-                <textarea id="review" name="review" class="rating-form-textarea" placeholder="Write Your Review Here..."> {{$order->rate ? $order->rate->review : ''}}</textarea>
+                <label for="review" class="rating-form-label">{{ __('dashboard.review') }}</label>
+                <textarea id="review" name="review" class="rating-form-textarea" placeholder={{ __('dashboard.review_placeholder') }}> {{$order->rate ? $order->rate->review : ''}}</textarea>
             </div>
             <div>
             @foreach ($questions as $question)
@@ -187,16 +200,16 @@
                     <label style="font-family: cairo, sans-serif; font-size: 25px; margin-right: 15px; margin-bottom: 0;">{{ $question->question }}</label>
                     <div style="margin-left: 10px;">
                         <input type="radio" name="questions[{{ $question->id }}]" value="1" id="yes-{{ $question->id }}">
-                        <label for="yes-{{ $question->id }}" style="font-family: cairo, sans-serif; font-size: 20px; margin-right: 10px;">نعم</label>
+                        <label for="yes-{{ $question->id }}" style="font-family: cairo, sans-serif; font-size: 20px; margin-right: 10px;">{{ __('dashboard.yes') }}</label>
                         <input type="radio" name="questions[{{ $question->id }}]" value="0" id="no-{{ $question->id }}">
-                        <label for="no-{{ $question->id }}" style="font-family: cairo, sans-serif; font-size: 20px;">لا</label>
+                        <label for="no-{{ $question->id }}" style="font-family: cairo, sans-serif; font-size: 20px;">{{ __('dashboard.no') }}</label>
                     </div>
                 </div>
             @endforeach
         </div>
 
             <div class="rating-form-footer">
-                <button type="submit" class="rating-form-submit">Send Review ⭐</button>
+                <button type="submit" class="rating-form-submit">{{ __('dashboard.send_review') }} ⭐</button>
             </div>
         </form>
     </div>

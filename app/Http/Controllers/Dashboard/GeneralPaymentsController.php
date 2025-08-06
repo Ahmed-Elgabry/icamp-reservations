@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use DB;
-use PDF; 
+use PDF;
 use Mpdf\Mpdf;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -27,13 +27,13 @@ class GeneralPaymentsController extends Controller
 
         $startDate = request('start_date');
         $endDate = request('end_date');
-    
+
         $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                 return $query->whereBetween('date', [$startDate, $endDate]);
             })
             ->orderBy('created_at', 'desc')
             ->get();
-    
+
         $expenses = Expense::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                 return $query->whereBetween('date', [$startDate, $endDate]);
             })
@@ -45,10 +45,10 @@ class GeneralPaymentsController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-    
+
         // Convert transactions and expenses to a unified collection
         $merged = collect();
-    
+
         foreach ($transactions as $transaction) {
             $merged->push((object)[
                 'account' => $transaction->account,
@@ -64,7 +64,7 @@ class GeneralPaymentsController extends Controller
                 'created_at' => $transaction->created_at,
             ]);
         }
-    
+
         foreach ($expenses as $expense) {
             $merged->push((object)[
                 'account' => $expense->account,
@@ -96,11 +96,11 @@ class GeneralPaymentsController extends Controller
                 'created_at' => $payment->created_at,
             ]);
         }
-      
-    
+
+
         // Sort the merged collection by created_at
         $merged = $merged->sortByDesc('created_at');
-    
+
         // Manually paginate the merged collection
         $currentPage = Paginator::resolveCurrentPage();
         $perPage = 10; // Set your desired items per page
@@ -109,7 +109,7 @@ class GeneralPaymentsController extends Controller
             'path' => Paginator::resolveCurrentPath(),
             'pageName' => 'page',
         ]);
-    
+
         // Append query parameters to pagination links
         $paginatedResults->appends(request()->all());
 
@@ -125,11 +125,11 @@ class GeneralPaymentsController extends Controller
         $bankAccount = BankAccount::find($payment->account_id);
         $disccountFormAccount = $payment->amount;
         $amount = $payment->amount;
-        
+
         $bankAccount->update([
             'balance' => $bankAccount->balance + $disccountFormAccount
         ]);
-        
+
         if($payment->receiver_id)
         {
             $transfareTo =  BankAccount::find($payment->receiver_id);
@@ -164,8 +164,8 @@ class GeneralPaymentsController extends Controller
         }
 
         $general_payments = $query->get();
-        
-        $orders = Order::all();
+
+        $orders = Order::whereNot('insurance_status' , 'returned')->get();
         $customers = Customer::all(); // Assuming you have a Customer model
         return view('dashboard.general_payments.index', compact('general_payments', 'customers','orders'));
     }
@@ -184,7 +184,7 @@ class GeneralPaymentsController extends Controller
     {
         $bankAccounts = BankAccount::all();
         $payment = Transaction::findOrFail($id);
-        
+
         return view('dashboard.general_payments.create',[
             'bankAccounts' => $bankAccounts,
             'payment' => $payment
@@ -201,22 +201,22 @@ class GeneralPaymentsController extends Controller
             'description' => 'nullable|string',
             'order_id' => 'required|exists:orders,id',
         ]);
-     
+
         $payment = Transaction::create($validatedData);
         $bankAccount = BankAccount::find($request->account_id);
         $disccountFormAccount = $request->amount;
         $amount = $request->amount;
-        
+
         $bankAccount->update([
             'balance' => $bankAccount->balance - $disccountFormAccount
         ]);
-        
+
         $transfareTo =  BankAccount::find($request->receiver_id);;
         $transfareTo->update([
             'balance' => $transfareTo->balance + $amount
         ]);
-        
-        
+
+
 
         return response()->json();
     }
@@ -239,43 +239,43 @@ class GeneralPaymentsController extends Controller
             'order_id' => 'required|exists:orders,id',
         ]);
 
-     
+
         $payment->update($validatedData);
         $oldBankAccount = BankAccount::find($account_id);
-        
-        // return money to the accounts  
-        // back money to the sender account_id 
+
+        // return money to the accounts
+        // back money to the sender account_id
         $newBalance = $oldBankAccount->balance + $disccountFormAccount;
         BankAccount::where('id', $account_id)->update(['balance' => $newBalance]);
-        // take money form resever account 
-        // back money to resever 
+        // take money form resever account
+        // back money to resever
         $oldResever = BankAccount::find($receiver);
         $newBalance = $oldResever->balance - $paymentAmount;
         BankAccount::where('id', $receiver)->update(['balance' => $newBalance]);
-    
 
-        // save them again , take money form 
+
+        // save them again , take money form
         $bankAccount = BankAccount::find($request->account_id);
         $bankAccount->update([
             'balance' => $bankAccount->balance - $disccountFormAccount
         ]);
-        
-        // send money to 
+
+        // send money to
         $transfareTo =  BankAccount::find($request->receiver_id);;
         $transfareTo->update([
             'balance' => $transfareTo->balance + $amount
         ]);
-       
+
 
         return response()->json();
     }
 
-    
+
     public function print($payment)
     {
         $payment = GeneralPayment::with('order.customer')->findOrFail($payment);
         $html = view('dashboard.general_payments.pdf', compact('payment'))->render();
-    
+
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
         $mpdf->Output('invoice.pdf', 'I');
@@ -303,7 +303,7 @@ class GeneralPaymentsController extends Controller
             'statement' => 'nullable',
             'notes' => 'nullable|string',
         ]);
-        
+
 
 
         $bankAccount = BankAccount::findOrFail($request->account_id);
@@ -325,7 +325,7 @@ class GeneralPaymentsController extends Controller
      */
     public function show( $order)
     {
-        $order = Order::findOrFail($order); 
+        $order = Order::findOrFail($order);
         $bankAccounts = BankAccount::all();
 
         return view('dashboard.general_payments.show',[
@@ -335,7 +335,7 @@ class GeneralPaymentsController extends Controller
         ]);
     }
 
-   
+
     public function update(Request $request,  $payment)
     {
         $payment = GeneralPayment::findOrFail($payment);
@@ -349,16 +349,16 @@ class GeneralPaymentsController extends Controller
         ]);
 
         $oldBankAccount = BankAccount::find($payment->account_id);
-        //  return money back 
+        //  return money back
         $oldBankAccount->update([
             'balance' => $oldBankAccount->balance - $payment->price
         ]);
-       
+
         $payment->update($validatedData);
 
-        
+
         $bankAccount = BankAccount::findOrFail($request->account_id);
-        // take money form bank 
+        // take money form bank
         $bankAccount->update([
             'balance' => $bankAccount->balance + $request->price
         ]);
@@ -389,7 +389,7 @@ class GeneralPaymentsController extends Controller
 
     public function deleteAll(Request $request) {
         $requestIds = json_decode($request->data);
-    
+
         foreach ($requestIds as $id) {
           $ids[] = $id->id;
         }

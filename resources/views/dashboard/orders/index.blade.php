@@ -143,6 +143,7 @@
                     <thead>
                         <!--begin::Table row-->
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
+                            <th class="">@lang('dashboard.sequence')</th>
                             <th class="">@lang('dashboard.reservation_number')</th>
                             <th class="w-10px pe-2">
                                 <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
@@ -158,6 +159,7 @@
                             <th class="">@lang('dashboard.time_from')</th>
                             <th class="">@lang('dashboard.paied')</th>
                             <th class="">@lang('dashboard.status')</th>
+                            <th class="">@lang('dashboard.insurance_status')</th>
                             <th class="">@lang('dashboard.rate link')</th>
                             <th class="">@lang('dashboard.created_by')</th>
                             <th class="">@lang('dashboard.Agree_to_the_terms')</th>
@@ -166,13 +168,14 @@
                         <!--end::Table row-->
                     </thead>
                     <!--end::Table head-->
+                    
                     <!--begin::Table body-->
                     <tbody class="fw-bold text-gray-600">
                         @foreach ($orders as $order)
                             <!--begin::Table row-->
                             <tr data-id="{{$order->id}}">
                                 <td>{{ $orders->firstItem() + $loop->index }}</td>
-
+                                <td> <span class="badge bg-primary">{{ $order->id }}</span></td>
                                 <!--begin::Checkbox-->
                                 <td>
                                     <div class="form-check form-check-sm form-check-custom form-check-solid">
@@ -233,7 +236,12 @@
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
-                                        {{ number_format($order->price - $order->deposit) }} <!-- المبلغ المتبقي -->
+                                        @if ($order->insurance_status == 'returned')
+                                            {{ number_format($order->insurance_amount) }}
+                                        @else
+                                            {{ number_format($order->price - $order->deposit) }}
+                                        @endif
+
                                     </span>
                                 </td>
 
@@ -241,6 +249,15 @@
 
                                 <!--begin::Order Status-->
                                 <td>{{ __('dashboard.' . $order->status) }}</td>
+                                <!--end::Order Status-->
+
+                                @if ($order->insurance_status)
+                                    <td><span class="badge bg-danger text-white">{{ __('dashboard.' . $order->insurance_status) }}</span></td>
+                                @else
+                                    <td><span class="badge bg-warning text-white">{{ __('dashboard.no_result') }}</span></td>
+                                @endif
+                                <!--begin::Order Status-->
+
                                 <!--end::Order Status-->
 
                                 <!--begin::Rate Link-->
@@ -298,7 +315,7 @@
                                         @else
                                             <p>No permission to view this order.</p>
                                         @endif -->
-                                        
+
                                         @can('orders.edit')
                                             <div class="menu-item px-3">
                                                 <a href="{{route('orders.edit', $order->id)}}"

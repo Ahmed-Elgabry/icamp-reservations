@@ -143,8 +143,8 @@
                                     @foreach ($reports as $index => $report)
                                         <div class="row align-reports-center reports-item-row mb-2" data-order="{{ $report->order }}">
                                             <div class="col-1">
-                                                @if ($latest = $report->latestImage)
-                                                    <img src="{{ asset('storage/' . $latest->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
+                                                @if ($report->image)
+                                                    <img src="{{ asset($report->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
                                                 @else
                                                     <img src="" alt="" class="preview-image"
                                                         style="width:50px;height:50px;display:none;">
@@ -167,7 +167,7 @@
                                                     required>
                                             </div>
                                             <div class="col-2">
-                                                <input type="file" name="reports_images[{{ $index }}][]" accept="image/*" class="form-control form-control-lg form-control-solid image-upload" multiple id="imageInput">
+                                                <input type="file" name="reports_images[{{ $index }}]" accept="image/*" class="form-control form-control-lg form-control-solid image-upload" id="imageInput">
 
                                                 <div class="progress mt-2 d-none" id="progressWrapper">
                                                     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
@@ -334,7 +334,7 @@
                     <input type="number" name="reports_counts[]" min="1" class="form-control form-control-lg form-control-solid" placeholder="@lang('dashboard.count')" required>
                 </div>
                 <div class="col-2">
-                    <input type="file" name="reports_images[${newRowCount}][]" accept="image/*" class="form-control form-control-lg form-control-solid image-upload">
+                    <input type="file" name="reports_images[${newRowCount}]" accept="image/*" class="form-control form-control-lg form-control-solid image-upload">
                     <div class="progress mt-2 d-none">
                         <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                     </div>

@@ -40,9 +40,9 @@
                             <input type="date" name="date_to" class="form-control" placeholder="{{ __('dashboard.date_to') }}" value="{{ request('date_to') }}">
                         </div>
                         <button type="submit" class="btn btn-primary mt-3">{{ __('dashboard.search') }} <i class="fa fa-search"></i></button>
-                       
+
                     </form>
-                    
+
                 </div>
                 <!--end::Card title-->
                 <!--begin::Card toolbar-->
@@ -51,7 +51,7 @@
                         <a href="?">
                             <i class="fa fa-list"></i> {{__('dashboard.showall')}}
                         </a>
-                    @endif 
+                    @endif
                 </div>
                 <!--end::Card toolbar-->
             </div>
@@ -100,7 +100,7 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('payments.show', $payment->order_id) }}">
-                                        {{ $payment->order_id }} [{{$order->customer->name }}]
+                                        {{ $payment->order_id }} @isset($order) [{{$order->customer->name }}] @endisset
                                     </a>
                                 </td>
                                 <td>{{__('dashboard.'. $payment->statement )}}</td>
@@ -160,4 +160,4 @@
     <script>
         $("#customer_id").select2();
     </script>
-@endpush 
+@endpush

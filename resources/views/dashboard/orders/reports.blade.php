@@ -72,9 +72,9 @@
                                                 {{ $index + 1 }}
                                             </div>
                                             <div class="col-1 col-md-1">
-                                                @if ($report->image)
+                                                @if ($latest = $report->latestImage)
                                                     <a href="{{ asset($report->image) }}" target="_blank">
-                                                        <img src="{{ asset($report->image) }}" alt="{{ $report->name }}"
+                                                        <img src="{{ asset('storage/' . $latest->image) }}" alt="{{ $report->name }}"
                                                             class="report-image">
                                                     </a>
                                                 @else
@@ -82,7 +82,7 @@
                                                         alt="{{ $report->name }}" class="report-image">
                                                 @endif
                                             </div>
-                                           
+
                                             <div class="col-2 col-md-2">
                                                 <label>{{ $report->name }}</label>
                                             </div>
@@ -97,7 +97,7 @@
                                                     max="{{ $report->count }}" class="form-control"
                                                     value="{{ $orderReport->ordered_count ?? '' }}">
                                             </div>
-                                            <div class="col-2 col-md-2"> 
+                                            <div class="col-2 col-md-2">
                                                 <input type="text" name="ordered_price[{{ $report->id }}]" min="0"
                                                     class="form-control"
                                                     value="{{ $orderReport->ordered_price ?? '' }}">
@@ -267,12 +267,12 @@
             }
         }
         .small-text {
-            font-size: 1rem; 
+            font-size: 1rem;
         }
 
         @media (max-width: 964px) {
             .small-text {
-                font-size: 0.65rem; 
+                font-size: 0.65rem;
                 font-weight: 900;
             }
         }

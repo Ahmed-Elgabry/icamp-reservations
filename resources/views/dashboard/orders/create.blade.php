@@ -152,24 +152,24 @@
                                         value="{{ isset($order) ? $order->time_to : old('time_to') }}">
                                 </div>
                             </div>
-                            
+
                             <!-- Status -->
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label  fw-bold fs-6">@lang('dashboard.status')</label>
                                 <div class="col-lg-8">
                                     <select name="status" class="form-select form-select-lg form-select-solid">
-                                        <option value="pending_and_show_price" title="@lang('dashboard.pending_and_show_price_desc')"
-                                        {{ isset($order) && $order->status == 'pending_and_show_price' ? 'selected' : '' }}>
-                                        @lang('dashboard.pending_and_Initial_reservation')</option>
-                                        <option value="pending_and_Initial_reservation" title="@lang('dashboard.pending_and_Initial_reservation_desc')"
-                                        {{ isset($order) && $order->status == 'pending_and_Initial_reservation' ? 'selected' : '' }}>
-                                        @lang('dashboard.pending_and_Initial_reservation')</option>
-                                        <option value="approved" title="@lang('dashboard.approved_desc')"
-                                        {{ isset($order) && $order->status == 'approved' ? 'selected' : '' }}>
-                                        @lang('dashboard.approved')</option>
-                                        <option value="canceled" title="@lang('dashboard.canceled_desc')"
-                                        {{ isset($order) && $order->status == 'canceled' ? 'selected' : '' }}>
-                                        @lang('dashboard.canceled')</option>
+                                        <option value="pending_and_show_price" title="@lang('dashboard.pending_and_show_price_desc')" {{ isset($order) && $order->status == 'pending_and_show_price' ? 'selected' : '' }}>
+                                            @lang('dashboard.pending_and_show_price_desc')
+                                        </option>
+                                        <option value="pending_and_Initial_reservation" title="@lang('dashboard.pending_and_Initial_reservation_desc')" {{ isset($order) && $order->status == 'pending_and_Initial_reservation' ? 'selected' : '' }}>
+                                            @lang('dashboard.pending_and_Initial_reservation')
+                                        </option>
+                                        <option value="approved" title="@lang('dashboard.approved_desc')" {{ isset($order) && $order->status == 'approved' ? 'selected' : '' }}>
+                                            @lang('dashboard.approved')
+                                        </option>
+                                        <option value="canceled" title="@lang('dashboard.canceled_desc')" {{ isset($order) && $order->status == 'canceled' ? 'selected' : '' }}>
+                                            @lang('dashboard.canceled')
+                                        </option>
                                         <option value="delayed" title="@lang('dashboard.delayed')"
                                         {{ isset($order) && $order->status == 'delayed' ? 'selected' : '' }}>
                                         @lang('dashboard.delayed')</option>
@@ -188,8 +188,8 @@
                                             <option value="1" {{ isset($order) && $order->refunds == '1' ? 'selected' : '' }}>Yes</option>
                                             <option value="0" {{ isset($order) && $order->refunds == '0' ? 'selected' : '' }}>No</option>
                                         </select>
-                                </div>                        
-                            </div>  
+                                </div>
+                            </div>
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.refunds_notes')</label>
                                 <div class="col-lg-8">
@@ -217,9 +217,9 @@
                                             <option value="1" {{ isset($order) && $order->agree == '1' ? 'selected' : '' }}>Yes</option>
                                             <option value="0" {{ isset($order) && $order->agree == '0' ? 'selected' : '' }}>No</option>
                                         </select>
-                                </div>                        
-                            </div>                        
-                            
+                                </div>
+                            </div>
+
                             <!-- Submit Button -->
                             <div class="d-flex justify-content-end">
                                 <!--begin::Button-->

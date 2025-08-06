@@ -11,7 +11,7 @@
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <div class="col-4 mt-3">
-    
+
                     <a href="{{route('general_payments.create')}}"
                         class="btn btn-primary">{{ __('dashboard.add') }}</a>
                 </div>
@@ -103,18 +103,18 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('general_payments.show', $payment->order_id) }}">
-                                        {{ $payment->order_id }} [{{$order->customer->name }}]
+                                        {{ $payment->order_id }} @isset($order) [{{$order->customer->name }}] @endisset
                                     </a>
                                 </td>
                                 <td>{{__('dashboard.' . $payment->statement)}}</td>
                                 <td>
                                     {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                                     @if($payment->verified)
-                                        <a href="{{ route('general_payments.verified', $payment->id) }}"
+                                        <a href="{{ route('payments.verified', $payment->id) }}"
                                             class="btn btn-sm btn-danger">{{ __('dashboard.mark') }}
                                             {{ __('dashboard.unverifyed') }}</a>
                                     @else
-                                        <a href="{{ route('general_payments.verified', $payment->id) }}"
+                                        <a href="{{ route('payments.verified', $payment->id) }}"
                                             class="btn btn-sm btn-success">{{ __('dashboard.mark') }}
                                             {{ __('dashboard.verified') }} <i class="fa fa-check"></i></a>
                                     @endif

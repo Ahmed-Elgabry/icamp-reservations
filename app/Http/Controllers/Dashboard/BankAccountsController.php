@@ -51,7 +51,7 @@ class BankAccountsController extends Controller
             'balance' => 'required|numeric',
             'notes' => 'nullable|string',
         ]);
-        
+
         $bankAccount = BankAccount::create($validatedData);
 
         return response()->json(['message' => 'Bank account created successfully', 'bank_account' => $bankAccount]);
@@ -66,10 +66,9 @@ class BankAccountsController extends Controller
     public function show( $bankAccount)
     {
         $bank = BankAccount::findOrFail($bankAccount);
-
         $startDate = request('start_date');
         $endDate = request('end_date');
-    
+
         $transactions = Transaction::where(function ($query) use ($bank) {
                 $query->where('account_id', $bank->id)
                       ->orWhere('receiver_id', $bank->id);
@@ -79,7 +78,7 @@ class BankAccountsController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-    
+
         $expenses = Expense::where('account_id', $bank->id)
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                 return $query->whereBetween('date', [$startDate, $endDate]);
@@ -87,16 +86,19 @@ class BankAccountsController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $payments = Payment::where('account_id', $bank->id)
+        $payments = Payment::where(function ($query) use ($bank) {
+                $query->where('account_id', $bank->id)
+                      ->Where('verified', false);
+            })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                 return $query->whereBetween('date', [$startDate, $endDate]);
             })
             ->orderBy('created_at', 'desc')
             ->get();
-    
-        // Convert transactions and expenses to a unified collection
+
+            // Convert transactions and expenses to a unified collection
         $merged = collect();
-    
+
         foreach ($transactions as $transaction) {
             $merged->push((object)[
                 'account' => $transaction->account,
@@ -112,7 +114,7 @@ class BankAccountsController extends Controller
                 'created_at' => $transaction->created_at,
             ]);
         }
-    
+
         foreach ($expenses as $expense) {
             $merged->push((object)[
                 'account' => $expense->account,
@@ -147,7 +149,7 @@ class BankAccountsController extends Controller
 
         // Sort the merged collection by created_at
         $merged = $merged->sortByDesc('created_at');
-    
+
         // Manually paginate the merged collection
         $currentPage = Paginator::resolveCurrentPage();
         $perPage = 10; // Set your desired items per page
@@ -156,7 +158,7 @@ class BankAccountsController extends Controller
             'path' => Paginator::resolveCurrentPath(),
             'pageName' => 'page',
         ]);
-    
+
         // Append query parameters to pagination links
         $paginatedResults->appends(request()->all());
 

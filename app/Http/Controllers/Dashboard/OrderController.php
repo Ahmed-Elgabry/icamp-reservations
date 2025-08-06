@@ -359,8 +359,7 @@ class OrderController extends Controller
     public function reports($id)
     {
         $order = Order::findOrFail($id);
-        $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())->get();
-
+        $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())->with('latestImage')->get();
         return view('dashboard.orders.reports', compact('order', 'reports'));
     }
 
@@ -546,8 +545,8 @@ class OrderController extends Controller
     {
         if ($lang = request()->get('lang')) {
             if (in_array($lang, ['ar', 'en'])) {
-                App::setLocale($lang);  
-                session(['lang' => $lang]); 
+                App::setLocale($lang);
+                session(['lang' => $lang]);
             }
         } else {
             App::setLocale(session('lang', 'ar'));
@@ -570,9 +569,9 @@ class OrderController extends Controller
         $html = view('dashboard.orders.pdf', compact('termsSittng', 'order', 'randomLink', 'urlAr', 'urlEn'))->render();
         $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
-        $mpdf->WriteHTML('<p>للاطلاع على الفاتورة، يمكنك زيارة الرابط: 
+        $mpdf->WriteHTML('<p>للاطلاع على الفاتورة، يمكنك زيارة الرابط:
                           <a href="' . $urlAr . '">' . $urlAr . '</a></p>');
-        $mpdf->WriteHTML('<p>For the English version of the contract, click: 
+        $mpdf->WriteHTML('<p>For the English version of the contract, click:
                           <a href="' . $urlEn . '">' . $urlEn . '</a></p>');
         $mpdf->Output('terms.pdf', 'I');
         return response()->json(['link' => $urlAr, 'link_en' => $urlEn]);
