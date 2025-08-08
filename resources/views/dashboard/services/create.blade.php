@@ -95,39 +95,6 @@
                                 </div>
                             </div>
 
-                            <!-- Stock Items Section -->
-                            <div id="stock-items-section">
-                                @if (isset($service))
-                                    @foreach ($service->stocks as $index => $serviceStock)
-                                        <div class="row align-items-center stock-item-row mb-2">
-                                            <div class="col-1">
-                                                <!-- Add serial number here -->
-                                                <span>{{ $index + 1 }}</span>
-                                            </div>
-                                            <div class="col-5">
-                                                <select name="stocks[]"
-                                                    class="form-select-stock form-select-lg col-12 form-select-solid" required>
-                                                    @foreach ($stocks as $stock)
-                                                        <option value="{{ $stock->id }}"
-                                                            {{ $serviceStock->id == $stock->id ? 'selected' : '' }}>
-                                                            {{ $stock->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-4">
-                                                <input type="number" name="counts[]" min="1"
-                                                    class="form-control form-control-lg form-control-solid"
-                                                    placeholder="@lang('dashboard.count')"
-                                                    value="{{ $serviceStock->pivot->count }}" required>
-                                            </div>
-                                            <div class="col-2">
-                                                <button type="button"
-                                                    class="btn btn-danger btn-sm remove-stock-row">@lang('dashboard.delete')</button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                @endif
-                            </div>
                             <!-- Button to Add More Stock Items -->
                             <div class="row mt-4">
                                 <div class="col-lg-12">
@@ -141,7 +108,7 @@
                             <div id="reports-section">
                                 @if (isset($service))
                                     @foreach ($reports as $index => $report)
-                                        <div class="row align-reports-center reports-item-row mb-2" data-order="{{ $report->order }}">
+                                        <div class="row align-reports-center reports-item-row mb-2 main_reports" id="main_reports" data-order="{{ $report->order }}">
                                             <div class="col-1">
                                                 @if ($report->image)
                                                     <img src="{{ asset($report->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
@@ -194,6 +161,49 @@
                                             <input type="hidden" name="report_ids[]" value="{{ $report->id }}">
                                         </div>
                                     @endforeach
+
+                                    @foreach ($service->stocks as $index => $serviceStock)
+                                        <div class="row align-items-center stock-item-row mb-2">
+                                            <div class="col-1">
+                                                @if ($serviceStock->image)
+                                                    <img src="{{ asset($serviceStock->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
+                                                @else
+                                                    <img src="" alt="" class="preview-image" style="width:50px;height:50px;display:none;">
+                                                @endif
+                                            </div>
+
+                                            <div class="col-1">
+                                                <span>{{ $index + 1 . ' (المخزون)' }}</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <select name="stocks[]"
+                                                    class="form-select-stock form-select-lg col-12 form-select-solid" required>
+                                                    @foreach ($stocks as $stock)
+                                                        <option value="{{ $stock->id }}"
+                                                            {{ $serviceStock->id == $stock->id ? 'selected' : '' }}>
+                                                            {{ $stock->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="number" name="counts[]" min="1"
+                                                    class="form-control form-control-lg form-control-solid"
+                                                    placeholder="@lang('dashboard.count')"
+                                                    value="{{ $serviceStock->pivot->count }}" required>
+                                            </div>
+                                            <div class="col-2">
+                                                <form action="{{ route('stocks.destroyServiceStock', $service->id) }}" method="POST" onsubmit="return confirm('@lang('dashboard.delete')?')">
+                                                    <input type="hidden" name="stock_id" value="{{ $serviceStock->id }}">
+                                                    
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        @lang('dashboard.delete')
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 @endif
                             </div>
 
@@ -205,8 +215,6 @@
                                     </button>
                                 </div>
                             </div>
-
-
 
                             <!-- Submit Button -->
                             <div class="d-flex justify-content-end mt-4">
@@ -228,8 +236,6 @@
         </div>
         <!--end::Container-->
     </div>
-
-
 
 @endsection
 @section('scripts')
@@ -278,20 +284,23 @@
         attachProgressListeners();
 
         $('#add-stock-item').click(function() {
-            var newRowCount = $('.stock-item-row').length + 1; // تحديث الترقيم
+            var newRowCount = $('.stock-item-row').length;
             var newRow = `
             <div class="row align-items-center stock-item-row mb-2" data-index="${newRowCount}">
                 <div class="col-1">
-                    <span class="row-number">${newRowCount}</span>
+                    <img src="http://127.0.0.1:8000/storage/reports/eR4H4ROijWVvAzNhCpafoNa6EC6UdZOk0819AuUU.png" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
                 </div>
-                <div class="col-5">
+                <div class="col-1">
+                    <span class="row-number">${newRowCount} (المخزن)</span>
+                </div>
+                <div class="col-4">
                     <select name="stocks[]" class="form-select-stock col-12 form-select-lg form-select-solid" required>
                        @foreach ($stocks as $stock)
                             <option value="{{ $stock->id }}">{{ $stock->name }}</option>
                        @endforeach
                     </select>
                 </div>
-                <div class="col-4">
+                <div class="col-2">
                     <input type="number" name="counts[]" min="1" class="form-control form-control-lg form-control-solid" placeholder="@lang('dashboard.count')" required>
                 </div>
                 <div class="col-2">
@@ -299,29 +308,26 @@
                 </div>
             </div>`;
 
-            $('#stock-items-section').append(newRow);
+        $('#main_reports').append(newRow);
             initializeSelect2();
             updateSelectOptions();
-            updateRowNumbers(); // تحديث الأرقام بعد إضافة صف جديد
+            updateRowNumbers();
         });
 
         $(document).on('click', '.remove-stock-row', function() {
             $(this).closest('.stock-item-row').remove();
-            updateRowNumbers(); // تحديث الأرقام بعد إزالة صف
+            updateRowNumbers();
         });
 
         function updateRowNumbers() {
             $('.stock-item-row').each(function(index) {
-                $(this).find('.row-number').text(index + 1); // تحديث الرقم في كل صف
+                $(this).find('.row-number').text(index + 1);
             });
         }
 
-        // الكود المتبقي لم يتغير
-        // ...
-
         $('#add-report-item').click(function() {
             attachProgressListeners();
-            var newRowCount = $('.reports-item-row').length + 1; // تحديث الترقيم
+            var newRowCount = $('.reports-item-row').length + 1;
             var newRow = `
             <div class="row align-reports-center reports-item-row mb-2" data-index="${newRowCount}">
                 <div class="col-1">
@@ -354,22 +360,19 @@
             $('#reports-section').append(newRow);
             updateMoveButtons();
             updateOrder();
-            updateRowNumbers(); // تحديث الأرقام بعد إضافة صف جديد
+            updateRowNumbers();
         });
 
         $(document).on('click', '.remove-report-row', function() {
             $(this).closest('.reports-item-row').remove();
-            updateRowNumbers(); // تحديث الأرقام بعد إزالة صف
+            updateRowNumbers();
         });
 
         function updateRowNumbers() {
             $('.reports-item-row').each(function(index) {
-                $(this).find('.row-number').text(index + 1); // تحديث الرقم في كل صف
+                $(this).find('.row-number').text(index + 1);
             });
         }
-
-        // الكود المتبقي لم يتغير
-        // ...
     });
 </script>
 @endsection

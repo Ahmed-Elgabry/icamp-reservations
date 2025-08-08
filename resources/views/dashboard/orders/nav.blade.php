@@ -28,6 +28,12 @@
                     </a>
                 </li>
             @endcan
+            <li class="nav-item">
+                    <a href="{{ route('warehouse_sales.show',$order->id) }}"
+                    class="nav-link text-active-primary pb-4 {{ isActiveRoute('warehouse_sales.show') }}">
+                     {{ __('dashboard.warehouse_sales') }} <span class="badge badge-primary">{{$order->items->count()}}</span>
+                    </a>
+                </li>
             @can('expenses.show')
                 <li class="nav-item">
                     <a href="{{ route('expenses.show',$order->id) }}"

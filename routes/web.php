@@ -37,7 +37,7 @@ Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
 Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
     ->name('signature.store');
 
-    // Auth::routes();
+// Auth::routes();
 Route::group(['middleware' => ['web']], function () {
     Route::get('/', [LoginController::class, 'showloginform'])->name('show.login');
     Route::post('admin-login', [LoginController::class, 'login'])->name('admin-login');
@@ -224,7 +224,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.index',
         'title' => 'dashboard.stocks',
         'type' => 'parent',
-        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll']
+        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock']
     ]);
 
     # stocks store
@@ -273,6 +273,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.deleteAll',
         'title' => ['actions.delete_all', 'dashboard.stocks']
     ]);
+
+    # Service Stock delete
+    Route::delete('destroyServiceStock/{id}/', [
+        'uses' => 'StockController@destroyServiceStock',
+        'as' => 'stocks.destroyServiceStock',
+        'title' => ['actions.delete', 'dashboard.stocks']
+    ]);
+
     /*------------ end Of stocks ----------*/
     /*------------ start Of addons ----------*/
     Route::get('addons', [
@@ -280,7 +288,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'addons.index',
         'title' => 'dashboard.addons',
         'type' => 'parent',
-        'child' => ['addons.store', 'addons.edit', 'addons.show', 'addons.update', 'addons.destroy', 'addons.deleteAll' , 'addons.print']
+        'child' => ['addons.store', 'addons.edit', 'addons.show', 'addons.update', 'addons.destroy', 'addons.deleteAll', 'addons.print']
     ]);
 
     # addons store
@@ -747,6 +755,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.show', 'dashboard.payments']
     ]);
 
+    # payments verified
     Route::get('payments/{id}/verified', [
         'uses' => 'PaymentsController@verified',
         'as' => 'payments.verified',
@@ -803,6 +812,40 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 
     /*------------ end Of payments ----------*/
 
+    /*------------ start Of warehouse_sales ----------*/
+    Route::get('warehouse-sales', [
+        'uses' => 'WarehousesalesController@index',
+        'as' => 'warehouse_sales.index',
+        'title' => 'dashboard.warehouse_sales',
+        'type' => 'parent',
+        'child' => ['warehouse_sales.edit', 'warehouse_sales.destroy', 'warehouse_sales.store']
+    ]);
+
+    Route::get('warehouse-sales/{id}/show', [
+        'uses' => 'WarehousesalesController@show',
+        'as' => 'warehouse_sales.show',
+        'title' => ['actions.show', 'dashboard.warehouse_sales']
+    ]);
+
+    Route::post('warehouse-sales/store', [
+        'uses' => 'WarehousesalesController@store',
+        'as' => 'warehouse_sales.store',
+        'title' => ['actions.store', 'dashboard.warehouse_sales']
+    ]);
+
+    Route::put('warehouse_sales/{id}/update', [
+        'uses' => 'WarehousesalesController@update',
+        'as' => 'warehouse_sales.update',
+        'title' => ['actions.update', 'dashboard.warehouse_sales']
+    ]);
+
+    Route::delete('warehouse_sales/{id}', [
+        'uses' => 'WarehousesalesController@destroy',
+        'as' => 'warehouse_sales.destroy',
+        'title' => ['actions.delete', 'dashboard.warehouse_sales']
+    ]);
+
+    /*------------ end Of warehouse_sales ----------*/
 
     /*------------ start Of expense_items ----------*/
     Route::get('expense-items', [
@@ -1006,4 +1049,3 @@ Route::resource('questions', QuestionController::class);
 Route::post('/questions/{question}/answer', [QuestionController::class, 'storeAnswer'])->name('questions.storeAnswer');
 Route::get('/questions/{id}/answers', [QuestionController::class, 'showAnswers'])->name('questions.answers');
 Route::get('answers/user/{userId}', [QuestionController::class, 'showUserAnswers'])->name('answers.user');
-

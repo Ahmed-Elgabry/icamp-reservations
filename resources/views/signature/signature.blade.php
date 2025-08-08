@@ -197,6 +197,14 @@
                 height: 260px
             }
         }
+
+        .alert.alert-warning {
+            background: rgba(251, 191, 36, .1);
+            color: #b45309;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
     </style>
 </head>
 
@@ -207,6 +215,12 @@
             <img src="{{ asset('images/logo.png') }}" alt="Logo">
             <h1>نظام الإدارة</h1>
         </div>
+
+        @if ($terms)
+            <div class="alert alert-warning">
+                <strong>تنبيه:</strong> {{ $terms?->commercial_license }}
+            </div>
+        @endif
 
         <div class="card">
             <div class="header">

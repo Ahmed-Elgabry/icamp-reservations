@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\TermsSittng;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,7 +15,10 @@ class OrderSignatureController extends Controller
         if ($order->signature_path) {
             return view('signature.already', compact('order'));
         }
-        return view('signature.signature', compact('order'));
+        return view('signature.signature', [
+            'order' => $order,
+            'terms' => TermsSittng::first()
+        ]);
     }
 
     public function store(Request $request, Order $order)

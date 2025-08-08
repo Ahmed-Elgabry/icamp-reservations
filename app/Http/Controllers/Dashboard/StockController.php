@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Service;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class StockController extends Controller
         $stocks = Stock::filter($filters)
             ->orderBy('created_at', 'desc')
             ->get();
-        // low stock alarm
+
         $lowStock = $stocks->filter(function ($stock) {
             return $stock->quantity < 6;
         });
@@ -36,7 +37,7 @@ class StockController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validate the input data  
+            // Validate the input data
             $validatedData = $request->validate([
                 'name' => 'required|max:255',
                 'description' => 'nullable',
@@ -47,27 +48,20 @@ class StockController extends Controller
                 'percentage' => 'nullable|string'
             ]);
 
-            // إنشاء سجل جديد في Stock مع البيانات المصدقة  
             $stock = new Stock($validatedData);
-
-            // إذا تم تقديم صورة، سيتم حفظها باستخدام mutator  
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
                 if ($file->isValid()) {
-                    $stock->image = $file; // سيتم معالجة الصورة من خلال setImageAttribute  
+                    $stock->image = $file;
                 } else {
                     return response()->json(['error' => 'Invalid image file.'], 422);
                 }
             }
 
-            // حفظ النموذج  
             $stock->save();
-
-            // إرجاع استجابة النجاح  
             return response()->json(['success' => 'Stock created successfully']);
 
         } catch (\Exception $e) {
-            // إرجاع استجابة بالخطأ مع الرسالة  
             return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
@@ -127,4 +121,15 @@ class StockController extends Controller
         }
     }
 
+    public function destroyServiceStock(Request $request, $service_id)
+    {
+        // $service = Service::findOrFail($service_id);
+        // $serviceStocks = $service->stocks()->detach($request->stock_id);
+
+        // if ($serviceStocks) {
+        //     return response()->json(['message' => __('dashboard.stock_removed_from_service')], 200);
+        // } else {
+        //     return response()->json(['error' => __('dashboard.error_removing_stock_from_service')], 500);
+        // }
+    }
 }

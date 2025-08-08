@@ -142,4 +142,15 @@ class Order extends Model
         });
     }
 
+     public function items()       { return $this->hasMany(OrderItem::class); }
+     public function stocksItems()      { return $this->belongsToMany(Stock::class, 'order_items')
+                                                  ->withPivot(['unit_price','quantity'])
+                                                  ->using(OrderItemPivot::class)
+                                                  ->withTimestamps(); }
+
+    public function getItemsTotalAttribute()
+    {
+        return $this->items->sum('subtotal');
+    }
+
 }

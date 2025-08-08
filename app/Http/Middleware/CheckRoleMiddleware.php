@@ -28,13 +28,11 @@ class CheckRoleMiddleware {
          $permissions->push('logout');
          $permissions = $permissions->toArray();
         // some exception
-        $excpetions = ['edit-profile','home','logout','payments.print','orders.quote','orders.invoice','addons.print'];
+        $excpetions = ['edit-profile','home','logout','payments.print','orders.quote','orders.invoice','addons.print', 'warehouse_sales.show' , 'warehouse_sales.store' , 'warehouse_sales.destroy' , 'warehouse_sales.update' , 'stocks.destroyServiceStock'];
 
         $currunt_route = Route::currentRouteName();
         $route = Route::current();
         $actAs = $route->action['act-as'] ?? null;
-
-
 
         if(!in_array($currunt_route,$excpetions))
         {
@@ -52,6 +50,10 @@ class CheckRoleMiddleware {
           $currunt_route = str_replace('payments.verified','payments.show',$currunt_route);
           $currunt_route = str_replace('payments.verified','payments.index',$currunt_route);
           $currunt_route = str_replace('addons.print','addons.print',$currunt_route);
+          $currunt_route = str_replace('warehouse_sales.show','warehouse_sales.show',$currunt_route);
+          $currunt_route = str_replace('warehouse_sales.store','warehouse_sales.store',$currunt_route);
+          $currunt_route = str_replace('warehouse_sales.destroy','warehouse_sales.destroy',$currunt_route);
+          $currunt_route = str_replace('stocks.destroyServiceStock','stocks.destroyServiceStock',$currunt_route);
 
           if($actAs)
           {
