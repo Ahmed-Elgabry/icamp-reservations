@@ -91,13 +91,6 @@ class TermsSittngController extends Controller
             $validatedData['logo'] = $logoPath;
         }
 
-        if ($request->hasFile('commercial_license')) {
-            $licenseFile = $request->file('commercial_license');
-            $licenseFilename = time() . '_license.' . $licenseFile->getClientOriginalExtension();
-            $licensePath = $licenseFile->storeAs('licenses', $licenseFilename, 'public');
-            $validatedData['commercial_license'] = $licensePath;
-        }
-
         // تحديث السجل
         $termsSittng->update($validatedData);
 
@@ -110,29 +103,29 @@ class TermsSittngController extends Controller
         // إعداد البيانات للتصدير
         $signatureDrawn = $request->input('signature_drawn'); // بيانات التوقيع المرسوم
         $signatureText = $request->input('signature_text'); // بيانات التوقيع المكتوب
-    
+
         // إنشاء كائن TCPDF
         $pdf = new TCPDF();
         $pdf->AddPage();
-    
+
         // إضافة نص إلى الـ PDF
         $pdf->SetFont('Cairo', '', 12);
         $pdf->Cell(0, 10, 'Payment Receipt', 0, 1, 'C');
-    
+
         // إضافة التوقيع المكتوب
         $pdf->Ln(10);
         $pdf->Cell(0, 10, 'Signature: ' . $signatureText, 0, 1);
-    
+
         // إضافة التوقيع المرسوم
         if ($signatureDrawn) {
             $img = 'data:image/png;base64,' . $signatureDrawn; // تحويل البيانات إلى صورة
             $pdf->Image($img, 15, 50, 100, 50, 'PNG'); // ضبط الموضع والحجم
         }
-    
+
         // حفظ الـ PDF
         $pdf->Output('receipt.pdf', 'D');
     }
-    
+
 
     /**
      * Remove the specified resource from storage.

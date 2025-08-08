@@ -51,15 +51,7 @@
                             <div class="form-group col-6 mb-3">
                                 <label for="commercial_license"
                                     class="form-label">{{ __('dashboard.commercial_license') }}</label>
-                                <input type="file" name="commercial_license" id="commercial_license"
-                                    class="form-control">
-                                @if (isset($termsSittng->commercial_license))
-                                    <img src="{{ asset('storage/' . $termsSittng->commercial_license) }}"
-                                        alt="Commercial License" width="100" class="mt-2">
-                                @else
-                                    <img src="{{ asset('assets/media/logos/logo-1.png') }}"
-                                        alt="{{ __('dashboard.commercial_license') }}" width="100" class="mt-2">
-                                @endif
+                                <textarea name="commercial_license" id="commercial_license" class="form-control" rows="8">{{ $termsSittng->commercial_license }}</textarea>
                             </div>
                             <!-- Description Field -->
                             <div class="form-group col-6 mb-3">
@@ -85,8 +77,8 @@
                                 CKEDITOR.replace('terms', {
                                     filebrowserUploadMethod: 'form',
                                     filebrowserUploadUrl: '/ckeditor/upload',
-                                    language: 'ar', 
-                                    height: 200 
+                                    language: 'ar',
+                                    height: 200
                                 });
                             </script> -->
                         </div>

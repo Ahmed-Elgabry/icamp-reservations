@@ -10,4 +10,14 @@ class OrderAddon extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'order_addon';
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function addon()
+    {
+        return $this->belongsTo(Addon::class);
+    }
 }

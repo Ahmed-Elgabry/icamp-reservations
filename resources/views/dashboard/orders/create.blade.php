@@ -157,7 +157,7 @@
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label  fw-bold fs-6">@lang('dashboard.status')</label>
                                 <div class="col-lg-8">
-                                    <select name="status" class="form-select form-select-lg form-select-solid">
+                                    <select name="status" class="form-select form-select-lg form-select-solid" id="status">
                                         <option value="pending_and_show_price" title="@lang('dashboard.pending_and_show_price_desc')" {{ isset($order) && $order->status == 'pending_and_show_price' ? 'selected' : '' }}>
                                             @lang('dashboard.pending_and_show_price_desc')
                                         </option>
@@ -179,6 +179,18 @@
                                     </select>
                                 </div>
                             </div>
+
+                            <div @class(['row mb-6' , 'd-none' => ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') ]) id="expired_price_offer">
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.expired_price_offer') <span class="text-danger">*</span></label>
+                                <div class="col-lg-8">
+                                    <input type="date" name="expired_price_offer"
+                                        placeholder="@lang('dashboard.expired_price_offer')"
+                                        id="expired_price_offer"
+                                        class="form-control form-control-lg form-control-solid"
+                                        value="{{ isset($order) ? $order->expired_price_offer : old('expired_price_offer') }}">
+                                </div>
+                            </div>
+
                             @if (isset($order) && $order->status == 'canceled')
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label  fw-bold fs-6">رد المبالغ المدفوعه ؟</label>
@@ -209,14 +221,32 @@
                                 </div>
                             </div>
                             @endif
+
                             <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label  fw-bold fs-6">@lang('dashboard.Agree_to_the_terms') ؟</label>
-                                <div class="col-lg-8">
-                                        <select name="agree" class="form-select form-select-lg form-select-solid">
-                                            <option value="">-- Select --</option>
-                                            <option value="1" {{ isset($order) && $order->agree == '1' ? 'selected' : '' }}>Yes</option>
-                                            <option value="0" {{ isset($order) && $order->agree == '0' ? 'selected' : '' }}>No</option>
-                                        </select>
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">
+                                    @lang('dashboard.Customer_Signature')
+                                </label>
+
+                                <div class="col-lg-8 d-flex flex-column gap-3">
+                                    @if($order->signature_path)
+                                        <div class="text-success fw-bold">
+                                             {{ $order?->signature }}
+                                        </div>
+                                        <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
+                                    @else
+                                        <div class="input-group">
+                                            <input type="text"
+                                                class="form-control"
+                                                value="{{ route('signature.show', $order) }}"
+                                                readonly
+                                                onclick="this.select();document.execCommand('copy');">
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                    onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
+                                                Copy Link
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
+                                    @endif
                                 </div>
                             </div>
 
@@ -240,7 +270,6 @@
             </div>
             <!--end::Basic info-->
 
-
         </div>
         <!--end::Container-->
     </div>
@@ -249,6 +278,16 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+
+            $('#status').change(function() {
+                if ($(this).val() === 'pending_and_show_price' || $(this).val() === 'pending_and_Initial_reservation' ) {
+                    $('#expired_price_offer').removeClass('d-none');
+                } else {
+                    $('#expired_price_offer').addClass('d-none');
+                }
+            });
+
+
             $('.select2-hidden-accessible').select2(); // Initialize Select2
 
             $('#service_id').change(function() {

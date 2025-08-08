@@ -25,7 +25,6 @@ class Order extends Model
     use HasFactory, UploadTrait;
     protected $guarded = [];
 
-
     public function addHoursCount()
     {
         if ($this->time_from && $this->time_to) {

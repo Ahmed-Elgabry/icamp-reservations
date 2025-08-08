@@ -4,86 +4,85 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>عرض سعر</title>
-<style>
-  body {
-    font-family: 'Cairo', sans-serif;
-    margin: 0;
-    padding: 20px;
-    font-size: 14px;
-    direction: rtl;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+    <style>
+    body {
+        font-family: 'Cairo', sans-serif;
+        margin: 0;
+        padding: 20px;
+        font-size: 14px;
+        direction: rtl;
+    }
 
-  .company-info{
-    padding: 10px;
-    width: 30%;
-    float: left;
-    text-align: left;
-  }
-  .quote-info {
-    padding: 10px;
-    width: 190px;
-    float: right;
-  }
-  .customer-info{
-    padding: 10px;
-    width: 100%;
-  }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-  .title {
-    text-align: center;
-    font-size: 24px;
-    font-weight: bold;
-    margin: 20px 0;
-  }
+    .company-info{
+        padding: 10px;
+        width: 30%;
+        float: left;
+        text-align: left;
+    }
+    .quote-info {
+        padding: 10px;
+        width: 190px;
+        float: right;
+    }
+    .customer-info{
+        padding: 10px;
+        width: 100%;
+    }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
+    .title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin: 20px 0;
+    }
 
-  th, td {
-    padding: 10px;
-    border: 1px solid #000;
-    text-align: center;
-  }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
 
-  th {
-    background-color: #f0f0f0;
-  }
+    th, td {
+        padding: 10px;
+        border: 1px solid #000;
+        text-align: center;
+    }
 
-  .total {
-    color: red;
-    font-weight: bold;
-    margin: 20px;
-    text-align: right;
-  }
+    th {
+        background-color: #f0f0f0;
+    }
 
-  .notes {
-    margin-top: 20px;
-    border: 1px solid #000;
-    padding: 10px;
-  }
+    .total {
+        color: red;
+        font-weight: bold;
+        margin: 20px;
+        text-align: right;
+    }
 
-  .company-stamp {
-    text-align: center;
-    margin-top: 40px;
-  }
-  
-  .company-stamp div {
-    /* border: 1px solid #000; */
-    width: 150px;
-    height: 150px;
-    margin: 0 auto;
-  }
-</style>
+    .notes {
+        margin-top: 20px;
+        border: 1px solid #000;
+        padding: 10px;
+    }
+
+    .company-stamp {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .company-stamp div {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+    </style>
 </head>
 <body>
 
@@ -94,11 +93,16 @@
     <p>0566674766</p>
     <a href="www.funcamp.ae">www.funcamp.ae</a>
   </div>
-  
+
   <div class="quote-info">
     <p>عرض سعر رقم: {{ $order->id }}</p>
     <p>تاريخ الإصدار: {{ date('Y/m/d') }}</p>
-    <p>تاريخ انتهاء عرض السعر: {{ date('Y/m/d', strtotime('+1 day')) }}</p>
+    <span>تاريخ انتهاء عرض السعر: @if ($order->expired_price_offer)
+                                        <span>{{ $order->expired_price_offer }}</span>
+                                    @else
+                                        {{ date('Y/m/d', strtotime('+1 day')) }}
+                                    @endif
+    </span>
   </div>
 </div>
 
@@ -132,6 +136,51 @@
     @endforeach
   </tbody>
 </table>
+
+@if ($order->addons)
+    <table>
+        <thead>
+            <tr>
+                <th>م</th>
+                <th>الاضافات</th>
+                <th>العدد</th>
+                <th>المبلغ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($order->addons as $index => $service)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $service->name }}</td>
+                    <td>1</td>
+                    <td>{{ $service->pivot->price }} درهم</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+
+@if ($order)
+    <table>
+        <thead>
+            <tr>
+                <th>م</th>
+                <th>التامين</th>
+                <th>العربون</th>
+                <th>الاجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $totalPrice = 0 @endphp
+                <tr>
+                    <td>1</td>
+                    <td>{{ $order->deposit }}</td>
+                    <td>{{ $order->insurance_amount }}</td>
+                    <td>{{ $order->deposit + $order->insurance_amount }} درهم</td>
+                </tr>
+        </tbody>
+    </table>
+@endif
 
 <p class="total">المجموع الكلي: {{ $totalPrice }} درهم</p>
 

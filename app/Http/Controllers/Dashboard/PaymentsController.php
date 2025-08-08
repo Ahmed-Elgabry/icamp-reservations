@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Addon;
 use App\Models\Payment;
 use App\Models\Order;
 use App\Models\Customer;

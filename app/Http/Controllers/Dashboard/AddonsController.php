@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Addon;
+use App\Models\Order;
+use App\Models\OrderAddon;
 use Illuminate\Http\Request;
+use Mpdf\Mpdf;
 
 class AddonsController extends Controller
 {
@@ -30,6 +33,18 @@ class AddonsController extends Controller
 
         Addon::create($validatedData);
         return response()->json();
+    }
+
+    public function print($id)
+    {
+        $order = OrderAddon::with(['order' , 'addon'])->find($id);
+
+        $html = view('dashboard.addons.print', compact('order'))->render();
+
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('invoice.pdf', 'I');
+
     }
 
     public function show( $addon)

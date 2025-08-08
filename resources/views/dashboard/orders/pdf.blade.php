@@ -201,7 +201,7 @@
   <!-- ختم الشركة -->
   <div style="text-align: center; margin-top: 10px;"> <img src="https://via.placeholder.com/150" alt="ختم الشركة" />
   </div>
-  
+
   <p style="text-align: center; font-weight: bold; margin-top: 5px;">@lang('dashboard.company_stamp')</p>
   <!-- التوقييع -->
   <h3 style="margin-bottom: 120px; font-weight: bold; margin-top: 5px;">@lang('dashboard.Signature')</h3>

@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Permission;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
-
+use App\Http\Controllers\OrderSignatureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,10 +31,13 @@ Route::post('orders/rate_orders', "VisitorsController@rateStore")->name('rate.sa
 
 Route::get('orders/rate_orders', [rateOrderController::class, 'rate_orders'])->name('orders.rate');
 
+Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
+    ->name('signature.show'); // public page to draw
 
+Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
+    ->name('signature.store');
 
-
-// Auth::routes();
+    // Auth::routes();
 Route::group(['middleware' => ['web']], function () {
     Route::get('/', [LoginController::class, 'showloginform'])->name('show.login');
     Route::post('admin-login', [LoginController::class, 'login'])->name('admin-login');
@@ -277,7 +280,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'addons.index',
         'title' => 'dashboard.addons',
         'type' => 'parent',
-        'child' => ['addons.store', 'addons.edit', 'addons.show', 'addons.update', 'addons.destroy', 'addons.deleteAll']
+        'child' => ['addons.store', 'addons.edit', 'addons.show', 'addons.update', 'addons.destroy', 'addons.deleteAll' , 'addons.print']
     ]);
 
     # addons store
@@ -305,6 +308,12 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'uses' => 'AddonsController@edit',
         'as' => 'addons.edit',
         'title' => ['actions.edit', 'dashboard.addons']
+    ]);
+
+    Route::get('addons/{id}/print', [
+        'uses' => 'AddonsController@print',
+        'as' => 'addons.print',
+        'title' => ['addons.print', 'dashboard.addons']
     ]);
 
     # addons update
@@ -553,47 +562,41 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.add', 'dashboard.reports']
     ]);
 
-    # orders store 
+    # orders store
     Route::get('orders/create', [
         'uses' => 'OrderController@create',
         'as' => 'orders.create',
         'title' => ['actions.add', 'dashboard.orders']
     ]);
 
-    # orders show 
+    # orders show
     Route::get('orders/{id}/show', [
         'uses' => 'OrderController@show',
         'as' => 'orders.show',
         'title' => ['actions.add', 'dashboard.orders']
     ]);
 
-    # orders store 
+    # orders store
     Route::post('orders/store', [
         'uses' => 'OrderController@store',
         'as' => 'orders.store',
         'title' => ['actions.add', 'dashboard.orders']
     ]);
 
-    # orders invoice 
+    # orders invoice
     Route::get('orders/{id}/invoice', [
         'uses' => 'OrderController@invoice',
         'as' => 'orders.invoice',
         'title' => ['actions.invoice', 'dashboard.orders']
     ]);
 
-    Route::get('orders/{id}/receipt', [
-        'uses' => 'OrderController@receipt',
-        'as' => 'orders.receipt',
-        'title' => ['actions.receipt', 'dashboard.orders']
-    ]);
-
-    # orders update 
+    # orders update
     Route::get('orders/{id}/edit', [
         'uses' => 'OrderController@edit',
         'as' => 'orders.edit',
         'title' => ['actions.edit', 'dashboard.orders']
     ]);
-    # orders quote 
+    # orders quote
     Route::get('orders/{id}/quote', [
         'uses' => 'OrderController@quote',
         'as' => 'orders.quote',
@@ -995,7 +998,6 @@ Route::resource('general_payments', GeneralPaymentsController::class);
 Route::get('orders/{id}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
 
 Route::resource('terms_sittngs', TermsSittngController::class);
-Route::get('orders/{id}/terms_form', [OrderController::class, 'terms_form'])->name('orders.terms_form');
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);
 // Route::resource('stocks', StockController::class);

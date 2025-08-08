@@ -137,8 +137,8 @@ class OrderController extends Controller
     {
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'service_ids' => 'required|array', // Change to 'service_ids' and expect an array
-            'service_ids.*' => 'exists:services,id', // Ensure each ID exists in the services table
+            'service_ids' => 'required|array',
+            'service_ids.*' => 'exists:services,id',
             'price' => 'required',
             'deposit' => 'nullable',
             'insurance_amount' => 'required',
@@ -150,8 +150,8 @@ class OrderController extends Controller
             'image_before_receiving' => 'nullable',
             'delivery_time' => 'nullable',
             'image_after_delivery' => 'nullable',
-            'image_after_delivery' => 'nullable',
             'status' => 'required|in:pending_and_show_price,pending_and_Initial_reservation,approved,canceled,delayed,completed',
+            'expired_price_offer' => 'required_if:status,pending_and_show_price,pending_and_Initial_reservation',
             'created_by' => 'required|exists:users,id',
             'agree' => 'nullable|in:1,0',
             'refunds' => 'nullable|in:1,0',
@@ -271,6 +271,7 @@ class OrderController extends Controller
             'date' => 'nullable|date',
             'time_from' => 'nullable',
             'time_to' => 'nullable',
+            'expired_price_offer' => 'required_if:status,pending_and_show_price,pending_and_Initial_reservation',
             'time_of_receipt' => 'nullable',
             'image_before_receiving' => 'nullable|image',
             'delivery_time' => 'nullable',
@@ -295,22 +296,15 @@ class OrderController extends Controller
             // تحديث بيانات الطلب
             $order->fill($validatedData);
 
-            // تحديث السعر بناءً على الخدمات المحددة
             $totalPrice = 0;
             foreach ($request->service_ids as $serviceId) {
                 $service = Service::findOrFail($serviceId);
-                $totalPrice += $service->price; // افترض أن كل خدمة لديها سعر ثابت
+                $totalPrice += $service->price;
             }
             $order->price = $totalPrice;
-
-            // إدارة الخدمات المرتبطة
             $service_ids = array_map('intval', $request->service_ids);
-            $servicesToDetach = array_diff($currentServiceIds, $service_ids);
-
-            // إزالة الخدمات القديمة
             \DB::table('order_service')->where('order_id', $order->id)->delete();
 
-            // إضافة الخدمات الجديدة
             foreach ($service_ids as $serviceId) {
                 \DB::table('order_service')->insert([
                     'order_id' => $order->id,
@@ -319,7 +313,6 @@ class OrderController extends Controller
                 ]);
             }
 
-            // حفظ الطلب
             $order->save();
             \DB::commit();
 
@@ -359,7 +352,7 @@ class OrderController extends Controller
     public function reports($id)
     {
         $order = Order::findOrFail($id);
-        $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())->with('latestImage')->get();
+        $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())->get();
         return view('dashboard.orders.reports', compact('order', 'reports'));
     }
 
@@ -524,7 +517,7 @@ class OrderController extends Controller
 
     public function invoice($order)
     {
-        $order = Order::with('payments')->findOrFail($order);
+        $order = Order::with(['payments'])->findOrFail($order);
         $html = view('dashboard.orders.invoice', compact('order'))->render();
 
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
@@ -541,42 +534,6 @@ class OrderController extends Controller
         $mpdf->Output('receipt.pdf', 'I');
     }
 
-    public function terms_form($orderId)
-    {
-        if ($lang = request()->get('lang')) {
-            if (in_array($lang, ['ar', 'en'])) {
-                App::setLocale($lang);
-                session(['lang' => $lang]);
-            }
-        } else {
-            App::setLocale(session('lang', 'ar'));
-        }
-        $order = Order::with('payments', 'services')->findOrFail($orderId);
-        $termsSittng = TermsSittng::first();
-        if (!$termsSittng) {
-            $termsSittng = (object) ['terms' => 'لا توجد شروط متاحة'];
-        }
-        $invoiceLink = InvoiceLink::where('order_id', $orderId)->first();
-        if (!$invoiceLink) {
-            $randomLink = Str::random(32);
-            $invoiceLink = InvoiceLink::create(['order_id' => $orderId, 'link' => $randomLink]);
-        } else {
-            $randomLink = $invoiceLink->link;
-        }
-
-        $urlAr = url('/Terms_and_Conditions/' . $randomLink . '?lang=ar');
-        $urlEn = url('/Terms_and_Conditions/' . $randomLink . '?lang=en');
-        $html = view('dashboard.orders.pdf', compact('termsSittng', 'order', 'randomLink', 'urlAr', 'urlEn'))->render();
-        $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
-        $mpdf->WriteHTML($html);
-        $mpdf->WriteHTML('<p>للاطلاع على الفاتورة، يمكنك زيارة الرابط:
-                          <a href="' . $urlAr . '">' . $urlAr . '</a></p>');
-        $mpdf->WriteHTML('<p>For the English version of the contract, click:
-                          <a href="' . $urlEn . '">' . $urlEn . '</a></p>');
-        $mpdf->Output('terms.pdf', 'I');
-        return response()->json(['link' => $urlAr, 'link_en' => $urlEn]);
-    }
-
     public function getInvoiceByLink($link)
     {
         $invoiceLink = InvoiceLink::where('link', $link)->firstOrFail();
@@ -590,7 +547,7 @@ class OrderController extends Controller
 
     public function quote($order)
     {
-        $order = Order::with('payments')->findOrFail($order);
+        $order = Order::with(['payments' , 'addons'])->findOrFail($order);
         $html = view('dashboard.orders.quote', compact('order'))->render();
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);

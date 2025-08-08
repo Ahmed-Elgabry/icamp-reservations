@@ -1,4 +1,4 @@
- 
+
 @section('pageTitle' , __('dashboard.payments'))
 @extends('dashboard.layouts.app')
 @section('content')
@@ -34,7 +34,7 @@
                 </div>
                 <!--end::Card title-->
 
-                
+
                 <!--begin::Card toolbar-->
                 <div class="card-toolbar">
                     <!--begin::Add customer-->
@@ -42,7 +42,7 @@
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addNewCount">
                             @lang('dashboard.create_title', ['page_title' => __('dashboard.payments')])
                     </button>
-                    @endcan 
+                    @endcan
                     <!--end::Add customer-->
                     <span class="w-5px h-2px"></span>
 
@@ -94,7 +94,7 @@
                                     <!--begin::Title-->
                                     <a href="#"
                                     data-kt-ecommerce-category-filter="search"
-                                     class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1" 
+                                     class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
                                    >{{$payment->price}}</a>
                                     <!--end::Title-->
                                 </div>
@@ -106,9 +106,9 @@
                             {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                             @if($payment->verified)
                                 <a href="{{ route('payments.verified', $payment->id) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
-                            @else 
+                            @else
                                  <a href="{{ route('payments.verified', $payment->id) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }} <i class="fa fa-check"></i></a>
-                            @endif 
+                            @endif
                         </td>
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
@@ -131,19 +131,19 @@
                             <!--begin::Menu-->
                             <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
                                 <div class="menu-item px-3">
-                                    <a href="{{ route('payments.print',$payment->id) }}"  class="menu-link px-3">{{ __('dashboard.invoice') }}</a>
+                                    <a href="{{ route('payments.print',$payment->id) }}"  class="menu-link px-3">{{ __('dashboard.receipt') }}</a>
                                 </div>
                                 @can('payments.edit')
                                 <div class="menu-item px-3">
                                     <a href="#" type="button" data-toggle="modal" data-target="#editCount-{{$payment->id}}" class="menu-link px-3">{{ __('actions.edit') }}</a>
                                 </div>
-                                @endcan 
+                                @endcan
                                 @can('payments.destroy')
                                 <!--begin::Menu item-->
                                 <div class="menu-item px-3">
                                     <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('payments.destroy', $payment->id)}}" data-id="{{$payment->id}}"> @lang('dashboard.delete')</a>
                                 </div>
-                                @endcan 
+                                @endcan
                             <!--end::Menu item-->
                             </div>
                             <!--end::Menu-->
@@ -164,7 +164,7 @@
                         </div>
                         <div class="modal-body">
                             <form action="{{ route('payments.update',$payment->id) }}" id="editCountForm{{$payment->id}}" method="POST">
-                                @csrf 
+                                @csrf
                                 @method('PUT')
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.statement') }}</label>
@@ -187,8 +187,8 @@
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>
                                     <input type="number" name="price" id="price" value="{{   $payment->price }}"
-                                        class="form-control mb-2" required  
-                                        value="" /> 
+                                        class="form-control mb-2" required
+                                        value="" />
                                 </div>
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
@@ -231,7 +231,7 @@
       </div>
       <div class="modal-body">
         <form action="{{ route('payments.store') }}" id="saveCountDetails" method="POST" enctype="multipart/form-data">
-            @csrf 
+            @csrf
             <!--begin::Input group-->
             <input type="hidden" value="{{ $order->id }}" name="order_id">
 
@@ -254,8 +254,8 @@
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.price') }}</label>
                 <input type="number" name="price" id="price" value="{{   old('price') }}"
-                    class="form-control mb-2" required  
-                    value="" /> 
+                    class="form-control mb-2" required
+                    value="" />
             </div>
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
@@ -265,7 +265,7 @@
                     @endforeach
                 </select>
             </div>
-            
+
             <!--begin::Input group-->
             <div class="mb-5 fv-row col-md-12">
                 <label class=" form-label">{{ __('dashboard.notes') }}</label>
@@ -289,6 +289,6 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-					
+
 
 @endsection

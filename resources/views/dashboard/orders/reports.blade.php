@@ -72,9 +72,9 @@
                                                 {{ $index + 1 }}
                                             </div>
                                             <div class="col-1 col-md-1">
-                                                @if ($latest = $report->latestImage)
+                                                @if ($latest = $report->image)
                                                     <a href="{{ asset($report->image) }}" target="_blank">
-                                                        <img src="{{ asset('storage/' . $latest->image) }}" alt="{{ $report->name }}"
+                                                        <img src="{{ asset($latest) }}" alt="{{ $report->name }}"
                                                             class="report-image">
                                                     </a>
                                                 @else

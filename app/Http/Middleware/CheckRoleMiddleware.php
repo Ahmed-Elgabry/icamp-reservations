@@ -27,14 +27,14 @@ class CheckRoleMiddleware {
          $permissions->push('home');
          $permissions->push('logout');
          $permissions = $permissions->toArray();
-        // some exception 
-        $excpetions = ['edit-profile','home','logout','payments.print','orders.quote','orders.invoice'];
+        // some exception
+        $excpetions = ['edit-profile','home','logout','payments.print','orders.quote','orders.invoice','addons.print'];
 
         $currunt_route = Route::currentRouteName();
         $route = Route::current();
         $actAs = $route->action['act-as'] ?? null;
 
-     
+
 
         if(!in_array($currunt_route,$excpetions))
         {
@@ -51,43 +51,44 @@ class CheckRoleMiddleware {
           $currunt_route = str_replace('orders.removeImage','orders.signin',$currunt_route);
           $currunt_route = str_replace('payments.verified','payments.show',$currunt_route);
           $currunt_route = str_replace('payments.verified','payments.index',$currunt_route);
+          $currunt_route = str_replace('addons.print','addons.print',$currunt_route);
 
           if($actAs)
           {
             $currunt_route = str_replace($currunt_route,$actAs,$currunt_route);
           }
         }
-        
-        
+
+
 
         if(!str_contains($currunt_route,'settings') AND !\str_contains($currunt_route,'sms') AND !in_array($currunt_route,$excpetions))
         {
           $currunt_route = str_replace('update','edit',$currunt_route);
         }
-    
+
          if (!in_array($currunt_route, $permissions) AND !in_array($currunt_route,$excpetions)) {
 
           $msg = trans('auth.not_authorized');
           if ($request->ajax()) {
             return $this->unauthorizedReturn(['type' => 'notAuth']);
           }
-    
+
           if (!count($permissions)) {
             session()->invalidate();
             session()->regenerateToken();
             return redirect(route('show.login'));
           }
-    
+
           session()->flash('danger', $msg);
-    
+
           return redirect()->route($this->getAdminFirstRouteName($permissions));
-          
+
         }
-        
+
 
 
         \View::share('roles', $permissions);
-    
+
         return $next($request);
       }
 }
