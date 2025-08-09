@@ -1,0 +1,107 @@
+{
+    "locale": "ar-EG",
+    "shortLocale": "ar",
+    "direction": "rtl",
+    "n_a": "غير متوفر",
+
+    "common": {
+        "createdBy": "انشأ بواسطة",
+        "createdAt": "انشأ في",
+        "updatedBy": "تم التعديل بواسطة",
+        "updatedAt": "تم التعديل في",
+        "deletedBy": "تم الحذف بواسطة",
+        "deletedAt": "تم الحذف في",
+        "subscribedOn": "تم الاشتراك في",
+        "unsubscribedOn": "تم إلغاء الاشتراك في",
+        "sentAt": "تم إرسالها في",
+        "details": "تقاصيل",
+        "categoryData": "بيانات القسم",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "restore": "استعادة",
+        "permanentlyDelete": "حذف دائم",
+        "settings": "إعدادات",
+        "seo_data": "بيانات محركات البحث",
+        "seo_images": "صور محركات البحث",
+        "choose_file_to_upload": "اختر ملف للتحميل ...",
+        "contactInfo": "بيانات التواصل",
+        "address": "العنوان",
+        "viewMessage": "عرض الرسالة",
+        "callToAction"       : "الدعوة الى إجراء", 
+        "condition "         : "الشرط"            ,
+        "greater_than"       : "أكبر من"          ,
+        "less_than"          : "أقل من "          ,
+        "rang"               : "النطاق بين"       ,
+        "gender"             : "الجنس"            ,
+        "male"               : "ذكر"              ,
+        "female"             : "أنثي"             ,
+        "choose_condition"   : "حدد الشرط"       ,
+        "condition_value"    : "قيمة الشرط"      ,
+        "from"               : "من"              ,
+        "to"                 : "الي"             ,
+        "date_from"          : "التاريخ من"     ,
+        "date_to"            : "التاريخ الي"    ,
+        "unselect_all"       : "إلغاء تحديد الكل",
+        "select_all"         : "تحديد الكل",
+        "submitted"          : "تم الارسال بنجاح",
+        "got_it"             : "حسنًا ، موافق",
+        "error"              : "خطأ" ,
+        "general_error"      : "عذرًا ، يبدو أنه تم اكتشاف بعض الأخطاء ، يرجى المحاولة مرة أخرى",
+        "check_for_delete"   : "هل أنت متأكد من حذف ",
+        "ok_delete"          : "نعم قم بالحذف",
+        "no_cancel"          : " لا , الغاء",
+        "deleted"            : "تم حذف ",
+        "not_deleted"        : " لم يتم الحذف ",
+        "delete_selected"     : "هل انت متأكد من حذف المحدد ؟ ",
+        "deleted_selected"     : "تم الحذف بنجاح",
+        "deactivate_account"   : "تعطيل الحساب",
+        "deactivate_text"   : "أؤكد تعطيل الحساب",
+        "activate_account"   : "تفعيل الحساب",
+        "activate_text"   : "أؤكد تفعيل الحساب",
+        "deactivate_desc" : "<h4 class='text-gray-900 fw-bolder'>أنت تقوم بإلغاء تنشيط الحساب</h4><div class='fs-6 text-gray-700'>لمزيد من الأمان ، يتطلب ذلك تأكيد بريدك الإلكتروني أو رقم هاتفك عند إعادة تعيين كلمة مرور تسجيل الدخول",
+        "activate_desc" : "<h4 class='text-gray-900 fw-bolder'>أنت تقوم بتنشيط الحساب</h4><div class='fs-6 text-gray-700'> سيتمكن صاحب الحساب من تسجيل الدخول بعد التفعيل بنجاح"
+    },
+
+    "placeholders": {
+        "choose_category": "اختر القسم",
+        "choose_type": "اختر النوع",
+        "choose_icon": "اختر الأيقونة",
+        "choose_option": "اختر الخيار",
+        "order": "الترتيب"
+    },
+
+    "errors": {
+        "connectionUnstable": "قد يكون لديك مشاكل في الاتصال بالانترنت، يرجى المحاولة مرة أخرى",
+        "serverError": " حدث خطأ ما، في حالة استمرار هذه المشكلة، يرجى التواصل معنا على <a href='mailto:support@apeiron.dev'>support@apeiron.dev</a>",
+        "sessionExpired": "انتهت الجلسة، سيتم إعادة توجيهك إلى صفحة تسجيل الدخول",
+        "noImageChangesMade": "لم يتم إجراء أي تغييرات على الصورة ليتم حفظها",
+        "noFileChangesMade": "لم يتم إجراء أي تغييرات على الملف ليتم حفظه",
+        "noDataToExport": "لا يوجد بيانات للتصدير"
+    },
+
+    "validations": {
+        "common":{
+            "apiKeyRequired": "ادخل مفتاح تطبيق الأبى اى",
+            "emailAddressRequired": "ادخل البريد الإلكتروني",
+            "emailAddressInvalid": "ادخل بريدًا إلكترونيًا صحيحاً",
+            "passwordRequired": "ادخل كلمة المرور",
+            "newPasswordRequired": "ادخل كلمة المرور الجديدة",
+            "repeatNewPasswordRequired": "كرر كلمة المرور الجديدة",
+            "repeatNewPasswordEqualTo": "كلمات المرور التي تم إدخالها لا تتطابق مع بعضها",
+            "orderInputNumber": "أدخل رقمًا صحيحاً للترتيب",
+            "urlInputURL": "أدخل رابط المسار صحيحاً",
+            "slugRequired": "أدخل عنوان رابط الصفحة",
+            "slugInvalid": "عنوان رابط الصفحة يجب ان يحتوى على حروف انجليزيه صغيرة و/أو أرقام، كل كلمة مفصولة بشرطة \"-\"، و لا يسمح بأحرف خاصة أو مسافات",
+            "seoImageExtensions": "يجب أن تكون الصورة بامتدادات png. أو jpg",
+            "seoImageMaxSize": "يجب أن يكون أقصى حجم للصورة ١ ميغابايت أو أقل",
+            "exportFileTypeSelectInputRequired": "أختر نوع الملف للتصدير البيانات",
+            "ImportFileInputRequired": "اختر ملف لاستيراد البيانات منة لقاعدة البيانات",
+            "ImportFileInputExtensions": "يجب أن يكون الملف بامتدادات xlsx. أو csv",
+            "MainCategoryInputRequired": "أختر القسم الرئيسى لهذا القسم"
+        }
+    }
+
+   
+
+
+}
