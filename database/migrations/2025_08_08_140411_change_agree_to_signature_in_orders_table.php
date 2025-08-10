@@ -20,6 +20,7 @@ return new class extends Migration
             if (!Schema::hasColumn('orders','signature_path')) {
                 $table->string('signature_path')->nullable();
             }
+            $table->string('signature')->nullable()->after('status');
         });
     }
 
@@ -31,7 +32,6 @@ return new class extends Migration
     public function down()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('signature');
             $table->string('agree')->nullable()->after('status');
         });
     }

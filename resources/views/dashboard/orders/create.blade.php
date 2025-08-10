@@ -1,5 +1,6 @@
 @extends('dashboard.layouts.app')
 @section('pageTitle', __('dashboard.orders'))
+@props(['order' => null])
 @section('content')
     <!-------------->
     <div class="post d-flex flex-column-fluid" id="kt_post">
@@ -179,8 +180,8 @@
                                     </select>
                                 </div>
                             </div>
-
-                            <div @class(['row mb-6' , 'd-none' => ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') ]) id="expired_price_offer">
+                            @php $orderStatus = isset($order) ? ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') : null  @endphp
+                            <div @class(['row mb-6' , 'd-none' => $orderStatus ]) id="expired_price_offer">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.expired_price_offer') <span class="text-danger">*</span></label>
                                 <div class="col-lg-8">
                                     <input type="date" name="expired_price_offer"
@@ -222,33 +223,36 @@
                             </div>
                             @endif
 
-                            <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label fw-bold fs-6">
-                                    @lang('dashboard.Customer_Signature')
-                                </label>
+                            @isset($order)
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label fw-bold fs-6">
+                                        @lang('dashboard.Customer_Signature')
+                                    </label>
 
-                                <div class="col-lg-8 d-flex flex-column gap-3">
-                                    @if($order->signature_path)
-                                        <div class="text-success fw-bold">
-                                             {{ $order?->signature }}
-                                        </div>
-                                        <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
-                                    @else
-                                        <div class="input-group">
-                                            <input type="text"
-                                                class="form-control"
-                                                value="{{ route('signature.show', $order) }}"
-                                                readonly
-                                                onclick="this.select();document.execCommand('copy');">
-                                            <button type="button" class="btn btn-outline-secondary"
-                                                    onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
-                                                Copy Link
-                                            </button>
-                                        </div>
-                                        <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
-                                    @endif
+                                    <div class="col-lg-8 d-flex flex-column gap-3">
+                                        @if(isset($order->signature_path))
+                                            <div class="text-success fw-bold">
+                                                {{ $order?->signature }}
+                                            </div>
+                                            <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
+                                        @else
+                                                <div class="input-group">
+                                                    <input type="text"
+                                                        class="form-control"
+                                                        value="{{ route('signature.show', $order) }}"
+                                                        readonly
+                                                        onclick="this.select();document.execCommand('copy');">
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                            onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
+                                                        Copy Link
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
+
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
+                            @endisset
 
                             <!-- Submit Button -->
                             <div class="d-flex justify-content-end">

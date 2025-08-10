@@ -17,15 +17,15 @@ class CustomersController extends Controller
         if ($request->has('name') && !empty($request->name)) {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
-    
+
         if ($request->has('email') && !empty($request->email)) {
             $query->where('email', 'like', '%' . $request->email . '%');
         }
-    
+
         if ($request->has('phone') && !empty($request->phone)) {
             $query->where('phone', 'like', '%' . $request->phone . '%');
         }
-    
+
         $customers = $query->paginate(100);
 
         return view('dashboard.customers.index', compact('customers'));
@@ -46,8 +46,14 @@ class CustomersController extends Controller
             'phone' => 'nullable|unique:customers',
             'notes' => 'nullable',
         ]);
-
-        Customer::create($validatedData);
+        try {
+            \DB::beginTransaction();
+            Customer::create($validatedData);
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json($e->getMessage(), 500);
+        }
         return response()->json();
     }
 
@@ -91,7 +97,7 @@ class CustomersController extends Controller
 
     public function deleteAll(Request $request) {
         $requestIds = json_decode($request->data);
-    
+
         foreach ($requestIds as $id) {
           $ids[] = $id->id;
         }
