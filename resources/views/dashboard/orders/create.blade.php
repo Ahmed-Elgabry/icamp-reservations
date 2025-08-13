@@ -179,7 +179,7 @@
                                     </select>
                                 </div>
                             </div>
-<<<<<<< HEAD
+
                             @php $orderStatus = isset($order) ? ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') : null  @endphp
                             <div @class(['row mb-6' , 'd-none' => $orderStatus ]) id="expired_price_offer">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.expired_price_offer') <span class="text-danger">*</span></label>
