@@ -236,18 +236,19 @@
                                             </div>
                                             <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
                                         @else
-                                            <div class="input-group">
-                                                <input type="text"
-                                                       class="form-control"
-                                                       value="{{ route('signature.show', $order) }}"
-                                                       readonly
-                                                       onclick="this.select();document.execCommand('copy');">
-                                                <button type="button" class="btn btn-outline-secondary"
-                                                        onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
-                                                    Copy Link
-                                                </button>
-                                            </div>
-                                            <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
+
+                                                <div class="input-group">
+                                                    <input type="text"
+                                                        class="form-control"
+                                                        value="{{ route('signature.show', $order) }}"
+                                                        readonly
+                                                        onclick="this.select();document.execCommand('copy');">
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                            onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
+                                                        Copy Link
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
 
                                         @endif
                                     </div>

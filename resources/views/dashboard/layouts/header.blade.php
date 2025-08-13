@@ -35,7 +35,6 @@
                                 <span class="menu-title"><a href="{{route('home')}}">@lang('dashboard.back_to_home')</a></span>
                                 <span class="menu-arrow d-lg-none"></span>
                             </span>
-
                         </div>
                     </div>
                     <!--end::Menu-->
@@ -158,7 +157,6 @@
                         <div class="separator my-2"></div>
                         <!--end::Menu separator-->
 
-
                         <!--begin::Menu item-->
                         <div class="menu-item px-5" data-kt-menu-trigger="hover" data-kt-menu-placement="left-start">
                             <a href="#" class="menu-link px-5">
@@ -233,6 +231,7 @@
         <!--end::Wrapper-->
     </div>
     <!--end::Container-->
+</div>
 </div>
 <script>
     function markNotificationAsRead(notificationId, url) {

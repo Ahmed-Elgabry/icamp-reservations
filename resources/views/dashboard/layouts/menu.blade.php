@@ -113,6 +113,7 @@
     @endcan
     @can('customers.index')
         <!--begin::Menu item-->
+
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index'])}}"
             data-kt-menu-trigger="click">
             <!--begin::Menu link-->
@@ -610,6 +611,7 @@
         </div>
         <!--end::Menu item-->
     @endcan
+
 {{--    @can('tasks.index')--}}
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports','employee.tasks'])}}"

@@ -1,5 +1,6 @@
 <?php
 
+
 use App\Http\Controllers\Dashboard\DailyReportController;
 use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
 use App\Http\Controllers\Dashboard\MeetingController;
@@ -282,7 +283,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # Service Stock delete
-    Route::delete('destroyServiceStock/{id}/', [
+    Route::delete('service/{service}/stocks/{stock}', [
         'uses' => 'StockController@destroyServiceStock',
         'as' => 'stocks.destroyServiceStock',
         'title' => ['actions.delete', 'dashboard.stocks']

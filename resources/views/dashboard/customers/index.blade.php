@@ -177,6 +177,7 @@
                                         <div class="menu-item px-3">
                                             <a href="{{route('orders.index')}}?customer_id={{$customer->id}}" class="menu-link px-3"> @lang('dashboard.orders')</a>
                                         </div>
+
                                         <div class="menu-item px-3">
                                             <a href="{{ route('notices.index') }}?customer_id={{$customer->id}}"
                                                class="menu-link px-3">@lang('dashboard.view_notices')</a>
@@ -186,6 +187,7 @@
                                             <a href="{{route('customers.edit', $customer->id)}}" class="menu-link px-3"> @lang('dashboard.edit')</a>
                                         </div>
                                         @endcan
+
                                         <!--end::Menu item-->
                                         @can('customers.destroy')
                                         <!--begin::Menu item-->
@@ -213,5 +215,4 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-
 @endsection

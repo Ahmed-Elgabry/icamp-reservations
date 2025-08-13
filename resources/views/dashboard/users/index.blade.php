@@ -314,3 +314,4 @@
 <script src="{{asset('dashboard/assets/js/custom/apps/customers/add.js')}}"></script>
 
 @endsection
+

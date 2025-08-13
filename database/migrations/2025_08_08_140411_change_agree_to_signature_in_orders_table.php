@@ -20,6 +20,7 @@ return new class extends Migration
             if (!Schema::hasColumn('orders','signature_path')) {
                 $table->string('signature_path')->nullable();
             }
+            $table->string('signature')->nullable()->after('status');
         });
     }
 

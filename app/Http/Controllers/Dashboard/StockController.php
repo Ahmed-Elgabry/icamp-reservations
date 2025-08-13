@@ -132,4 +132,6 @@ class StockController extends Controller
         //     return response()->json(['error' => __('dashboard.error_removing_stock_from_service')], 500);
         // }
     }
+
+    
 }

@@ -53,8 +53,6 @@ class User extends Authenticatable
         'graduation_year',
         'qualification',
         'job'
-
-
     ];
 
     /**
@@ -75,8 +73,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-
 
     public function isAdmin(){
         return $this->user_type === 1;
@@ -115,7 +111,6 @@ class User extends Authenticatable
     //     }
     // }
 
-
     public function roleName()
     {
         return $this->roles->first() ? $this->roles->first()->nickname_ar : '';
@@ -134,6 +129,7 @@ class User extends Authenticatable
         }
         return null;
     }
+
     public function scopeEmployee($query)
     {
         return $query->where('user_type', 'employee');
@@ -176,8 +172,6 @@ class User extends Authenticatable
         if($value)
         return $this->attributes['password'] = bcrypt($value);
     }
-
-
 
     public function markAsActive()
     {
