@@ -42,7 +42,7 @@
                                 $violation->action_taken === 'warning' ? 'warning' :
                                 ($violation->action_taken === 'allowance' ? 'success' : 'danger')
                             }}">
-                                {{ ucfirst($violation->action_taken) }}
+                                @lang('dashboard.' . $violation->action_taken)
                                 @if($violation->action_taken === 'deduction')
                                     ({{ $violation->deduction_amount }})
                                 @endif

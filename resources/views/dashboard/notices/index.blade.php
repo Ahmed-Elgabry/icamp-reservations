@@ -88,6 +88,19 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+            // Initialize Select2 for customer and order selects
+            $('#createEditModal select[name="customer_id"]').select2({
+                placeholder: "@lang('dashboard.select_customer')",
+                dropdownParent: $('#createEditModal'),
+                width: '100%'
+            });
+
+            {{--$('#createEditModal select[name="order_id"]').select2({--}}
+            {{--    placeholder: "@lang('dashboard.select_order')",--}}
+            {{--    dropdownParent: $('#createEditModal'),--}}
+            {{--    width: '100%'--}}
+            {{--});--}}
+
             // Initialize create/edit modal based on mode
             $('#createEditModal').on('show.bs.modal', function(event) {
                 const button = $(event.relatedTarget);

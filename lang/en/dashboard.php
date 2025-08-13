@@ -714,4 +714,17 @@ return [
 
     'violation_type_status' => 'Status',
 
+    'meeting_assigned_to' => 'Assigned To',
+
+    // Meeting Locations
+    'meeting_locations' => 'Meeting Locations',
+    'location_details' => 'Location Details',
+    'create_location' => 'Create Location',
+    'edit_location' => 'Edit Location',
+    'update_location' => 'Update Location',
+    'save_location' => 'Save Location',
+    'back_to_locations' => 'Back to Locations',
+    'select_location' => 'Select Location',
+//    'created_at' => 'Created At',
+//    'confirm_delete' => 'Are you sure you want to delete this location?',
 ];

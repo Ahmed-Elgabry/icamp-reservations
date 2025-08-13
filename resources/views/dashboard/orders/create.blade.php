@@ -13,8 +13,8 @@
             <div class="card mb-5 mb-xl-10">
                 <!--begin::Card header-->
                 <div class="card-header border-0 cursor-pointer" role="button" data-bs-toggle="collapse"
-                    data-bs-target="#kt_account_profile_details" aria-expanded="true"
-                    aria-controls="kt_account_profile_details">
+                     data-bs-target="#kt_account_profile_details" aria-expanded="true"
+                     aria-controls="kt_account_profile_details">
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bolder m-0">
@@ -28,9 +28,9 @@
                 <div class="collapse show">
                     <!--begin::Form-->
                     <form id="kt_ecommerce_add_product_form"
-                        data-kt-redirect="{{ isset($order) ? route('orders.edit', $order->id) : route('orders.create') }}"
-                        action="{{ isset($order) ? route('orders.update', $order->id) : route('orders.store') }}"
-                        method="post" enctype="multipart/form-data" class="form d-flex flex-column flex-lg-row store">
+                          data-kt-redirect="{{ isset($order) ? route('orders.edit', $order->id) : route('orders.create') }}"
+                          action="{{ isset($order) ? route('orders.update', $order->id) : route('orders.store') }}"
+                          method="post" enctype="multipart/form-data" class="form d-flex flex-column flex-lg-row store">
                         @csrf
                         @if (isset($order))
                             @method('PUT')
@@ -42,8 +42,8 @@
                                 <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.customer')</label>
                                 <div class="col-lg-8">
                                     <select name="customer_id"
-                                        class="form-select form-select-lg form-select-solid select2-hidden-accessible"
-                                        required>
+                                            class="form-select form-select-lg form-select-solid select2-hidden-accessible"
+                                            required>
                                         @foreach ($customers as $customer)
                                             <option value="{{ $customer->id }}"
                                                 {{ isset($order) && $order->customer_id == $customer->id ? 'selected' : '' }}>
@@ -60,8 +60,8 @@
                                 <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.service')</label>
                                 <div class="col-lg-8">
                                     <select name="service_ids[]" id="service_id" placeholder="@lang('dashboard.service')"
-                                        class="form-select form-select-lg form-select-solid select2-hidden-accessible"
-                                        multiple="multiple" required>
+                                            class="form-select form-select-lg form-select-solid select2-hidden-accessible"
+                                            multiple="multiple" required>
                                         @foreach ($services as $service)
                                             <option value="{{ $service->id }}" data-price="{{ $service->price }}"
                                                 {{ isset($order) && in_array($service->id, $order->services->pluck('id')->toArray()) ? 'selected' : '' }}>
@@ -77,8 +77,8 @@
                                 <label class="col-lg-4 col-form-label fw-bold fs-6 required">@lang('dashboard.service_price')</label>
                                 <div class="col-lg-8">
                                     <input type="number" name="price" id="price"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ isset($order) ? $order->price : old('price') }}" required>
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ isset($order) ? $order->price : old('price') }}" required>
                                 </div>
                             </div>
 
@@ -88,8 +88,8 @@
                                     <label class="col-lg-4 col-form-label fw-bold fs-6 required">@lang('dashboard.addons')</label>
                                     <div class="col-lg-8">
                                         <input type="number" name="price" id="price"
-                                            class="form-control form-control-lg form-control-solid"
-                                            value="{{ isset($order) ? $addonsPrice : 0 }}" readonly>
+                                               class="form-control form-control-lg form-control-solid"
+                                               value="{{ isset($order) ? $addonsPrice : 0 }}" readonly>
                                     </div>
                                 </div>
                             @endif
@@ -99,8 +99,8 @@
                                 <label class="col-lg-4 col-form-label fw-bold fs-6 required">@lang('dashboard.deposit')</label>
                                 <div class="col-lg-8">
                                     <input type="number" name="deposit" id="deposit"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ isset($order) ? $order->deposit : old('deposit') }}" required>
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ isset($order) ? $order->deposit : old('deposit') }}" required>
                                 </div>
                             </div>
 
@@ -109,9 +109,9 @@
                                 <label class="col-lg-4 col-form-label fw-bold fs-6 required">@lang('dashboard.insurance_amount')</label>
                                 <div class="col-lg-8">
                                     <input type="number" name="insurance_amount" id="insurance_amount"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ isset($order) ? $order->insurance_amount : old('insurance_amount') }}"
-                                        required>
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ isset($order) ? $order->insurance_amount : old('insurance_amount') }}"
+                                           required>
                                 </div>
                             </div>
                             <!-- Notes -->
@@ -127,8 +127,8 @@
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.date')</label>
                                 <div class="col-lg-8">
                                     <input type="date" name="date"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ request('date', isset($order) ? $order->date : old('date')) }}">
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ request('date', isset($order) ? $order->date : old('date')) }}">
                                 </div>
                             </div>
 
@@ -138,8 +138,8 @@
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.time_from')</label>
                                 <div class="col-lg-8">
                                     <input type="time" name="time_from"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ isset($order) ? $order->time_from : old('time_from') }}">
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ isset($order) ? $order->time_from : old('time_from') }}">
                                 </div>
                             </div>
 
@@ -148,8 +148,8 @@
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.time_to')</label>
                                 <div class="col-lg-8">
                                     <input type="time" name="time_to"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ isset($order) ? $order->time_to : old('time_to') }}">
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ isset($order) ? $order->time_to : old('time_to') }}">
                                 </div>
                             </div>
 
@@ -171,84 +171,88 @@
                                             @lang('dashboard.canceled')
                                         </option>
                                         <option value="delayed" title="@lang('dashboard.delayed')"
-                                        {{ isset($order) && $order->status == 'delayed' ? 'selected' : '' }}>
-                                        @lang('dashboard.delayed')</option>
+                                            {{ isset($order) && $order->status == 'delayed' ? 'selected' : '' }}>
+                                            @lang('dashboard.delayed')</option>
                                         <option value="completed" title="@lang('dashboard.completed_desc')"
-                                        {{ isset($order) && $order->status == 'completed' ? 'selected' : '' }}>
-                                        @lang('dashboard.completed')</option>
+                                            {{ isset($order) && $order->status == 'completed' ? 'selected' : '' }}>
+                                            @lang('dashboard.completed')</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div @class(['row mb-6' , 'd-none' => ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') ]) id="expired_price_offer">
+                            @php $orderStatus = isset($order) ? ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') : null  @endphp
+                            <div @class(['row mb-6' , 'd-none' => $orderStatus ]) id="expired_price_offer">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.expired_price_offer') <span class="text-danger">*</span></label>
                                 <div class="col-lg-8">
                                     <input type="date" name="expired_price_offer"
-                                        placeholder="@lang('dashboard.expired_price_offer')"
-                                        id="expired_price_offer"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ isset($order) ? $order->expired_price_offer : old('expired_price_offer') }}">
+                                           placeholder="@lang('dashboard.expired_price_offer')"
+                                           id="expired_price_offer"
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ isset($order) ? $order->expired_price_offer : old('expired_price_offer') }}">
                                 </div>
                             </div>
 
                             @if (isset($order) && $order->status == 'canceled')
-                            <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label  fw-bold fs-6">رد المبالغ المدفوعه ؟</label>
-                                <div class="col-lg-8">
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label  fw-bold fs-6">رد المبالغ المدفوعه ؟</label>
+                                    <div class="col-lg-8">
                                         <select name="refunds" class="form-select form-select-lg form-select-solid">
                                             <option value="">-- Select --</option>
                                             <option value="1" {{ isset($order) && $order->refunds == '1' ? 'selected' : '' }}>Yes</option>
                                             <option value="0" {{ isset($order) && $order->refunds == '0' ? 'selected' : '' }}>No</option>
                                         </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.refunds_notes')</label>
-                                <div class="col-lg-8">
-                                    <textarea name="refunds_notes" class="form-control form-control-lg form-control-solid" placeholder="@lang('dashboard.refunds_notes')">{{ isset($order) ? $order->refunds_notes : old('refunds_notes') }}</textarea>
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.refunds_notes')</label>
+                                    <div class="col-lg-8">
+                                        <textarea name="refunds_notes" class="form-control form-control-lg form-control-solid" placeholder="@lang('dashboard.refunds_notes')">{{ isset($order) ? $order->refunds_notes : old('refunds_notes') }}</textarea>
+                                    </div>
                                 </div>
-                            </div>
                             @endif
 
                             @if (isset($order) && $order->status == 'delayed')
-                                 <!-- Time From -->
-                            <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.delayed_time')</label>
-                                <div class="col-lg-8">
-                                    <input type="time" name="delayed_time"
-                                        class="form-control form-control-lg form-control-solid"
-                                        value="{{ isset($order) ? $order->delayed_time : old('delayed_time') }}">
+                                <!-- Time From -->
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.delayed_time')</label>
+                                    <div class="col-lg-8">
+                                        <input type="time" name="delayed_time"
+                                               class="form-control form-control-lg form-control-solid"
+                                               value="{{ isset($order) ? $order->delayed_time : old('delayed_time') }}">
+                                    </div>
                                 </div>
-                            </div>
                             @endif
 
-                            <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label fw-bold fs-6">
-                                    @lang('dashboard.Customer_Signature')
-                                </label>
+                            @isset($order)
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label fw-bold fs-6">
+                                        @lang('dashboard.Customer_Signature')
+                                    </label>
 
-                                <div class="col-lg-8 d-flex flex-column gap-3">
-                                    @if($order->signature_path)
-                                        <div class="text-success fw-bold">
-                                             {{ $order?->signature }}
-                                        </div>
-                                        <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
-                                    @else
-                                        <div class="input-group">
-                                            <input type="text"
-                                                class="form-control"
-                                                value="{{ route('signature.show', $order) }}"
-                                                readonly
-                                                onclick="this.select();document.execCommand('copy');">
-                                            <button type="button" class="btn btn-outline-secondary"
-                                                    onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
-                                                Copy Link
-                                            </button>
-                                        </div>
-                                        <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
-                                    @endif
+                                    <div class="col-lg-8 d-flex flex-column gap-3">
+                                        @if(isset($order->signature_path))
+                                            <div class="text-success fw-bold">
+                                                {{ $order?->signature }}
+                                            </div>
+                                            <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
+                                        @else
+                                            <div class="input-group">
+                                                <input type="text"
+                                                       class="form-control"
+                                                       value="{{ route('signature.show', $order) }}"
+                                                       readonly
+                                                       onclick="this.select();document.execCommand('copy');">
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                        onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
+                                                    Copy Link
+                                                </button>
+                                            </div>
+                                            <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
+
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
+                            @endisset
 
                             <!-- Submit Button -->
                             <div class="d-flex justify-content-end">
@@ -300,7 +304,7 @@
 
                 // Update the price input with the total price
                 $('#price').val(totalSelectedPrice.toFixed(
-                2)); // .toFixed(2) ensures the price is formatted as a decimal with two digits
+                    2)); // .toFixed(2) ensures the price is formatted as a decimal with two digits
             });
 
             // Customer change event to check for notices
