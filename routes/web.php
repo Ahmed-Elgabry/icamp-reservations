@@ -1,5 +1,13 @@
 <?php
 
+
+use App\Http\Controllers\Dashboard\DailyReportController;
+use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
+use App\Http\Controllers\Dashboard\MeetingController;
+use App\Http\Controllers\Dashboard\MeetingLocationController;
+use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\ViolationController;
+use App\Http\Controllers\Dashboard\ViolationTypeController;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
@@ -1168,6 +1176,8 @@ Route::get('camp-reports/{campReport}', 'Dashboard\CampReportController@show')
     ->name('camp-reports.show');
 
 Route::resource('meetings', MeetingController::class)
+    ->middleware(['auth']);
+Route::resource('meeting-locations', MeetingLocationController::class)
     ->middleware(['auth']);
 
 Route::resource('violation-types', ViolationTypeController::class)

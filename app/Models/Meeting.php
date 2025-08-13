@@ -10,7 +10,7 @@ class Meeting extends Model
 {
     protected $fillable = [
         'meeting_number', 'date', 'start_time', 'end_time',
-        'location', 'notes', 'created_by'
+        'location_id', 'notes', 'created_by'
     ];
 
     protected $casts = [
@@ -40,5 +40,10 @@ class Meeting extends Model
             $nextNumber = $latestMeeting ? (int) str_replace('MTG-', '', $latestMeeting->meeting_number) + 1 : 1;
             $model->meeting_number = 'MTG-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
         });
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(MeetingLocation::class, 'location_id');
     }
 }

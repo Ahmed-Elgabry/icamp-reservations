@@ -52,8 +52,14 @@
                     <div class="row g-5 mt-3">
                         <div class="col-md-4">
                             <label class="form-label required">@lang('dashboard.meeting_location')</label>
-                            <input type="text" name="location" class="form-control form-control-solid"
-                                   value="{{ old('location', $meeting->location ?? '') }}" required>
+                            <select name="location_id" class="form-select form-select-solid" required>
+                                <option value="">@lang('dashboard.select_location')</option>
+                                @foreach($locations as $location)
+                                    <option value="{{ $location->id }}" {{ old('location_id', $meeting->location_id ?? '') == $location->id ? 'selected' : '' }}>
+                                        {{ $location->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-8">
                             <label class="form-label">@lang('dashboard.notes')</label>
@@ -108,7 +114,7 @@
                                                        value="{{ old("topics.$index.topic", $topic->topic) }}">
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">@lang('dashboard.assigned_to')</label>
+                                                <label class="form-label">@lang('dashboard.meeting_assigned_to')</label>
                                                 <select name="topics[{{ $index }}][assigned_to]"
                                                         class="form-select form-select-solid select2">
                                                     <option value="">@lang('dashboard.select_user')</option>
@@ -122,16 +128,10 @@
                                         </div>
 
                                         <div class="row mb-4 g-3">
-                                            <div class="col-md-6">
                                                 <label class="form-label">@lang('dashboard.discussion')</label>
-                                                <textarea name="topics[{{ $index }}][discussion]"
-                                                          class="form-control form-control-solid" rows="2">{{ old("topics.$index.discussion", $topic->discussion) }}</textarea>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">@lang('dashboard.action_items')</label>
-                                                <textarea name="topics[{{ $index }}][action_items]"
-                                                          class="form-control form-control-solid" rows="2">{{ old("topics.$index.action_items", $topic->action_items) }}</textarea>
-                                            </div>
+                                                <textarea name="topics[{{ $index }}][discussion]" class="form-control form-control-solid tiny-editor" rows="5">
+                                                    {{ old("topics.$index.discussion", $topic->discussion) }}
+                                                </textarea>
                                         </div>
 
                                         <button type="button" class="btn btn-sm btn-light-danger remove-topic">
@@ -149,7 +149,7 @@
                                             <input type="text" name="topics[0][topic]" class="form-control form-control-solid">
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label">@lang('dashboard.assigned_to')</label>
+                                            <label class="form-label">@lang('dashboard.meeting_assigned_to')</label>
                                             <select name="topics[0][assigned_to]" class="form-select form-select-solid select2">
                                                 <option value="">@lang('dashboard.select_user')</option>
                                                 @foreach($users as $user)
@@ -160,14 +160,8 @@
                                     </div>
 
                                     <div class="row mb-4 g-3">
-                                        <div class="col-md-6">
                                             <label class="form-label">@lang('dashboard.discussion')</label>
-                                            <textarea name="topics[0][discussion]" class="form-control form-control-solid" rows="2"></textarea>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">@lang('dashboard.action_items')</label>
-                                            <textarea name="topics[0][action_items]" class="form-control form-control-solid" rows="2"></textarea>
-                                        </div>
+                                            <textarea name="topics[0][discussion]" class="form-control form-control-solid tiny-editor" rows="5"></textarea>
                                     </div>
 
                                     <button type="button" class="btn btn-sm btn-light-danger remove-topic">
@@ -196,7 +190,24 @@
 @endsection
 
 @push('js')
+    <script src="https://cdn.tiny.cloud/1/m181ycw0urzvmmzinvpzqn3nv10wxttgo7gvv77hf6ce6z89/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
+        function initTinyMCE(selector) {
+            tinymce.init({
+                selector: selector,
+                plugins: 'advlist autolink lists link image charmap preview anchor',
+                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+                menubar: false,
+                height: 300,
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+            });
+        }
+
+        // Initialize existing textareas on page load
+        document.querySelectorAll('textarea[name*="discussion"]').forEach(el => {
+            initTinyMCE(`textarea[name="${el.name}"]`);
+        });
+
         $(document).ready(function() {
             $('#attendees-select').select2({
                 placeholder: "@lang('dashboard.select_attendees_placeholder')",
@@ -219,7 +230,7 @@
                                 <input type="text" name="topics[${topicCount}][topic]" class="form-control form-control-solid">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">@lang('dashboard.assigned_to')</label>
+                                <label class="form-label">@lang('dashboard.meeting_assigned_to')</label>
                                 <select name="topics[${topicCount}][assigned_to]" class="form-select form-select-solid select2">
                                     <option value="">@lang('dashboard.select_user')</option>
                                     @foreach($users as $user)
@@ -232,11 +243,7 @@
                         <div class="row mb-4 g-3">
                             <div class="col-md-6">
                                 <label class="form-label">@lang('dashboard.discussion')</label>
-                                <textarea name="topics[0][discussion]" class="form-control form-control-solid" rows="2"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">@lang('dashboard.action_items')</label>
-                                <textarea name="topics[0][action_items]" class="form-control form-control-solid" rows="2"></textarea>
+                                <textarea name="topics[${topicCount}][discussion]" class="form-control form-control-solid tiny-editor" rows="5"></textarea>
                             </div>
                         </div>
 
@@ -247,6 +254,8 @@
                 </div>
                 `;
                 $('#topics-container').append(html);
+                // Initialize TinyMCE for the new field
+                initTinyMCE(`textarea[name="topics[${topicCount}][discussion]"]`);
                 topicCount++;
             });
 
@@ -257,3 +266,14 @@
     </script>
 @endpush
 
+@push('css')
+    <style>
+        .tox-tinymce {
+            border-radius: 0.475rem !important;
+            border: 1px solid #E4E6EF !important;
+        }
+        .tox .tox-editor-header {
+            background-color: #F1FAFF !important;
+        }
+    </style>
+@endpush

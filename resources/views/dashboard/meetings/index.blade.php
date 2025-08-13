@@ -33,7 +33,7 @@
                         <td>{{ $meeting->meeting_number }}</td>
                         <td>{{ $meeting->date->format('Y-m-d') }}</td>
                         <td>{{ $meeting->start_time }} - {{ $meeting->end_time }}</td>
-                        <td>{{ $meeting->location }}</td>
+                        <td>{{ $meeting->location->name }}</td>
                         <td>{{ $meeting->attendees->count() }}</td>
                         <td>{{ $meeting->topics->count() }}</td>
                         <td>{{ $meeting->creator->name }}</td>
