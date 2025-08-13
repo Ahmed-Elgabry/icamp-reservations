@@ -1,6 +1,5 @@
 @extends('dashboard.layouts.app')
 @section('pageTitle', __('dashboard.orders'))
-@props(['order' => null])
 @section('content')
     <!-------------->
     <div class="post d-flex flex-column-fluid" id="kt_post">
@@ -180,6 +179,7 @@
                                     </select>
                                 </div>
                             </div>
+<<<<<<< HEAD
                             @php $orderStatus = isset($order) ? ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') : null  @endphp
                             <div @class(['row mb-6' , 'd-none' => $orderStatus ]) id="expired_price_offer">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.expired_price_offer') <span class="text-danger">*</span></label>
@@ -307,7 +307,46 @@
                 2)); // .toFixed(2) ensures the price is formatted as a decimal with two digits
             });
 
+            // Customer change event to check for notices
+            $('select[name="customer_id"]').change(function() {
+                const customerId = $(this).val();
+                if (customerId) {
+                    $.get('/orders/check-customer-notices/' + customerId, function(response) {
+                        if (response.hasNotices) {
+                            // Detect current language direction
+                            const isRTL = "{{ app()->getLocale() }}" === "ar";
+                            const textAlign = isRTL ? 'right' : 'left';
 
+                            let noticeContent = `<div style="text-align: ${textAlign}; font-size: 14px; line-height: 1.6;">`;
+                            response.notices.forEach(notice => {
+                                noticeContent += `
+                        <div style="margin-bottom: 15px; padding: 12px; background: #fdfdfd; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <p style="margin: 0 0 6px 0; font-weight: bold; color: #333;">
+                                {{ __('dashboard.notice_label') }}:
+                            </p>
+                            <p style="margin: 0 0 8px 0; color: #555;">${notice.content}</p>
+                            <p style="margin: 0; font-size: 12px; color: #888;">
+                                {{ __('dashboard.created_by_at', ['name' => '${notice.created_by}', 'date' => '${notice.created_at}']) }}
+                                </p>
+                            </div>
+`;
+                            });
+                            noticeContent += '</div>';
+
+                            Swal.fire({
+                                title: "{{ __('dashboard.customer_has_notices') }}",
+                                html: noticeContent,
+                                icon: 'warning',
+                                confirmButtonText: "{{ __('dashboard.ok') }}",
+                                width: '700px',
+                                customClass: {
+                                    popup: isRTL ? 'swal2-rtl' : ''
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         });
     </script>
 @endsection

@@ -16,8 +16,7 @@ class Service extends Model
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'service_stock')
-            ->withPivot(['id','count'])
-            ->withTimestamps();
+                ->withPivot('count');
     }
 
 

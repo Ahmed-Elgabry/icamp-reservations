@@ -53,7 +53,7 @@
                                     class="form-label">{{ __('dashboard.commercial_license') }}</label>
                                 <textarea name="commercial_license" id="commercial_license" class="form-control" rows="8">{{ isset($termsSittng->commercial_license) ? $termsSittng->commercial_license : '' }}</textarea>
                             </div>
-                            
+
                             <!-- Description Field -->
                             <div class="form-group col-6 mb-3">
                                 <label for="description"

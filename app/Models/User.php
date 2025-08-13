@@ -9,6 +9,7 @@ use App\Traits\UploadTrait;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -45,15 +46,13 @@ class User extends Authenticatable
         'address',
         'wallet_balance',
         'city_id',
-        'user_type', 
-        'bio', 
+        'user_type',
+        'bio',
         'experience',
         'university',
         'graduation_year',
         'qualification',
         'job'
-
-        
     ];
 
     /**
@@ -75,8 +74,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-
-    
     public function isAdmin(){
         return $this->user_type === 1;
     }
@@ -88,7 +85,7 @@ class User extends Authenticatable
     public function isProvider(){
         return $this->user_type === 3;
     }
-    
+
     public function isActive(){
         return $this->is_active === 1;
     }
@@ -113,7 +110,6 @@ class User extends Authenticatable
     //       return $this->attributes['image'] = $this->StoreFile('users' , $value);
     //     }
     // }
-    
 
     public function roleName()
     {
@@ -134,6 +130,31 @@ class User extends Authenticatable
         return null;
     }
 
+    public function scopeEmployee($query)
+    {
+        return $query->where('user_type', 'employee');
+    }
+    public function markNotificationAsRead($notificationId)
+    {
+        $this->notifications()->where('id', $notificationId)->update(['read_at' => now()]);
+    }
+
+    /**
+     * Relationship to daily reports created by this user
+     */
+    public function dailyReports(): HasMany
+    {
+        return $this->hasMany(DailyReport::class, 'employee_id');
+    }
+
+    /**
+     * Check if user is an employee
+     */
+    public function isEmployee(): bool
+    {
+        return $this->hasRole('employee');
+    }
+
     public function getFullPhoneAttribute()
     {
         return $this->attributes['country_code'] . $this->attributes['phone'];
@@ -152,8 +173,6 @@ class User extends Authenticatable
         return $this->attributes['password'] = bcrypt($value);
     }
 
-
-    
     public function markAsActive()
     {
         $this->update(['code' => null, 'code_expire' => null, 'is_active' => true]);
@@ -175,7 +194,7 @@ class User extends Authenticatable
 
     public function sendVerificationMail()
     {
-      
+
         $this->update([
             'code'        => $this->activationCode(),
             'code_expire' => Carbon::now()->addMinute(),
@@ -184,7 +203,7 @@ class User extends Authenticatable
         $msg = trans('apis.activeCode');
         $this->sendMail($this->email, $msg . $this->code);
         return ['user' => new UserResource($this->refresh())];
-   
+
     }
 
 

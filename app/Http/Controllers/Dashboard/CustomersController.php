@@ -97,7 +97,6 @@ class CustomersController extends Controller
 
     public function deleteAll(Request $request) {
         $requestIds = json_decode($request->data);
-
         foreach ($requestIds as $id) {
           $ids[] = $id->id;
         }

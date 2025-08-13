@@ -3,9 +3,6 @@
 
 @section('content')
 
-{{-- //////////// --}}
-
-
 <!--begin::Modal - Customers - Add-->
 <div class="modal fade" id="kt_modal_add_customer" tabindex="-1" aria-hidden="true">
     <!--begin::Modal dialog-->
@@ -58,7 +55,7 @@
                             <!--end::Input-->
                         </div>
                         <!--end::Input group-->
-                       
+
                         <!--begin::Input group-->
                         <div class="fv-row mb-15">
                             <!--begin::Label-->
@@ -252,7 +249,7 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-					
+
 @endsection
 @section('scripts')
 
@@ -317,3 +314,4 @@
 <script src="{{asset('dashboard/assets/js/custom/apps/customers/add.js')}}"></script>
 
 @endsection
+

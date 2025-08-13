@@ -11,6 +11,7 @@ use App\Jobs\SendEmailJob;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Notifications\NotifyUser;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use App\Mail\SendMail;
@@ -29,17 +30,17 @@ class NotificationController extends Controller
     public function sendNotification(Request $request)
     {
         if ($request->user_type == 'all_users' ) {
-            $rows = User::get() ; 
+            $rows = User::get() ;
         }else if($request->user_type == 'active_users'){
-            $rows = User::where('is_active' , true)->get() ; 
+            $rows = User::where('is_active' , true)->get() ;
         }else if($request->user_type == 'not_active_users'){
-            $rows = User::where('is_active' , false)->get() ; 
+            $rows = User::where('is_active' , false)->get() ;
         }else if($request->user_type == 'blocked_users'){
-            $rows = User::where('is_blocked' , true)->get() ; 
+            $rows = User::where('is_blocked' , true)->get() ;
         }else if($request->user_type == 'not_blocked_users'){
-            $rows = User::where('is_blocked' , false)->get() ; 
+            $rows = User::where('is_blocked' , false)->get() ;
         }else if($request->user_type == 'admins'){
-            $rows = User::admins()->get() ; 
+            $rows = User::admins()->get() ;
         }
         if ($request->type == 'notify') {
             if ($request->user_type == 'admins') {
@@ -53,7 +54,7 @@ class NotificationController extends Controller
             dispatch(new SendSms($rows->pluck('phone')->toArray() , $request->message));
         }
 
-        return response()->json() ; 
+        return response()->json() ;
     }
 
 
@@ -82,14 +83,14 @@ class NotificationController extends Controller
 
     public function storeToken(Request $request)
     {
-       
+
        return  Device::firstOrCreate([
                 'morph_id' => auth()->user()->id,
-                'morph_type' => 'App\Models\User',  
+                'morph_type' => 'App\Models\User',
                 'device_id' =>  $request->token,
                 'device_type'  => 'web'
             ]);
-        
+
     }
 
     public function create()
@@ -97,5 +98,19 @@ class NotificationController extends Controller
         return view('dashboard.notifications.create');
     }
 
-   
+    public function markAsRead(DatabaseNotification $notification)
+    {
+        if ($notification->notifiable_id !== auth()->id()) {
+            return response()->json(['success' => false], 403);
+        }
+
+        $notification->markAsRead();
+        return response()->json(['success' => true]);
+    }
+
+    public function destroy(DatabaseNotification $notification)
+    {
+        $notification->delete();
+        return response()->json(['success' => true]);
+    }
 }

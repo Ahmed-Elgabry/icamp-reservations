@@ -195,6 +195,7 @@
                                                 <form action="{{ route('stocks.destroyServiceStock', ['service' => $service->id, 'stock' => $serviceStock->id]) }}"
                                                     method="POST"
                                                     onsubmit="return confirm('@lang('dashboard.delete')?')">
+
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm">

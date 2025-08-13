@@ -121,17 +121,17 @@ class StockController extends Controller
         }
     }
 
-    public function destroyServiceStock(Service $service, $pivot)
+    public function destroyServiceStock(Request $request, $service_id)
     {
-        // $deleted = \DB::table('service_stock')
-        //     ->where('id', $pivot)
-        //     ->where('service_id', $service->id)
-        //     ->delete();
+        // $service = Service::findOrFail($service_id);
+        // $serviceStocks = $service->stocks()->detach($request->stock_id);
 
-        // if ($deleted) {
-        //     return back()->with('success', __('dashboard.stock_removed_from_service'));
+        // if ($serviceStocks) {
+        //     return response()->json(['message' => __('dashboard.stock_removed_from_service')], 200);
+        // } else {
+        //     return response()->json(['error' => __('dashboard.error_removing_stock_from_service')], 500);
         // }
-        // return back()->with('error', __('dashboard.error_removing_stock_from_service'));
     }
 
+    
 }
