@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Dashboard\DailyReportController;
+use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
+use App\Http\Controllers\Dashboard\MeetingController;
+use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\ViolationController;
+use App\Http\Controllers\Dashboard\ViolationTypeController;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
@@ -1049,3 +1055,129 @@ Route::resource('questions', QuestionController::class);
 Route::post('/questions/{question}/answer', [QuestionController::class, 'storeAnswer'])->name('questions.storeAnswer');
 Route::get('/questions/{id}/answers', [QuestionController::class, 'showAnswers'])->name('questions.answers');
 Route::get('answers/user/{userId}', [QuestionController::class, 'showUserAnswers'])->name('answers.user');
+
+// Admin reports
+Route::group(['middleware' => ['auth', 'admin']], function() {
+    Route::resource('tasks', 'Dashboard\TaskController')->except('show');
+
+    Route::get('tasks/reports', 'Dashboard\TaskController@reports')
+        ->name('tasks.reports');
+
+    Route::get('tasks/export-reports', 'Dashboard\TaskController@exportReports')
+        ->name('tasks.exportReports');
+});
+
+// Employee routes
+Route::group(['middleware' => ['auth']], function() {
+    Route::get('employee/tasks', 'Dashboard\TaskController@myTasks')
+        ->name('employee.tasks');
+
+    Route::post('tasks/{task}/status', 'Dashboard\TaskController@updateTaskStatus')
+        ->name('tasks.updateStatus');
+});
+
+Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+    ->name('notifications.read');
+
+Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])
+    ->name('notifications.destroy');
+
+// Notice Routes
+Route::get('notices', [
+    'uses' => 'Dashboard\NoticeController@index',
+    'as' => 'notices.index',
+    'title' => 'dashboard.notices',
+    'type' => 'parent',
+    'child' => ['notices.create', 'notices.store', 'notices.show', 'notices.edit', 'notices.update', 'notices.destroy']
+]);
+
+Route::post('notices/store', [
+    'uses' => 'Dashboard\NoticeController@store',
+    'as' => 'notices.store',
+    'title' => ['actions.add', 'dashboard.notice']
+]);
+
+Route::get('notices/{notice}', [
+    'uses' => 'Dashboard\NoticeController@show',
+    'as' => 'notices.show',
+    'title' => ['actions.show', 'dashboard.notice']
+]);
+
+Route::get('notices/{notice}/edit', [
+    'uses' => 'Dashboard\NoticeController@edit',
+    'as' => 'notices.edit',
+    'title' => ['actions.edit', 'dashboard.notice']
+]);
+
+Route::put('notices/{notice}', [
+    'uses' => 'Dashboard\NoticeController@update',
+    'as' => 'notices.update',
+    'title' => ['actions.update', 'dashboard.notice']
+]);
+
+Route::delete('notices/{notice}', [
+    'uses' => 'Dashboard\NoticeController@destroy',
+    'as' => 'notices.destroy',
+    'title' => ['actions.delete', 'dashboard.notice']
+]);
+
+Route::get('notices/get-customer-orders/{customer_id}', [
+    'uses' => 'Dashboard\NoticeController@getCustomerOrders',
+    'as' => 'notices.get-customer-orders'
+]);
+
+Route::get('orders/check-customer-notices/{customerId}', [
+    'uses' => 'Dashboard\OrderController@checkCustomerNotices',
+    'as' => 'orders.check-customer-notices'
+]);
+
+Route::group(['middleware' => ['auth']], function() {
+    Route::resource('daily-reports', 'Dashboard\DailyReportController');
+    Route::get('daily-reports/export/pdf', [DailyReportController::class, 'exportToPdf'])
+        ->name('daily-reports.export');
+});
+
+// Equipment Directories
+Route::resource('equipment-directories', EquipmentDirectoryController::class)
+    ->except(['show']);
+
+// Directory Items
+Route::prefix('equipment-directories/{equipmentDirectory}/items')->group(function () {
+    Route::get('/', [EquipmentDirectoryController::class, 'itemsIndex'])
+        ->name('equipment-directories.items.index');
+    Route::get('/create', [EquipmentDirectoryController::class, 'createItem'])
+        ->name('equipment-directories.items.create');
+    Route::post('/', [EquipmentDirectoryController::class, 'storeItem'])
+        ->name('equipment-directories.items.store');
+    Route::get('/{item}/edit', [EquipmentDirectoryController::class, 'editItem'])
+        ->name('equipment-directories.items.edit');
+    Route::put('/{item}', [EquipmentDirectoryController::class, 'updateItem'])
+        ->name('equipment-directories.items.update');
+    Route::delete('/{item}', [EquipmentDirectoryController::class, 'destroyItem'])
+        ->name('equipment-directories.items.destroy');
+});
+
+// Media
+Route::delete('/equipment-directories/media/{media}', [EquipmentDirectoryController::class, 'destroyMedia'])
+    ->name('equipment-directories.media.destroy');
+
+// PDF Export
+Route::get('/equipment-directories/{equipmentDirectory}/export', [EquipmentDirectoryController::class, 'exportPdf'])
+    ->name('equipment-directories.export');
+Route::get('equipment-directories/export', [EquipmentDirectoryController::class, 'exportDirectoriesPdf'])
+    ->name('equipment-directories.export');
+Route::get('equipment-directories/{equipmentDirectory}/items/export', [EquipmentDirectoryController::class, 'exportItemsPdf'])
+    ->name('equipment-directories.items.export');
+
+Route::resource('camp-reports', 'Dashboard\CampReportController')->except(['show']);
+Route::get('camp-reports/{campReport}', 'Dashboard\CampReportController@show')
+    ->name('camp-reports.show');
+
+Route::resource('meetings', MeetingController::class)
+    ->middleware(['auth']);
+
+Route::resource('violation-types', ViolationTypeController::class)
+    ->middleware(['auth']);
+
+Route::resource('violations', ViolationController::class)
+    ->middleware(['auth']);

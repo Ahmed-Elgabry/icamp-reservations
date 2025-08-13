@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Models\Notice;
 use DB;
 use PDF;
 use Mpdf\Mpdf;
@@ -674,5 +675,24 @@ class OrderController extends Controller
         } else {
             return response()->json('failed');
         }
+    }
+
+    public function checkCustomerNotices($customerId)
+    {
+        $notices = Notice::where('customer_id', $customerId)
+            ->with('creator')
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'hasNotices' => $notices->isNotEmpty(),
+            'notices' => $notices->map(function($notice) {
+                return [
+                    'content' => $notice->notice,
+                    'created_at' => $notice->created_at->format('Y-m-d H:i'),
+                    'created_by' => $notice->creator->name
+                ];
+            })
+        ]);
     }
 }

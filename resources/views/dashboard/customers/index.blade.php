@@ -57,7 +57,7 @@
                                             <a href="?" class="btn btn-secondary">
                                                 {{ __('dashboard.reset') }}
                                             </a>
-                                            @endif  
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -94,14 +94,14 @@
                     <!--begin::Add customer-->
                     @can('customers.create')
                     <a href="{{ route('customers.create')}}" class="btn btn-primary">@lang('dashboard.create_title', ['page_title' => __('dashboard.customers')])</a>
-                    @endcan 
+                    @endcan
                     <!--end::Add customer-->
                     <span class="w-5px h-2px"></span>
                     @can('customers.create')
-                    <button type="button" data-route="{{route('customers.deleteAll')}}" 
+                    <button type="button" data-route="{{route('customers.deleteAll')}}"
                     class="btn btn-danger delete_all_button">
                         <i class="feather icon-trash"></i>@lang('dashboard.delete_selected')</button>
-                    @endcan 
+                    @endcan
                 </div>
                 <!--end::Card toolbar-->
             </div>
@@ -177,18 +177,22 @@
                                         <div class="menu-item px-3">
                                             <a href="{{route('orders.index')}}?customer_id={{$customer->id}}" class="menu-link px-3"> @lang('dashboard.orders')</a>
                                         </div>
+                                        <div class="menu-item px-3">
+                                            <a href="{{ route('notices.index') }}?customer_id={{$customer->id}}"
+                                               class="menu-link px-3">@lang('dashboard.view_notices')</a>
+                                        </div>
                                         @can('customers.edit')
                                         <div class="menu-item px-3">
                                             <a href="{{route('customers.edit', $customer->id)}}" class="menu-link px-3"> @lang('dashboard.edit')</a>
                                         </div>
-                                        @endcan 
+                                        @endcan
                                         <!--end::Menu item-->
                                         @can('customers.destroy')
                                         <!--begin::Menu item-->
                                         <div class="menu-item px-3">
                                             <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('customers.destroy', $customer->id)}}" data-id="{{$customer->id}}"> @lang('dashboard.delete')</a>
                                         </div>
-                                        @endcan 
+                                        @endcan
                                         <!--end::Menu item-->
                                     </div>
                                     <!--end::Menu-->
@@ -209,5 +213,5 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-					
+
 @endsection
