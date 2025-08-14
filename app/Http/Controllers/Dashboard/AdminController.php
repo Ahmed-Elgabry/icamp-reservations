@@ -31,7 +31,7 @@ class AdminController extends Controller
     public function index()
     {
         $users = $this->usersRepository->getAll();
- 
+
         return view('dashboard.admins.index' , compact('users'));
     }
 
@@ -43,27 +43,36 @@ class AdminController extends Controller
 
     public function store(CreateUpdateAdminRequest $request)
     {
-        $data = $request->all();
-        $data['user_type'] = 1 ;
-        $data['is_active'] = $request->is_active == 'on' ? '1' : '0';
-    
-        if($request->has('image')){
-            $data['image'] = $request->file('image')->store('dashboard/uploads');
-        }
-        $user = $this->usersRepository->create($data);
+        try {
+            \DB::beginTransaction();
+            $data = $request->all();
+            $data['user_type'] = 1 ;
+            $data['is_active'] = $request->is_active == 'on' ? '1' : '0';
 
-        if($user && $request->role_id){
-            $role = $this->rolesRepository->findOne($request->role_id);
-           
-            if($role){
-                
-                $user->assignRole($role->name);
+            if($request->has('image')){
+                $data['image'] = $request->file('image')->store('dashboard/uploads');
             }
-            
-            $user->syncPermissions($role->permissions()->pluck('name')->toArray());
-          //  $updateRole = $this->usersRepository->update(['user_type' =>  $request->role_id], $user->id);
+            $user = $this->usersRepository->create($data);
+
+            if($user && $request->role_id){
+                $role = $this->rolesRepository->findOne($request->role_id);
+
+                if($role){
+
+                    $user->assignRole($role->name);
+                }
+
+                $user->syncPermissions($role->permissions()->pluck('name')->toArray());
+            //  $updateRole = $this->usersRepository->update(['user_type' =>  $request->role_id], $user->id);
+            }
+            \DB::commit();
+            return response()->json();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Error creating admin: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-         return response()->json();
+
     }
 
     public function show($id)
@@ -111,10 +120,10 @@ class AdminController extends Controller
             $role = $this->rolesRepository->findOne($request->role_id);
 
 
-            if($role){  
+            if($role){
                 $user->syncRoles([$role->name]);
             }
-            
+
             $user->syncPermissions($role->permissions()->pluck('name')->toArray());
          //   $updateRole = $this->usersRepository->update(['user_type' =>  $request->role_id], $user->id);
         }
@@ -124,8 +133,8 @@ class AdminController extends Controller
     }
 
     public function activationStatus($id)
-    {       
-         
+    {
+
         $admin = $this->usersRepository->findOne($id);
 
         if($admin->is_active)
@@ -150,7 +159,7 @@ class AdminController extends Controller
 
     public function deleteAll(Request $request) {
         $requestIds = json_decode($request->data);
-    
+
         foreach ($requestIds as $id) {
           $ids[] = $id->id;
         }
@@ -162,7 +171,7 @@ class AdminController extends Controller
     }
 
 
-     
+
     public function editProfile()
     {
        return view('dashboard.admins.edit-profile');
@@ -187,11 +196,11 @@ class AdminController extends Controller
 
     public function fileStorageServe($filePath)
     {
-        
+
         if(auth()->check())
         {
             $file = public_path().DIRECTORY_SEPARATOR .'storage'.DIRECTORY_SEPARATOR .str_replace('/',DIRECTORY_SEPARATOR,$filePath);
-          
+
             return response()->file($file);
         }
         return redirect(route('home'));

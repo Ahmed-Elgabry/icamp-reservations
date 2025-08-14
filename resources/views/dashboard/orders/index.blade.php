@@ -168,7 +168,7 @@
                         <!--end::Table row-->
                     </thead>
                     <!--end::Table head-->
-                    
+
                     <!--begin::Table body-->
                     <tbody class="fw-bold text-gray-600">
                         @foreach ($orders as $order)
@@ -221,18 +221,17 @@
                                 <!--end::Order Hours-->
 
                                 <!--begin::Time From-->
-                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}
-                                </td>
+                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
                                 <!--end::Time From-->
 
                                 <!--begin::Payments-->
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format($order->deposit) }} <!-- المبلغ المدفوع -->
+                                        {{ number_format($order->deposit) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
-                                    {{ number_format($order->price) }} <!-- المبلغ الإجمالي -->
+                                    {{ number_format($order->price) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}

@@ -479,7 +479,7 @@ return [
     <p>We (FunCamp) disclaim our responsibility for any violations issued by the competent authorities against you regarding, but not limited to: (disturbing others, using firecrackers, etc.), and we have the right to demand any compensation that may cause us harm as a result of those actions.</p>
     <p>We (FunCamp) disclaim any responsibility for any human or material injuries that may occur to the tenant due to his negligence, and he alone is responsible for that towards himself and towards others.</p>
     <p>Any other requests as agreed upon.</p>  ',
-    
+
     // Task Management
     'tasks' => 'Tasks',
     'create_task' => 'Create Task',
@@ -714,5 +714,4 @@ return [
 
     'violation_type_status' => 'Status',
 
->>>>>>> origin/new_features
 ];

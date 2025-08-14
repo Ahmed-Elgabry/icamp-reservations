@@ -160,12 +160,10 @@ class User extends Authenticatable
         return $this->attributes['country_code'] . $this->attributes['phone'];
     }
 
-    public function getNameAttribute()
-    {
-        return $this->attributes['first_name'] ." ". $this->attributes['last_name'];
-    }
-
-
+    // public function getNameAttribute()
+    // {
+    //     return $this->attributes['first_name'] ." ". $this->attributes['last_name'];
+    // }
 
     public function setPasswordAttribute($value)
     {

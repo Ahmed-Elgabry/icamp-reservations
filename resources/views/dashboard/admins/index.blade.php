@@ -34,14 +34,14 @@
                     <!--begin::Add customer-->
                     @can('admins.create')
                     <a href="{{ route('admins.create')}}" class="btn btn-primary">@lang('dashboard.create_title', ['page_title' => __('dashboard.admin')])</a>
-                    @endcan 
+                    @endcan
                     <!--end::Add customer-->
                     <span class="w-5px h-2px"></span>
                     @can('admins.deleteAll')
-                    <button type="button" data-route="{{route('admins.deleteAll')}}" 
+                    <button type="button" data-route="{{route('admins.deleteAll')}}"
                     class="btn btn-danger delete_all_button">
                         <i class="feather icon-trash"></i>@lang('dashboard.delete_selected')</button>
-                    @endcan 
+                    @endcan
                 </div>
                 <!--end::Card toolbar-->
             </div>
@@ -97,7 +97,7 @@
                                     <!--end::Badges-->
                                 </td>
                                 <td>{{$user->phone}}</td>
-                              
+
                                 <!--begin::Action=-->
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">@lang('dashboard.actions')
@@ -115,7 +115,7 @@
                                         <div class="menu-item px-3">
                                             <a href="{{route('admins.edit', $user->id)}}" class="menu-link px-3">@lang('dashboard.edit')</a>
                                         </div>
-                                        @endcan 
+                                        @endcan
                                         <!--end::Menu item-->
                                         @can('admins.destroy')
                                         <!--begin::Menu item-->
@@ -124,7 +124,7 @@
                                             @lang('dashboard.delete')
                                             </a>
                                         </div>
-                                        @endcan 
+                                        @endcan
                                         <!--end::Menu item-->
                                     </div>
                                     <!--end::Menu-->
@@ -145,5 +145,5 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-					
+
 @endsection
