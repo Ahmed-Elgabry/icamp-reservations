@@ -38,7 +38,7 @@
                     <div class="text-muted fs-7 mb-1">@lang('dashboard.meeting_location')</div>
                     <div class="fs-5 fw-bold">
                         <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                        {{ $meeting->location }}
+                        {{ $meeting->location->name }} ({{ $meeting->location->address }})
                     </div>
                 </div>
             </div>
@@ -90,9 +90,16 @@
                             </div>
                             @if($topic->assigned_to)
                                 <div class="card-toolbar">
+                                    @if($topic->task)
+                                        <a href="{{ route('tasks.index') }}"
+                                           class="btn ms-4 btn-sm btn-info">
+                                            <i class="fas fa-tasks me-2"></i>
+                                            @lang('dashboard.view_task')
+                                        </a>
+                                    @endif
                                     <span class="badge badge-light-info">
                                         <i class="fas fa-user-tie me-2"></i>
-                                        @lang('dashboard.assigned_to'): {{ $topic->assignee->name }}
+                                        @lang('dashboard.meeting_assigned_to'): {{ $topic->assignee->name }}
                                     </span>
                                 </div>
                             @endif
@@ -102,21 +109,6 @@
                                 <h6 class="text-muted mb-2">@lang('dashboard.discussion')</h6>
                                 <p class="fs-6">{{ $topic->discussion }}</p>
                             </div>
-
-                            <div class="mb-4">
-                                <h6 class="text-muted mb-2">@lang('dashboard.action_items')</h6>
-                                <p class="fs-6">{{ $topic->action_items }}</p>
-                            </div>
-
-                            @if($topic->task)
-                                <div class="d-flex justify-content-end">
-                                    <a href="{{ route('tasks.index') }}"
-                                       class="btn btn-sm btn-light-info">
-                                        <i class="fas fa-tasks me-2"></i>
-                                        @lang('dashboard.view_task')
-                                    </a>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 @endforeach

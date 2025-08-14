@@ -31,7 +31,7 @@
 
                 <div class="row mb-6">
                     <label class="col-lg-4 col-form-label fw-bold fs-6">
-                        @lang('dashboard.status')
+                        @lang('dashboard.directory_status')
                     </label>
                     <div class="col-lg-8">
                         <div class="form-check form-switch form-check-custom form-check-solid">

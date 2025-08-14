@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Meeting;
 use App\Models\MeetingAttendee;
+use App\Models\MeetingLocation;
 use App\Models\MeetingTopic;
 use App\Models\Task;
 use App\Models\User;
@@ -29,7 +30,8 @@ class MeetingController extends Controller
     {
         $users = User::all();
         $topics = OrderRate::pluck('review', 'id');
-        return view('dashboard.meetings.create', compact('users', 'topics'));
+        $locations = MeetingLocation::where('is_active', true)->get();
+        return view('dashboard.meetings.create', compact('users', 'topics','locations'));
     }
 
     public function store(Request $request)
@@ -38,7 +40,7 @@ class MeetingController extends Controller
             'date' => 'required|date',
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
-            'location' => 'required|string|max:255',
+            'location_id' => 'required|exists:meeting_locations,id',
             'notes' => 'nullable|string',
             'attendees' => 'required|array',
             'attendees.*' => 'required|exists:users,id',
@@ -53,7 +55,7 @@ class MeetingController extends Controller
             'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
-            'location' => $validated['location'],
+            'location_id' => $validated['location_id'],
             'notes' => $validated['notes'] ?? null,
             'created_by' => auth()->id(),
         ]);
@@ -75,14 +77,14 @@ class MeetingController extends Controller
                     'meeting_id' => $meeting->id,
                     'topic' => $topic['topic'],
                     'discussion' => $topic['discussion'],
-                    'action_items' => $topic['action_items'],
+                    'action_items' => $topic['action_items'] ?? null,
                     'assigned_to' => $topic['assigned_to'] ?? null,
                 ]);
 
                 if ($topic['assigned_to']) {
                     $task = Task::create([
                         'title' => $topic['topic'],
-                        'description' => $topic['action_items'],
+                        'description' => $topic['discussion'],
                         'assigned_to' => $topic['assigned_to'],
                         'due_date' => $meeting->date,
                         'priority' => 'medium',
@@ -110,7 +112,8 @@ class MeetingController extends Controller
     {
         $users = User::all();
         $topics = OrderRate::pluck('review', 'id');
-        return view('dashboard.meetings.create', compact('meeting', 'users', 'topics'));
+        $locations = MeetingLocation::where('is_active', true)->get();
+        return view('dashboard.meetings.create', compact('meeting', 'users', 'topics','locations'));
     }
 
     public function update(Request $request, Meeting $meeting)
@@ -119,7 +122,7 @@ class MeetingController extends Controller
             'date' => 'required|date',
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
-            'location' => 'required|string|max:255',
+            'location_id' => 'required|exists:meeting_locations,id',
             'notes' => 'nullable|string',
             'attendees' => 'required|array',
             'attendees.*' => 'required|exists:users,id',
@@ -135,7 +138,7 @@ class MeetingController extends Controller
             'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
-            'location' => $validated['location'],
+            'location_id' => $validated['location_id'],
             'notes' => $validated['notes'] ?? null,
         ]);
 
@@ -166,14 +169,14 @@ class MeetingController extends Controller
                     'meeting_id' => $meeting->id,
                     'topic' => $topic['topic'],
                     'discussion' => $topic['discussion'],
-                    'action_items' => $topic['action_items'],
+                    'action_items' => $topic['action_items'] ?? null,
                     'assigned_to' => $topic['assigned_to'] ?? null,
                 ]);
 
                 if (!empty($topic['assigned_to'])) {
                     $task = Task::create([
                         'title' => $topic['topic'],
-                        'description' => $topic['action_items'],
+                        'description' => $topic['discussion'],
                         'assigned_to' => $topic['assigned_to'],
                         'due_date' => $meeting->date,
                         'priority' => 'medium',
