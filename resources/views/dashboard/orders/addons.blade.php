@@ -26,7 +26,7 @@
                             </svg>
                         </span>
                             <!--end::Svg Icon-->
-                            <input type="text" data-kt-ecommerce-category-filter="search" class="form-control form-control-solid w-250px ps-14" placeholder="@lang('dashboard.search_title', ['page_title' => __('dashboard.orders')])" />
+                            <input type="text" data-kt-ecommerce-category-filter="search" class="form-control form-control-solid w-250px ps-14" placeholder="@lang('dashboard.search_title', ['page_title' => __('dashboard.addons')])" />
                         </div>
                         <!--end::Search-->
                     </div>
@@ -50,6 +50,8 @@
                             <th>{{ __('dashboard.name') }}</th>
                             <th>{{ __('dashboard.quantity') }}</th>
                             <th>{{ __('dashboard.price') }}</th>
+                            <th>{{ __('dashboard.payment_method') }}</th>
+                            <th>{{ __('dashboard.verified') }}</th>
                             <th>{{ __('dashboard.description') }}</th>
                             <th>{{ __('dashboard.actions') }}</th>
                         </tr>
@@ -60,6 +62,15 @@
                                 <td data-kt-ecommerce-category-filter="category_name">{{ $orderAddon->name }}</td>
                                 <td >{{ $orderAddon->pivot->count }}</td>
                                 <td>{{ $orderAddon->pivot->price }}</td>
+                                <td>{{__('dashboard.'. $orderAddon->pivot->payment_method )}}</td>
+                                <td>
+                                    {{ $orderAddon->pivot->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                                    @if($orderAddon->pivot->verified)
+                                        <a href="{{ route('order.verified' , [$orderAddon->pivot->id , 'addon']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                    @else
+                                        <a href="{{ route('order.verified' , [$orderAddon->pivot->id , 'addon']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                    @endif
+                                </td>
                                 <td>{{ $orderAddon->pivot->description }}</td>
                                 {{-- <td>
 
@@ -134,6 +145,14 @@
                                                     <label for="edit_service_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.service_price') }}</label>
                                                     <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->price }}" readonly>
                                                 </div>
+                                                <div class="mb-5 fv-row col-md-12">
+                                                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                                                    <select name="account_id" id="account_id" class="form-select" required>
+                                                        @foreach($bankAccounts as $bankAccount)
+                                                            <option @selected($orderAddon->pivot->account_id === $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                                 <div class="form-group mt-3">
                                                     <label for="edit_count_{{ $orderAddon->id }}">{{ __('dashboard.count') }}</label>
                                                     <input type="number" name="count" id="edit_count_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->count }}">
@@ -141,6 +160,14 @@
                                                 <div class="form-group mt-3">
                                                     <label for="edit_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.total_price') }}</label>
                                                     <input type="number" step="0.01" name="price" id="edit_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->price }}">
+                                                </div>
+                                                <div class="mb-5 fv-row col-md-12">
+                                                    <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
+                                                    <select name="payment_method" id="" class="form-select" required>
+                                                        @foreach(paymentMethod() as $paymentSelect)
+                                                            <option @selected($orderAddon->pivot->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                                 <div class="form-group mt-3">
                                                     <label for="edit_description_{{ $orderAddon->pivot->id }}">{{ __('dashboard.description') }}</label>
@@ -192,6 +219,22 @@
                         <div class="form-group mt-3">
                             <label for="service_price">{{ __('dashboard.service_price') }}</label>
                             <input type="number" step="0.01" name="service_price" id="service_price" class="form-control" value="0" readonly>
+                        </div>
+                        <div class="mb-5 fv-row col-md-12">
+                            <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
+                            <select name="payment_method" id="" class="form-select" required>
+                                @foreach(paymentMethod() as $paymentSelect)
+                                    <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-5 fv-row col-md-12">
+                            <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                            <select name="account_id" id="account_id" class="form-select" required>
+                                @foreach($bankAccounts as $bankAccount)
+                                    <option value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="form-group mt-3">
                             <label for="count">{{ __('dashboard.count') }}</label>

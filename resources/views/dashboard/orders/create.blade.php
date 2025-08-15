@@ -236,7 +236,6 @@
                                             </div>
                                             <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
                                         @else
-
                                                 <div class="input-group">
                                                     <input type="text"
                                                         class="form-control"

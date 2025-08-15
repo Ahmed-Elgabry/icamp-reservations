@@ -9,4 +9,9 @@ class BankAccount extends Model
 {
     use HasFactory;
     protected $guarded = [];
+
+    public function orderAddons()
+    {
+        return $this->hasMany(OrderAddon::class, 'account_id', 'id');
+    }
 }

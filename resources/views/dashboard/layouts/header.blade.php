@@ -232,7 +232,6 @@
     </div>
     <!--end::Container-->
 </div>
-</div>
 <script>
     function markNotificationAsRead(notificationId, url) {
         fetch('/notifications/' + notificationId + '/read', {

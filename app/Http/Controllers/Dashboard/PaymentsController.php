@@ -365,7 +365,6 @@ public function accountsStore(Request $request)
 
 
         $bankAccount = BankAccount::findOrFail($request->account_id);
-        // take money form bank
         $bankAccount->update([
             'balance' => $bankAccount->balance + $request->price
         ]);

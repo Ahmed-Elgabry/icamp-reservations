@@ -478,7 +478,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'orders.index',
         'title' => 'dashboard.orders',
         'type' => 'parent',
-        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll']
+        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll' , 'order.verified']
     ]);
 
     # orders store
@@ -486,6 +486,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'uses' => 'OrderController@signin',
         'as' => 'orders.signin',
         'title' => ['actions.add', 'dashboard.signin']
+    ]);
+
+    # order items Verified
+    Route::get('order/verified/{Id}/{type?}', [
+        'uses' => 'OrderController@updateVerified',
+        'as' => 'order.verified',
+        'title' => ['actions.verified', 'dashboard.signin']
     ]);
 
     # orders store

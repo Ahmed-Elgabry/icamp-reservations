@@ -221,26 +221,27 @@
                                 <!--end::Order Hours-->
 
                                 <!--begin::Time From-->
-                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
+                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}
+                                </td>
                                 <!--end::Time From-->
 
                                 <!--begin::Payments-->
+                                @php $totalPrice = ($order->price + $order->deposit + $order->insurance_amount + $order->addons->sum('price')) @endphp
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format($order->deposit) }}
+                                        {{ number_format($order->payments->sum('price')) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
-                                    {{ number_format($order->price) }}
+                                    {{ number_format($totalPrice) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
                                         @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
                                         @else
-                                            {{ number_format($order->price - $order->deposit) }}
+                                            {{ number_format($totalPrice - $order->payments->sum('price')) }}
                                         @endif
-
                                     </span>
                                 </td>
 

@@ -31,7 +31,7 @@ class ExpensesController extends Controller
 
         return Excel::download(new ExpensesExport($expenseItem), $fileName . '.xlsx');
     }
-    
+
     // دالة للتحقق من صحة التاريخ
     private function isValidDate($date)
     {
@@ -69,7 +69,12 @@ class ExpensesController extends Controller
             $query->where('created_at', '<=', $endDate);
         }
 
-        $expenses = $query->orderBy('created_at', 'desc')->paginate(100);
+        $expenses = $query->where( fn($q) =>
+            $q->where('verified', true)
+               ->orWhereNull('verified')
+        )
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
 
         return view('dashboard.expenses.index', [
             'expenses' => $expenses,
@@ -125,7 +130,7 @@ class ExpensesController extends Controller
         ]);
 
 
-        // that mean he is get form orders page 
+        // that mean he is get form orders page
         if (!$request->date) {
             return back()->withSuccess(__('dashboard.success'));
         }
@@ -166,12 +171,12 @@ class ExpensesController extends Controller
 
         $oldBankAccount = BankAccount::find($expense->account_id);
         $bankAccount = BankAccount::findOrFail($request->account_id);
-        //  return money back 
+        //  return money back
         $bankAccount->update([
             'balance' => $bankAccount->balance + $expense->price
         ]);
 
-        // take money form bank 
+        // take money form bank
         $bankAccount->update([
             'balance' => $bankAccount->balance - $request->price
         ]);
@@ -194,7 +199,7 @@ class ExpensesController extends Controller
     public function destroy($expense)
     {
         $expense = Expense::findOrFail($expense);
-        // check account to take money of 
+        // check account to take money of
         $bankAccount = BankAccount::find($expense->account_id);
         $bankAccount->update([
             'balance' => $bankAccount->balance + $expense->price
@@ -203,4 +208,6 @@ class ExpensesController extends Controller
         $expense->delete();
         return response()->json();
     }
+
+
 }

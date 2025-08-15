@@ -183,6 +183,7 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                
                                 <!--begin::Card body-->
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>

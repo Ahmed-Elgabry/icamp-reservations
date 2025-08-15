@@ -1,4 +1,4 @@
- 
+
 
  <div class="row justify-content-center">
      <div class="col-md-12 mb-4">
@@ -24,7 +24,7 @@
                 </div>
             </div>
         </div>
-        
+
   <!--begin::Card header-->
   <div class="card-header align-items-center py-5 gap-2 gap-md-5 p-0">
 
@@ -67,8 +67,8 @@
                                 <td>
                                     <div class="d-flex">
                                         <div class="ms-5">
-                                            <a href="{{ $expense->expense_item_id ? route('expense-items.show', $expense->expense_item_id) : '#'}}" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1" data-kt-ecommerce-category-filter="category_name">
-                                                {{$expense->expenseItem ? $expense->expenseItem->name : ''}}
+                                            <a href="{{ $expense->expense_item_id ? route('expense-items.show', $expense->expense_item_id) : route('orders.edit', $expense->order_id)}}" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1" data-kt-ecommerce-category-filter="category_name">
+                                                {{$expense->expenseItem ? $expense->expenseItem->name : $expense->order_id }}
                                             </a>
                                             <div class="text-muted fs-7 fw-bolder">{{$expense->notes}}</div>
                                         </div>
@@ -77,7 +77,7 @@
                                 <td>{{$expense->price}} </td>
                                 <td>{{$expense->date }} </td>
                                 <td>{{$expense->notes }} </td>
-                           
+
                                 <!--begin::Action=-->
                                 <td class="">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">@lang('dashboard.actions')
@@ -95,14 +95,14 @@
                                         <div class="menu-item px-3">
                                             <a href="{{route('expenses.edit', $expense->id)}}" class="menu-link px-3">@lang('dashboard.edit')</a>
                                         </div>
-                                        @endcan 
+                                        @endcan
                                         <!--end::Menu item-->
                                         <!--begin::Menu item-->
                                         @can('expenses.destroy')
                                         <div class="menu-item px-3">
                                             <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('expenses.destroy', $expense->id)}}" data-id="{{$expense->id}}">@lang('dashboard.delete')</a>
                                         </div>
-                                        @endcan 
+                                        @endcan
                                         <!--end::Menu item-->
                                     </div>
                                     <!--end::Menu-->

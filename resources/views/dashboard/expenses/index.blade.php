@@ -10,12 +10,7 @@
     <div id="kt_content_container" class="container-xxl">
         <!--begin::Category-->
         <div class="card card-flush">
-           
-            
-          
-               
-           
-                    <!--begin::Category-->
+        <!--begin::Category-->
          <div class="card card-flush mt-10">
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
@@ -45,17 +40,17 @@
                         <i class="fa fa-plus"></i>
                     </a>
                     <!--end::Add customer-->
-                    @endcan 
-                    
+                    @endcan
+
                 </div>
                 <!--end::Card toolbar-->
             </div>
-           
+
             <!--end::Card header-->
             <!--begin::Card body-->
             <div class="card-body pt-0">
-          
-               
+
+
             @include('dashboard.expenses.table')
 
             </div>
@@ -70,7 +65,7 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-					
+
 @endsection
 @push('css')
 <style>
@@ -83,4 +78,4 @@
     border: 1px solid #000;
     }
 </style>
-@endpush 
+@endpush

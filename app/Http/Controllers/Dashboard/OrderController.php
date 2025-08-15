@@ -25,6 +25,7 @@ use App\Models\ServiceReport;
 use App\Models\PreLogoutImage;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Models\Expense;
 use App\Repositories\IUserRepository;
 use App\Repositories\IOrderRepository;
 use Illuminate\Support\Facades\Storage;
@@ -61,19 +62,17 @@ class OrderController extends Controller
 
         $query = Order::query();
 
-        // Filter by status if it's valid and provided
         if (in_array($status, $validStatuses)) {
             $query->where('status', $status);
         }
 
-        // Filter by customer ID if provided
         if (!empty($customerId)) {
             $query->where('customer_id', $customerId);
         }
 
-        // تطبيق فلاتر السعر باستخدام scopeFilter
         $orders = $query->filter($filters)
             ->orderBy('created_at', 'desc')
+            ->with(['payments' , 'addons'])
             ->paginate(100);
 
         return view('dashboard.orders.index', compact('orders'));
@@ -362,22 +361,22 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'addon_id' => 'required|exists:addons,id',
             'count' => 'nullable|integer|min:1',
+            'account_id' => 'nullable|exists:bank_accounts,id',
             'price' => 'required|numeric',
+            'payment_method' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
-
         $order = Order::findOrFail($orderId);
-
         $order->addons()->attach($validatedData['addon_id'], [
             'count' => $validatedData['count'],
             'price' => $validatedData['price'],
+            'payment_method' => $validatedData['payment_method'] ?? null,
+            'account_id' => $validatedData['account_id'] ?? null,
             'description' => $validatedData['description'] ?? '',
         ]);
-
         $order->update([
             'price' => $order->price
         ]);
-
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -387,30 +386,18 @@ class OrderController extends Controller
             'addon_id' => 'required|exists:addons,id',
             'count' => 'required|integer|min:1',
             'price' => 'required|numeric',
+            'account_id' => 'nullable|exists:bank_accounts,id',
+            'payment_method' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
-
-        $existingAddon = DB::table('order_addon')->where('id', $pivotId)->first();
-        $order = Order::findOrFail($existingAddon->order_id);
-
-        // Calculate the total price for the existing addon
-        $oldTotalPrice = $existingAddon->price;
-        // Calculate the total price for the updated addon
-        $newTotalPrice = $validatedData['price'];
-
-        // Update the pivot table
-        DB::table('order_addon')->where('id', $pivotId)->update([
+        \DB::table('order_addon')->where('id', $pivotId)->update([
             'addon_id' => $validatedData['addon_id'],
             'count' => $validatedData['count'],
+            'account_id' => $validatedData['account_id'] ?? null,
+            'payment_method' => $validatedData['payment_method'] ?? null,
             'price' => $validatedData['price'],
             'description' => $validatedData['description'] ?? '',
         ]);
-        // dd($order);
-        // Update order price
-        // $order->update([
-        //     'price' => ($order->price - $oldTotalPrice) + $newTotalPrice
-        // ]);
-
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -439,10 +426,11 @@ class OrderController extends Controller
 
     public function addons($id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('addons')->findOrFail($id);
         $addons = Addon::all();
+        $bankAccounts = BankAccount::all();
 
-        return view('dashboard.orders.addons', compact('order', 'addons'));
+        return view('dashboard.orders.addons', compact('order', 'addons' , 'bankAccounts'));
     }
 
     public function updateReports(Request $request, $id)
@@ -694,5 +682,26 @@ class OrderController extends Controller
                 ];
             })
         ]);
+    }
+
+    public function updateVerified(int $id ,string $type )
+    {
+        try {
+            \DB::beginTransaction();
+
+            if ($type == 'addon') { $item = OrderAddon::findOrFail($id); }
+            elseif ($type == 'expense') { $item = Expense::findOrFail($id); }
+            else { return redirect()->back()->with('error', __('dashboard.invalid_type')); }
+
+            $item->verified = !$item->verified;
+            $item->save();
+
+            \DB::commit();
+            return redirect()->back()->with('success' , __('dashboard.success'));
+        } catch (\Exception $e) {
+            \DB::rollback();
+            return redirect()->back()->with('error' , $e->getMessage());
+        }
+
     }
 }

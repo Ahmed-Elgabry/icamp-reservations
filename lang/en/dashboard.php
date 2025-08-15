@@ -714,8 +714,6 @@ return [
 
     'violation_type_status' => 'Status',
 
-<<<<<<< HEAD
-=======
 
     'meeting_assigned_to' => 'Assigned To',
 
@@ -730,5 +728,4 @@ return [
     'select_location' => 'Select Location',
 //    'created_at' => 'Created At',
 //    'confirm_delete' => 'Are you sure you want to delete this location?',
->>>>>>> f4050c3f00ceadf7648ecf67050c08ded8c21e22
 ];

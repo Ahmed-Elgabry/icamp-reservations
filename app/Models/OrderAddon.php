@@ -20,4 +20,9 @@ class OrderAddon extends Model
     {
         return $this->belongsTo(Addon::class);
     }
+
+    public function account()
+    {
+        return $this->belongsTo(BankAccount::class, 'account_id');
+    }
 }

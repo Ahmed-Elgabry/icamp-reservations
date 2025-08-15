@@ -1,4 +1,4 @@
- 
+
 @section('pageTitle' , __('dashboard.expenses'))
 @extends('dashboard.layouts.app')
 @section('content')
@@ -34,7 +34,7 @@
                 </div>
                 <!--end::Card title-->
 
-                
+
                 <!--begin::Card toolbar-->
                 <div class="card-toolbar">
                     <!--begin::Add customer-->
@@ -42,7 +42,7 @@
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addNewCount">
                             @lang('dashboard.create_title', ['page_title' => __('dashboard.expenses')])
                     </button>
-                    @endcan 
+                    @endcan
                     <!--end::Add customer-->
                     <span class="w-5px h-2px"></span>
 
@@ -65,6 +65,7 @@
                         </div>
                     </th>
                     <th>{{ __('dashboard.price') }}</th>
+                    <th class="">{{ __('dashboard.verified') }}</th>
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
                     <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
@@ -89,13 +90,20 @@
                                 <!--end::Thumbnail-->
                                 <div class="ms-5">
                                     <!--begin::Title-->
-                                    <a href="#"
-                                    data-kt-ecommerce-category-filter="search"
-                                     class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1" 
-                                   >{{$payment->price}}</a>
+                                    <a href="#" data-kt-ecommerce-category-filter="search" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
+                                        {{$payment->price}}
+                                    </a>
                                     <!--end::Title-->
                                 </div>
                             </div>
+                        </td>
+                        <td>
+                            {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                            @if($payment->verified)
+                                <a href="{{ route('order.verified' , [$payment->id , 'expense']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                            @else
+                                <a href="{{ route('order.verified' , [$payment->id , 'expense']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                            @endif
                         </td>
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
@@ -121,13 +129,13 @@
                                 <div class="menu-item px-3">
                                     <a href="#" type="button" data-toggle="modal" data-target="#editCount-{{$payment->id}}" class="menu-link px-3">{{ __('actions.edit') }}</a>
                                 </div>
-                                @endcan 
+                                @endcan
                                 @can('expenses.destroy')
                                 <!--begin::Menu item-->
                                 <div class="menu-item px-3">
                                     <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('expenses.destroy', $payment->id)}}" data-id="{{$payment->id}}"> @lang('dashboard.delete')</a>
                                 </div>
-                                @endcan 
+                                @endcan
                             <!--end::Menu item-->
                             </div>
                             <!--end::Menu-->
@@ -148,14 +156,14 @@
                         </div>
                         <div class="modal-body">
                             <form action="{{ route('expenses.update',$payment->id) }}" id="editCountForm{{$payment->id}}" method="POST">
-                                @csrf 
+                                @csrf
                                 @method('PUT')
                                 <!--begin::Card body-->
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>
                                     <input type="number" name="price" id="price" value="{{   $payment->price }}"
-                                        class="form-control mb-2" required  
-                                        value="" /> 
+                                        class="form-control mb-2" required
+                                        value="" />
                                 </div>
 
                                 <div class="mb-5 fv-row col-md-12">
@@ -163,7 +171,7 @@
                                 <select name="account_id" id="account_id" class="form-control" required>
                                     <option value="">{{ __('dashboard.choose_bank_account') }}</option>
                                     @foreach($bankAccounts as $bank)
-                                        <option 
+                                        <option
                                                  {{ $payment->account_id == $bank->id ? 'selected' : ''}}
                                         value="{{ $bank->id }}">{{ $bank->name }}</option>
                                     @endforeach
@@ -203,23 +211,23 @@
       </div>
       <div class="modal-body">
         <form action="{{ route('expenses.store') }}" id="saveCountDetails" method="POST" enctype="multipart/form-data">
-            @csrf 
+            @csrf
             <!--begin::Input group-->
             <input type="hidden" value="{{ $order->id }}" name="order_id">
 
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.price') }}</label>
                 <input type="number" name="price" id="price" value="{{   old('price') }}"
-                    class="form-control mb-2" required  
-                    value="" /> 
+                    class="form-control mb-2" required
+                    value="" />
             </div>
-            
+
             <div class="mb-5 fv-row col-md-12">
                 <label for="account_id" class="required">{{ __('dashboard.bank_account') }}</label>
                 <select name="account_id" id="account_id" class="form-control" required>
                     <option value="">{{ __('dashboard.choose_bank_account') }}</option>
                     @foreach($bankAccounts as $bank)
-                        <option 
+                        <option
                                 {{ old('account_id') == $bank->id ? 'selected' : '' }}
                         value="{{ $bank->id }}">{{ $bank->name }}</option>
                     @endforeach
@@ -249,6 +257,6 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-					
+
 
 @endsection
