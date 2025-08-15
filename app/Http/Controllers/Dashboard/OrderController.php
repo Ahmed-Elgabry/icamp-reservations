@@ -26,6 +26,7 @@ use App\Models\PreLogoutImage;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
+use App\Models\OrderItem;
 use App\Repositories\IUserRepository;
 use App\Repositories\IOrderRepository;
 use Illuminate\Support\Facades\Storage;
@@ -691,6 +692,7 @@ class OrderController extends Controller
 
             if ($type == 'addon') { $item = OrderAddon::findOrFail($id); }
             elseif ($type == 'expense') { $item = Expense::findOrFail($id); }
+            elseif ($type == 'warehouse_sales') { $item = OrderItem::findOrFail($id); }
             else { return redirect()->back()->with('error', __('dashboard.invalid_type')); }
 
             $item->verified = !$item->verified;

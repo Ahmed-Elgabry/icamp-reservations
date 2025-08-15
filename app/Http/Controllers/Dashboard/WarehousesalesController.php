@@ -14,8 +14,9 @@ class WarehousesalesController extends Controller
 
         return view('dashboard.warehouse_sales.show', [
             'order' => $order,
-            'stocks' => Stock::select('id' , 'price', 'name')->get(),
+            'stocks' => Stock::select('id' , 'selling_price', 'name')->get(),
             'items' => $order->items()->with('stock')->get(),
+            'bankAccounts' => \App\Models\BankAccount::pluck('name','id'),
         ]);
     }
 
@@ -25,6 +26,8 @@ class WarehousesalesController extends Controller
             'order_id' => 'required|exists:orders,id',
             'stock_id' => 'required|exists:stocks,id',
             'quantity' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'account_id' => 'required|exists:bank_accounts,id',
             'total_price' => 'required|numeric|min:0',
             'notes' => 'nullable|string|max:255'
         ]);
@@ -51,6 +54,8 @@ class WarehousesalesController extends Controller
             'stock_id' => 'required|exists:stocks,id',
             'quantity' => 'required|numeric|min:0',
             'total_price' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'account_id' => 'required|exists:bank_accounts,id',
             'notes' => 'nullable|string|max:255'
         ]);
 

@@ -158,7 +158,10 @@ class PaymentsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Payment::with('order.customer')->where('verified', '1');
+        $query = Payment::with(['order.customer' , 'order.addons' , 'order.items' , 'order.expenses'])->where(fn ($q) =>
+            $q->where('verified', '1')
+                ->whereNot('statement', 'the_insurance')
+        );
 
         if ($request->customer_id) {
             $query->whereHas('order.customer', function ($q) use ($request) {
@@ -179,7 +182,7 @@ class PaymentsController extends Controller
         $payments = $query->get();
 
         $orders = Order::whereNot('insurance_status' , 'returned')->get();
-        $customers = Customer::all(); // Assuming you have a Customer model
+        $customers = Customer::all();
         return view('dashboard.payments.index', compact('payments', 'customers', 'orders'));
     }
 

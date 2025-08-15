@@ -145,7 +145,16 @@ class GeneralPaymentsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Payment::with('order.customer')->where('verified', '1');
+        $query = Payment::with([
+                'order.customer',
+                'order.expenses' => fn ($q) => $q->where('verified' , true),
+                'order.addons'  => fn ($q) => $q->where('verified', true),
+                'order.items'  => fn ($q) => $q->where('verified', true)
+            ])
+            ->where(fn ($q) =>
+                $q->where('verified', '1')
+                ->where('statement', 'the_insurance')
+            );
 
         if ($request->customer_id) {
             $query->whereHas('order.customer', function($q) use ($request) {
@@ -164,10 +173,12 @@ class GeneralPaymentsController extends Controller
         }
 
         $general_payments = $query->get();
+        $paymentsByOrder = $general_payments->groupBy('order_id');
 
         $orders = Order::whereNot('insurance_status' , 'returned')->get();
-        $customers = Customer::all(); // Assuming you have a Customer model
-        return view('dashboard.general_payments.index', compact('general_payments', 'customers','orders'));
+        $customers = Customer::all();
+
+        return view('dashboard.general_payments.index', compact('general_payments', 'customers','orders' , 'paymentsByOrder'));
     }
 
     public function create ()
@@ -325,13 +336,14 @@ class GeneralPaymentsController extends Controller
      */
     public function show( $order)
     {
-        $order = Order::findOrFail($order);
+        $order = Order::with('payments')->findOrFail($order);
         $bankAccounts = BankAccount::all();
 
         return view('dashboard.general_payments.show',[
             'order' => $order,
             'bankAccounts' => $bankAccounts,
-            'general_payments' => $order->general_payments
+            'general_payments' => $order->general_payments,
+            'payments' => $order->payments,
         ]);
     }
 

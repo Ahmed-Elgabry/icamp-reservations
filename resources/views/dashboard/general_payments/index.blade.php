@@ -59,108 +59,167 @@
             <div class="card-body pt-0">
                 <!--begin::Table-->
                 <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
-                    <!--begin::Table head-->
                     <thead>
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="w-10px pe-2">
-                                <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
-                                    <input class="form-check-input" id="checkedAll" type="checkbox" data-kt-check="true"
-                                        data-kt-check-target="#kt_ecommerce_category_table .form-check-input"
-                                        value="1" />
-                                </div>
-                            </th>
-                            <th>{{ __('dashboard.price') }}</th>
-                            <th class="">{{ __('dashboard.orders') }}</th>
-                            <th class="">{{ __('dashboard.statement') }}</th>
-                            <th class="">{{ __('dashboard.verified') }}</th>
-                            <th class="">{{ __('dashboard.notes') }}</th>
-                            <th class="">{{ __('dashboard.created_at') }}</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                        <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                            <th class="text-nowrap">{{ __('dashboard.orders') }}</th>
+                            <th class="text-nowrap">{{ __('dashboard.Insurance') }}</th>
+                            <th class="text-nowrap">{{ __('dashboard.addons') }}</th>
+                            <th class="text-nowrap">{{ __('dashboard.warehouse_sales') }}</th>
+                            <th class="text-nowrap">{{ __('dashboard.expenses') }}</th>
+                            <th class="text-nowrap">{{ __('dashboard.notes') }}</th>
+                            <th class="text-nowrap">{{ __('dashboard.created_at') }}</th>
+                            <th class="text-end min-w-100px">@lang('dashboard.actions')</th>
                         </tr>
                     </thead>
-                    <!--end::Table head-->
-                    <!--begin::Table body-->
-                    <tbody class="fw-bold text-gray-600">
-                        @foreach ($general_payments as $payment)
-                            <tr data-id="{{$payment->id}}">
-                                <!--begin::Checkbox-->
-                                <td>
-                                    <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                        <input class="form-check-input checkSingle" type="checkbox" value="1"
-                                            id="{{$payment->id}}" />
-                                    </div>
-                                </td>
-                                <!--begin::Category=-->
-                                <td>
-                                    <div class="d-flex">
-                                        <div class="ms-5">
-                                            <a href="#" data-kt-ecommerce-category-filter="search"
-                                                class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
-                                                {{$payment->price}} {{__('dashboard.' . $payment->payment_method)}}
-                                            </a>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <a href="{{ route('general_payments.show', $payment->order_id) }}">
-                                        {{ $payment->order_id }} @isset($order) [{{$order->customer->name }}] @endisset
+
+                    <tbody class="fw-semibold text-gray-700">
+                    @forelse ($paymentsByOrder as $orderId => $orderPayments)
+                        @php
+                            $firstPayment  = $orderPayments->first();
+                            $order         = $firstPayment->order ?? null;
+                            $customerName  = $order?->customer?->name ?? null;
+
+                            $paymentsCount = $orderPayments->count();
+                            $paymentsTotal = $orderPayments->sum('price');
+
+                            $addonsTotal = $order?->addons?->sum(fn($q) => $q->pivot->price) ?? 0;
+                            $itemsTotal  = $order?->items?->sum(fn($q) => $q->total_price) ?? 0;
+                            $expensesTotal = $order?->expenses?->sum(fn($q) => $q->price) ?? 0;
+
+                            $addonsCount   = $order?->addons?->count() ?? 0;
+                            $itemsCount    = $order?->items?->count() ?? 0;
+                            $expensesCount = $order?->expenses?->count() ?? 0;
+                        @endphp
+
+                        <tr data-id="{{ $firstPayment->id }}">
+
+                            {{-- Order Id --}}
+                            <td>
+                                @if($order)
+                                    <a href="{{ route('general_payments.show', $orderId) }}" class="text-hover-primary fw-bold">
+                                        #{{ $orderId }}
                                     </a>
-                                </td>
-                                <td>{{__('dashboard.' . $payment->statement)}}</td>
-                                <td>
-                                    {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
-                                    @if($payment->verified)
-                                        <a href="{{ route('payments.verified', $payment->id) }}"
-                                            class="btn btn-sm btn-danger">{{ __('dashboard.mark') }}
-                                            {{ __('dashboard.unverifyed') }}</a>
-                                    @else
-                                        <a href="{{ route('payments.verified', $payment->id) }}"
-                                            class="btn btn-sm btn-success">{{ __('dashboard.mark') }}
-                                            {{ __('dashboard.verified') }} <i class="fa fa-check"></i></a>
+                                    @if($customerName)
+                                        <div class="text-muted small">{{ $customerName }}</div>
                                     @endif
-                                </td>
-                                <td data-kt-ecommerce-category-filter="category_name">
-                                    {{$payment->notes}}
-                                </td>
-                                <td>
-                                    {{$payment->created_at->diffForHumans() }}
-                                </td>
-                                <!--end::Category=-->
-                                <!--begin::Action=-->
-                                <td class="text-end">
-                                    <a href="#" class="btn btn-sm btn-light btn-active-light-primary"
-                                        data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-                                        {{ __('dashboard.actions') }}
-                                        <span class="svg-icon svg-icon-5 m-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none">
-                                                <path
-                                                    d="M11.4343 12.7344L7.25 8.55005C6.83579 8.13583 6.16421 8.13584 5.75 8.55005C5.33579 8.96426 5.33579 9.63583 5.75 10.05L11.2929 15.5929C11.6834 15.9835 12.3166 15.9835 12.7071 15.5929L18.25 10.05C18.6642 9.63584 18.6642 8.96426 18.25 8.55005C17.8358 8.13584 17.1642 8.13584 16.75 8.55005L12.5657 12.7344C12.2533 13.0468 11.7467 13.0468 11.4343 12.7344Z"
-                                                    fill="currentColor" />
-                                            </svg>
-                                        </span>
-                                    </a>
-                                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
-                                        data-kt-menu="true">
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('payments.print', $payment->id) }}"
-                                                class="menu-link px-3">{{ __('dashboard.invoice') }}</a>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+
+                            {{-- Payments summary --}}
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold">{{ number_format($paymentsTotal, 2) }}</span>
+                                    <span class="badge badge-light-primary mt-1">{{ $paymentsCount }} {{ __('dashboard.Insurance') }}</span>
+                                </div>
+                            </td>
+
+                            {{-- Addons --}}
+                            <td>
+                                @if($addonsCount)
+                                    <details>
+                                        <summary class="cursor-pointer">
+                                            <span class="badge badge-light">{{ $addonsCount }}</span>
+                                            <span class="text-muted mx-1">•</span>
+                                            <span class="fw-bold">{{ __('dashboard.total') }}: {{ number_format($addonsTotal, 2) }}</span>
+                                        </summary>
+                                        <div class="mt-2">
+                                            <ul class="mb-0 ps-3 small">
+                                                @foreach($order->addons as $addon)
+                                                    <li class="mb-1">
+                                                        {{ $addon->name ?? '—' }}
+                                                        <span class="text-muted">—</span>
+                                                        {{ number_format(isset($addon->pivot?->price) ? $addon->pivot->price : ($addon->price ?? 0), 2) }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
                                         </div>
-                                        @can('payments.destroy')
-                                            <div class="menu-item px-3">
-                                                <a href="#" class="menu-link px-3"
-                                                    data-kt-ecommerce-category-filter="delete_row"
-                                                    data-url="{{route('payments.destroy', $payment->id)}}"
-                                                    data-id="{{$payment->id}}"> @lang('dashboard.delete')</a>
-                                            </div>
-                                        @endcan
-                                    </div>
-                                </td>
-                                <!--end::Action=-->
-                            </tr>
-                        @endforeach
+                                    </details>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+
+                            {{-- Items (warehouse sales) --}}
+                            <td>
+                                @if($itemsCount)
+                                    <details>
+                                        <summary class="cursor-pointer">
+                                            <span class="badge badge-light">{{ $itemsCount }}</span>
+                                            <span class="text-muted mx-1">•</span>
+                                            <span class="fw-bold">{{ __('dashboard.total') }}: {{ number_format($itemsTotal, 2) }}</span>
+                                        </summary>
+                                        <div class="mt-2">
+                                            <ul class="mb-0 ps-3 small">
+                                                @foreach($order->items as $item)
+                                                    @php
+                                                        $line = isset($item->total_price)
+                                                            ? (float)$item->total_price
+                                                            : (float)($item->price ?? 0) * (int)($item->qty ?? 1);
+                                                    @endphp
+                                                    <li class="mb-1">
+                                                        {{ $item->stock->name ?? $item->name ?? '—' }}
+                                                        <span class="text-muted">—</span>
+                                                        {{ number_format($line, 2) }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </details>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+
+                            {{-- Expenses --}}
+                            <td>
+                                @if($expensesCount)
+                                    <details>
+                                        <summary class="cursor-pointer">
+                                            <span class="badge badge-light">{{ $expensesCount }}</span>
+                                            <span class="text-muted mx-1">•</span>
+                                            <span class="fw-bold">{{ __('dashboard.total') }}: {{ number_format($expensesTotal, 2) }}</span>
+                                        </summary>
+                                        <div class="mt-2">
+                                            <ul class="mb-0 ps-3 small">
+                                                @foreach($order->expenses as $ex)
+                                                    <li class="mb-1">
+                                                        {{ $ex->description ?? '—' }}
+                                                        <span class="text-muted">—</span>
+                                                        {{ number_format($ex->amount ?? $ex->price ?? 0, 2) }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </details>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+
+                            {{-- Notes (latest payment) --}}
+                            <td class="text-muted">{{ $firstPayment->notes }}</td>
+
+                            {{-- Latest payment time --}}
+                            <td class="text-muted">{{ optional($orderPayments->max('created_at'))->diffForHumans() }}</td>
+
+                            {{-- Actions (using latest payment id) --}}
+                            <td class="text-end">
+                                @can('payments.destroy')
+                                    <a href="#" class="btn btn-sm btn-light btn-danger"
+                                    data-kt-ecommerce-category-filter="delete_row"
+                                    data-url="{{ route('payments.destroy', $firstPayment->id) }}"
+                                    data-id="{{ $firstPayment->id }}">
+                                        @lang('dashboard.delete')
+                                    </a>
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="10" class="text-center text-muted py-10">— {{ __('dashboard.no_results') }} —</td></tr>
+                    @endforelse
                     </tbody>
-                    <!--end::Table body-->
                 </table>
                 <!--end::Table-->
             </div>

@@ -710,11 +710,14 @@ return [
     'no_description' => 'No description',
     'inactive' => 'Inactive',
     'select_employee' => 'Select Employee',
+    'Insurance' => 'Insurance',
     'no_notes' => 'No notes',
 
     'violation_type_status' => 'Status',
 
-
+    'rows' => 'Rows',
+    'total' => 'Total',
+    
     'meeting_assigned_to' => 'Assigned To',
 
     // Meeting Locations
