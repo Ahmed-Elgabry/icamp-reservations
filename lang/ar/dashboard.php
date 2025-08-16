@@ -569,8 +569,8 @@ return [
     'select_customer' => 'اختر العميل',
     'select_order' => 'اختر رقم الحجز',
     'view_notices' => "عرض الملاحظات",
-    'notice_created_successfully' => 'تم إنشاء الإشعار بنجاح',
-    'notice_updated_successfully' => 'تم تعديل الإشعار بنجاح',
+    'notice_created_successfully' => 'تم إنشاء الملاحظه بنجاح',
+    'notice_updated_successfully' => 'تم تعديل الملاحظه بنجاح',
     'customer_has_notices' => 'العميل لديه ملاحظات!',
     'notice_label' => 'ملاحظة',
     'created_by_at' => 'تمت الإضافة بواسطة :name في :date',
@@ -761,4 +761,14 @@ return [
     'select_location' => 'اختر الموقع',
 //    'created_at' => 'تاريخ الإنشاء',
 //    'confirm_delete' => 'هل أنت متأكد من رغبتك في حذف هذا الموقع؟',
+
+    // Notice Types Section
+    'notice_types' => 'أنواع الملاحظات',
+    'add_notice_type' => 'إضافة نوع ملاحظة',
+    'edit_notice_type' => 'تعديل نوع ملاحظة',
+    'notice_type_created_successfully' => 'تم إنشاء نوع الملاحظة بنجاح.',
+    'notice_type_updated_successfully' => 'تم تحديث نوع الملاحظة بنجاح.',
+    'notice_type_deleted_successfully' => 'تم حذف نوع الملاحظة بنجاح.',
+    'notice_type' => 'نوع الملاحظة',
+    'select_notice_type' => 'اختر نوع الملاحظة',
 ];

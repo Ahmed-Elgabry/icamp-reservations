@@ -99,7 +99,7 @@
                             <div class="col-md-12">
                                 <label class="form-label">@lang('dashboard.photo_attachment')</label>
                                 <div id="photoAttachmentContainer"></div>
-                                <input type="file" name="photo_attachment" accept="image/*" capture="camera" class="form-control">
+                                <input type="file" name="photo_attachment" accept="image/*" class="form-control" id="photoInput">
                                 <button type="button" class="btn btn-secondary mt-2" id="openCamera">
                                     @lang('dashboard.capture_photo')
                                 </button>
@@ -389,7 +389,27 @@
 
             // Camera capture functionality
             document.getElementById('openCamera').addEventListener('click', function() {
-                document.querySelector('input[name="photo_attachment"]').click();
+                // This will trigger the full media selection dialog on mobile devices
+                document.getElementById('photoInput').click();
+            });
+
+            // Handle file input changes to show previews
+            $('#photoInput').change(function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        $('#photoAttachmentContainer').html(`
+                            <div class="attachment-preview mb-2">
+                                <img src="${event.target.result}" class="img-thumbnail" style="max-width: 200px;">
+                                <button type="button" class="btn btn-sm btn-danger ms-2" onclick="document.getElementById('delete_photo').value = '1'; this.parentElement.remove(); $('#photoInput').val('');">
+                                    @lang('dashboard.delete')
+                                </button>
+                            </div>
+                        `);
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
 
             // Video recording functionality

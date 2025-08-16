@@ -13,7 +13,8 @@ class Notice extends Model
         'customer_id',
         'order_id',
         'notice',
-        'created_by'
+        'created_by',
+        'notice_type_id'
     ];
 
     public function customer()
@@ -29,5 +30,10 @@ class Notice extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function type()
+    {
+        return $this->belongsTo(NoticeType::class, 'notice_type_id');
     }
 }

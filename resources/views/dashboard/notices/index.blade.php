@@ -24,57 +24,61 @@
                 </div>
                 <div class="card-body pt-0">
 {{--                    @include('dashboard.partials.alerts')--}}
-                    <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_notices_table">
-                        <thead>
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th>@lang('dashboard.customer')</th>
-                            <th>@lang('dashboard.notice_order')</th>
-                            <th>@lang('dashboard.notice')</th>
-                            <th>@lang('dashboard.notice_created_by')</th>
-                            <th>@lang('dashboard.date')</th>
-                            <th class="text-end">@lang('dashboard.actions')</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($notices as $notice)
-                            <tr>
-                                <td>{{ $notice->customer->name }}</td>
-                                <td>
-                                    @if($notice->order)
-                                        <a href="{{ route('orders.edit', $notice->order_id) }}">#{{ $notice->order_id }}</a>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td>{{ Str::limit($notice->notice, 70) }}</td>
-                                <td>{{ $notice->creator->name }}</td>
-                                <td>{{ $notice->created_at->format('Y-m-d H:i') }}</td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-light btn-show-notice"
-                                            data-notice-id="{{ $notice->id }}"
-                                            title="@lang('dashboard.show')">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-{{--                                    @can('notices.edit')--}}
+                    <div class="table-responsive">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_notices_table">
+                            <thead>
+                            <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
+                                <th>@lang('dashboard.customer')</th>
+                                <th>@lang('dashboard.notice_order')</th>
+                                <th>@lang('dashboard.notice_type')</th>
+                                <th>@lang('dashboard.notice')</th>
+                                <th>@lang('dashboard.notice_created_by')</th>
+                                <th>@lang('dashboard.date')</th>
+                                <th class="text-end">@lang('dashboard.actions')</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($notices as $notice)
+                                <tr>
+                                    <td>{{ $notice->customer->name }}</td>
+                                    <td>
+                                        @if($notice->order)
+                                            <a href="{{ route('orders.edit', $notice->order_id) }}">#{{ $notice->order_id }}</a>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>{{  $notice->type ? $notice->type->name : '-'  }}</td>
+                                    <td>{{ Str::limit($notice->notice, 70) }}</td>
+                                    <td>{{ $notice->creator->name }}</td>
+                                    <td>{{ $notice->created_at->format('Y-m-d H:i') }}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-light btn-show-notice"
+                                                data-notice-id="{{ $notice->id }}"
+                                                title="@lang('dashboard.show')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {{--                                    @can('notices.edit')--}}
                                         <button class="btn btn-sm btn-light btn-edit-notice"
                                                 data-notice-id="{{ $notice->id }}"
                                                 data-mode="edit"
                                                 title="@lang('dashboard.edit')">
                                             <i class="fas fa-edit"></i>
                                         </button>
-{{--                                    @endcan--}}
-{{--                                    @can('notices.destroy')--}}
+                                        {{--                                    @endcan--}}
+                                        {{--                                    @can('notices.destroy')--}}
                                         <button class="btn btn-sm btn-danger btn-delete-notice"
                                                 data-notice-id="{{ $notice->id }}"
                                                 title="@lang('dashboard.delete')">
                                             <i class="fas fa-trash"></i>
                                         </button>
-{{--                                    @endcan--}}
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
+                                        {{--                                    @endcan--}}
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                     {{ $notices->links() }}
                 </div>
             </div>

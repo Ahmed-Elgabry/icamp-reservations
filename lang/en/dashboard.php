@@ -717,7 +717,7 @@ return [
 
     'rows' => 'Rows',
     'total' => 'Total',
-    
+
     'meeting_assigned_to' => 'Assigned To',
 
     // Meeting Locations
@@ -731,4 +731,14 @@ return [
     'select_location' => 'Select Location',
 //    'created_at' => 'Created At',
 //    'confirm_delete' => 'Are you sure you want to delete this location?',
+
+    // Notice Types Section
+    'notice_types' => 'Note Types',
+    'add_notice_type' => 'Add Note Type',
+    'edit_notice_type' => 'Edit Note Type',
+    'notice_type_created_successfully' => 'Notice type created successfully.',
+    'notice_type_updated_successfully' => 'Notice type updated successfully.',
+    'notice_type_deleted_successfully' => 'Notice type deleted successfully.',
+    'notice_type' => 'Notice Type',
+    'select_notice_type' => 'Select Notice Type',
 ];
