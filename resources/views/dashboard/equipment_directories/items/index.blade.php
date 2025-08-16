@@ -26,103 +26,105 @@
         </div>
 
         <div class="card-body pt-0">
-            <table class="table align-middle table-row-dashed fs-6 gy-5">
-                <thead>
-                <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                    <th>#</th>
-                    <th>@lang('dashboard.item_type')</th>
-                    <th>@lang('dashboard.item_name')</th>
-                    <th>@lang('dashboard.location')</th>
-                    <th>@lang('dashboard.quantity')</th>
-                    <th>@lang('dashboard.notes')</th>
-                    <th>@lang('dashboard.creator') / @lang('dashboard.date')</th>
-                    <th>@lang('dashboard.media')</th>
-                    <th>@lang('dashboard.directory_status')</th>
-                    <th>@lang('dashboard.actions')</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($items as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->type }}</td>
-                        <td>{{ $item->name }}</td>
-                        <td>{{ $item->location }}</td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ Str::limit($item->notes, 30) }}</td>
-                        <td>
-                            {{ $item->creator->name }}<br>
-                            {{ $item->created_at->format('Y-m-d h:i A') }}
-                        </td>
-                        <td>
-                            @if($item->media->count() > 0)
-                                <button class="btn btn-sm btn-icon btn-light-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#mediaModal{{ $item->id }}">
-                                    <i class="fas fa-images"></i> ({{ $item->media->count() }})
-                                </button>
-                            @else
-                                <span class="text-muted">@lang('dashboard.no_media')</span>
-                            @endif
-                        </td>
-                        <td>
+            <div class="table-responsive">
+                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                    <thead>
+                    <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
+                        <th>#</th>
+                        <th class="min-w-100px">@lang('dashboard.item_type')</th>
+                        <th class="min-w-100px">@lang('dashboard.item_name')</th>
+                        <th class="min-w-100px">@lang('dashboard.location')</th>
+                        <th class="min-w-100px">@lang('dashboard.quantity')</th>
+                        <th class="min-w-100px">@lang('dashboard.notes')</th>
+                        <th class="min-w-100px">@lang('dashboard.creator') / @lang('dashboard.date')</th>
+                        <th class="min-w-100px">@lang('dashboard.media')</th>
+                        <th class="min-w-100px">@lang('dashboard.directory_status')</th>
+                        <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($items as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->type }}</td>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ $item->location }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>{{ Str::limit($item->notes, 30) }}</td>
+                            <td>
+                                {{ $item->creator->name }}<br>
+                                {{ $item->created_at->format('Y-m-d h:i A') }}
+                            </td>
+                            <td>
+                                @if($item->media->count() > 0)
+                                    <button class="btn btn-sm btn-icon btn-light-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#mediaModal{{ $item->id }}">
+                                        <i class="fas fa-images"></i> ({{ $item->media->count() }})
+                                    </button>
+                                @else
+                                    <span class="text-muted">@lang('dashboard.no_media')</span>
+                                @endif
+                            </td>
+                            <td>
                             <span class="badge badge-{{ $item->is_active ? 'success' : 'danger' }}">
                                 {{ $item->is_active ? __('dashboard.active') : __('dashboard.inactive') }}
                             </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('equipment-directories.items.edit', [$equipmentDirectory,$item]) }}"
-                               class="btn btn-sm btn-primary" title="@lang('dashboard.edit')">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('equipment-directories.items.destroy',  [$equipmentDirectory,$item]) }}"
-                                  method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                        title="@lang('dashboard.delete')"
-                                        onclick="return confirm('@lang('dashboard.confirm_delete')')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
+                            </td>
+                            <td>
+                                <a href="{{ route('equipment-directories.items.edit', [$equipmentDirectory,$item]) }}"
+                                   class="btn btn-sm btn-primary" title="@lang('dashboard.edit')">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ route('equipment-directories.items.destroy',  [$equipmentDirectory,$item]) }}"
+                                      method="POST" class="d-inline">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            title="@lang('dashboard.delete')"
+                                            onclick="return confirm('@lang('dashboard.confirm_delete')')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
 
-                    <!-- Media Modal -->
-                    <div class="modal fade" id="mediaModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">{{ $item->name }} - @lang('dashboard.media')</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="row">
-                                        @foreach($item->media as $media)
-                                            <div class="col-md-4 mb-3">
-                                                @if($media->file_type === 'image')
-                                                    <img src="{{ $media->file_url }}" class="img-fluid rounded" alt="">
-                                                @else
-                                                    <video controls class="w-100">
-                                                        <source src="{{ $media->file_url }}" type="video/mp4">
-                                                    </video>
-                                                @endif
-                                                <form action="{{ route('equipment-directories.media.destroy', $media) }}"
-                                                      method="POST" class="mt-2 text-center">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-trash"></i> @lang('dashboard.delete')
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @endforeach
+                        <!-- Media Modal -->
+                        <div class="modal fade" id="mediaModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ $item->name }} - @lang('dashboard.media')</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            @foreach($item->media as $media)
+                                                <div class="col-md-4 mb-3">
+                                                    @if($media->file_type === 'image')
+                                                        <img src="{{ $media->file_url }}" class="img-fluid rounded" alt="">
+                                                    @else
+                                                        <video controls class="w-100">
+                                                            <source src="{{ $media->file_url }}" type="video/mp4">
+                                                        </video>
+                                                    @endif
+                                                    <form action="{{ route('equipment-directories.media.destroy', $media) }}"
+                                                          method="POST" class="mt-2 text-center">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="fas fa-trash"></i> @lang('dashboard.delete')
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
-                </tbody>
-            </table>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 @endsection

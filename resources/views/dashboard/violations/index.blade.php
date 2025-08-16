@@ -59,7 +59,7 @@
             </div>
 
             <table class="table align-middle table-row-dashed fs-6 gy-5">
-                <thead>
+                <thead class="text-gray-400 fw-bolder">
                 <tr>
                     <th>@lang('dashboard.employee')</th>
                     <th>@lang('dashboard.violation_type')</th>
