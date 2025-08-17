@@ -658,7 +658,7 @@
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                            <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.tasks')])</span>
+                            <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.tasks')])</span>
                         </a>
                     </div>
                     <!--end::Menu item-->
@@ -934,7 +934,7 @@
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                            <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.violation')])</span>
+                            <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.violation')])</span>
                         </a>
                     </div>
                     <!--end::Menu item-->

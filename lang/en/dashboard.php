@@ -744,4 +744,5 @@ return [
     'notice_type_deleted_successfully' => 'Notice type deleted successfully.',
     'notice_type' => 'Notice Type',
     'select_notice_type' => 'Select Notice Type',
+    'task_status' => 'Task Status',
 ];
