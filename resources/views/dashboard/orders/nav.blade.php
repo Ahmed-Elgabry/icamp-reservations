@@ -28,6 +28,23 @@
                     </a>
                 </li>
             @endcan
+            
+            <!-- روابط الدفع -->
+            <li class="nav-item">
+                <a href="{{ route('payment-links.create') }}?order_id={{ $order->id }}"
+                class="nav-link text-active-primary pb-4 {{ isActiveRoute('payment-links.*') }}">
+                 {{ __('dashboard.payment-links') }} <span class="badge badge-success">+</span>
+                </a>
+            </li>
+            
+            <!-- عرض روابط الدفع المرتبطة بالطلب -->
+            <li class="nav-item">
+                <a href="{{ route('payment-links.index') }}?order_id={{ $order->id }}"
+                class="nav-link text-active-primary pb-4">
+                 {{ __('dashboard.view_payment_links') }} <span class="badge badge-info">{{ $order->paymentLinks->count() ?? 0 }}</span>
+                </a>
+            </li>
+            
             <li class="nav-item">
                     <a href="{{ route('warehouse_sales.show',$order->id) }}"
                     class="nav-link text-active-primary pb-4 {{ isActiveRoute('warehouse_sales.show') }}">
@@ -48,7 +65,7 @@
                     class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.insurance') }}">
                      {{ __('dashboard.Insurance forfeiture refund') }}
                     </a>
-                </li>
+                </li> 
             @endcan
             @can('orders.reports')
                 <li class="nav-item">
