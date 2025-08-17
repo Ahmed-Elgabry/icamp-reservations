@@ -573,7 +573,10 @@ class OrderController extends Controller
             'voice_note' => 'nullable|file',
             'video_note' => 'nullable|file', // تأكد من إضافة هذا السطر
             'delete_voice_note' => 'nullable|boolean',
-            'delete_video_note' => 'nullable|boolean', // Validate deletion flag for video
+            'delete_video_note' => 'nullable|boolean',
+            'voice_note_logout' => 'nullable|file',
+            'video_note_logout' => 'nullable|file',
+
         ]);
 
         $order = Order::findOrFail($orderId);
@@ -583,13 +586,27 @@ class OrderController extends Controller
             $order->voice_note = null;
         } elseif ($request->hasFile('voice_note')) {
             $order->voice_note = $request->file('voice_note')->store('voice_notes');
+        } elseif ($request->hasFile('voice_note_logout')) {
+            $order->voice_note_logout = $request->file('voice_note_logout')->store('voice_notes');
+        } elseif ($request->delete_voice_note_logout) {
+            if ($order->voice_note_logout) {
+                Storage::disk('public')->delete($order->voice_note_logout);
+            }
+            $order->voice_note_logout = null;
         }
 
         // معالجة الفيديو
         if ($request->delete_video_note) {
             $order->video_note = null; // Clear the video note
         } elseif ($request->hasFile('video_note')) {
-            $order->video_note = $request->file('video_note')->store('video_notes'); // Store the video file
+            $order->video_note = $request->file('video_note')->store('video_notes');
+        } elseif ($request->hasFile('video_note_logout')) {
+            $order->video_note_logout = $request->file('video_note_logout')->store('video_notes');
+        } elseif ($request->delete_video_note_logout) {
+            if ($order->video_note_logout) {
+                Storage::disk('public')->delete($order->video_note_logout);
+            }
+            $order->video_note_logout = null;
         }
 
         // تحديث تفاصيل الطلب الأخرى

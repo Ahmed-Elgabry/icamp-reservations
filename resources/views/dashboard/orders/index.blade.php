@@ -145,13 +145,6 @@
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                             <th class="">@lang('dashboard.sequence')</th>
                             <th class="">@lang('dashboard.reservation_number')</th>
-                            <th class="w-10px pe-2">
-                                <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
-                                    <input class="form-check-input" id="checkedAll" type="checkbox" data-kt-check="true"
-                                        data-kt-check-target="#kt_ecommerce_category_table .form-check-input"
-                                        value="1" />
-                                </div>
-                            </th>
                             <th class="">@lang('dashboard.date')</th>
                             <th class="">@lang('dashboard.service')</th>
                             <th class="">@lang('dashboard.customer')</th>
@@ -176,14 +169,6 @@
                             <tr data-id="{{$order->id}}">
                                 <td>{{ $orders->firstItem() + $loop->index }}</td>
                                 <td> <span class="badge bg-primary">{{ $order->id }}</span></td>
-                                <!--begin::Checkbox-->
-                                <td>
-                                    <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                        <input class="form-check-input checkSingle" type="checkbox" value="1"
-                                            id="{{$order->id}}" />
-                                    </div>
-                                </td>
-                                <!--end::Checkbox-->
 
                                 <!--begin::Order Date-->
                                 <td>
@@ -251,11 +236,15 @@
                                 <td>{{ __('dashboard.' . $order->status) }}</td>
                                 <!--end::Order Status-->
 
-                                @if ($order->insurance_status)
-                                    <td><span class="badge bg-danger text-white">{{ __('dashboard.' . $order->insurance_status) }}</span></td>
-                                @else
-                                    <td><span class="badge bg-warning text-white">{{ __('dashboard.no_result') }}</span></td>
-                                @endif
+                                <td>
+                                    <span @class(['badge text-white' , 'bg-success' => $order->insurance_status == 'returned' , 'bg-danger' => $order->insurance_status == null , 'bg-secondary' => $order->insurance_status == 'confiscated_full' , 'bg-primary' => $order->insurance_status == 'confiscated_partial' ])>
+                                        @if ($order->insurance_status)
+                                            {{ __('dashboard.' . $order->insurance_status) }}
+                                        @else
+                                            {{ __('dashboard.no_result') }}
+                                        @endif
+                                    </span>
+                                </td>
                                 <!--begin::Order Status-->
 
                                 <!--end::Order Status-->

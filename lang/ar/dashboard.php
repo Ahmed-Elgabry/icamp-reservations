@@ -186,7 +186,7 @@ return [
     'review_placeholder' => 'اكتب تقييمك هنا...',
     'send_review' => 'أرسل تقييمك',
     'no orders' => 'لايوجد طلبات',
-    'no_result' => 'لا توجد نتائج',
+    'no_result' => 'لم يتم الرد التأمين',
     'time_of_receipt' => 'وقت التسليم',
     'image_before_receiving' => 'صورة قبل التسليم',
     'pending_and_Initial_reservation_desc' => 'معلق - حجز مبدئي',
