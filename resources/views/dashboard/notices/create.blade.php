@@ -26,6 +26,18 @@
                         </div>
                     </div>
 
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">@lang('dashboard.notice_type')</label>
+                            <select name="notice_type_id" class="form-select">
+                                <option value="">@lang('dashboard.select_notice_type')</option>
+                                @foreach($noticeTypes as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">@lang('dashboard.notice') *</label>
                         <textarea name="notice" class="form-control" rows="5" required

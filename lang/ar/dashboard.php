@@ -293,7 +293,7 @@ return [
     'status_title' => 'حالة :page_title',
     'status_desc' => 'قم يتحديد حالة :page_title',
     'show_title' => 'عرض :page_title',
-    'create_title' => 'إضافة :page_title',
+    'create_title' => 'إنشاء :page_title',
     'update_title' => 'تعديل بيانات :page_title',
     'create_title_page' => 'عرض صفحة اضافة :page_title',
     'update_title_page' => 'عرض صفحة تعديل :page_title',
@@ -569,8 +569,8 @@ return [
     'select_customer' => 'اختر العميل',
     'select_order' => 'اختر رقم الحجز',
     'view_notices' => "عرض الملاحظات",
-    'notice_created_successfully' => 'تم إنشاء الإشعار بنجاح',
-    'notice_updated_successfully' => 'تم تعديل الإشعار بنجاح',
+    'notice_created_successfully' => 'تم إنشاء الملاحظه بنجاح',
+    'notice_updated_successfully' => 'تم تعديل الملاحظه بنجاح',
     'customer_has_notices' => 'العميل لديه ملاحظات!',
     'notice_label' => 'ملاحظة',
     'created_by_at' => 'تمت الإضافة بواسطة :name في :date',
@@ -615,7 +615,7 @@ return [
     'report_submitted' => 'تم إرسال التقرير بنجاح',
 
     // PDF Export
-    'export_pdf' => 'تصدير PDF',
+    'export_pdf' => 'PDF',
     'daily_report' => 'تقرير يومي',
     'prepared_by' => 'أعد بواسطة',
 
@@ -641,7 +641,7 @@ return [
     'upload_images_or_videos' => 'يمكنك تحميل الصور أو مقاطع الفيديو',
     'manage_items' => 'إدارة الأصناف',
     'confirm_delete' => 'هل أنت متأكد من رغبتك في الحذف؟',
-    'back_to_directories' => 'العودة إلى المجلدات',
+    'back_to_directories' => 'العودة للمجلدات',
     'add_item_to_directory' => 'إضافة صنف إلى المجلد',
     'inactive' => 'غير فعال',
     'search_directories' => 'بحث في المجلدات',
@@ -670,7 +670,7 @@ return [
     'error' => 'خطأ',
     'info' => 'معلومة',
 
-    'camp_reports' => 'تقارير المخيمات',
+    'camp_reports' => 'تقارير حالة المخيمات',
     'camp_report' => 'تقرير',
     'create_camp_report' => 'إنشاء تقرير مخيم',
     'edit_camp_report' => 'تعديل تقرير مخيم',
@@ -761,4 +761,14 @@ return [
     'select_location' => 'اختر الموقع',
 //    'created_at' => 'تاريخ الإنشاء',
 //    'confirm_delete' => 'هل أنت متأكد من رغبتك في حذف هذا الموقع؟',
+
+    // Notice Types Section
+    'notice_types' => 'أنواع الملاحظات',
+    'add_notice_type' => 'إضافة نوع ملاحظة',
+    'edit_notice_type' => 'تعديل نوع ملاحظة',
+    'notice_type_created_successfully' => 'تم إنشاء نوع الملاحظة بنجاح.',
+    'notice_type_updated_successfully' => 'تم تحديث نوع الملاحظة بنجاح.',
+    'notice_type_deleted_successfully' => 'تم حذف نوع الملاحظة بنجاح.',
+    'notice_type' => 'نوع الملاحظة',
+    'select_notice_type' => 'اختر نوع الملاحظة',
 ];

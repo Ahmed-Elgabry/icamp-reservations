@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Notice;
+use App\Models\NoticeType;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class NoticeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Notice::with(['customer', 'order', 'creator'])
+        $query = Notice::with(['customer', 'order', 'creator', 'type'])
             ->latest();
 
         if ($request->has('customer_id')) {
@@ -21,8 +22,9 @@ class NoticeController extends Controller
 
         $notices = $query->paginate(100);
         $customers = Customer::select('id', 'name')->get();
+        $noticeTypes = NoticeType::where('is_active', true)->get();
 
-        return view('dashboard.notices.index', compact('notices', 'customers'));
+        return view('dashboard.notices.index', compact('notices', 'customers', 'noticeTypes'));
     }
 
     public function getCustomerOrders($customer_id)
@@ -37,6 +39,7 @@ class NoticeController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'order_id' => 'nullable|exists:orders,id',
             'notice' => 'required|string|max:1000',
+            'notice_type_id' => 'nullable|exists:notice_types,id',
         ]);
 
         Notice::create($validated + ['created_by' => auth()->id()]);
@@ -58,7 +61,8 @@ class NoticeController extends Controller
             'notice' => [
                 'customer_id' => $notice->customer_id,
                 'order_id' => $notice->order_id,
-                'notice' => $notice->notice
+                'notice' => $notice->notice,
+                'notice_type_id' => $notice->notice_type_id
             ],
             'orders' => $orders
         ]);
@@ -70,6 +74,7 @@ class NoticeController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'order_id' => 'nullable|exists:orders,id',
             'notice' => 'required|string|max:1000',
+            'notice_type_id' => 'nullable|exists:notice_types,id',
         ]);
 
         $notice->update($validated);

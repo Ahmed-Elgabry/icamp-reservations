@@ -15,6 +15,13 @@
     </div>
 </div>
 
+<div class="row mb-3">
+    <div class="col-md-6">
+        <strong>@lang('dashboard.notice_type'):</strong>
+        <p>{{ $notice->type ? $notice->type->name : '-' }}</p>
+    </div>
+</div>
+
 <div class="mb-3">
     <strong>@lang('dashboard.notice'):</strong>
     <p class="p-3 bg-light rounded">{{ $notice->notice }}</p>

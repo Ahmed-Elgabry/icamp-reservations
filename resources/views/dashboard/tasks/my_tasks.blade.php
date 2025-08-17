@@ -11,7 +11,8 @@
                     </div>
                 </div>
                 <div class="card-body pt-0">
-                    <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_employee_tasks_table">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_employee_tasks_table">
                         <thead>
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                             <th>@lang('dashboard.title')</th>
@@ -28,8 +29,8 @@
                                 <td>{{ $task->creator->name }}</td>
                                 <td>{{ $task->due_date->format('Y-m-d') }}</td>
                                 <td>
-                                <span class="badge badge-light-primary">
-                                    {{ $task->status }}
+                                <span class="badge badge-light-{{ $task->status == 'completed' ? 'success' : ($task->status == 'failed' ? 'danger' : ($task->status == 'in_progress' ? 'info' : 'warning')) }}">
+                                    {{ str_replace('_', ' ', ucfirst( __('dashboard.' . $task->status) )) }}
                                 </span>
                                 </td>
                                 <td>
@@ -43,6 +44,7 @@
                         @endforeach
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,12 +61,12 @@
                 <div class="modal-body">
                     <div class="row mb-5">
                         <div class="col-md-6">
-                            <p><strong>@lang('dashboard.description'):</strong> <span id="taskDescription"></span></p>
-                            <p><strong>@lang('dashboard.due_date'):</strong> <span id="taskDueDate"></span></p>
+                            <p><strong>@lang('dashboard.description'):</strong> <p id="taskDescription"></p></p>
+                            <p><strong>@lang('dashboard.due_date'):</strong> <p id="taskDueDate"></p></p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>@lang('dashboard.priority'):</strong> <span id="taskPriority"></span></p>
-                            <p><strong>@lang('dashboard.created_at'):</strong> <span id="taskCreatedAt"></span></p>
+                            <p><strong>@lang('dashboard.priority'):</strong> <p id="taskPriority"></p> </p>
+                            <p><strong>@lang('dashboard.created_at'):</strong> <p id="taskCreatedAt"></p> </p>
                         </div>
                     </div>
 
@@ -97,7 +99,7 @@
                             <div class="col-md-12">
                                 <label class="form-label">@lang('dashboard.photo_attachment')</label>
                                 <div id="photoAttachmentContainer"></div>
-                                <input type="file" name="photo_attachment" accept="image/*" capture="camera" class="form-control">
+                                <input type="file" name="photo_attachment" accept="image/*" class="form-control" id="photoInput">
                                 <button type="button" class="btn btn-secondary mt-2" id="openCamera">
                                     @lang('dashboard.capture_photo')
                                 </button>
@@ -159,7 +161,7 @@
             $('.view-task').click(function() {
                 const task = $(this).data('task');
                 const priorityColors = {
-                    low: 'success',
+                    low: 'primary',
                     medium: 'warning',
                     high: 'danger'
                 };
@@ -193,9 +195,14 @@
                 $('#taskTitle').text(task.title);
                 $('#taskDescription').text(task.description || 'N/A');
                 $('#taskDueDate').text(formatDate(task.due_date));
+                const priorityTranslations = {
+                    'low': '@lang('dashboard.low')',
+                    'medium': '@lang('dashboard.medium')',
+                    'high': '@lang('dashboard.high')'
+                };
                 $('#taskPriority').html(`
                     <span class="badge bg-${priorityColors[task.priority] || 'secondary'}">
-                        ${task.priority.toUpperCase()}
+                        ${priorityTranslations[task.priority] || task.priority}
                     </span>
                 `);
                 $('#taskCreatedAt').text(formatDate(task.created_at));
@@ -382,7 +389,27 @@
 
             // Camera capture functionality
             document.getElementById('openCamera').addEventListener('click', function() {
-                document.querySelector('input[name="photo_attachment"]').click();
+                // This will trigger the full media selection dialog on mobile devices
+                document.getElementById('photoInput').click();
+            });
+
+            // Handle file input changes to show previews
+            $('#photoInput').change(function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        $('#photoAttachmentContainer').html(`
+                            <div class="attachment-preview mb-2">
+                                <img src="${event.target.result}" class="img-thumbnail" style="max-width: 200px;">
+                                <button type="button" class="btn btn-sm btn-danger ms-2" onclick="document.getElementById('delete_photo').value = '1'; this.parentElement.remove(); $('#photoInput').val('');">
+                                    @lang('dashboard.delete')
+                                </button>
+                            </div>
+                        `);
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
 
             // Video recording functionality
@@ -398,7 +425,9 @@
             recordVideoButton.addEventListener('click', async function() {
                 try {
                     videoStream = await navigator.mediaDevices.getUserMedia({
-                        video: true,
+                        video: {
+                            facingMode: { ideal: 'environment' }
+                        },
                         audio: true
                     });
 
