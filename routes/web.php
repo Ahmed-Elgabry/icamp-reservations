@@ -848,6 +848,35 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.add', 'dashboard.payment-links']
     ]);
 
+    # payment-links test-connection
+    Route::post('payment-links/test-connection', [
+        'uses' => 'PaymentLinkController@testConnection',
+        'as' => 'payment-links.test-connection',
+        'title' => ['actions.test', 'dashboard.payment-links']
+    ]);
+
+    # payment-links test-connection debug
+    Route::get('payment-links/test-connection-debug', [
+        'uses' => 'PaymentLinkController@testConnectionDebug',
+        'as' => 'payment-links.test-connection-debug',
+        'title' => ['actions.test', 'dashboard.payment-links']
+    ]);
+
+    # payment-links test-connection simple
+    Route::get('payment-links/test-simple', function () {
+        return response()->json([
+            'success' => true,
+            'message' => 'Route working correctly',
+            'timestamp' => now()
+        ]);
+    });
+
+    # payment-links test-simple controller
+    Route::get('payment-links/test-simple-controller', [
+        'uses' => 'PaymentLinkController@testSimple',
+        'as' => 'payment-links.test-simple-controller'
+    ]);
+
     # payment-links show
     Route::get('payment-links/{paymentLink}', [
         'uses' => 'PaymentLinkController@show',
@@ -1215,6 +1244,10 @@ Route::get('orders/check-customer-notices/{customerId}', [
 // Paymennt Webhook Route
 Route::post('webhooks/paymennt', [App\Http\Controllers\PaymentWebhookController::class, 'handle'])
     ->name('webhooks.paymennt');
+
+// Payment Callback Route
+Route::get('payment/callback', [App\Http\Controllers\PaymentWebhookController::class, 'callback'])
+    ->name('payment.callback');
 
 Route::group(['middleware' => ['auth']], function () {
     Route::resource('daily-reports', 'Dashboard\DailyReportController');

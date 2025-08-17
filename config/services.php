@@ -34,8 +34,9 @@ return [
     'paymennt' => [
         'api_key' => env('PAYMENNT_API_KEY'),
         'api_secret' => env('PAYMENNT_API_SECRET'),
-        'test_mode' => env('PAYMENNT_TEST_MODE', true),
+        'api_id' => env('PAYMENNT_API_ID'),
         'webhook_secret' => env('PAYMENNT_WEBHOOK_SECRET'),
+        'test_mode' => env('PAYMENNT_TEST_MODE', true),
     ],
 
 ];

@@ -83,15 +83,29 @@ class PaymentLinkController extends Controller
             }
 
             // Create payment link via Paymennt
+            // In your PaymentLinkController store method, update the $paymentData array:
+
+            // In your PaymentLinkController store method, update the $paymentData array:
+
+// Split customer name into first and last name
+            $customerName = $customer->name ?? 'Customer';
+            $nameParts = explode(' ', trim($customerName), 2);
+            $firstName = $nameParts[0] ?? 'Customer';
+            $lastName = $nameParts[1] ?? 'Customer'; // Fallback to 'Customer' if no last name
+
             $paymentData = [
                 'amount' => $request->amount,
+                'description' => $request->description ?? __('dashboard.payment_link_defaults.payment'), // Add this line
                 'customer_id' => $customer->id,
-                'customer_name' => $customer->name,
+                'customer_name' => $firstName, // First name only
+                'lastName' => $lastName, // Last name
                 'customer_email' => $customer->email ?? 'customer@example.com',
                 'customer_phone' => $customer->phone ?? '+971500000000',
                 'order_id' => $request->order_id ?? uniqid('ORD-'),
                 'currency' => 'AED',
-                'return_url' => route('payment.callback'),
+                'send_email' => $request->send_email ?? false, // Optional
+                'send_sms' => $request->send_sms ?? false, // Optional
+                'expires_in' => $request->expires_at ? now()->diffInMinutes($request->expires_at) : null, // Convert to minutes
                 'items' => [
                     [
                         'name' => $request->description ?? __('dashboard.payment_link_defaults.payment'),
@@ -102,7 +116,7 @@ class PaymentLinkController extends Controller
                     ]
                 ]
             ];
-
+            Log::info('Payment data being sent to service', $paymentData);
             $result = $this->paymenntService->createPaymentLink($paymentData);
 
             if (!$result['success']) {

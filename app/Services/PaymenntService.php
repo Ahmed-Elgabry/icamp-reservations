@@ -9,17 +9,32 @@ class PaymenntService
 {
     protected $apiKey;
     protected $apiSecret;
+    protected $apiId;
     protected $baseUrl;
     protected $isTest;
 
     public function __construct()
     {
-        $this->apiKey = config('services.paymennt.api_key');
-        $this->apiSecret = config('services.paymennt.api_secret');
+        $this->apiKey = config('services.paymennt.api_key'); // pk_live_...
+        $this->apiSecret = config('services.paymennt.api_secret'); // mer_...
+        $this->apiId = config('services.paymennt.api_id'); // 17c368305a0ce997
         $this->isTest = config('services.paymennt.test_mode', true);
-        $this->baseUrl = $this->isTest 
+        $this->baseUrl = $this->isTest
             ? 'https://api.test.paymennt.com/mer/v2.0'
             : 'https://api.paymennt.com/mer/v2.0';
+    }
+
+    /**
+     * Get HTTP client with proper authentication headers
+     */
+    private function getHttpClient()
+    {
+        return Http::withHeaders([
+            'X-Paymennt-Api-Key' => $this->apiId, // Use the short API ID
+            'X-Paymennt-Api-Secret' => $this->apiSecret, // Use the API secret
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ]);
     }
 
     /**
@@ -28,27 +43,35 @@ class PaymenntService
     public function createPaymentLink($data)
     {
         try {
+            // Ensure customer data is properly set
+            $customerData = [
+                'id' => (string)($data['customer_id'] ?? '1'),
+                'firstName' => $data['customer_name'] ?? 'Customer',
+                'lastName' => $data['customer_last_name'] ?? 'Customer',
+                'email' => $data['customer_email'] ?? 'customer@example.com',
+                'phone' => $data['customer_phone'] ?? '+971500000000'
+            ];
+
+            // Debug customer data
+            Log::info('Customer data before API call', $customerData);
+
             $payload = [
                 'requestId' => $data['request_id'] ?? uniqid('PAY-'),
                 'orderId' => $data['order_id'] ?? uniqid('ORD-'),
+                'description' => $data['description'] ?? 'Payment Link',
                 'currency' => $data['currency'] ?? 'AED',
                 'amount' => $data['amount'],
-                'customer' => [
-                    'id' => $data['customer_id'] ?? '1',
-                    'firstName' => $data['customer_name'] ?? 'Customer',
-                    'lastName' => '',
-                    'email' => $data['customer_email'] ?? 'customer@example.com',
-                    'phone' => $data['customer_phone'] ?? '+971500000000'
-                ],
+                'sendSms' => $data['send_sms'] ?? false,
+                'sendEmail' => $data['send_email'] ?? false,
+                'customer' => $customerData,
                 'billingAddress' => [
-                    'name' => $data['customer_name'] ?? 'Customer',
+                    'name' => ($data['customer_name'] ?? 'Customer') . ' ' . ($data['customer_last_name'] ?? 'Customer'),
                     'address1' => $data['address'] ?? 'Address',
                     'city' => $data['city'] ?? 'Dubai',
                     'state' => $data['state'] ?? 'Dubai',
                     'zip' => $data['zip'] ?? '00000',
                     'country' => $data['country'] ?? 'AE'
                 ],
-                'returnUrl' => $data['return_url'] ?? route('payment.callback'),
                 'language' => app()->getLocale() === 'ar' ? 'ar' : 'en'
             ];
 
@@ -62,8 +85,27 @@ class PaymenntService
                 $payload['deliveryAddress'] = $data['delivery_address'];
             }
 
-            $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
-                ->post($this->baseUrl . '/checkout/web', $payload);
+            // إضافة انتهاء الصلاحية
+            if (isset($data['expires_in'])) {
+                $payload['expiresIn'] = $data['expires_in'];
+            }
+
+            Log::info('Paymennt API Request', [
+                'url' => $this->baseUrl . '/checkout/link',
+                'payload' => $payload,
+                'headers' => [
+                    'X-Paymennt-Api-Key' => $this->apiId,
+                    'X-Paymennt-Api-Secret' => substr($this->apiSecret, 0, 20) . '...'
+                ]
+            ]);
+
+            $response = $this->getHttpClient()
+                ->post($this->baseUrl . '/checkout/link', $payload);
+
+            Log::info('Paymennt API Response', [
+                'status' => $response->status(),
+                'response' => $response->json()
+            ]);
 
             if ($response->successful()) {
                 $result = $response->json();
@@ -108,7 +150,7 @@ class PaymenntService
     public function getCheckoutStatus($checkoutId)
     {
         try {
-            $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
+            $response = $this->getHttpClient()
                 ->get($this->baseUrl . '/checkout/' . $checkoutId);
 
             if ($response->successful()) {
@@ -144,7 +186,7 @@ class PaymenntService
     public function cancelCheckout($checkoutId)
     {
         try {
-            $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
+            $response = $this->getHttpClient()
                 ->post($this->baseUrl . '/checkout/' . $checkoutId . '/cancel');
 
             if ($response->successful()) {
@@ -178,7 +220,7 @@ class PaymenntService
     public function resendCheckout($checkoutId)
     {
         try {
-            $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
+            $response = $this->getHttpClient()
                 ->post($this->baseUrl . '/checkout/' . $checkoutId . '/resend');
 
             if ($response->successful()) {

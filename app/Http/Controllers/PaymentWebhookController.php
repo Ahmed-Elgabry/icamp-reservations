@@ -167,4 +167,59 @@ class PaymentWebhookController extends Controller
 
         return response('OK', 200);
     }
+
+    /**
+     * Handle payment callback (return URL)
+     */
+    public function callback(Request $request)
+    {
+        try {
+            $checkoutId = $request->query('checkout_id');
+            $status = $request->query('status');
+
+            if (!$checkoutId) {
+                Log::warning('Payment callback missing checkout_id', $request->all());
+                return redirect()->route('show.login')->withErrors(['error' => 'Invalid payment callback']);
+            }
+
+            $paymentLink = PaymentLink::where('checkout_id', $checkoutId)->first();
+
+            if (!$paymentLink) {
+                Log::error('Payment link not found in callback', ['checkout_id' => $checkoutId]);
+                return redirect()->route('show.login')->withErrors(['error' => 'Payment link not found']);
+            }
+
+            // Log the callback
+            Log::info('Payment callback received', [
+                'checkout_id' => $checkoutId,
+                'status' => $status,
+                'payment_link_id' => $paymentLink->id,
+                'query_params' => $request->all()
+            ]);
+
+            // Handle different statuses
+            switch ($status) {
+                case 'success':
+                case 'completed':
+                    return redirect()->route('show.login')->withSuccess('Payment completed successfully!');
+
+                case 'cancelled':
+                    return redirect()->route('show.login')->withErrors(['error' => 'Payment was cancelled']);
+
+                case 'failed':
+                    return redirect()->route('show.login')->withErrors(['error' => 'Payment failed']);
+
+                default:
+                    return redirect()->route('show.login')->withInfo('Payment status: ' . ($status ?? 'unknown'));
+            }
+        } catch (\Exception $e) {
+            Log::error('Payment callback error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            return redirect()->route('show.login')->withErrors(['error' => 'An error occurred while processing payment callback']);
+        }
+    }
 }
