@@ -723,4 +723,20 @@ class OrderController extends Controller
         }
 
     }
+
+    public function acceptTerms($id)
+    {
+        return view('dashboard.orders.accept_terms', ['order' => Order::findOrFail($id) , 'termsSittng' => TermsSittng::firstOrFail()]);
+    }
+
+    public function updateNotes(Request $request, Order $order)
+    {
+        $data = $request->validate([
+            'terms_notes' => ['nullable','string','max:20000'],
+        ]);
+
+        $order->update($data);
+
+        return back()->with('success', __('dashboard.success'));
+    }
 }

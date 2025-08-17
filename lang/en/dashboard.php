@@ -714,7 +714,8 @@ return [
     'no_notes' => 'No notes',
 
     'violation_type_status' => 'Status',
-
+    'characters' => 'Characters',
+    'terms' => 'Terms and Conditions',
     'rows' => 'Rows',
     'total' => 'Total',
 
@@ -724,6 +725,8 @@ return [
     'meeting_locations' => 'Meeting Locations',
     'location_details' => 'Location Details',
     'create_location' => 'Create Location',
+    'additional_notes' => 'Additional notes',
+    'accept_terms' => 'Accept Terms and Conditions',
     'edit_location' => 'Edit Location',
     'update_location' => 'Update Location',
     'save_location' => 'Save Location',

@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('voice_note_logout')->nullable();
-            $table->string('video_note_logout')->nullable();
+            $table->string('voice_note_logout')->after('refunds_notes')->nullable();
+            $table->string('video_note_logout')->after('voice_note_logout')->nullable();
+            $table->text('terms_notes')->after('video_note_logout')->nullable();
         });
     }
 
@@ -29,6 +30,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->dropColumn('voice_note_logout');
             $table->dropColumn('video_note_logout');
+            $table->dropColumn('terms_notes');
         });
     }
 };

@@ -478,7 +478,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'orders.index',
         'title' => 'dashboard.orders',
         'type' => 'parent',
-        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll' , 'order.verified']
+        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll' , 'order.verified' , 'orders.accept_terms', 'orders.updateNotes']
     ]);
 
     # orders store
@@ -650,6 +650,18 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'uses' => 'OrderController@userOrders',
         'as' => 'user-orders',
         'title' => ['actions.show', 'dashboard.user_orders']
+    ]);
+
+    Route::get('order/accept-terms/{order_id}', [
+        'uses' => 'OrderController@acceptTerms',
+        'as' => 'orders.accept_terms',
+        'title' => ['actions.accept_terms', 'dashboard.orders']
+    ]);
+
+    Route::patch('/orders/{order}/notes', [
+        'uses' => 'OrderController@updateNotes',
+        'as' => 'orders.updateNotes',
+        'title' => ['actions.updateNotes', 'dashboard.orders']
     ]);
 
     /*------------ end Of orders ----------*/

@@ -270,7 +270,7 @@
 
                                 <!--begin::Agree_to_the_terms-->
                                 <td>
-                                    @if($order->agree == '1')
+                                    @if($order->signature_path)
                                         {{ __('dashboard.Done_agree_to_the_terms') }}
                                     @else
                                         Null
@@ -295,15 +295,6 @@
 
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
                                         data-kt-menu="true">
-
-                                        <!-- @if(auth()->user()->can('orders.show'))
-                                            <div class="menu-item px-3">
-                                                <a href="{{ route('orders.show', $order->id) }}"
-                                                    class="menu-link px-3">{{ __('dashboard.show') }}</a>
-                                            </div>
-                                        @else
-                                            <p>No permission to view this order.</p>
-                                        @endif -->
 
                                         @can('orders.edit')
                                             <div class="menu-item px-3">

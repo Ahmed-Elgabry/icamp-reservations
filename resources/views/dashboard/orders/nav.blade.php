@@ -6,7 +6,7 @@
             <!--begin:::Tab item-->
         <li class="nav-item">
             <a href="{{  isset($order) ? route('orders.edit',$order->id) : route('orders.create') }}" class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.edit') }}">
-                {{ isset($order) ? $order->customer->name : __('dashboard.create_title', ['page_title' => __('dashboard.orders')]) }}
+                {{-- {{ isset($order) ? $order->customer->name : __('dashboard.create_title', ['page_title' => __('dashboard.orders')]) }} --}}
                 </a>
         </li>
         @if(isset($order))
@@ -82,12 +82,21 @@
                     {{__('dashboard.Offer Price')}}
                 </a>
             </li>
+
             <li class="nav-item">
                 <a href="{{ route('orders.invoice',$order->id) }}"
                 class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.invoice') }}">
                     {{__('dashboard.invoice')}}
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('orders.accept_terms',$order->id) }}"
+                class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.accept_terms') }}">
+                    {{__('dashboard.accept_terms')}}
+                </a>
+            </li>
+
 
         @endif
     <!--end:::Tab item-->
