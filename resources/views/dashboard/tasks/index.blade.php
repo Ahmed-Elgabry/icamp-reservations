@@ -48,7 +48,7 @@
                             <th class="min-w-100px">@lang('dashboard.assigned_to')</th>
                             <th class="min-w-100px">@lang('dashboard.due_date')</th>
                             <th class="min-w-100px">@lang('dashboard.priority')</th>
-                            <th class="min-w-100px">@lang('dashboard.status')</th>
+                            <th class="min-w-100px">@lang('dashboard.task_status')</th>
                             <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                         </tr>
                         </thead>
