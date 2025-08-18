@@ -50,7 +50,7 @@ class OrderController extends Controller
 
     public function index()
     {
-        $validStatuses = ['pending', 'approved', 'completed', 'rejected', 'canceled'];
+        $validStatuses = ['completed', 'rejected', 'canceled' , 'delayed'];
         $status = request()->query('status');
         $customerId = request()->query('customer_id');
 
@@ -65,6 +65,10 @@ class OrderController extends Controller
 
         if (in_array($status, $validStatuses)) {
             $query->where('status', $status);
+        } elseif ($status == 'pending') {
+            $query->where(fn ($q) => $q->whereIn('status' , ['pending_and_show_price' , 'pending_and_Initial_reservation']));
+        } else if ($status == 'approved') {
+            $query->where(fn ($q) => $q->whereIn('status' , ['approved','delayed']));
         }
 
         if (!empty($customerId)) {
@@ -83,7 +87,6 @@ class OrderController extends Controller
     {
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
-
 
         return view('dashboard.orders.create', [
             'customers' => $customers,
@@ -155,6 +158,7 @@ class OrderController extends Controller
             'expired_price_offer' => 'required_if:status,pending_and_show_price,pending_and_Initial_reservation',
             'created_by' => 'required|exists:users,id',
             'agree' => 'nullable|in:1,0',
+            'delayed_reson' => 'nullable|string',
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
             'delayed_time' => 'nullable',
@@ -278,6 +282,7 @@ class OrderController extends Controller
             'delivery_time' => 'nullable',
             'image_after_delivery' => 'nullable|image',
             'status' => 'required|in:pending_and_show_price,pending_and_Initial_reservation,approved,canceled,delayed,completed',
+            'delayed_reson' => 'nullable',
             'agree' => 'nullable|in:1,0',
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',

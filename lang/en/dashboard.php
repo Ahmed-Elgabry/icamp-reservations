@@ -709,6 +709,7 @@ return [
     'save' => 'Save',
     'no_description' => 'No description',
     'inactive' => 'Inactive',
+    'delayed_reson' => 'Delayed reson',
     'select_employee' => 'Select Employee',
     'Insurance' => 'Insurance',
     'no_notes' => 'No notes',
@@ -716,6 +717,7 @@ return [
     'violation_type_status' => 'Status',
     'characters' => 'Characters',
     'terms' => 'Terms and Conditions',
+    'old_date_vs_new_date' => 'Old date / New date',
     'rows' => 'Rows',
     'total' => 'Total',
 

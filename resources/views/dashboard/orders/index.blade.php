@@ -152,6 +152,10 @@
                             <th class="">@lang('dashboard.time_from')</th>
                             <th class="">@lang('dashboard.paied')</th>
                             <th class="">@lang('dashboard.status')</th>
+                            @if (request('status') == 'delayed')
+                                <th>@lang('dashboard.old_date_vs_new_date')</th>
+                                <th>@lang('dashboard.delayed_reson')</th>
+                            @endif
                             <th class="">@lang('dashboard.insurance_status')</th>
                             <th class="">@lang('dashboard.rate link')</th>
                             <th class="">@lang('dashboard.created_by')</th>
@@ -161,7 +165,7 @@
                         <!--end::Table row-->
                     </thead>
                     <!--end::Table head-->
-
+                    
                     <!--begin::Table body-->
                     <tbody class="fw-bold text-gray-600">
                         @foreach ($orders as $order)
@@ -236,6 +240,17 @@
                                 <td>{{ __('dashboard.' . $order->status) }}</td>
                                 <!--end::Order Status-->
 
+                                @if (request('status') == 'delayed')
+                                    <td class="text-nowrap">
+                                        {{ $order->date . ' / '  . $order->expired_price_offer }}
+                                    </td>    
+                                    <td>
+                                        {{ Str::limit($order->delayed_reson , 50)}}
+                                    </td>    
+                                @endif
+                                
+                                <!--begin::Order Status-->
+
                                 <td>
                                     <span @class(['badge text-white' , 'bg-success' => $order->insurance_status == 'returned' , 'bg-danger' => $order->insurance_status == null , 'bg-secondary' => $order->insurance_status == 'confiscated_full' , 'bg-primary' => $order->insurance_status == 'confiscated_partial' ])>
                                         @if ($order->insurance_status)
@@ -247,7 +262,6 @@
                                 </td>
                                 <!--begin::Order Status-->
 
-                                <!--end::Order Status-->
 
                                 <!--begin::Rate Link-->
                                 <td>
@@ -273,7 +287,7 @@
                                     @if($order->signature_path)
                                         {{ __('dashboard.Done_agree_to_the_terms') }}
                                     @else
-                                        Null
+                                        {{ __('dashboard.no') }}
                                     @endif
                                 </td>
                                 <!--end::Agree_to_the_terms-->
