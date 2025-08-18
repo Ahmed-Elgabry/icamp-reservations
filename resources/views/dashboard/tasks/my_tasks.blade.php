@@ -18,7 +18,7 @@
                             <th>@lang('dashboard.title')</th>
                             <th>@lang('dashboard.creator')</th>
                             <th>@lang('dashboard.due_date')</th>
-                            <th>@lang('dashboard.status')</th>
+                            <th>@lang('dashboard.task_status')</th>
                             <th>@lang('dashboard.actions')</th>
                         </tr>
                         </thead>

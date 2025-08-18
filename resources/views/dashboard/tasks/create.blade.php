@@ -195,7 +195,7 @@
                                     <!--begin::Input group-->
                                     <div class="row mb-6">
                                         <!--begin::Label-->
-                                        <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.status')</label>
+                                        <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.task_status')</label>
                                         <!--end::Label-->
                                         <!--begin::Col-->
                                         <div class="col-lg-8 fv-row fv-plugins-icon-container">

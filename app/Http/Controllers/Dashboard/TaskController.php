@@ -154,9 +154,9 @@ class TaskController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:pending,in_progress,completed,failed',
             'failure_reason' => 'required_if:status,failed|nullable|string',
-            'photo_attachment' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-            'video_attachment' => 'nullable|mimes:mp4,mov,avi,webm|max:5120',
-            'audio_attachment' => 'nullable|file|max:2048',
+            'photo_attachment' => 'nullable|image|max:1048',
+            'video_attachment' => 'nullable|file|max:1048',
+            'audio_attachment' => 'nullable|file|max:1048',
             'delete_photo' => 'nullable|boolean',
             'delete_video' => 'nullable|boolean',
             'delete_audio' => 'nullable|boolean'
