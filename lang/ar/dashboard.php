@@ -190,6 +190,7 @@ return [
     'old_date_vs_new_date' => 'التاريخ السابق / التاريخ الجديد',
     'no_result' => 'لم يتم الرد التأمين',
     'image_before_receiving' => 'صورة قبل التسليم',
+    'full_price' => 'مبلغ الشراء اإلجمالي',
     'pending_and_Initial_reservation_desc' => 'معلق - حجز مبدئي',
     'image_after_delivery' => 'صورة بعد الاستلام',
     'customers' => 'العملاء',

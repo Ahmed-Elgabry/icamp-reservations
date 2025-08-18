@@ -720,6 +720,7 @@ return [
     'old_date_vs_new_date' => 'Old date / New date',
     'rows' => 'Rows',
     'total' => 'Total',
+    'full_price' => 'Total price',
 
     'meeting_assigned_to' => 'Assigned To',
 
