@@ -79,36 +79,38 @@ class PaymentLinkController extends Controller
             $customer = $order->customer;
 
             if (!$customer) {
-                return back()->withErrors(['error' => __('dashboard.payment_link_errors.invalid_customer')]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'العميل غير صحيح'
+                ]);
             }
 
-            // Create payment link via Paymennt
-            // In your PaymentLinkController store method, update the $paymentData array:
+            // Split customer name into first and last name
+            $customerName = $customer->name ?? 'Customer Customer';
+            Log::info('Original customer name: ' . $customerName);
 
-            // In your PaymentLinkController store method, update the $paymentData array:
-
-// Split customer name into first and last name
-            $customerName = $customer->name ?? 'Customer';
             $nameParts = explode(' ', trim($customerName), 2);
             $firstName = $nameParts[0] ?? 'Customer';
-            $lastName = $nameParts[1] ?? 'Customer'; // Fallback to 'Customer' if no last name
+            $lastName = isset($nameParts[1]) && !empty(trim($nameParts[1])) ? trim($nameParts[1]) : 'Customer';
+
+            Log::info('Split names - First: ' . $firstName . ', Last: ' . $lastName);
 
             $paymentData = [
                 'amount' => $request->amount,
-                'description' => $request->description ?? __('dashboard.payment_link_defaults.payment'), // Add this line
+                'description' => $request->description ?? 'Payment Link',
                 'customer_id' => $customer->id,
-                'customer_name' => $firstName, // First name only
-                'lastName' => $lastName, // Last name
+                'customer_name' => $firstName,
+                'customer_last_name' => $lastName,
                 'customer_email' => $customer->email ?? 'customer@example.com',
                 'customer_phone' => $customer->phone ?? '+971500000000',
                 'order_id' => $request->order_id ?? uniqid('ORD-'),
                 'currency' => 'AED',
-                'send_email' => $request->send_email ?? false, // Optional
-                'send_sms' => $request->send_sms ?? false, // Optional
-                'expires_in' => $request->expires_at ? now()->diffInMinutes($request->expires_at) : null, // Convert to minutes
+                'send_email' => $request->send_email ?? false,
+                'send_sms' => $request->send_sms ?? false,
+                'expires_in' => $request->expires_at ? now()->diffInMinutes($request->expires_at) : null,
                 'items' => [
                     [
-                        'name' => $request->description ?? __('dashboard.payment_link_defaults.payment'),
+                        'name' => $request->description ?? 'Payment Link',
                         'sku' => 'PAY-' . uniqid(),
                         'unitprice' => $request->amount,
                         'quantity' => 1,
@@ -116,11 +118,15 @@ class PaymentLinkController extends Controller
                     ]
                 ]
             ];
+
             Log::info('Payment data being sent to service', $paymentData);
             $result = $this->paymenntService->createPaymentLink($paymentData);
 
             if (!$result['success']) {
-                return back()->withErrors(['error' => __('dashboard.payment_link_errors.creation_failed', ['error' => $result['error'] ?? __('dashboard.payment_link_errors.unknown_error')])]);
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['error'] ?? 'فشل في إنشاء رابط الدفع'
+                ]);
             }
 
             // Save payment link to database
@@ -138,21 +144,56 @@ class PaymentLinkController extends Controller
                 'order_id_paymennt' => $result['data']['orderId'] ?? null,
             ]);
 
-            return redirect()->route('payment-links.index')
-                ->withSuccess(__('dashboard.payment_link_creation_success'));
+            // Redirect to success page with payment link details
+            return redirect()->route('payment-links.show-created', [
+                'order_id' => $request->order_id,
+                'payment_url' => $result['checkout_url'],
+                'checkout_id' => $result['checkout_id'],
+                'payment_link_id' => $paymentLink->id,
+                'amount' => $request->amount,
+                'description' => $request->description,
+                'expires_at' => $request->expires_at
+            ]);
         } catch (\Exception $e) {
             Log::error('Payment Link Creation Error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return back()->withErrors(['error' => __('dashboard.payment_link_errors.creation_error')]);
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء إنشاء رابط الدفع'
+            ]);
         }
     }
 
     /**
-     * Display payment link
+     * Show created payment link details
      */
+    public function showCreated(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'payment_url' => 'required|url',
+            'checkout_id' => 'required|string',
+            'payment_link_id' => 'required|integer',
+            'amount' => 'required|numeric',
+            'description' => 'nullable|string',
+            'expires_at' => 'nullable|string',
+        ]);
+
+        $order = Order::with('customer')->findOrFail($request->order_id);
+
+        return view('dashboard.payment_links.show_created', [
+            'order' => $order,
+            'payment_url' => $request->payment_url,
+            'checkout_id' => $request->checkout_id,
+            'payment_link_id' => $request->payment_link_id,
+            'amount' => $request->amount,
+            'description' => $request->description,
+            'expires_at' => $request->expires_at,
+        ]);
+    }
     public function show(PaymentLink $paymentLink)
     {
         return view('dashboard.payment_links.show', compact('paymentLink'));
