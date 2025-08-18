@@ -32,5 +32,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ServiceSeeder::class);
         $this->call(ExpenseItemSeeder::class);
         $this->call(BankAccounts::class);
+        $this->call(OrderSeeder::class);
     }
 }

@@ -35,7 +35,19 @@ class CheckRoleMiddleware
     $route = Route::current();
     $actAs = $route->action['act-as'] ?? null;
 
-    if (!in_array($currunt_route, $excpetions)) {
+    // Check if current route matches any wildcard exceptions
+    $isWildcardException = false;
+    foreach ($excpetions as $exception) {
+      if (str_ends_with($exception, '.*')) {
+        $prefix = str_replace('.*', '', $exception);
+        if (str_starts_with($currunt_route, $prefix . '.')) {
+          $isWildcardException = true;
+          break;
+        }
+      }
+    }
+
+    if (!in_array($currunt_route, $excpetions) && !$isWildcardException) {
       $currunt_route = str_replace('update-settings', 'settings', $currunt_route);
       $currunt_route = str_replace('store', 'create', $currunt_route);
       $currunt_route = str_replace('adminsfile.destroy', 'admins.destroy', $currunt_route);
@@ -66,7 +78,7 @@ class CheckRoleMiddleware
       $currunt_route = str_replace('update', 'edit', $currunt_route);
     }
 
-    if (!in_array($currunt_route, $permissions) and !in_array($currunt_route, $excpetions)) {
+    if (!in_array($currunt_route, $permissions) and !in_array($currunt_route, $excpetions) and !$isWildcardException) {
 
       $msg = trans('auth.not_authorized');
       if ($request->ajax()) {
