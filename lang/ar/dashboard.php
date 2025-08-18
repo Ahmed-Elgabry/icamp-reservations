@@ -768,6 +768,98 @@ return [
     //    'created_at' => 'تاريخ الإنشاء',
     //    'confirm_delete' => 'هل أنت متأكد من رغبتك في حذف هذا الموقع؟',
 
+    // Payment Links
+    'payment-links' => 'روابط الدفع',
+    'payment_link' => 'رابط الدفع',
+    'create_payment_link' => 'إنشاء رابط دفع جديد',
+    'edit_payment_link' => 'تعديل رابط الدفع',
+    'delete_payment_link' => 'حذف رابط الدفع',
+    'view_payment_links' => 'عرض روابط الدفع',
+    'payment_link_created' => 'تم إنشاء رابط الدفع بنجاح',
+    'payment_link_updated' => 'تم تحديث رابط الدفع بنجاح',
+    'payment_link_deleted' => 'تم حذف رابط الدفع بنجاح',
+
+    // Payment Link Fields
+    'checkout_id' => 'معرف الدفع',
+    'checkout_key' => 'مفتاح الدفع',
+    'payment_url' => 'رابط الدفع',
+    'request_id' => 'معرف الطلب',
+    'order_id_paymennt' => 'معرف الطلب في Paymennt',
+    'expires_at' => 'تاريخ انتهاء الصلاحية',
+    'paid_at' => 'تاريخ الدفع',
+
+    // Payment Link Statuses
+    'status_pending' => 'معلق',
+    'status_paid' => 'تم الدفع',
+    'status_cancelled' => 'ملغي',
+    'status_expired' => 'منتهي الصلاحية',
+
+    // Payment Link Actions
+    'resend_link' => 'إعادة إرسال الرابط',
+    'copy_link' => 'نسخ الرابط',
+    'view_qr' => 'عرض QR Code',
+    'cancel_link' => 'إلغاء الرابط',
+    'update_status' => 'تحديث الحالة',
+
+    // Messages
+    'link_resent_successfully' => 'تم إعادة إرسال رابط الدفع بنجاح',
+    'link_cancelled_successfully' => 'تم إلغاء رابط الدفع بنجاح',
+    'link_copied_to_clipboard' => 'تم نسخ رابط الدفع إلى الحافظة',
+    'status_updated_successfully' => 'تم تحديث حالة الدفع بنجاح',
+    'payment_link_not_found' => 'رابط الدفع غير موجود',
+    'failed_to_create_link' => 'فشل في إنشاء رابط الدفع',
+    'failed_to_update_status' => 'فشل في تحديث حالة الدفع',
+
+    // Validation Messages
+    'amount_required' => 'المبلغ مطلوب',
+    'amount_min' => 'المبلغ يجب أن يكون أكبر من صفر',
+    'customer_required' => 'العميل مطلوب',
+    'customer_exists' => 'العميل المحدد غير موجود',
+    'order_exists' => 'الطلب المحدد غير موجود',
+    'expires_at_after_now' => 'تاريخ انتهاء الصلاحية يجب أن يكون في المستقبل',
+
+    // Webhook Messages
+    'webhook_received' => 'تم استلام webhook من Paymennt',
+    'webhook_processed' => 'تم معالجة webhook بنجاح',
+    'webhook_error' => 'حدث خطأ في معالجة webhook',
+    'invalid_webhook_signature' => 'توقيع webhook غير صحيح',
+
+    // Commands
+    'updating_payment_link_statuses' => 'جاري تحديث حالات روابط الدفع...',
+    'payment_link_statuses_updated' => 'تم تحديث حالات روابط الدفع بنجاح',
+    'no_pending_links' => 'لا توجد روابط دفع معلقة للتحديث',
+
+    // Additional Payment Link Translations
+    'currency_aed' => 'درهم',
+    'payment_link_amount_placeholder' => 'يرجى إدخال المبلغ المطلوب سداده',
+    'payment_link_example' => 'مثال: الرابط هنا: http://system.funcamp.ae',
+    'payment_link_description_placeholder' => 'وصف مختصر للدفع',
+    'additional_options' => 'خيارات إضافية',
+    'hide_options' => 'إخفاء الخيارات',
+    'open_payment_link' => 'فتح رابط الدفع',
+    'close' => 'إغلاق',
+    'creating' => 'جاري الإنشاء',
+
+    // Payment Links Index Page
+    'payment_links_index' => 'روابط الدفع',
+    'payment_links_for_order' => 'روابط الدفع - الطلب #:order_id (:customer_name)',
+    'back_to_order' => 'العودة للطلب',
+    'create_new_payment_link' => 'إنشاء رابط دفع جديد',
+    'serial_number' => 'م',
+    'customer_name' => 'اسم العميل',
+    'reservation_number' => 'رقم الحجز',
+    'amount_aed' => 'المبلغ / درهم',
+    'date_time' => 'التاريخ / الوقت',
+    'status' => 'الحالة',
+    'actions' => 'التحكم',
+    'qr_code_title' => 'رمز QR للدفع',
+    'qr_code_coming_soon' => 'QR Code سيتم إضافته قريباً',
+    'open_payment_link' => 'فتح رابط الدفع',
+    'no_payment_links' => 'لا توجد روابط دفع حالياً',
+    'resend_link' => 'إعادة إرسال الرابط',
+    'view_and_copy' => 'مشاهدة ونسخ',
+    'payment_link_copied' => 'تم نسخ رابط الدفع إلى الحافظة',
+    'not_specified' => 'غير محدد',
     // Notice Types Section
     'notice_types' => 'أنواع الملاحظات',
     'add_notice_type' => 'إضافة نوع ملاحظة',

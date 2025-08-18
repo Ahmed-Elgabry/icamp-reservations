@@ -1,0 +1,460 @@
+@extends('dashboard.layouts.app')
+
+@section('title', __('dashboard.payment_link_created'))
+
+@section('content')
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="page-header d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="page-title">{{ __('dashboard.payment_link_created') }}</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{{ route('home') }}">{{ __('dashboard.home') }}</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{{ route('payment-links.index') }}">{{ __('dashboard.payment-links') }}</a>
+                            </li>
+                            <li class="breadcrumb-item active">{{ __('dashboard.payment_link_created') }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{{ route('payment-links.create', ['order_id' => $order->id]) }}" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> {{ __('dashboard.create_another_payment_link') }}
+                    </a>
+                    <a href="{{ route('payment-links.index', ['order_id' => $order->id]) }}" class="btn btn-secondary">
+                        <i class="fa fa-list"></i> {{ __('dashboard.view_all_payment_links') }}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Success Alert -->
+            <div class="alert alert-success">
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-check-circle me-3" style="font-size: 2rem;"></i>
+                    <div>
+                        <h4 class="alert-heading">{{ __('dashboard.payment_link_creation_success') }}</h4>
+                        <p class="mb-0">{{ __('dashboard.payment_link_has_been_created') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Link Details -->
+            
+            <!-- Generated Payment Link -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{{ __('dashboard.generated_payment_link') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       value="{{ $payment_url }}" 
+                                       id="paymentLinkInput" 
+                                       readonly>
+                                <button class="btn btn-success" type="button" id="copyLinkBtn">
+                                    <i class="fa fa-copy"></i> {{ __('dashboard.copy_link') }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ $payment_url }}" target="_blank" class="btn btn-primary btn-lg w-100">
+                                <i class="fa fa-external-link-alt"></i> {{ __('dashboard.open_payment_link') }}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- QR Code -->
+                    <div class="text-center mt-4">
+                        <div id="qrcode" class="d-inline-block"></div>
+                        <p class="mt-2 text-muted">{{ __('dashboard.scan_qr_code_to_pay') }}</p>
+                        <button id="downloadQrBtn" class="btn btn-outline-secondary mt-2">
+                            <i class="fa fa-download"></i> {{ __('dashboard.download_qr_code') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center mt-4">
+                <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-secondary me-2">
+                    <i class="fa fa-arrow-left"></i> {{ __('dashboard.back_to_order') }}
+                </a>
+                <a href="{{ route('payment-links.index', ['order_id' => $order->id]) }}" class="btn btn-outline-primary me-2">
+                    <i class="fa fa-list"></i> {{ __('dashboard.view_payment_links') }}
+                </a>
+                <a href="{{ route('payment-links.create', ['order_id' => $order->id]) }}" class="btn btn-success">
+                    <i class="fa fa-plus"></i> {{ __('dashboard.create_new_payment_link') }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let qrCodeDataURL = null; // Store QR code data URL for download
+    
+    // Generate QR Code with payment URL using qrcode-generator library
+    try {
+        const qr = qrcode(0, 'M'); // Type 0, Error correction level M
+        qr.addData("{{ $payment_url }}");
+        qr.make();
+        
+        // Create the QR code HTML
+        const qrCodeHtml = qr.createImgTag(4, 8); // cellSize=4, margin=8
+        document.getElementById('qrcode').innerHTML = qrCodeHtml;
+        
+        // Generate canvas version for download
+        generateQRCodeCanvas("{{ $payment_url }}");
+        
+        console.log('QR Code generated successfully!');
+    } catch (error) {
+        console.error('QR Code generation error:', error);
+        document.getElementById('qrcode').innerHTML = '<p class="text-danger">خطأ في إنشاء رمز QR</p>';
+        document.getElementById('downloadQrBtn').style.display = 'none';
+    }
+
+    // Generate QR Code canvas for download
+    function generateQRCodeCanvas(url) {
+        try {
+            const qr = qrcode(0, 'M');
+            qr.addData(url);
+            qr.make();
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const modules = qr.getModuleCount();
+            const cellSize = 8;
+            const margin = 32;
+            const size = modules * cellSize + (margin * 2);
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Fill white background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw QR code modules
+            ctx.fillStyle = '#000000';
+            for (let row = 0; row < modules; row++) {
+                for (let col = 0; col < modules; col++) {
+                    if (qr.isDark(row, col)) {
+                        ctx.fillRect(
+                            margin + col * cellSize,
+                            margin + row * cellSize,
+                            cellSize,
+                            cellSize
+                        );
+                    }
+                }
+            }
+            
+            // Store the data URL for download
+            qrCodeDataURL = canvas.toDataURL('image/png');
+            
+        } catch (error) {
+            console.error('Canvas QR Code generation error:', error);
+            document.getElementById('downloadQrBtn').style.display = 'none';
+        }
+    }
+
+    // Enhanced Copy payment link functionality
+    document.getElementById('copyLinkBtn').addEventListener('click', function() {
+        const button = this;
+        const originalText = button.innerHTML;
+        const input = document.getElementById('paymentLinkInput');
+        const textToCopy = input.value;
+        
+        // Change button appearance while copying
+        button.disabled = true;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري النسخ...';
+        
+        // Select the text in the input field
+        input.select();
+        input.setSelectionRange(0, 99999); // For mobile devices
+        
+        // Try to copy using different methods
+        let copySuccess = false;
+        
+        // Method 1: Modern clipboard API
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                copySuccess = true;
+                showSuccessState(button, originalText);
+                showToast('تم نسخ رابط الدفع بنجاح', 'success');
+            }).catch(function(err) {
+                console.error('Clipboard API failed: ', err);
+                // Try fallback method
+                tryFallbackCopy(textToCopy, button, originalText);
+            });
+    
+    // Download QR Code functionality
+    document.getElementById('downloadQrBtn').addEventListener('click', function() {
+        const button = this;
+        const originalText = button.innerHTML;
+        
+        if (!qrCodeDataURL) {
+            showToast('فشل في تحضير رمز QR للتحميل', 'error');
+            return;
+        }
+        
+        try {
+            // Change button state
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري التحميل...';
+            
+            // Create download link
+            const downloadLink = document.createElement('a');
+            downloadLink.href = qrCodeDataURL;
+            downloadLink.download = 'payment-qr-code.png';
+            
+            // Trigger download
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            // Show success state
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+            button.innerHTML = '<i class="fa fa-check"></i> تم التحميل!';
+            
+            showToast('تم تحميل رمز QR بنجاح', 'success');
+            
+            // Reset button after 2 seconds
+            setTimeout(function() {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Download failed:', error);
+            button.disabled = false;
+            button.innerHTML = originalText;
+            showToast('فشل في تحميل رمز QR', 'error');
+        }
+    });
+        } else {
+            // Method 2: execCommand fallback
+            tryFallbackCopy(textToCopy, button, originalText);
+        }
+    });
+    
+    // Fallback copy method
+    function tryFallbackCopy(text, button, originalText) {
+        try {
+            // Create temporary input element
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            tempInput.style.position = 'fixed';
+            tempInput.style.left = '-9999px';
+            tempInput.style.top = '-9999px';
+            document.body.appendChild(tempInput);
+            
+            // Select and copy
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999);
+            
+            const successful = document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            
+            if (successful) {
+                showSuccessState(button, originalText);
+                showToast('تم نسخ رابط الدفع بنجاح', 'success');
+            } else {
+                throw new Error('Copy command failed');
+            }
+        } catch (err) {
+            console.error('All copy methods failed: ', err);
+            resetButton(button, originalText);
+            showToast('فشل في نسخ الرابط', 'error');
+            
+            // Last resort: prompt user to copy manually
+            prompt('انسخ الرابط يدوياً:', text);
+        }
+    }
+
+    // Show success state on copy button
+    function showSuccessState(button, originalText) {
+        button.classList.remove('btn-success');
+        button.classList.add('btn-info');
+        button.innerHTML = '<i class="fa fa-check"></i> تم النسخ بنجاح!';
+        
+        // Reset button after 2 seconds
+        setTimeout(function() {
+            button.classList.remove('btn-info');
+            button.classList.add('btn-success');
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }, 2000);
+    }
+
+    // Reset button to original state
+    function resetButton(button, originalText) {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    }
+
+    // Enhanced toast notification function
+    function showToast(message, type) {
+        // Remove any existing toasts first
+        const existingToasts = document.querySelectorAll('.custom-toast');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toastId = 'toast_' + Date.now();
+        const bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        // Create toast element
+        const toastElement = document.createElement('div');
+        toastElement.id = toastId;
+        toastElement.className = 'custom-toast';
+        toastElement.style.backgroundColor = bgColor;
+        toastElement.innerHTML = `
+            <i class="fa ${icon} me-2"></i>
+            <strong>${message}</strong>
+            <button type="button" class="btn-close btn-close-white ms-2" onclick="document.getElementById('${toastId}').remove()"></button>
+        `;
+        
+        // Add toast to body
+        document.body.appendChild(toastElement);
+        
+        // Auto-hide toast after 3 seconds
+        setTimeout(function() {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 3000);
+    }
+
+    // Add some visual feedback on QR code hover
+    const qrcodeElement = document.getElementById('qrcode');
+    
+    qrcodeElement.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.05)';
+        this.style.transition = 'transform 0.2s ease';
+    });
+    
+    qrcodeElement.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+
+    // Optional: Add click to copy functionality on the QR code
+    qrcodeElement.style.cursor = 'pointer';
+    qrcodeElement.title = 'انقر لنسخ الرابط';
+    qrcodeElement.addEventListener('click', function() {
+        document.getElementById('copyLinkBtn').click();
+    });
+});
+</script>
+
+<style>
+    /* Enhanced QR Code styling */
+    #qrcode {
+        padding: 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+        border: 2px solid #f8f9fa;
+    }
+    
+    #qrcode img {
+        border-radius: 8px;
+        max-width: 200px;
+        height: auto;
+    }
+    
+    /* Copy button enhancements */
+    #copyLinkBtn {
+        transition: all 0.3s ease;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    #copyLinkBtn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* Input field styling */
+    #paymentLinkInput {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        border-radius: 8px 0 0 8px;
+        border-right: none;
+    }
+    
+    /* Toast styling */
+    .custom-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Download button styling */
+    #downloadQrBtn {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        min-width: 150px;
+    }
+    
+    #downloadQrBtn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    #downloadQrBtn:disabled {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-close-white {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+    }
+</style>
+
+@endsection

@@ -1,13 +1,6 @@
 <?php
 
 
-use App\Http\Controllers\Dashboard\DailyReportController;
-use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
-use App\Http\Controllers\Dashboard\MeetingController;
-use App\Http\Controllers\Dashboard\MeetingLocationController;
-use App\Http\Controllers\Dashboard\NotificationController;
-use App\Http\Controllers\Dashboard\ViolationController;
-use App\Http\Controllers\Dashboard\ViolationTypeController;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +8,16 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Permission;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Dashboard\QuestionController;
-use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
+use App\Http\Controllers\statisticsController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\OrderSignatureController;
+use App\Http\Controllers\Dashboard\AdminController;
+use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\StockController;
+use App\Http\Controllers\Dashboard\MeetingController;
+use App\Http\Controllers\Dashboard\QuestionController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Dashboard\ViolationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -851,7 +851,106 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     /*------------ end Of payments ----------*/
+    /*------------ start Of payment-links ----------*/
+    Route::get('payment-links', [
+        'uses' => 'PaymentLinkController@index',
+        'as' => 'payment-links.index',
+        'title' => 'dashboard.payment-links',
+        'type' => 'parent',
+    ]);
 
+    # payment-links create
+    Route::get('payment-links/create', [
+        'uses' => 'PaymentLinkController@create',
+        'as' => 'payment-links.create',
+        'title' => ['actions.add', 'dashboard.payment-links']
+    ]);
+
+    # payment-links store
+    Route::post('payment-links', [
+        'uses' => 'PaymentLinkController@store',
+        'as' => 'payment-links.store',
+        'title' => ['actions.add', 'dashboard.payment-links']
+    ]);
+
+    # payment-links test-connection
+    Route::post('payment-links/test-connection', [
+        'uses' => 'PaymentLinkController@testConnection',
+        'as' => 'payment-links.test-connection',
+        'title' => ['actions.test', 'dashboard.payment-links']
+    ]);
+
+    # payment-links test-connection debug
+    Route::get('payment-links/test-connection-debug', [
+        'uses' => 'PaymentLinkController@testConnectionDebug',
+        'as' => 'payment-links.test-connection-debug',
+        'title' => ['actions.test', 'dashboard.payment-links']
+    ]);
+
+    # payment-links test-connection simple
+    Route::get('payment-links/test-simple', function () {
+        return response()->json([
+            'success' => true,
+            'message' => 'Route working correctly',
+            'timestamp' => now()
+        ]);
+    });
+
+    # payment-links test-simple controller
+    Route::get('payment-links/test-simple-controller', [
+        'uses' => 'PaymentLinkController@testSimple',
+        'as' => 'payment-links.test-simple-controller'
+    ]);
+
+    # payment-links show
+    Route::get('payment-links/{paymentLink}', [
+        'uses' => 'PaymentLinkController@show',
+        'as' => 'payment-links.show',
+        'title' => ['actions.show', 'dashboard.payment-links']
+    ]);
+
+    # payment-links resend
+    Route::post('payment-links/{paymentLink}/resend', [
+        'uses' => 'PaymentLinkController@resend',
+        'as' => 'payment-links.resend',
+        'title' => ['actions.resend', 'dashboard.payment-links']
+    ]);
+
+    # payment-links cancel
+    Route::post('payment-links/{paymentLink}/cancel', [
+        'uses' => 'PaymentLinkController@cancel',
+        'as' => 'payment-links.cancel',
+        'title' => ['actions.cancel', 'dashboard.payment-links']
+    ]);
+
+    # payment-links destroy
+    Route::delete('payment-links/{paymentLink}', [
+        'uses' => 'PaymentLinkController@destroy',
+        'as' => 'payment-links.destroy',
+        'title' => ['actions.delete', 'dashboard.payment-links']
+    ]);
+
+    # payment-links qr-code
+    Route::get('payment-links/{paymentLink}/qr-code', [
+        'uses' => 'PaymentLinkController@qrCode',
+        'as' => 'payment-links.qr-code',
+        'title' => ['actions.qr-code', 'dashboard.payment-links']
+    ]);
+
+    # payment-links copy
+    Route::get('payment-links/{paymentLink}/copy', [
+        'uses' => 'PaymentLinkController@copy',
+        'as' => 'payment-links.copy',
+        'title' => ['actions.copy', 'dashboard.payment-links']
+    ]);
+
+    # payment-links update-status
+    Route::get('payment-links/{paymentLink}/update-status', [
+        'uses' => 'PaymentLinkController@updateStatus',
+        'as' => 'payment-links.update-status',
+        'title' => ['actions.update-status', 'dashboard.payment-links']
+    ]);
+    /*------------ end Of payment-links ----------*/
     /*------------ start Of warehouse_sales ----------*/
     Route::get('warehouse-sales', [
         'uses' => 'WarehousesalesController@index',
@@ -1015,12 +1114,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 
 /*** update route if i added new routes  */
 
-use App\Http\Controllers\statisticsController;
-use App\Http\Controllers\Dashboard\AdminController;
-use App\Http\Controllers\Dashboard\OrderController;
-use App\Http\Controllers\Dashboard\StockController;
+use App\Http\Controllers\Dashboard\DailyReportController;
 use App\Http\Controllers\Dashboard\TermsSittngController;
+use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\ViolationTypeController;
 use App\Http\Controllers\Dashboard\GeneralPaymentsController;
+use App\Http\Controllers\Dashboard\MeetingLocationController;
+use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
+use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
 use App\Http\Controllers\Dashboard\OrderController as DashboardOrderController;
 
 Route::get('update-routes', function () {
@@ -1091,7 +1192,7 @@ Route::get('/questions/{id}/answers', [QuestionController::class, 'showAnswers']
 Route::get('answers/user/{userId}', [QuestionController::class, 'showUserAnswers'])->name('answers.user');
 
 // Admin reports
-Route::group(['middleware' => ['auth', 'admin']], function() {
+Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::resource('tasks', 'Dashboard\TaskController')->except('show');
 
     Route::get('tasks/reports', 'Dashboard\TaskController@reports')
@@ -1102,7 +1203,7 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
 });
 
 // Employee routes
-Route::group(['middleware' => ['auth']], function() {
+Route::group(['middleware' => ['auth']], function () {
     Route::get('employee/tasks', 'Dashboard\TaskController@myTasks')
         ->name('employee.tasks');
 
@@ -1163,11 +1264,19 @@ Route::get('notices/get-customer-orders/{customer_id}', [
 ])->middleware(['auth']);
 
 Route::get('orders/check-customer-notices/{customerId}', [
-    'uses' => 'Dashboard\OrderController@checkCustomerNotices',
+    'uses' => 'OrderController@checkCustomerNotices',
     'as' => 'orders.check-customer-notices'
 ])->middleware(['auth']);
 
-Route::group(['middleware' => ['auth']], function() {
+// Paymennt Webhook Route
+Route::post('webhooks/paymennt', [App\Http\Controllers\PaymentWebhookController::class, 'handle'])
+    ->name('webhooks.paymennt');
+
+// Payment Callback Route
+Route::get('payment/callback', [App\Http\Controllers\PaymentWebhookController::class, 'callback'])
+    ->name('payment.callback');
+
+Route::group(['middleware' => ['auth']], function () {
     Route::resource('daily-reports', 'Dashboard\DailyReportController');
     Route::get('daily-reports/export/pdf', [DailyReportController::class, 'exportToPdf'])
         ->name('daily-reports.export');
