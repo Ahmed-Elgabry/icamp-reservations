@@ -1,23 +1,23 @@
 <?php
 
 
+use App\Http\Controllers\Dashboard\SurveyController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Dashboard\AdminController;
 use App\Http\Controllers\Dashboard\DailyReportController;
 use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
+use App\Http\Controllers\Dashboard\GeneralPaymentsController;
 use App\Http\Controllers\Dashboard\MeetingController;
 use App\Http\Controllers\Dashboard\MeetingLocationController;
 use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\OrderController as DashboardOrderController;
+use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
+use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\QuestionController;
+use App\Http\Controllers\Dashboard\StockController;
+use App\Http\Controllers\Dashboard\TermsSittngController;
 use App\Http\Controllers\Dashboard\ViolationController;
 use App\Http\Controllers\Dashboard\ViolationTypeController;
-use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
-use Spatie\Permission\Models\Permission;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Dashboard\QuestionController;
-use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
-use App\Http\Controllers\OrderSignatureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1002,13 +1002,17 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 
 /*** update route if i added new routes  */
 
+use App\Http\Controllers\OrderSignatureController;
 use App\Http\Controllers\statisticsController;
-use App\Http\Controllers\Dashboard\AdminController;
-use App\Http\Controllers\Dashboard\OrderController;
-use App\Http\Controllers\Dashboard\StockController;
-use App\Http\Controllers\Dashboard\TermsSittngController;
-use App\Http\Controllers\Dashboard\GeneralPaymentsController;
-use App\Http\Controllers\Dashboard\OrderController as DashboardOrderController;
+use App\Http\Controllers\SurveySubmissionController;
+use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+
 
 Route::get('update-routes', function () {
     $routes_data = [];
@@ -1206,3 +1210,12 @@ Route::resource('violation-types', ViolationTypeController::class)
 
 Route::resource('violations', ViolationController::class)
     ->middleware(['auth']);
+
+
+
+Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submit'])->name('surveys.submit');
+Route::get('survey/{survey}/thankyou', [SurveySubmissionController::class, 'thankyou'])->name('surveys.thankyou');
+Route::resource('surveys', SurveyController::class)->middleware(['auth']);
+Route::get('surveys/{survey}/results', [SurveyController::class, 'results'])->name('surveys.results')->middleware(['auth']);
+// Public survey route
+Route::get('survey/{order}', [SurveyController::class, 'show'])->name('surveys.public');

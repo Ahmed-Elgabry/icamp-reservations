@@ -25,9 +25,16 @@ class RolesAndPermissionsSeeder extends Seeder
         // create permissions
 
         $routes_data    = [];
+        $seen_names = [];
 
         foreach (Route::getRoutes() as $route) {
             if ($route->getName()){
+                // Skip duplicate route names
+                if (in_array($route->getName(), $seen_names)) {
+                    continue;
+                }
+
+                $seen_names[] = $route->getName();
                 $routes_data []   = [ 'name' => $route->getName() ,
                 'nickname_en' =>  $route->getName() ,
                 'nickname_ar' =>  $route->getName() ,
