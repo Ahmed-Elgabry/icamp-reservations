@@ -873,6 +873,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.add', 'dashboard.payment-links']
     ]);
 
+    # payment-links show created
+    Route::get('payment-links/created', [
+        'uses' => 'PaymentLinkController@showCreated',
+        'as' => 'payment-links.show-created',
+        'title' => ['actions.show', 'dashboard.payment_link_created']
+    ]);
+
     # payment-links test-connection
     Route::post('payment-links/test-connection', [
         'uses' => 'PaymentLinkController@testConnection',
