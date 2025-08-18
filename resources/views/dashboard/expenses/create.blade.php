@@ -45,6 +45,13 @@
 
                                                 <div class="row">
                                                 
+                                                    <div class="form-group col-6 mt-5">
+                                                        <label for="image">@lang('dashboard.upload_or_take_image')</label>
+                                                        <input type="file" name="image" id="image"
+                                                            class="form-control"
+                                                            accept="image/*"
+                                                            capture="environment"> 
+                                                    </div>
 
                                                     <div class="form-group col-6 mt-5">
                                                         <label for="expense_item_id" class="required">بند المصاريف</label>

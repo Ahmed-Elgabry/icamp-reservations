@@ -232,7 +232,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.index',
         'title' => 'dashboard.stocks',
         'type' => 'parent',
-        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock']
+        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock' , 'stocks.destroyServiceReport']
     ]);
 
     # stocks store
@@ -286,6 +286,12 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::delete('service/{service}/stocks/{stock}', [
         'uses' => 'StockController@destroyServiceStock',
         'as' => 'stocks.destroyServiceStock',
+        'title' => ['actions.delete', 'dashboard.stocks']
+    ]);
+
+    Route::delete('service-reports/{report}', [
+        'uses' => 'StockController@destroyServiceReport',
+        'as' => 'stocks.destroyServiceReport',
         'title' => ['actions.delete', 'dashboard.stocks']
     ]);
 
@@ -415,7 +421,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'services.index',
         'title' => 'dashboard.services',
         'type' => 'parent',
-        'child' => ['services.store', 'services.show', 'services.edit', 'services.update', 'services.destroy']
+        'child' => ['services.store', 'services.show', 'services.edit', 'services.update', 'services.destroy' , 'services.reports.move']
     ]);
 
     # services store
@@ -471,6 +477,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'services.deleteAll',
         'title' => ['actions.delete_all', 'dashboard.services']
     ]);
+
+    Route::post('/services/{service}/reports/{report}/move', [
+        'uses' => 'ServicesController@move',
+        'as' => 'services.reports.move',
+        'title' => ['actions.move', 'dashboard.services']
+    ]);
+
     /*------------ end Of services ----------*/
     /*------------ start Of orders ----------*/
     Route::get('orders', [

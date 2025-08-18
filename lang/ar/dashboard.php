@@ -190,6 +190,8 @@ return [
     'old_date_vs_new_date' => 'التاريخ السابق / التاريخ الجديد',
     'no_result' => 'لم يتم الرد التأمين',
     'image_before_receiving' => 'صورة قبل التسليم',
+    'upload_or_take_image' => 'إرفاق صورة (رفع/التقاط)',
+    'orders_payments' => 'إيرادات الحجوزات', 
     'full_price' => 'مبلغ الشراء اإلجمالي',
     'pending_and_Initial_reservation_desc' => 'معلق - حجز مبدئي',
     'image_after_delivery' => 'صورة بعد الاستلام',

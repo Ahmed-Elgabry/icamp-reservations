@@ -44,7 +44,7 @@
                         </div>
 
                         <div class="row mb-5">
-                            <div class="col-6">
+                            <div class="col-12">
                                 <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.bank_account') }}</label>
                                 <div class="col-lg-12">
                                     <select name="account_id" id="account_id" class="form-select form-select-lg form-select-solid mb-3 mb-lg-0">
@@ -52,18 +52,6 @@
                                         @foreach($bankAccounts as $bankAccount)
                                             <option value="{{ $bankAccount->id }}" data-currency="{{ $bankAccount->currency }}"
                                             {{ isset($payment) && $payment->account_id == $bankAccount->id ? 'selected' : '' }}>{{ $bankAccount->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.receiver') }}</label>
-                                <div class="col-lg-12">
-                                    <select name="receiver_id" id="receiver_id" class="form-select form-select-lg form-select-solid mb-3 mb-lg-0">
-                                        <option value="">{{ __('dashboard.choose_receiver') }}</option>
-                                        @foreach($bankAccounts as $bankAccount)
-                                            <option value="{{ $bankAccount->id }}" data-currency="{{ $bankAccount->currency }}"
-                                            {{ isset($payment) && $payment->receiver_id == $bankAccount->id ? 'selected' : '' }}>{{ $bankAccount->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
