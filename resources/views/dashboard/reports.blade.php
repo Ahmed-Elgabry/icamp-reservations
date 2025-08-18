@@ -92,6 +92,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-12">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-warning text-white">
+                                    <h4 class="card-title" style="color: white;">@lang('dashboard.orders_payments')</h4>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="monthlyPaymentsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -191,6 +201,7 @@
                     }
                 }
             });
+
         });
     </script>
 @endpush

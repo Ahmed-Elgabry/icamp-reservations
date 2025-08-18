@@ -145,13 +145,6 @@
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                             <th class="">@lang('dashboard.sequence')</th>
                             <th class="">@lang('dashboard.reservation_number')</th>
-                            <th class="w-10px pe-2">
-                                <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
-                                    <input class="form-check-input" id="checkedAll" type="checkbox" data-kt-check="true"
-                                        data-kt-check-target="#kt_ecommerce_category_table .form-check-input"
-                                        value="1" />
-                                </div>
-                            </th>
                             <th class="">@lang('dashboard.date')</th>
                             <th class="">@lang('dashboard.service')</th>
                             <th class="">@lang('dashboard.customer')</th>
@@ -159,6 +152,10 @@
                             <th class="">@lang('dashboard.time_from')</th>
                             <th class="">@lang('dashboard.paied')</th>
                             <th class="">@lang('dashboard.status')</th>
+                            @if (request('status') == 'delayed')
+                                <th>@lang('dashboard.old_date_vs_new_date')</th>
+                                <th>@lang('dashboard.delayed_reson')</th>
+                            @endif
                             <th class="">@lang('dashboard.insurance_status')</th>
                             <th class="">@lang('dashboard.rate link')</th>
                             <th class="">@lang('dashboard.created_by')</th>
@@ -168,7 +165,7 @@
                         <!--end::Table row-->
                     </thead>
                     <!--end::Table head-->
-
+                    
                     <!--begin::Table body-->
                     <tbody class="fw-bold text-gray-600">
                         @foreach ($orders as $order)
@@ -176,14 +173,6 @@
                             <tr data-id="{{$order->id}}">
                                 <td>{{ $orders->firstItem() + $loop->index }}</td>
                                 <td> <span class="badge bg-primary">{{ $order->id }}</span></td>
-                                <!--begin::Checkbox-->
-                                <td>
-                                    <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                        <input class="form-check-input checkSingle" type="checkbox" value="1"
-                                            id="{{$order->id}}" />
-                                    </div>
-                                </td>
-                                <!--end::Checkbox-->
 
                                 <!--begin::Order Date-->
                                 <td>
@@ -251,14 +240,28 @@
                                 <td>{{ __('dashboard.' . $order->status) }}</td>
                                 <!--end::Order Status-->
 
-                                @if ($order->insurance_status)
-                                    <td><span class="badge bg-danger text-white">{{ __('dashboard.' . $order->insurance_status) }}</span></td>
-                                @else
-                                    <td><span class="badge bg-warning text-white">{{ __('dashboard.no_result') }}</span></td>
+                                @if (request('status') == 'delayed')
+                                    <td class="text-nowrap">
+                                        {{ $order->date . ' / '  . $order->expired_price_offer }}
+                                    </td>    
+                                    <td>
+                                        {{ Str::limit($order->delayed_reson , 50)}}
+                                    </td>    
                                 @endif
+                                
                                 <!--begin::Order Status-->
 
-                                <!--end::Order Status-->
+                                <td>
+                                    <span @class(['badge text-white' , 'bg-success' => $order->insurance_status == 'returned' , 'bg-danger' => $order->insurance_status == null , 'bg-secondary' => $order->insurance_status == 'confiscated_full' , 'bg-primary' => $order->insurance_status == 'confiscated_partial' ])>
+                                        @if ($order->insurance_status)
+                                            {{ __('dashboard.' . $order->insurance_status) }}
+                                        @else
+                                            {{ __('dashboard.no_result') }}
+                                        @endif
+                                    </span>
+                                </td>
+                                <!--begin::Order Status-->
+
 
                                 <!--begin::Rate Link-->
                                 <td>
@@ -281,10 +284,10 @@
 
                                 <!--begin::Agree_to_the_terms-->
                                 <td>
-                                    @if($order->agree == '1')
+                                    @if($order->signature_path)
                                         {{ __('dashboard.Done_agree_to_the_terms') }}
                                     @else
-                                        Null
+                                        {{ __('dashboard.no') }}
                                     @endif
                                 </td>
                                 <!--end::Agree_to_the_terms-->
@@ -306,15 +309,6 @@
 
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
                                         data-kt-menu="true">
-
-                                        <!-- @if(auth()->user()->can('orders.show'))
-                                            <div class="menu-item px-3">
-                                                <a href="{{ route('orders.show', $order->id) }}"
-                                                    class="menu-link px-3">{{ __('dashboard.show') }}</a>
-                                            </div>
-                                        @else
-                                            <p>No permission to view this order.</p>
-                                        @endif -->
 
                                         @can('orders.edit')
                                             <div class="menu-item px-3">

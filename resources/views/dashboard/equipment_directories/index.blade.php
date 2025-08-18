@@ -22,59 +22,61 @@
         </div>
 
         <div class="card-body pt-0">
-            <table class="table align-middle table-row-dashed fs-6 gy-5">
-                <thead>
-                <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                    <th>@lang('dashboard.directory_name')</th>
-                    <th>@lang('dashboard.sub_items_count')</th>
-                    <th>@lang('dashboard.media_count')</th>
-                    <th>@lang('dashboard.creator') / @lang('dashboard.date')</th>
-                    <th>@lang('dashboard.directory_status')</th>
-                    <th>@lang('dashboard.actions')</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($directories as $directory)
-                    <tr>
-                        <td>{{ $directory->name }}</td>
-                        <td>{{ $directory->items_count }}</td>
-                        <td>{{ $directory->media_count }}</td>
-                        <td>
-                            {{ $directory->creator->name }}<br>
-                            {{ $directory->created_at->format('Y-m-d h:i A') }}
-                        </td>
-                        <td>
+            <div class="table-responsive">
+                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                    <thead>
+                    <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
+                        <th class="min-w-100px">@lang('dashboard.directory_name')</th>
+                        <th class="min-w-50px">@lang('dashboard.sub_items_count')</th>
+                        <th class="min-w-50px">@lang('dashboard.media_count')</th>
+                        <th class="min-w-100px">@lang('dashboard.creator') / @lang('dashboard.date')</th>
+                        <th class="min-w-100px">@lang('dashboard.directory_status')</th>
+                        <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($directories as $directory)
+                        <tr>
+                            <td>{{ $directory->name }}</td>
+                            <td>{{ $directory->items_count }}</td>
+                            <td>{{ $directory->media_count }}</td>
+                            <td>
+                                {{ $directory->creator->name }}<br>
+                                {{ $directory->created_at->format('Y-m-d h:i A') }}
+                            </td>
+                            <td>
                             <span class="badge badge-{{ $directory->is_active ? 'success' : 'danger' }}">
                                 {{ $directory->is_active ? __('dashboard.active') : __('dashboard.inactive') }}
                             </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('equipment-directories.items.index', $directory) }}"
-                               class="btn btn-sm btn-info" title="@lang('dashboard.manage_items')">
-                                <i class="fas fa-boxes"></i>
-                            </a>
-                            <a href="{{ route('equipment-directories.edit', $directory) }}"
-                               class="btn btn-sm btn-primary" title="@lang('dashboard.edit')">
-                                <i class="fas fa-edit"></i>
-                            </a>
-{{--                            <a href="{{ route('equipment-directories.export', $directory) }}"--}}
-{{--                               class="btn btn-sm btn-success" title="@lang('dashboard.export_pdf')">--}}
-{{--                                <i class="fas fa-file-pdf"></i>--}}
-{{--                            </a>--}}
-                            <form action="{{ route('equipment-directories.destroy', $directory) }}"
-                                  method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                        title="@lang('dashboard.delete')"
-                                        onclick="return confirm('@lang('dashboard.confirm_delete')')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+                            </td>
+                            <td>
+                                <a href="{{ route('equipment-directories.items.index', $directory) }}"
+                                   class="btn btn-sm btn-info" title="@lang('dashboard.manage_items')">
+                                    <i class="fas fa-boxes"></i>
+                                </a>
+                                <a href="{{ route('equipment-directories.edit', $directory) }}"
+                                   class="btn btn-sm btn-primary" title="@lang('dashboard.edit')">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {{--                            <a href="{{ route('equipment-directories.export', $directory) }}"--}}
+                                {{--                               class="btn btn-sm btn-success" title="@lang('dashboard.export_pdf')">--}}
+                                {{--                                <i class="fas fa-file-pdf"></i>--}}
+                                {{--                            </a>--}}
+                                <form action="{{ route('equipment-directories.destroy', $directory) }}"
+                                      method="POST" class="d-inline">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            title="@lang('dashboard.delete')"
+                                            onclick="return confirm('@lang('dashboard.confirm_delete')')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 @endsection

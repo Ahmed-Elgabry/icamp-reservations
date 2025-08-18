@@ -114,11 +114,11 @@
     @can('customers.index')
         <!--begin::Menu item-->
 
-        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index','notice-types.index'])}}"
             data-kt-menu-trigger="click">
             <!--begin::Menu link-->
             <a href="#"
-                class="menu-link py-3 {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index'])}}">
+                class="menu-link py-3 {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index','notice-types.index'])}}">
                 <span class="menu-icon">
                     <img src="{{ asset('images/customers.png') }}" style="width:25px;height:25px">
                 </span>
@@ -164,6 +164,18 @@
                     </a>
                 </div>
                 {{--    @endcan--}}
+{{--                @can('notice-types.index')--}}
+                    <!--begin::Menu item-->
+                    <div class="menu-item">
+                        <a href="{{ route('notice-types.index') }}" class="menu-link py-3 {{ isActiveRoute('notice-types.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">@lang('dashboard.notice_types')</span>
+                        </a>
+                    </div>
+                    <!--end::Menu item-->
+{{--                @endcan--}}
             </div>
             <!--end::Menu sub-->
         </div>
@@ -646,7 +658,7 @@
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                            <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.tasks')])</span>
+                            <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.tasks')])</span>
                         </a>
                     </div>
                     <!--end::Menu item-->
@@ -922,7 +934,7 @@
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                            <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.violation')])</span>
+                            <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.violation')])</span>
                         </a>
                     </div>
                     <!--end::Menu item-->

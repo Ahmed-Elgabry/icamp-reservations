@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
+use App\Models\ServiceReport;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 
@@ -121,17 +122,29 @@ class StockController extends Controller
         }
     }
 
-    public function destroyServiceStock(Request $request, $service_id)
+    public function destroyServiceStock(Service $service, Stock $stock)
     {
-        // $service = Service::findOrFail($service_id);
-        // $serviceStocks = $service->stocks()->detach($request->stock_id);
 
-        // if ($serviceStocks) {
-        //     return response()->json(['message' => __('dashboard.stock_removed_from_service')], 200);
-        // } else {
-        //     return response()->json(['error' => __('dashboard.error_removing_stock_from_service')], 500);
-        // }
+        $attached = $service->stocks()->whereKey($stock->id)->first();
+        if (!$attached) {
+            return response()->json(['error' => __('dashboard.stock_not_attached')], 422);
+        }
+
+        $count = (int) $attached->pivot->count;
+
+        \DB::transaction(function () use ($service, $stock, $count) {
+            $stock->increment('quantity', $count);
+            $service->stocks()->detach($stock->id);
+        });
+
+        return response()->json(['message' => __('dashboard.success')], 200);
     }
 
-    
+    public function destroyServiceReport(ServiceReport $report)
+    {
+        $report->delete();
+        return response()->json(['message' => __('dashboard.success')], 200);
+    }
+
+
 }

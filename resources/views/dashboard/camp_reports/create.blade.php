@@ -54,7 +54,7 @@
                             @foreach(old('items', isset($campReport) ? $campReport->items : []) as $index => $item)
                                 <div class="card mb-4 item-row" data-index="{{ $index }}">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0">Item #{{ $index + 1 }}</h5>
+                                        <h5 class="mb-0">#{{ $index + 1 }}</h5>
                                         <button type="button" class="btn btn-sm btn-icon btn-danger remove-item">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -218,7 +218,7 @@
                 const template = `
                     <div class="card mb-4 item-row" data-index="${itemIndex}">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Item #${itemIndex + 1}</h5>
+                            <h5 class="mb-0"> #${itemIndex + 1}</h5>
                             <button type="button" class="btn btn-sm btn-icon btn-danger remove-item">
                                 <i class="bi bi-trash"></i>
                             </button>

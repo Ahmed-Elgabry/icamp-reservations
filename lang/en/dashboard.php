@@ -709,14 +709,20 @@ return [
     'save' => 'Save',
     'no_description' => 'No description',
     'inactive' => 'Inactive',
+    'delayed_reson' => 'Delayed reson',
     'select_employee' => 'Select Employee',
     'Insurance' => 'Insurance',
     'no_notes' => 'No notes',
 
     'violation_type_status' => 'Status',
-
+    'characters' => 'Characters',
+    'terms' => 'Terms and Conditions',
+    'old_date_vs_new_date' => 'Old date / New date',
+    'upload_or_take_image' => 'Upload Or take image',
+    'orders_payments' => 'Orders Payments', 
     'rows' => 'Rows',
     'total' => 'Total',
+    'full_price' => 'Total price',
 
     'meeting_assigned_to' => 'Assigned To',
 
@@ -724,6 +730,8 @@ return [
     'meeting_locations' => 'Meeting Locations',
     'location_details' => 'Location Details',
     'create_location' => 'Create Location',
+    'additional_notes' => 'Additional notes',
+    'accept_terms' => 'Accept Terms and Conditions',
     'edit_location' => 'Edit Location',
     'update_location' => 'Update Location',
     'save_location' => 'Save Location',
@@ -824,4 +832,18 @@ return [
 
     //    'created_at' => 'Created At',
     //    'confirm_delete' => 'Are you sure you want to delete this location?',
+
+//    'created_at' => 'Created At',
+//    'confirm_delete' => 'Are you sure you want to delete this location?',
+
+    // Notice Types Section
+    'notice_types' => 'Note Types',
+    'add_notice_type' => 'Add Note Type',
+    'edit_notice_type' => 'Edit Note Type',
+    'notice_type_created_successfully' => 'Notice type created successfully.',
+    'notice_type_updated_successfully' => 'Notice type updated successfully.',
+    'notice_type_deleted_successfully' => 'Notice type deleted successfully.',
+    'notice_type' => 'Notice Type',
+    'select_notice_type' => 'Select Notice Type',
+    'task_status' => 'Task Status',
 ];

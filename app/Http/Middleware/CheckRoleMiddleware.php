@@ -59,9 +59,6 @@ class CheckRoleMiddleware
         $currunt_route = str_replace($currunt_route, $actAs, $currunt_route);
       }
     }
-
-
-
     if (!str_contains($currunt_route, 'settings') and !\str_contains($currunt_route, 'sms') and !in_array($currunt_route, $excpetions)) {
       $currunt_route = str_replace('update', 'edit', $currunt_route);
     }

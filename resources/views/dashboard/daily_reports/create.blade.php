@@ -215,7 +215,9 @@
                         } else {
                             try {
                                 videoStream = await navigator.mediaDevices.getUserMedia({
-                                    video: true,
+                                    video: {
+                                        facingMode: { ideal: 'environment' }
+                                    },
                                     audio: true
                                 });
 
