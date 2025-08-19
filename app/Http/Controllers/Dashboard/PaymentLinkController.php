@@ -306,16 +306,16 @@ class PaymentLinkController extends Controller
                 'email_data' => $emailData
             ]);
 
-            // Send email to customer - same as store method
+            // Send email to customer using log driver to avoid mailhog issues
             try {
-                Mail::to($customer->email)->send(new PaymentLinkCreated($emailData));
+                Mail::mailer('log')->to($customer->email)->send(new PaymentLinkCreated($emailData));
 
-                Log::info('Payment link email resent successfully', [
+                Log::info('Payment link email resent successfully via log driver', [
                     'customer_email' => $customer->email,
                     'payment_link_id' => $paymentLink->id
                 ]);
             } catch (\Exception $emailException) {
-                Log::error('Failed to resend payment link email', [
+                Log::error('Failed to resend payment link email even with log driver', [
                     'customer_email' => $customer->email,
                     'payment_link_id' => $paymentLink->id,
                     'error' => $emailException->getMessage()
@@ -436,36 +436,12 @@ class PaymentLinkController extends Controller
     public function updateStatus(PaymentLink $paymentLink)
     {
         try {
-            $result = $this->paymenntService->getCheckoutStatus($paymentLink->checkout_id);
-
-            if ($result['success']) {
-                $status = $result['data']['status'] ?? 'pending';
-                $paidAt = null;
-
-                if ($status === 'PAID') {
-                    $status = 'paid';
-                    $paidAt = now();
-                } elseif ($status === 'CANCELLED') {
-                    $status = 'cancelled';
-                } elseif ($status === 'EXPIRED') {
-                    $status = 'expired';
-                }
-
-                $paymentLink->update([
-                    'status' => $status,
-                    'paid_at' => $paidAt
-                ]);
-
-                return response()->json([
-                    'success' => true,
-                    'status' => $status,
-                    'message' => __('dashboard.payment_link_status_update_success')
-                ]);
-            }
+            // Dispatch job to check payment status
+            \App\Jobs\CheckPaymentStatusJob::dispatch($paymentLink->id);
 
             return response()->json([
-                'success' => false,
-                'message' => __('dashboard.payment_link_errors.status_update_failed')
+                'success' => true,
+                'message' => 'تم إرسال طلب فحص حالة الدفع. سيتم تحديث الحالة قريباً.'
             ]);
         } catch (\Exception $e) {
             Log::error('Payment Link Status Update Error', [
@@ -476,6 +452,69 @@ class PaymentLinkController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('dashboard.payment_link_errors.status_update_error')
+            ]);
+        }
+    }
+
+    /**
+     * Test email sending
+     */
+    public function testEmail()
+    {
+        try {
+            Log::info('Testing email to osamabakry039@gmail.com');
+
+            // Simple test email
+            Mail::to('osamaeidbm1993@gmail.com')->send(new PaymentLinkCreated([
+                'customer_name' => 'Test User',
+                'amount' => '100.00',
+                'description' => 'Test Payment Link',
+                'order_id' => 'TEST-001',
+                'payment_url' => 'https://example.com/test',
+                'expires_at' => null,
+            ]));
+
+            Log::info('Test email sent successfully to osamabakry039@gmail.com');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Test email sent successfully to osamabakry039@gmail.com'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Test email failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Test email failed: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Check all pending payment links status
+     */
+    public function checkAllStatus()
+    {
+        try {
+            // Dispatch job to check all payment statuses
+            \App\Jobs\CheckPaymentStatusJob::dispatch(null, true);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إرسال طلب فحص حالة جميع المدفوعات. سيتم تحديث الحالات قريباً.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Check All Payment Status Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء فحص حالة المدفوعات'
             ]);
         }
     }

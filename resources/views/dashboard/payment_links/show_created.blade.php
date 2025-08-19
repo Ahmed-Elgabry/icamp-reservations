@@ -81,7 +81,7 @@
                     <div class="text-center mt-4">
                         <div id="qrcode" class="d-inline-block"></div>
                         <p class="mt-2 text-muted">{{ __('dashboard.scan_qr_code_to_pay') }}</p>
-                        <button id="downloadQrBtn" class="btn btn-outline-secondary mt-2">
+                        <button id="downloadQrBtn" class="btn btn-outline-secondary mt-2" disabled>
                             <i class="fa fa-download"></i> {{ __('dashboard.download_qr_code') }}
                         </button>
                     </div>
@@ -114,6 +114,7 @@
 
 <!-- Include QR Code Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -133,15 +134,51 @@ document.addEventListener('DOMContentLoaded', function() {
         generateQRCodeCanvas("{{ $payment_url }}");
         
         console.log('QR Code generated successfully!');
+        console.log('Payment URL:', "{{ $payment_url }}");
     } catch (error) {
         console.error('QR Code generation error:', error);
-                        document.getElementById('qrcode').innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
-        document.getElementById('downloadQrBtn').style.display = 'none';
+        console.log('Trying fallback QR code generation...');
+        
+        // Try fallback method using QRCode.js
+        try {
+            if (typeof QRCode !== 'undefined') {
+                const qrcodeElement = document.getElementById('qrcode');
+                qrcodeElement.innerHTML = '';
+                
+                QRCode.toCanvas(qrcodeElement, "{{ $payment_url }}", {
+                    width: 200,
+                    margin: 2,
+                    color: {
+                        dark: '#000000',
+                        light: '#FFFFFF'
+                    }
+                }, function (error, canvas) {
+                    if (error) {
+                        console.error('Fallback QR code generation failed:', error);
+                        qrcodeElement.innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
+                        document.getElementById('downloadQrBtn').style.display = 'none';
+                    } else {
+                        console.log('Fallback QR code generated successfully');
+                        // Store canvas for download
+                        qrCodeDataURL = canvas.toDataURL('image/png');
+                        document.getElementById('downloadQrBtn').disabled = false;
+                    }
+                });
+            } else {
+                throw new Error('Fallback library not available');
+            }
+        } catch (fallbackError) {
+            console.error('Fallback QR code generation also failed:', fallbackError);
+            document.getElementById('qrcode').innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
+            document.getElementById('downloadQrBtn').style.display = 'none';
+        }
     }
 
     // Generate QR Code canvas for download
     function generateQRCodeCanvas(url) {
         try {
+            console.log('Generating QR code canvas for URL:', url);
+            
             const qr = qrcode(0, 'M');
             qr.addData(url);
             qr.make();
@@ -152,6 +189,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const cellSize = 8;
             const margin = 32;
             const size = modules * cellSize + (margin * 2);
+            
+            console.log('Canvas size:', size, 'Modules:', modules);
             
             canvas.width = size;
             canvas.height = size;
@@ -177,10 +216,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Store the data URL for download
             qrCodeDataURL = canvas.toDataURL('image/png');
+            console.log('QR Code canvas generated successfully. Data URL length:', qrCodeDataURL.length);
+            
+            // Enable download button
+            document.getElementById('downloadQrBtn').disabled = false;
             
         } catch (error) {
             console.error('Canvas QR Code generation error:', error);
             document.getElementById('downloadQrBtn').style.display = 'none';
+            qrCodeDataURL = null;
         }
     }
 
@@ -193,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Change button appearance while copying
         button.disabled = true;
-                        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.copying") }}';
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.copying") }}';
         
         // Select the text in the input field
         input.select();
@@ -213,14 +257,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Try fallback method
                 tryFallbackCopy(textToCopy, button, originalText);
             });
+        } else {
+            // Method 2: execCommand fallback
+            tryFallbackCopy(textToCopy, button, originalText);
+        }
+    });
     
     // Download QR Code functionality
     document.getElementById('downloadQrBtn').addEventListener('click', function() {
         const button = this;
         const originalText = button.innerHTML;
         
+        console.log('Download button clicked. QR Code data URL available:', !!qrCodeDataURL);
+        
         if (!qrCodeDataURL) {
             showToast('{{ __("dashboard.failed_to_prepare_qr_download") }}', 'error');
+            console.error('No QR code data URL available for download');
             return;
         }
         
@@ -233,6 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const downloadLink = document.createElement('a');
             downloadLink.href = qrCodeDataURL;
             downloadLink.download = 'payment-qr-code.png';
+            downloadLink.style.display = 'none';
             
             // Trigger download
             document.body.appendChild(downloadLink);
@@ -245,6 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
             button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.downloaded") }}';
             
             showToast('{{ __("dashboard.qr_code_downloaded_success") }}', 'success');
+            console.log('QR code download initiated successfully');
             
             // Reset button after 2 seconds
             setTimeout(function() {
@@ -259,11 +313,6 @@ document.addEventListener('DOMContentLoaded', function() {
             button.disabled = false;
             button.innerHTML = originalText;
             showToast('{{ __("dashboard.failed_to_download_qr") }}', 'error');
-        }
-    });
-        } else {
-            // Method 2: execCommand fallback
-            tryFallbackCopy(textToCopy, button, originalText);
         }
     });
     
@@ -527,12 +576,19 @@ document.addEventListener('DOMContentLoaded', function() {
         min-width: 150px;
     }
      
-    #downloadQrBtn:hover {
+    #downloadQrBtn:hover:not(:disabled) {
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     
     #downloadQrBtn:disabled {
+        transform: none;
+        box-shadow: none;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    #downloadQrBtn:disabled:hover {
         transform: none;
         box-shadow: none;
     }

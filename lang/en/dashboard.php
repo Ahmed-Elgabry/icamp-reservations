@@ -892,6 +892,22 @@ return [
     'payment_link_copied' => 'Payment link copied successfully!',
     'view_details' => 'View Details',
 
+    // QR Code and Download related translations
+    'scan_qr_code_to_pay' => 'Scan QR code to pay',
+    'qr_code_creation_error' => 'Failed to create QR code',
+    'failed_to_prepare_qr_download' => 'Failed to prepare QR code for download',
+    'downloading' => 'Downloading...',
+    'downloaded' => 'Downloaded!',
+    'qr_code_downloaded_success' => 'QR code downloaded successfully',
+    'failed_to_download_qr' => 'Failed to download QR code',
+
+    // Copy functionality translations
+    'copying' => 'Copying...',
+    'copy_success' => 'Copied!',
+    'copy_failed_error' => 'Failed to copy to clipboard',
+    'copy_manually_prompt' => 'Please copy this text manually:',
+    'click_to_copy_link' => 'Click to copy payment link',
+
     // Email-related translations
     'hello' => 'Hello',
     'payment_link_email_message' => 'A new payment link has been created for your order. Please click the button below to complete your payment.',
