@@ -924,6 +924,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.resend', 'dashboard.payment-links']
     ]);
 
+    # payment-links resend email
+    Route::post('payment-links/{paymentLink}/resend-email', [
+        'uses' => 'PaymentLinkController@resendEmail',
+        'as' => 'payment-links.resend-email',
+        'title' => ['actions.resend_email', 'dashboard.payment-links']
+    ]);
+
     # payment-links cancel
     Route::post('payment-links/{paymentLink}/cancel', [
         'uses' => 'PaymentLinkController@cancel',

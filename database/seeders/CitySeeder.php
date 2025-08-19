@@ -15,18 +15,22 @@ class CitySeeder extends Seeder
      */
     public function run()
     {
-        DB::table('cities')->insert(
+        $cities = [
             [
+                'name' => json_encode(['ar' => 'مكة', 'en' => 'Makkah']),
+                'image' => null
+            ],
+            [
+                'name' => json_encode(['ar' => 'مصر', 'en' => 'Eqypt']),
+                'image' => null
+            ],
+        ];
 
-                ['name'   => json_encode(['ar' => 'مكة' , 'en' => 'Makkah']),
-                'image'   => null
-                ],
-
-                ['name'   => json_encode(['ar' => 'مصر' , 'en' => 'Eqypt']),
-                'image'   => null
-                ],
-
-            ]
-        );
+        foreach ($cities as $city) {
+            DB::table('cities')->updateOrInsert(
+                ['name' => $city['name']],
+                $city
+            );
+        }
     }
 }
