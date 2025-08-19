@@ -19,4 +19,9 @@ class Expense extends Model
     {
         return $this->belongsTo(BankAccount::class, 'account_id');
     }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }

@@ -45,14 +45,15 @@ function campInventory()
         'طاولة خشب صغيرة (Small wooden table)' => 28,
         'مزهرية ورد كبير (Large rose vase)' => 29,
         'مناديل (Tissues)' => 30
-    ];    
+    ];
 }
 
 function paymentMethod($select = null)
 {
-    $rows =  [    
+    $rows =  [
         'cash',
-        'visa'
+        'visa',
+        'payment_link'
     ];
 
     if($select)
@@ -72,7 +73,7 @@ function paymentMethod($select = null)
 
 function statements($select = null)
 {
-    $rows =  [    
+    $rows =  [
         'deposit',
         'complete the amount',
         'the_insurance',
@@ -174,19 +175,19 @@ if (!function_exists('defaultLang')) {
 
 function pushNotification($tokens , $data , $platforms)
 {
-    
+
     $url = 'https://fcm.googleapis.com/fcm/send';
     $SERVER_API_KEY = Setting::where('key' , 'firebase_key')->first()->value ;
 
     // $SERVER_API_KEY = 'AAAAi0Y_HnY:APA91bGeuHqUXsXiwWMDlJ-tenEOiKmRZ7pfifFPvI0XUzUiIRD6togg468docAR0gdTpY40Yvr50I8610Fdm9jG3RT-iYakNLthfVcxViBSJ6lIzt5gVh77Y_4VY3oqYyP64Svx6QxR';
-        
+
     // $data = [
     //     "registration_ids" => $tokens,
     //     "notification" => [
     //         'title'                  => $data['title_'.lang()],
     //         'body'                   => $data['body_'.lang()] ,
     //         'data'                   => json_encode(array('type' => $data['type'] ,'order_id' => $data['order_id']??null ,'provider_id' => $data['provider_id'] ??null,'delegate_id' => $data['delegate_id']??null,'status' => $data['status']??null)),
-    //         'sound'                  => 'default', 
+    //         'sound'                  => 'default',
     //     ]
     // ];
 
@@ -217,20 +218,20 @@ function pushNotification($tokens , $data , $platforms)
     ];
 
     $ch = curl_init();
-    
+
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
-            
+
     $response = curl_exec($ch);
 
     return response()->json();
 
 }
-    
 
-    
+
+
 ?>

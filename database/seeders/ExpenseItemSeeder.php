@@ -27,7 +27,10 @@ class ExpenseItemSeeder extends Seeder
         ];
 
         foreach ($expenseItems as $item) {
-            ExpenseItem::create($item);
+            ExpenseItem::updateOrCreate(
+                ['name' => $item['name']],
+                $item
+            );
         }
     }
 }
