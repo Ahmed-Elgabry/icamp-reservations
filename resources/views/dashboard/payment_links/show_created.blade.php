@@ -102,7 +102,7 @@
                 
                 @if($order->customer && $order->customer->email)
                     <button class="btn btn-warning resend-email-btn" 
-                            data-id="{{ $payment_link_id }}"
+                            data-id="{{ $paymentLink->id }}"
                             data-customer-name="{{ $order->customer->name ?? __('dashboard.not_specified') }}">
                         <i class="fa fa-envelope"></i> {{ __('dashboard.resend_email') }}
                     </button>
@@ -383,6 +383,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = button.getAttribute('data-id');
             const customerName = button.getAttribute('data-customer-name');
             
+            console.log('Resend email button clicked:', { id, customerName });
+            
             // Confirm before sending
             if (!confirm('{{ __('dashboard.confirm_resend_email') }} ' + customerName + '?')) {
                 return;
@@ -392,6 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
             button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __('dashboard.sending') }}...';
             
             try {
+                console.log('Sending request to:', `/payment-links/${id}/resend-email`);
                 const response = await fetch(`/payment-links/${id}/resend-email`, {
                     method: 'POST',
                     headers: {
@@ -400,7 +403,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 
+                console.log('Response status:', response.status);
                 const result = await response.json();
+                console.log('Response result:', result);
                 
                 if (result.success) {
                     showToast(result.message || '{{ __('dashboard.payment_link_email_resent_success') }}', 'success');
@@ -408,6 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showToast(result.message || '{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
                 }
             } catch (error) {
+                console.error('Error in resend email:', error);
                 showToast('{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
             } finally {
                 button.disabled = false;
