@@ -66,11 +66,24 @@ class PaymentLink extends Model
 
     public function getStatusBadgeAttribute()
     {
-        return match ($this->status) {
-            'paid' => '<span class="badge badge-success">تم الدفع</span>',
-            'pending' => '<span class="badge badge-warning">معلق</span>',
-            'expired' => '<span class="badge badge-danger">منتهي الصلاحية</span>',
-            default => '<span class="badge badge-secondary">غير محدد</span>'
-        };
+        $locale = app()->getLocale();
+
+        if ($locale === 'ar') {
+            return match ($this->status) {
+                'paid' => '<span class="badge badge-success">تم الدفع</span>',
+                'pending' => '<span class="badge badge-warning">معلق</span>',
+                'cancelled' => '<span class="badge badge-danger">ملغي</span>',
+                'expired' => '<span class="badge badge-danger">منتهي الصلاحية</span>',
+                default => '<span class="badge badge-secondary">غير محدد</span>'
+            };
+        } else {
+            return match ($this->status) {
+                'paid' => '<span class="badge badge-success">Paid</span>',
+                'pending' => '<span class="badge badge-warning">Pending</span>',
+                'cancelled' => '<span class="badge badge-danger">Cancelled</span>',
+                'expired' => '<span class="badge badge-danger">Expired</span>',
+                default => '<span class="badge badge-secondary">Unknown</span>'
+            };
+        }
     }
 }
