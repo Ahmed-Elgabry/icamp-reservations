@@ -137,7 +137,7 @@
             margin-left: 10px;
         }
         .lang-inputs {
-            display: flex;
+            display: block;
             gap: 10px;
         }
         .lang-inputs .form-control {
@@ -232,36 +232,35 @@
             <div class="bg-white rounded shadow-sm p-4" style="min-height: 70vh;">
                 <div id="formFields" class="sortable-container">
                     <!-- Survey questions will be added here dynamically -->
-                    @if(isset($survey) && isset($survey['fields']) && count($survey['fields']) > 0)
-                        @foreach($survey['fields'] as $question)
-                            <div dir="rtl" class="form-field {{ $question['settings']['width'] ?? 'col-12' }}" id="field_{{ $question['id'] }}" data-field-id="{{ $question['id'] }}">
-                                <div class="field-actions">
-                                    <button class="btn btn-sm btn-light me-1 duplicate-field" title="نسخ">
-                                        <i class="mdi mdi-content-copy"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-light me-1 move-up" title="تحريك للأعلى">
-                                        <i class="mdi mdi-arrow-up"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-light me-1 move-down" title="تحريك للأسفل">
-                                        <i class="mdi mdi-arrow-down"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-light delete-field" title="حذف">
-                                        <i class="mdi mdi-delete-outline text-danger"></i>
-                                    </button>
-                                </div>
-                                <div class="field-content">
-                                    {!! SurveyHelper::generateQuestionHtml($question) !!}
-                                </div>
-                                <div class="field-type-label text-start">{{ SurveyHelper::getQuestionTypeName($question["question_type"]) }}</div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="text-center text-muted py-5">
-                            <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
-                            <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
-                        </div>
-                    @endif
-                </div>
+@if(isset($survey) && isset($survey['fields']) && count($survey['fields']) > 0)
+    @foreach($survey['fields'] as $question)
+        <div dir="rtl" class="form-field {{ $question['settings']['width'] ?? 'col-12' }}" id="field_{{ $question['id'] }}" data-field-id="field_{{ $question['id'] }}">
+            <div class="field-actions">
+                <button class="btn btn-sm btn-light me-1 duplicate-field" title="نسخ">
+                    <i class="mdi mdi-content-copy"></i>
+                </button>
+                <button class="btn btn-sm btn-light me-1 move-up" title="تحريك للأعلى">
+                    <i class="mdi mdi-arrow-up"></i>
+                </button>
+                <button class="btn btn-sm btn-light me-1 move-down" title="تحريك للأسفل">
+                    <i class="mdi mdi-arrow-down"></i>
+                </button>
+                <button class="btn btn-sm btn-light delete-field" title="حذف">
+                    <i class="mdi mdi-delete-outline text-danger"></i>
+                </button>
+            </div>
+            <div class="field-content">
+                {!! SurveyHelper::generateQuestionHtml($question) !!}
+            </div>
+            <div class="field-type-label text-start">{{ SurveyHelper::getQuestionTypeName($question["question_type"]) }}</div>
+        </div>
+    @endforeach
+@else
+    <div class="text-center text-muted py-5">
+        <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
+        <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
+    </div>
+@endif                </div>
             </div>
         </div>
         <!-- Right Sidebar - Question Properties -->
@@ -472,34 +471,34 @@
             }
 
             // Render field in the survey builder
-            function renderField(fieldData) {
-                let fieldHtml = `
-                    <div dir="rtl" class="form-field ${fieldData.width}" id="${fieldData.id}" data-field-id="${fieldData.id}">
-                        <div class="field-actions">
-                            <button class="btn btn-sm btn-light me-1 duplicate-field" title="نسخ">
-                                <i class="mdi mdi-content-copy"></i>
-                            </button>
-                            <button class="btn btn-sm btn-light me-1 move-up" title="تحريك للأعلى">
-                                <i class="mdi mdi-arrow-up"></i>
-                            </button>
-                            <button class="btn btn-sm btn-light me-1 move-down" title="تحريك للأسفل">
-                                <i class="mdi mdi-arrow-down"></i>
-                            </button>
-                            <button class="btn btn-sm btn-light delete-field" title="حذف">
-                                <i class="mdi mdi-delete text-danger"></i>
-                            </button>
-                        </div>
-                        <div class="field-content">
-                            ${generateFieldHtml(fieldData)}
-                        </div>
-                        <div class="field-type-label text-start">${getFieldTypeName(fieldData.type)}</div>
-                    </div>
-                `;
-                $("#formFields").append(fieldHtml);
+function renderField(fieldData) {
+    let fieldHtml = `
+        <div dir="rtl" class="form-field ${fieldData.width}" id="${fieldData.id}" data-field-id="${fieldData.id}">
+            <div class="field-actions">
+                <button class="btn btn-sm btn-light me-1 duplicate-field" title="نسخ">
+                    <i class="mdi mdi-content-copy"></i>
+                </button>
+                <button class="btn btn-sm btn-light me-1 move-up" title="تحريك للأعلى">
+                    <i class="mdi mdi-arrow-up"></i>
+                </button>
+                <button class="btn btn-sm btn-light me-1 move-down" title="تحريك للأسفل">
+                    <i class="mdi mdi-arrow-down"></i>
+                </button>
+                <button class="btn btn-sm btn-light delete-field" title="حذف">
+                    <i class="mdi mdi-delete text-danger"></i>
+                </button>
+            </div>
+            <div class="field-content">
+                ${generateFieldHtml(fieldData)}
+            </div>
+            <div class="field-type-label text-start">${getFieldTypeName(fieldData.type)}</div>
+        </div>
+    `;
+    $("#formFields").append(fieldHtml);
 
-                // Add event listeners to the new field
-                attachFieldEvents(fieldData.id);
-            }
+    // Add event listeners to the new field
+    attachFieldEvents(fieldData.id);
+}
 
             // Generate HTML for specific field type
             function generateFieldHtml(fieldData) {
@@ -1041,41 +1040,46 @@
                 }).get());
                 console.log("================================");
             }
+function updateFieldOrder() {
+    const fieldOrder = [];
+    $("#formFields .form-field").each(function() {
+        fieldOrder.push($(this).data("field-id"));
+    });
 
-            function updateFieldOrder() {
-                const fieldOrder = [];
-                $("#formFields .form-field").each(function() {
-                    fieldOrder.push($(this).data("field-id"));
-                });
+    console.log("DOM field order:", fieldOrder);
+    console.log("Current survey fields:", surveyData.fields.map(f => f.id));
 
-                // Create a map of field IDs to their data for quick lookup
-                const fieldMap = {};
-                surveyData.fields.forEach(field => {
-                    fieldMap[field.id] = field;
-                });
+    // Create a map of field IDs to their data for quick lookup
+    const fieldMap = {};
+    surveyData.fields.forEach(field => {
+        fieldMap[field.id] = field;
+    });
 
-                // Rebuild the fields array in the new order
-                const orderedFields = [];
-                fieldOrder.forEach(fieldId => {
-                    if (fieldMap[fieldId]) {
-                        orderedFields.push(fieldMap[fieldId]);
-                    } else {
-                        console.error("Field not found in survey data:", fieldId);
-                    }
-                });
+    // Rebuild the fields array in the new order
+    const orderedFields = [];
+    fieldOrder.forEach(fieldId => {
+        if (fieldMap[fieldId]) {
+            orderedFields.push(fieldMap[fieldId]);
+        } else {
+            console.error("Field not found in survey data:", fieldId);
+            console.log("Available field IDs:", Object.keys(fieldMap));
+        }
+    });
 
-                // Only update if we found all fields
-                if (orderedFields.length === fieldOrder.length) {
-                    surveyData.fields = orderedFields;
-                } else {
-                    console.error("Not all fields found in survey data. Aborting order update.");
-                    console.log("Expected fields:", fieldOrder);
-                    console.log("Found fields:", orderedFields.map(f => f.id));
-                }
+    // Only update if we found all fields
+    if (orderedFields.length === fieldOrder.length) {
+        surveyData.fields = orderedFields;
+        console.log("Successfully updated field order");
+    } else {
+        console.error("Not all fields found in survey data. Aborting order update.");
+        console.log("Expected fields:", fieldOrder);
+        console.log("Found fields:", orderedFields.map(f => f.id));
+    }
 
-                // Mark as unsaved
-                $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-            }
+    // Mark as unsaved
+    $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+}
+
 
             // Save survey
             $("#saveBtn, #saveFormBtn").on("click", function() {
@@ -1487,40 +1491,83 @@
             }
 
             // Initialize with existing survey data if available
-            @if(isset($survey))
-                // Initialize survey data
-                surveyData = {
-                    id: {{ $survey['id'] }},
-                    title: "{{ $survey['title'] }}",
-                    description: "{{ $survey['description'] }}",
-                    fields: [
-                        @foreach($survey['fields'] as $question)
-                       {
-                            id: "field_{{ $question['id'] }}",
-                            type: "{{ $question['question_type'] }}",
-                            label: {!! json_encode(is_array($question['question_text']) ? $question['question_text'] : ['ar' => $question['question_text'], 'en' => $question['question_text']]) !!},
-                            placeholder: {!! json_encode(is_array($question['placeholder']) ? $question['placeholder'] : ['ar' => $question['placeholder'], 'en' => $question['placeholder']]) !!},
-                            helpText: {!! json_encode(is_array($question['help_text']) ? $question['help_text'] : ['ar' => $question['help_text'], 'en' => $question['help_text']]) !!},
-                            width: "{{ $question['settings']['width'] ?? 'col-12' }}",
-                            errorMessage: "{{ $question['error_message'] }}",
-                            options: {!! $question['options'] ? json_encode($question['options']) : 'null' !!},
-                            settings: {!! $question['settings'] ? json_encode($question['settings']) : '{}' !!}
-                        }
-                        @if(!$loop->last),@endif
-                        @endforeach
-                    ]
-                };
+@if(isset($survey))
+    // Initialize survey data with consistent field IDs
+    surveyData = {
+        id: {{ $survey['id'] }},
+        title: "{{ $survey['title'] }}",
+        description: "{{ $survey['description'] }}",
+        fields: [
+            @foreach($survey['fields'] as $question)
+           {
+                id: "field_{{ $question['id'] }}", // Ensure this matches the DOM data-field-id
+                type: "{{ $question['question_type'] }}",
+                label: {!! json_encode(is_array($question['question_text']) ? $question['question_text'] : ['ar' => $question['question_text'], 'en' => $question['question_text']]) !!},
+                placeholder: {!! json_encode(is_array($question['placeholder']) ? $question['placeholder'] : ['ar' => $question['placeholder'], 'en' => $question['placeholder']]) !!},
+                helpText: {!! json_encode(is_array($question['help_text']) ? $question['help_text'] : ['ar' => $question['help_text'], 'en' => $question['help_text']]) !!},
+                width: "{{ $question['settings']['width'] ?? 'col-12' }}",
+                errorMessage: "{{ $question['error_message'] }}",
+                options: {!! $question['options'] ? json_encode($question['options']) : 'null' !!},
+                settings: {!! $question['settings'] ? json_encode($question['settings']) : '{}' !!}
+            }
+            @if(!$loop->last),@endif
+            @endforeach
+        ]
+    };
 
-                // Set survey title
-                $("#surveyTitle").val(surveyData.title);
+    // Set survey title
+    $("#surveyTitle").val(surveyData.title);
 
-                // Remove empty state
-                $("#formFields .text-center.text-muted").remove();
+    // Remove empty state
+    $("#formFields .text-center.text-muted").remove();
 
-                surveyData.fields.forEach(function(field) {
-                    attachFieldEvents(field.id);
-                });
-            @endif
+    // Ensure all existing DOM elements have consistent data-field-id attributes
+    $("#formFields .form-field").each(function() {
+        const domId = $(this).attr('id');
+        $(this).attr('data-field-id', domId);
+    });
+
+    surveyData.fields.forEach(function(field) {
+        attachFieldEvents(field.id);
+    });
+@endif
+
+function checkFieldConsistency() {
+    console.log("=== FIELD CONSISTENCY CHECK ===");
+
+    const domFields = [];
+    $("#formFields .form-field").each(function() {
+        domFields.push({
+            id: $(this).attr('id'),
+            dataFieldId: $(this).data('field-id')
+        });
+    });
+
+    const dataFields = surveyData.fields.map(f => f.id);
+
+    console.log("DOM fields:", domFields);
+    console.log("Data fields:", dataFields);
+
+    // Check if all DOM fields have matching data
+    domFields.forEach(domField => {
+        if (!dataFields.includes(domField.id)) {
+            console.error(`DOM field ${domField.id} not found in data`);
+        }
+        if (domField.id !== domField.dataFieldId) {
+            console.error(`Inconsistent field ID: DOM id=${domField.id}, data-field-id=${domField.dataFieldId}`);
+        }
+    });
+
+    // Check if all data fields have matching DOM
+    dataFields.forEach(dataField => {
+        if (!$(`#${dataField}`).length) {
+            console.error(`Data field ${dataField} not found in DOM`);
+        }
+    });
+
+    console.log("===============================");
+}
+
         });
     </script>
 {{-- @endsection --}}
