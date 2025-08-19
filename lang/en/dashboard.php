@@ -719,7 +719,7 @@ return [
     'terms' => 'Terms and Conditions',
     'old_date_vs_new_date' => 'Old date / New date',
     'upload_or_take_image' => 'Upload Or take image',
-    'orders_payments' => 'Orders Payments', 
+    'orders_payments' => 'Orders Payments',
     'rows' => 'Rows',
     'total' => 'Total',
     'full_price' => 'Total price',
