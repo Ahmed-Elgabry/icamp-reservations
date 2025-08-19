@@ -904,4 +904,12 @@ return [
     'ratings_count' => 'Ratings Count',
     'question_answers' => 'Question Answers',
     'question_answers_desc' => 'Distribution of answers for each question type',
+
+    // Survey Email
+    'survey_email_title' => 'Service Evaluation',
+    'survey_email_greeting' => 'Dear Customer',
+    'survey_email_body' => 'Thank you for using our services. We would appreciate it if you could take a moment to evaluate your experience.',
+    'survey_email_button' => 'Click Here to Evaluate',
+    'survey_email_thanks' => 'Thank you for your feedback!',
+    'all_rights_reserved' => 'All Rights Reserved',
 ];

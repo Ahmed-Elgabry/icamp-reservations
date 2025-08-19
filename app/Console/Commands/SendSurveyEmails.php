@@ -4,9 +4,12 @@ namespace App\Console\Commands;
 
 use App\Models\Order;
 use App\Models\Survey;
+use App\Models\SurveyEmailLog;
+use App\Mail\SurveyEmail;
 use App\Mail\SendMail;
 use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendSurveyEmails extends Command
@@ -49,6 +52,7 @@ class SendSurveyEmails extends Command
             ->whereDoesntHave('surveyEmailLog') // Check if the order doesn't have any survey email logs
             ->with('customer')
             ->get();
+        $this->info("Orders found: " . count($orders));
 
         foreach ($orders as $order) {
             if (!$order->customer || !$order->customer->email) {
@@ -57,7 +61,7 @@ class SendSurveyEmails extends Command
             }
 
             // Generate survey URL
-            $surveyUrl = route('surveys.show', ['order' => $order->id]);
+            $surveyUrl = route('surveys.public', ['order' => $order->id]);
 
             // Prepare email data
             $emailData = [
@@ -72,8 +76,15 @@ class SendSurveyEmails extends Command
             ];
 
             try {
-                // Send the email
-                Mail::to($order->customer->email)->send(new SendMail($emailData));
+                // Send the email using our new SurveyEmail class
+                Mail::to($order->customer->email)->send(new SurveyEmail($order, $surveyUrl));
+
+                // Log that we've sent the email
+                SurveyEmailLog::create([
+                    'order_id' => $order->id,
+                    'sent_at' => now()
+                ]);
+
                 $this->info("Survey email sent to customer for order #{$order->id}");
                 $count++;
             } catch (\Exception $e) {

@@ -930,4 +930,12 @@ return [
     'question_types_desc' => 'توزيع أنواع الأسئلة في الاستبيان',
     'survey_responses' => 'استجابات الاستبيان',
     'survey_responses_desc' => 'توزيع الاستجابات عبر الأسئلة',
+
+    // Survey Email
+    'survey_email_title' => 'تقييم الخدمة',
+    'survey_email_greeting' => 'عميلنا العزيز',
+    'survey_email_body' => 'شكراً لاستخدامك خدماتنا. نرجو منك تقييم تجربتك معنا.',
+    'survey_email_button' => 'اضغط هنا للتقييم',
+    'survey_email_thanks' => 'نشكرك على تقييمك!',
+    'all_rights_reserved' => 'جميع الحقوق محفوظة',
 ];
