@@ -1,15 +1,17 @@
-{{-- resources/views/admin/surveys/builder.blade.php --}}
-{{-- @extends('layouts.app')
-@section('title', 'Survey Builder')
-@section('content') --}}
-{{-- @section('styles') --}}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>icamp - بناء الاستبيان</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-utilities.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>\
+	<link rel="canonical" href="{{ Request::fullUrl() }}" />
     <style>
         :root {
             --bs-primary: #2563eb;
@@ -149,6 +151,9 @@
             margin-bottom: 0.25rem;
         }
     </style>
+</head>
+<body>
+
 {{-- @endsection --}}
 <div class="container-fluid" style="height: 100vh;">
     <div class="row">
