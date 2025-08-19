@@ -81,7 +81,13 @@ class CheckPaymentStatusJob implements ShouldQueue
 
         $paymentLinks = $query->get();
 
-        Log::info("Checking {$paymentLinks->count()} payment links");
+        $locale = app()->getLocale();
+
+        if ($locale === 'ar') {
+            Log::info("فحص {$paymentLinks->count()} رابط دفع");
+        } else {
+            Log::info("Checking {$paymentLinks->count()} payment links");
+        }
 
         foreach ($paymentLinks as $paymentLink) {
             try {
@@ -108,6 +114,7 @@ class CheckPaymentStatusJob implements ShouldQueue
     protected function updatePaymentStatus(PaymentLink $paymentLink, PaymenntService $paymenntService)
     {
         $result = $paymenntService->getCheckoutStatus($paymentLink->checkout_id);
+        $locale = app()->getLocale();
 
         if ($result['success']) {
             $status = $result['data']['status'] ?? 'pending';
@@ -117,10 +124,17 @@ class CheckPaymentStatusJob implements ShouldQueue
                 $status = 'paid';
                 $paidAt = now();
 
-                Log::info("Payment {$paymentLink->id} is now PAID", [
-                    'order_id' => $paymentLink->order_id,
-                    'amount' => $paymentLink->amount
-                ]);
+                if ($locale === 'ar') {
+                    Log::info("تم دفع المدفوعة {$paymentLink->id}", [
+                        'order_id' => $paymentLink->order_id,
+                        'amount' => $paymentLink->amount
+                    ]);
+                } else {
+                    Log::info("Payment {$paymentLink->id} is now PAID", [
+                        'order_id' => $paymentLink->order_id,
+                        'amount' => $paymentLink->amount
+                    ]);
+                }
 
                 // Here you can add additional logic like:
                 // - Update order status
@@ -129,10 +143,18 @@ class CheckPaymentStatusJob implements ShouldQueue
 
             } elseif ($status === 'CANCELLED') {
                 $status = 'cancelled';
-                Log::info("Payment {$paymentLink->id} was CANCELLED");
+                if ($locale === 'ar') {
+                    Log::info("تم إلغاء المدفوعة {$paymentLink->id}");
+                } else {
+                    Log::info("Payment {$paymentLink->id} was CANCELLED");
+                }
             } elseif ($status === 'EXPIRED') {
                 $status = 'expired';
-                Log::info("Payment {$paymentLink->id} has EXPIRED");
+                if ($locale === 'ar') {
+                    Log::info("انتهت صلاحية المدفوعة {$paymentLink->id}");
+                } else {
+                    Log::info("Payment {$paymentLink->id} has EXPIRED");
+                }
             }
 
             $paymentLink->update([
@@ -141,10 +163,17 @@ class CheckPaymentStatusJob implements ShouldQueue
                 'last_status_check' => now()
             ]);
         } else {
-            Log::warning('Failed to get payment status', [
-                'payment_link_id' => $paymentLink->id,
-                'error' => $result['error'] ?? 'Unknown error'
-            ]);
+            if ($locale === 'ar') {
+                Log::warning('فشل في الحصول على حالة المدفوعة', [
+                    'payment_link_id' => $paymentLink->id,
+                    'error' => $result['error'] ?? 'خطأ غير معروف'
+                ]);
+            } else {
+                Log::warning('Failed to get payment status', [
+                    'payment_link_id' => $paymentLink->id,
+                    'error' => $result['error'] ?? 'Unknown error'
+                ]);
+            }
 
             // Update last check time even if failed
             $paymentLink->update(['last_status_check' => now()]);

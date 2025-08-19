@@ -136,12 +136,7 @@
                     </div>
                 </div>
 
-                <!-- Toggle Additional Fields Button -->
-                <div class="text-center mt-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="toggleFields">
-                        <i class="fa fa-cog"></i> {{ __('dashboard.additional_options') }}
-                    </button>
-                </div>
+           
 
                 <!-- Email Notification Option -->
                 <div class="row mt-4">
