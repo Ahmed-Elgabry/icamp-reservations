@@ -241,6 +241,7 @@ return [
     'delete_video_note' => 'حذف مقطع الفيديو ',
     'service' => 'الخدمة',
     'payment_method' => 'طريقة الدفع',
+    'choose_payment_method' => 'اختر طريقة الدفع',
     'date' => 'التاريخ',
     'all_questions' => 'جميع الأسئلة',
     'questions' => ' الأسئلة',
