@@ -183,10 +183,10 @@
 
     <div class="rating-form-header">{{ __('dashboard.rate_order') }}</div>
     <div class="rating-form-body">
-        <form action="{{ route('surveys.submit', $order->id) }}" method="POST">
+        <form action="{{ route('surveys.submit', 1) }}" method="POST">
             @csrf
             <input type="hidden" name="order_id" value="{{ $order->id }}">
-{{-- 
+{{--
             <div class="rating-form-group">
                 <label class="rating-form-label">{{ __('dashboard.Rate') }}</label>
                 <div class="rating-form-stars">

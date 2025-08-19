@@ -27,7 +27,7 @@ class SurveySubmissionController extends Controller
         $response = SurveyResponse::create([
             'survey_id' => $survey->id,
             'reservation_id' => $request->order_id,
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ?? null, // Allow null for non-authenticated users
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'submitted_at' => now(),

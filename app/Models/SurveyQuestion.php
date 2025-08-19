@@ -15,6 +15,7 @@ class SurveyQuestion extends Model
         'question_type',
         'options',
         'order',
+        'hidden',
         'placeholder',
         'help_text',
         'error_message',

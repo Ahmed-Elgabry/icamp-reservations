@@ -938,10 +938,37 @@
                 $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
             }
 
+            function validateDataConsistency() {
+                const domFields = $("#formFields .form-field").length;
+                const dataFields = surveyData.fields.length;
+
+                if (domFields !== dataFields) {
+                    console.error("Data inconsistency: DOM has", domFields, "fields but data has", dataFields);
+                    return false;
+                }
+
+                // Check if all fields in DOM exist in data
+                let allFieldsExist = true;
+                $("#formFields .form-field").each(function() {
+                    const fieldId = $(this).data("field-id");
+                    if (!surveyData.fields.find(f => f.id === fieldId)) {
+                        console.error("Field in DOM not found in data:", fieldId);
+                        allFieldsExist = false;
+                    }
+                });
+
+                return allFieldsExist;
+            }
             // Move field up or down
             function moveField(fieldId, direction) {
-                const fieldElement = $(`#${fieldId}`);
+                // Check if the field exists in surveyData
+                const fieldExists = surveyData.fields.some(field => field.id === fieldId);
+                if (!fieldExists) {
+                    console.error("Cannot move field because it's not in survey data:", fieldId);
+                    return;
+                }
 
+                const fieldElement = $(`#${fieldId}`);
                 if (direction === "up") {
                     const prevElement = fieldElement.prev();
                     if (prevElement.length) {
@@ -955,107 +982,101 @@
                 }
 
                 updateFieldOrder();
+                validateDataConsistency(); // Validate after moving
+                debugDataState(); // Debug after moving
+            }
+            // Delete field
+            function deleteField(fieldId) {
+                if (confirm("هل أنت متأكد من حذف هذا السؤال؟")) {
+                    console.log("Deleting field with ID:", fieldId);
+                    console.log("Fields before deletion:", surveyData.fields.map(f => f.id));
+
+                    // Remove from DOM
+                    $(`#${fieldId}`).remove();
+
+                    // Find the field index in the array
+                    const fieldIndex = surveyData.fields.findIndex(field => field.id === fieldId);
+                    if (fieldIndex !== -1) {
+                        console.log("Found field at index:", fieldIndex);
+                        // Remove the field from the array
+                        surveyData.fields.splice(fieldIndex, 1);
+                        console.log("Fields after deletion:", surveyData.fields.map(f => f.id));
+                    } else {
+                        console.error("Field not found in survey data!");
+                    }
+
+                    // Clear selection if deleted field was selected
+                    if (selectedField === fieldId) {
+                        selectedField = null;
+                        $("#fieldTypeLabel").text("حدد سؤالاً لتحرير خصائصه");
+                        $("#fieldLabelAr").val("");
+                        $("#fieldLabelEn").val("");
+                        $("#fieldPlaceholderAr").val("");
+                        $("#fieldPlaceholderEn").val("");
+                        $("#fieldHelpTextAr").val("");
+                        $("#fieldHelpTextEn").val("");
+                        $("#optionsEditor").hide();
+                        $("#ratingSettings").hide();
+                    }
+
+                    // Show empty state if no fields
+                    if (surveyData.fields.length === 0) {
+                        $("#formFields").html(`
+                            <div class="text-center text-muted py-5">
+                                <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
+                                <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
+                            </div>
+                        `);
+                    }
+
+                    // Mark as unsaved
+                    $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+                }
+            }
+            function debugDataState() {
+                console.log("=== DEBUG: Current Data State ===");
+                console.log("surveyData.fields:", surveyData.fields.map(f => f.id));
+                console.log("DOM fields:", $("#formFields .form-field").map(function() {
+                    return $(this).data("field-id");
+                }).get());
+                console.log("================================");
             }
 
-            // Delete field
-function deleteField(fieldId) {
-    if (confirm("هل أنت متأكد من حذف هذا السؤال؟")) {
-        console.log("Deleting field with ID:", fieldId);
-        console.log("Fields before deletion:", surveyData.fields.map(f => f.id));
+            function updateFieldOrder() {
+                const fieldOrder = [];
+                $("#formFields .form-field").each(function() {
+                    fieldOrder.push($(this).data("field-id"));
+                });
 
-        // Remove from DOM
-        $(`#${fieldId}`).remove();
+                // Create a map of field IDs to their data for quick lookup
+                const fieldMap = {};
+                surveyData.fields.forEach(field => {
+                    fieldMap[field.id] = field;
+                });
 
-        // Find the field index in the array
-        const fieldIndex = surveyData.fields.findIndex(field => field.id === fieldId);
-        if (fieldIndex !== -1) {
-            console.log("Found field at index:", fieldIndex);
-            // Remove the field from the array
-            surveyData.fields.splice(fieldIndex, 1);
-        } else {
-            console.error("Field not found in survey data!");
-        }
+                // Rebuild the fields array in the new order
+                const orderedFields = [];
+                fieldOrder.forEach(fieldId => {
+                    if (fieldMap[fieldId]) {
+                        orderedFields.push(fieldMap[fieldId]);
+                    } else {
+                        console.error("Field not found in survey data:", fieldId);
+                    }
+                });
 
-        console.log("Fields after deletion:", surveyData.fields.map(f => f.id));
+                // Only update if we found all fields
+                if (orderedFields.length === fieldOrder.length) {
+                    surveyData.fields = orderedFields;
+                } else {
+                    console.error("Not all fields found in survey data. Aborting order update.");
+                    console.log("Expected fields:", fieldOrder);
+                    console.log("Found fields:", orderedFields.map(f => f.id));
+                }
 
-        // Clear selection if deleted field was selected
-        if (selectedField === fieldId) {
-            selectedField = null;
-            $("#fieldTypeLabel").text("حدد سؤالاً لتحرير خصائصه");
-            $("#fieldLabelAr").val("");
-            $("#fieldLabelEn").val("");
-            $("#fieldPlaceholderAr").val("");
-            $("#fieldPlaceholderEn").val("");
-            $("#fieldHelpTextAr").val("");
-            $("#fieldHelpTextEn").val("");
-            $("#optionsEditor").hide();
-            $("#ratingSettings").hide();
-        }
+                // Mark as unsaved
+                $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+            }
 
-        // Show empty state if no fields
-        if (surveyData.fields.length === 0) {
-            $("#formFields").html(`
-                <div class="text-center text-muted py-5">
-                    <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
-                    <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
-                </div>
-            `);
-        }
-
-        // Mark as unsaved
-        $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-    }
-}
-
-            // Update field order in survey data
-            // function updateFieldOrder() {
-            //     const fieldOrder = [];
-            //     $("#formFields .form-field").each(function() {
-            //         fieldOrder.push($(this).data("field-id"));
-            //     });
-
-            //     // Reorder fields in survey data
-            //     const orderedFields = [];
-            //     fieldOrder.forEach(fieldId => {
-            //         const field = surveyData.fields.find(f => f.id === fieldId);
-            //         if (field) {
-            //             orderedFields.push(field);
-            //         }
-            //     });
-
-            //     surveyData.fields = orderedFields;
-
-            //     // Mark as unsaved
-            //     $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-            // }
-function updateFieldOrder() {
-    const fieldOrder = [];
-    $("#formFields .form-field").each(function() {
-        fieldOrder.push($(this).data("field-id"));
-    });
-
-    // Create a map of field IDs to their data for quick lookup
-    const fieldMap = {};
-    surveyData.fields.forEach(field => {
-        fieldMap[field.id] = field;
-    });
-
-    // Rebuild the fields array in the new order
-    const orderedFields = [];
-    fieldOrder.forEach(fieldId => {
-        if (fieldMap[fieldId]) {
-            orderedFields.push(fieldMap[fieldId]);
-        } else {
-            console.error("Field not found in survey data:", fieldId);
-        }
-    });
-
-    // Update the survey data with the reordered fields
-    surveyData.fields = orderedFields;
-
-    // Mark as unsaved
-    $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-}
             // Save survey
             $("#saveBtn, #saveFormBtn").on("click", function() {
                 // Get survey ID from hidden field
@@ -1066,6 +1087,7 @@ function updateFieldOrder() {
                     title: surveyData.title,
                     description: surveyData.description || "",
                     questions: surveyData.fields.map((field, index) => ({
+                        id: field.id,
                         question_text: field.label,
                         question_type: field.type,
                         placeholder: field.placeholder,
@@ -1303,6 +1325,7 @@ function updateFieldOrder() {
                     </html>
                 `);
                 previewWindow.document.close();
+
             });
 
             // Generate preview field HTML (without disabled attribute)

@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\Customer;
 use App\Models\OrderRate;
 use App\Models\OrderReport;
+use App\Models\SurveyResponse;
 use App\Models\TermsSittng;
 use App\Traits\UploadTrait;
 use App\Models\PreLoginImage;
@@ -158,4 +159,11 @@ class Order extends Model
         return $this->items->sum('subtotal');
     }
 
+    /**
+     * Get the survey responses associated with the order.
+     */
+    public function surveyResponses()
+    {
+        return $this->hasMany(SurveyResponse::class, 'reservation_id');
+    }
 }

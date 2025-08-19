@@ -30,6 +30,9 @@ class SurveyHelper
      */
     public static function generateQuestionHtml($question)
     {
+        if (isset($question['hidden']) && $question['hidden']) {
+            return '';
+        }
         $type = $question['question_type'];
         // $label = $question['question_text'];
         // $placeholder = $question['placeholder'];

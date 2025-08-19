@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('question_text');
             $table->string('question_type');
             $table->integer('order')->default(0);
+            $table->boolean('hidden')->default(false);
             $table->string('placeholder')->nullable();
             $table->text('help_text')->nullable();
             $table->text('error_message')->nullable();

@@ -472,221 +472,450 @@
         ];
 
         // Handle question selection change
-        document.getElementById('questionSelect').addEventListener('change', function(e) {
-            const questionId = parseInt(e.target.value);
-            console.log('Selected question ID:', questionId);
+        // document.getElementById('questionSelect').addEventListener('change', function(e) {
+        //     const questionId = parseInt(e.target.value);
+        //     console.log('Selected question ID:', questionId);
 
-            if (!questionId) {
-                console.log('No question selected, resetting chart');
-                questionOptionsChart.data.labels = ['No data'];
-                questionOptionsChart.data.datasets[0].data = [1];
-                questionOptionsChart.update();
-                return;
-            }
+        //     if (!questionId) {
+        //         console.log('No question selected, resetting chart');
+        //         questionOptionsChart.data.labels = ['No data'];
+        //         questionOptionsChart.data.datasets[0].data = [1];
+        //         questionOptionsChart.update();
+        //         return;
+        //     }
 
-            const selectedQuestion = questionsWithOptions.find(q => q.id === questionId);
-            console.log('Selected question:', selectedQuestion);
+        //     const selectedQuestion = questionsWithOptions.find(q => q.id === questionId);
+        //     console.log('Selected question:', selectedQuestion);
 
-            if (!selectedQuestion) {
-                console.log('Question not found in questionsWithOptions');
-                questionOptionsChart.data.labels = ['Question not found'];
-                questionOptionsChart.data.datasets[0].data = [1];
-                questionOptionsChart.update();
-                return;
-            }
+        //     if (!selectedQuestion) {
+        //         console.log('Question not found in questionsWithOptions');
+        //         questionOptionsChart.data.labels = ['Question not found'];
+        //         questionOptionsChart.data.datasets[0].data = [1];
+        //         questionOptionsChart.update();
+        //         return;
+        //     }
 
-            if (!selectedQuestion.options || selectedQuestion.options.length === 0) {
-                console.log('Question has no options');
-                questionOptionsChart.data.labels = ['No options'];
-                questionOptionsChart.data.datasets[0].data = [1];
-                questionOptionsChart.update();
-                return;
-            }
+        //     if (!selectedQuestion.options || selectedQuestion.options.length === 0) {
+        //         console.log('Question has no options');
+        //         questionOptionsChart.data.labels = ['No options'];
+        //         questionOptionsChart.data.datasets[0].data = [1];
+        //         questionOptionsChart.update();
+        //         return;
+        //     }
 
-            console.log('Question options:', selectedQuestion.options);
+        //     console.log('Question options:', selectedQuestion.options);
 
-            // Create a mapping from value to label
-            const valueToLabel = {};
-            const optionCounts = {};
+        //     // Create a mapping from value to label
+        //     const valueToLabel = {};
+        //     const optionCounts = {};
 
-            // Create a mapping for different option formats
-            selectedQuestion.options.forEach((option, index) => {
-                let value, label;
+        //     // Create a mapping for different option formats
+        //     selectedQuestion.options.forEach((option, index) => {
+        //         let value, label;
 
-                if (typeof option === 'object' && option !== null) {
-                    // If option is an object, get value and label separately
-                    value = String(option.value || option.label || '');
-                    label = option.label || option.value || '';
-                } else {
-                    // If option is a simple value, use it as both value and label
-                    value = String(option);
-                    label = option;
+        //         if (typeof option === 'object' && option !== null) {
+        //             // If option is an object, get value and label separately
+        //             value = String(option.value || option.label || '');
+        //             label = option.label || option.value || '';
+        //         } else {
+        //             // If option is a simple value, use it as both value and label
+        //             value = String(option);
+        //             label = option;
 
-                    // Also create potential mappings for different formats
-                    // For example, map "الخيار 1" to "option1"
-                    const optionNumber = index + 1;
-                    const potentialValue = `option${optionNumber}`;
-                    valueToLabel[potentialValue] = label;
+        //             // Also create potential mappings for different formats
+        //             // For example, map "الخيار 1" to "option1"
+        //             const optionNumber = index + 1;
+        //             const potentialValue = `option${optionNumber}`;
+        //             valueToLabel[potentialValue] = label;
+        //         }
+
+        //         valueToLabel[value] = label;
+        //         optionCounts[value] = 0;
+        //     });
+
+        //     console.log('Value to label mapping:', valueToLabel);
+        //     console.log('Initial option counts:', optionCounts);
+
+        //     // Log responses structure
+        //     console.log('Total responses:', responses.length);
+        //     console.log('First response sample:', responses[0]);
+
+        //     responses.forEach((response, responseIndex) => {
+        //         console.log(`Processing response ${responseIndex}:`, response);
+
+        //         const answer = response.answers.find(a => a.question_id === questionId);
+        //         console.log(`Answer for question ${questionId}:`, answer);
+
+        //         if (!answer) {
+        //             console.log(`No answer found for question ${questionId} in response ${responseIndex}`);
+        //             return;
+        //         }
+
+        //         if (selectedQuestion.type === 'checkbox') {
+        //             console.log('Processing checkbox answer:', answer.answer_option);
+
+        //             let options = [];
+        //             if (Array.isArray(answer.answer_option)) {
+        //                 options = answer.answer_option;
+        //                 console.log('Options is array:', options);
+        //             } else if (answer.answer_option) {
+        //                 try {
+        //                     options = JSON.parse(answer.answer_option);
+        //                     console.log('Parsed options from JSON:', options);
+        //                 } catch (e) {
+        //                     console.log('Failed to parse JSON, using as string:', answer.answer_option);
+        //                     options = [answer.answer_option];
+        //                 }
+        //             }
+
+        //             options.forEach(option => {
+        //                 const value = String(option);
+        //                 console.log(`Processing option value: ${value}`);
+
+        //                 // Try to find a matching key in our mapping
+        //                 let matchedKey = null;
+        //                 if (optionCounts.hasOwnProperty(value)) {
+        //                     matchedKey = value;
+        //                 } else if (valueToLabel.hasOwnProperty(value)) {
+        //                     // This value maps to a label, so we need to find the original key
+        //                     // This is a reverse mapping scenario
+        //                     for (const key in optionCounts) {
+        //                         if (valueToLabel[key] === valueToLabel[value]) {
+        //                             matchedKey = key;
+        //                             break;
+        //                         }
+        //                     }
+        //                 } else {
+        //                     // Try to extract a number from the value and match with index
+        //                     const match = value.match(/option(\d+)/i);
+        //                     if (match) {
+        //                         const optionNumber = parseInt(match[1]);
+        //                         const optionIndex = optionNumber - 1;
+        //                         if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+        //                             // Find the key for this option
+        //                             for (const key in optionCounts) {
+        //                                 if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+        //                                     matchedKey = key;
+        //                                     break;
+        //                                 }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+
+        //                 if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+        //                     optionCounts[matchedKey]++;
+        //                     console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
+        //                 } else {
+        //                     console.log(`Option value ${value} not found in question options`);
+        //                 }
+        //             });
+        //         } else {
+        //             console.log('Processing non-checkbox answer:', answer.answer_text);
+        //             const value = String(answer.answer_text || '');
+        //             console.log(`Processing value: ${value}`);
+
+        //             // Try to find a matching key in our mapping
+        //             let matchedKey = null;
+        //             if (optionCounts.hasOwnProperty(value)) {
+        //                 matchedKey = value;
+        //             } else if (valueToLabel.hasOwnProperty(value)) {
+        //                 // This value maps to a label, so we need to find the original key
+        //                 // This is a reverse mapping scenario
+        //                 for (const key in optionCounts) {
+        //                     if (valueToLabel[key] === valueToLabel[value]) {
+        //                         matchedKey = key;
+        //                         break;
+        //                     }
+        //                 }
+        //             } else {
+        //                 // Try to extract a number from the value and match with index
+        //                 const match = value.match(/option(\d+)/i);
+        //                 if (match) {
+        //                     const optionNumber = parseInt(match[1]);
+        //                     const optionIndex = optionNumber - 1;
+        //                     if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+        //                         // Find the key for this option
+        //                         for (const key in optionCounts) {
+        //                             if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+        //                                 matchedKey = key;
+        //                                 break;
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+
+        //             if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+        //                 optionCounts[matchedKey]++;
+        //                 console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
+        //             } else {
+        //                 console.log(`Value ${value} not found in question options`);
+        //             }
+        //         }
+        //     });
+
+        //     console.log('Final option counts:', optionCounts);
+
+        //     // Convert value counts to label counts for display
+        //     const labels = [];
+        //     const data = [];
+
+        //     for (const value in optionCounts) {
+        //         labels.push(valueToLabel[value]);
+        //         data.push(optionCounts[value]);
+        //     }
+
+        //     const total = data.reduce((a, b) => a + b, 0);
+        //     console.log('Total responses for this question:', total);
+        //     console.log('Chart labels:', labels);
+        //     console.log('Chart data:', data);
+
+        //     if (total === 0) {
+        //         console.log('No responses found, showing fallback');
+        //         questionOptionsChart.data.labels = ['No responses'];
+        //         questionOptionsChart.data.datasets[0].data = [1];
+        //     } else {
+        //         questionOptionsChart.data.labels = labels;
+        //         questionOptionsChart.data.datasets[0].data = data;
+        //         console.log('Updating chart with actual data');
+        //     }
+
+        //     questionOptionsChart.update('none');
+        //     setTimeout(() => {
+        //         questionOptionsChart.resize();
+        //     }, 100);
+        // });
+document.getElementById('questionSelect').addEventListener('change', function(e) {
+    const questionId = parseInt(e.target.value);
+    console.log('Selected question ID:', questionId);
+
+    if (!questionId) {
+        console.log('No question selected, resetting chart');
+        questionOptionsChart.data.labels = ['No data'];
+        questionOptionsChart.data.datasets[0].data = [1];
+        questionOptionsChart.update();
+        return;
+    }
+
+    const selectedQuestion = questionsWithOptions.find(q => q.id === questionId);
+    console.log('Selected question:', selectedQuestion);
+
+    if (!selectedQuestion) {
+        console.log('Question not found in questionsWithOptions');
+        questionOptionsChart.data.labels = ['Question not found'];
+        questionOptionsChart.data.datasets[0].data = [1];
+        questionOptionsChart.update();
+        return;
+    }
+
+    if (!selectedQuestion.options || selectedQuestion.options.length === 0) {
+        console.log('Question has no options');
+        questionOptionsChart.data.labels = ['No options'];
+        questionOptionsChart.data.datasets[0].data = [1];
+        questionOptionsChart.update();
+        return;
+    }
+
+    console.log('Question options:', selectedQuestion.options);
+
+    // Create a mapping from value to label
+    const valueToLabel = {};
+    const optionCounts = {};
+
+    // Handle different option formats
+    selectedQuestion.options.forEach((option, index) => {
+        let value, label;
+
+        if (selectedQuestion.type === 'stars') {
+            // For stars, value is the number of stars (1, 2, 3, etc.)
+            value = String(index + 1);
+            label = option; // The formatted star string (★, ★★, etc.)
+        } else if (selectedQuestion.type === 'rating') {
+            // For rating, value is the rating number (1, 2, 3, etc.)
+            value = String(index + 1);
+            label = option; // The rating number as string
+        } else if (typeof option === 'object' && option !== null) {
+            // If option is an object, get value and label separately
+            value = String(option.value || option.label || '');
+            label = option.label || option.value || '';
+        } else {
+            // If option is a simple value, use it as both value and label
+            value = String(option);
+            label = option;
+
+            // Also create potential mappings for different formats
+            // For example, map "الخيار 1" to "option1"
+            const optionNumber = index + 1;
+            const potentialValue = `option${optionNumber}`;
+            valueToLabel[potentialValue] = label;
+        }
+
+        valueToLabel[value] = label;
+        optionCounts[value] = 0;
+    });
+
+    console.log('Value to label mapping:', valueToLabel);
+    console.log('Initial option counts:', optionCounts);
+
+    // Log responses structure
+    console.log('Total responses:', responses.length);
+    console.log('First response sample:', responses[0]);
+
+    responses.forEach((response, responseIndex) => {
+        console.log(`Processing response ${responseIndex}:`, response);
+
+        const answer = response.answers.find(a => a.question_id === questionId);
+        console.log(`Answer for question ${questionId}:`, answer);
+
+        if (!answer) {
+            console.log(`No answer found for question ${questionId} in response ${responseIndex}`);
+            return;
+        }
+
+        if (selectedQuestion.type === 'checkbox') {
+            console.log('Processing checkbox answer:', answer.answer_option);
+
+            let options = [];
+            if (Array.isArray(answer.answer_option)) {
+                options = answer.answer_option;
+                console.log('Options is array:', options);
+            } else if (answer.answer_option) {
+                try {
+                    options = JSON.parse(answer.answer_option);
+                    console.log('Parsed options from JSON:', options);
+                } catch (e) {
+                    console.log('Failed to parse JSON, using as string:', answer.answer_option);
+                    options = [answer.answer_option];
                 }
+            }
 
-                valueToLabel[value] = label;
-                optionCounts[value] = 0;
-            });
+            options.forEach(option => {
+                const value = String(option);
+                console.log(`Processing option value: ${value}`);
 
-            console.log('Value to label mapping:', valueToLabel);
-            console.log('Initial option counts:', optionCounts);
-
-            // Log responses structure
-            console.log('Total responses:', responses.length);
-            console.log('First response sample:', responses[0]);
-
-            responses.forEach((response, responseIndex) => {
-                console.log(`Processing response ${responseIndex}:`, response);
-
-                const answer = response.answers.find(a => a.question_id === questionId);
-                console.log(`Answer for question ${questionId}:`, answer);
-
-                if (!answer) {
-                    console.log(`No answer found for question ${questionId} in response ${responseIndex}`);
-                    return;
-                }
-
-                if (selectedQuestion.type === 'checkbox') {
-                    console.log('Processing checkbox answer:', answer.answer_option);
-
-                    let options = [];
-                    if (Array.isArray(answer.answer_option)) {
-                        options = answer.answer_option;
-                        console.log('Options is array:', options);
-                    } else if (answer.answer_option) {
-                        try {
-                            options = JSON.parse(answer.answer_option);
-                            console.log('Parsed options from JSON:', options);
-                        } catch (e) {
-                            console.log('Failed to parse JSON, using as string:', answer.answer_option);
-                            options = [answer.answer_option];
+                // Try to find a matching key in our mapping
+                let matchedKey = null;
+                if (optionCounts.hasOwnProperty(value)) {
+                    matchedKey = value;
+                } else if (valueToLabel.hasOwnProperty(value)) {
+                    // This value maps to a label, so we need to find the original key
+                    for (const key in optionCounts) {
+                        if (valueToLabel[key] === valueToLabel[value]) {
+                            matchedKey = key;
+                            break;
                         }
                     }
-
-                    options.forEach(option => {
-                        const value = String(option);
-                        console.log(`Processing option value: ${value}`);
-
-                        // Try to find a matching key in our mapping
-                        let matchedKey = null;
-                        if (optionCounts.hasOwnProperty(value)) {
-                            matchedKey = value;
-                        } else if (valueToLabel.hasOwnProperty(value)) {
-                            // This value maps to a label, so we need to find the original key
-                            // This is a reverse mapping scenario
+                } else {
+                    // Try to extract a number from the value and match with index
+                    const match = value.match(/option(\d+)/i);
+                    if (match) {
+                        const optionNumber = parseInt(match[1]);
+                        const optionIndex = optionNumber - 1;
+                        if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+                            // Find the key for this option
                             for (const key in optionCounts) {
-                                if (valueToLabel[key] === valueToLabel[value]) {
+                                if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
                                     matchedKey = key;
                                     break;
                                 }
                             }
-                        } else {
-                            // Try to extract a number from the value and match with index
-                            const match = value.match(/option(\d+)/i);
-                            if (match) {
-                                const optionNumber = parseInt(match[1]);
-                                const optionIndex = optionNumber - 1;
-                                if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
-                                    // Find the key for this option
-                                    for (const key in optionCounts) {
-                                        if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
-                                            matchedKey = key;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
                         }
+                    }
+                }
 
-                        if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
-                            optionCounts[matchedKey]++;
-                            console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
-                        } else {
-                            console.log(`Option value ${value} not found in question options`);
-                        }
-                    });
+                if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+                    optionCounts[matchedKey]++;
+                    console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
                 } else {
-                    console.log('Processing non-checkbox answer:', answer.answer_text);
-                    const value = String(answer.answer_text || '');
-                    console.log(`Processing value: ${value}`);
+                    console.log(`Option value ${value} not found in question options`);
+                }
+            });
+        } else {
+            console.log('Processing non-checkbox answer:', answer.answer_text);
+            const value = String(answer.answer_text || '');
+            console.log(`Processing value: ${value}`);
 
-                    // Try to find a matching key in our mapping
-                    let matchedKey = null;
-                    if (optionCounts.hasOwnProperty(value)) {
-                        matchedKey = value;
-                    } else if (valueToLabel.hasOwnProperty(value)) {
-                        // This value maps to a label, so we need to find the original key
-                        // This is a reverse mapping scenario
+            // For stars and rating, ensure the value is within 1-5 range
+            let processedValue = value;
+            if (selectedQuestion.type === 'stars' || selectedQuestion.type === 'rating') {
+                const numValue = parseInt(value);
+                if (!isNaN(numValue)) {
+                    // Ensure the value is between 1 and 5
+                    processedValue = String(Math.max(1, Math.min(5, numValue)));
+                }
+            }
+
+            // Try to find a matching key in our mapping
+            let matchedKey = null;
+            if (optionCounts.hasOwnProperty(processedValue)) {
+                matchedKey = processedValue;
+            } else if (valueToLabel.hasOwnProperty(processedValue)) {
+                // This value maps to a label, so we need to find the original key
+                for (const key in optionCounts) {
+                    if (valueToLabel[key] === valueToLabel[processedValue]) {
+                        matchedKey = key;
+                        break;
+                    }
+                }
+            } else {
+                // Try to extract a number from the value and match with index
+                const match = processedValue.match(/option(\d+)/i);
+                if (match) {
+                    const optionNumber = parseInt(match[1]);
+                    const optionIndex = optionNumber - 1;
+                    if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+                        // Find the key for this option
                         for (const key in optionCounts) {
-                            if (valueToLabel[key] === valueToLabel[value]) {
+                            if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
                                 matchedKey = key;
                                 break;
                             }
                         }
-                    } else {
-                        // Try to extract a number from the value and match with index
-                        const match = value.match(/option(\d+)/i);
-                        if (match) {
-                            const optionNumber = parseInt(match[1]);
-                            const optionIndex = optionNumber - 1;
-                            if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
-                                // Find the key for this option
-                                for (const key in optionCounts) {
-                                    if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
-                                        matchedKey = key;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
-                        optionCounts[matchedKey]++;
-                        console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
-                    } else {
-                        console.log(`Value ${value} not found in question options`);
                     }
                 }
-            });
-
-            console.log('Final option counts:', optionCounts);
-
-            // Convert value counts to label counts for display
-            const labels = [];
-            const data = [];
-
-            for (const value in optionCounts) {
-                labels.push(valueToLabel[value]);
-                data.push(optionCounts[value]);
             }
 
-            const total = data.reduce((a, b) => a + b, 0);
-            console.log('Total responses for this question:', total);
-            console.log('Chart labels:', labels);
-            console.log('Chart data:', data);
-
-            if (total === 0) {
-                console.log('No responses found, showing fallback');
-                questionOptionsChart.data.labels = ['No responses'];
-                questionOptionsChart.data.datasets[0].data = [1];
+            if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+                optionCounts[matchedKey]++;
+                console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
             } else {
-                questionOptionsChart.data.labels = labels;
-                questionOptionsChart.data.datasets[0].data = data;
-                console.log('Updating chart with actual data');
+                console.log(`Value ${processedValue} not found in question options`);
             }
-
-            questionOptionsChart.update('none');
-            setTimeout(() => {
-                questionOptionsChart.resize();
-            }, 100);
-        });
+        }
     });
+
+    console.log('Final option counts:', optionCounts);
+
+    // Convert value counts to label counts for display
+    const labels = [];
+    const data = [];
+
+    for (const value in optionCounts) {
+        labels.push(valueToLabel[value]);
+        data.push(optionCounts[value]);
+    }
+
+    const total = data.reduce((a, b) => a + b, 0);
+    console.log('Total responses for this question:', total);
+    console.log('Chart labels:', labels);
+    console.log('Chart data:', data);
+
+    if (total === 0) {
+        console.log('No responses found, showing fallback');
+        questionOptionsChart.data.labels = ['No responses'];
+        questionOptionsChart.data.datasets[0].data = [1];
+    } else {
+        questionOptionsChart.data.labels = labels;
+        questionOptionsChart.data.datasets[0].data = data;
+        console.log('Updating chart with actual data');
+    }
+
+    questionOptionsChart.update('none');
+    setTimeout(() => {
+        questionOptionsChart.resize();
+    }, 100);
+});    });
 </script>
 {{-- @endpush --}}
 @endsection

@@ -17,125 +17,250 @@ class SurveyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function statistics()
-    {
-        $survey = Survey::with('questions')->find(1);
-        $responses = $survey->responses()->with('answers.question')->get();
-        $totalResponses = $responses->count();
+    // public function statistics()
+    // {
+    //     $survey = Survey::with('questions')->find(1);
+    //     $responses = $survey->responses()->with('answers.question')->get();
+    //     $totalResponses = $responses->count();
 
-        // Get question types distribution
-        $questionTypes = [
-            'text' => 0,
-            'textarea' => 0,
-            'radio' => 0,
-            'checkbox' => 0,
-            'select' => 0,
-            'stars' => 0,
-            'rating' => 0
+    //     // Get question types distribution
+    //     $questionTypes = [
+    //         'text' => 0,
+    //         'textarea' => 0,
+    //         'radio' => 0,
+    //         'checkbox' => 0,
+    //         'select' => 0,
+    //         'stars' => 0,
+    //         'rating' => 0
+    //     ];
+
+    //     foreach ($survey->questions as $question) {
+    //         if (isset($questionTypes[$question->question_type])) {
+    //             $questionTypes[$question->question_type]++;
+    //         }
+    //     }
+
+    //     // Get responses by date for the last 7 days
+    //     $timelineData = [];
+    //     for ($i = 6; $i >= 0; $i--) {
+    //         $date = now()->subDays($i);
+    //         $dateStr = $date->format('Y-m-d');
+    //         $timelineData[$dateStr] = $responses->where('created_at', '>=', $date->startOfDay())
+    //             ->where('created_at', '<=', $date->endOfDay())
+    //             ->count();
+    //     }
+
+    //     // Get popular questions with answer counts
+    //     $popularQuestions = $survey->questions()
+    //         ->withCount(['answers' => function($query) {
+    //             $query->whereNotNull('answer_text');
+    //         }])
+    //         ->orderBy('answers_count', 'desc')
+    //         ->take(5)
+    //         ->get();
+
+    //     // Prepare the popular questions for the chart
+    //     $popularQuestionsData = $popularQuestions->map(function ($question) {
+    //         return [
+    //             'title' => SurveyHelper::getLocalizedText($question->question_text),
+    //             'answers_count' => $question->answers_count
+    //         ];
+    //     });
+
+    //     // Get all questions with answer counts for the table
+    //     $allQuestions = $survey->questions()
+    //         ->withCount(['answers' => function($query) {
+    //             $query->whereNotNull('answer_text');
+    //         }])
+    //         ->orderBy('answers_count', 'desc')
+    //         ->get();
+
+    //     // Prepare the data for the table
+    //     $allQuestionsData = $allQuestions->map(function ($question) {
+    //         return [
+    //             'id' => $question->id,
+    //             'title' => SurveyHelper::getLocalizedText($question->question_text),
+    //             'type' => $question->question_type,
+    //             'answers_count' => $question->answers_count
+    //         ];
+    //     });
+
+    //     // Get questions with options for the select dropdown
+    //     $questionsWithOptions = $survey->questions()
+    //         ->whereIn('question_type', ['radio', 'checkbox', 'select'])
+    //         ->get()
+    //         ->map(function ($question) {
+    //             // Ensure options are properly formatted as strings
+    //             $formattedOptions = [];
+    //             if (is_array($question->options)) {
+    //                 foreach ($question->options as $key => $option) {
+    //                     // Handle different option formats
+    //                     if (is_array($option)) {
+    //                         // If option is an array, try to get the label
+    //                         if (isset($option['label'])) {
+    //                             $formattedOptions[] = SurveyHelper::getLocalizedText($option['label']);
+    //                         } else {
+    //                             $formattedOptions[] = is_string($key) ? $key : json_encode($option);
+    //                         }
+    //                     } elseif (is_object($option)) {
+    //                         // If option is an object, convert to array and handle
+    //                         $optionArray = (array)$option;
+    //                         if (isset($optionArray['label'])) {
+    //                             $formattedOptions[] = SurveyHelper::getLocalizedText($optionArray['label']);
+    //                         } else {
+    //                             $formattedOptions[] = is_string($key) ? $key : json_encode($optionArray);
+    //                         }
+    //                     } else {
+    //                         // If option is a simple value, use it directly
+    //                         $formattedOptions[] = (string)$option;
+    //                     }
+    //                 }
+    //             }
+
+    //             return [
+    //                 'id' => $question->id,
+    //                 'title' => SurveyHelper::getLocalizedText($question->question_text),
+    //                 'type' => $question->question_type,
+    //                 'options' => $formattedOptions
+    //             ];
+    //         });
+
+    //     return view('dashboard.surveys.statistics')
+    //         ->with('survey', $survey)
+    //         ->with('totalResponses', $totalResponses)
+    //         ->with('questionTypes', $questionTypes)
+    //         ->with('timelineData', $timelineData)
+    //         ->with('popularQuestionsData', $popularQuestionsData)
+    //         ->with('allQuestionsData', $allQuestionsData)
+    //         ->with('responses', $responses)
+    //         ->with('questionsWithOptions', $questionsWithOptions);
+    // }
+public function statistics()
+{
+    $survey = Survey::with('questions')->find(1);
+    $responses = $survey->responses()->with('answers.question')->get();
+    $totalResponses = $responses->count();
+
+    // Get question types distribution
+    $questionTypes = [
+        'text' => 0,
+        'textarea' => 0,
+        'radio' => 0,
+        'checkbox' => 0,
+        'select' => 0,
+        'stars' => 0,
+        'rating' => 0
+    ];
+    foreach ($survey->questions as $question) {
+        if (isset($questionTypes[$question->question_type])) {
+            $questionTypes[$question->question_type]++;
+        }
+    }
+
+    // Get responses by date for the last 7 days
+    $timelineData = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $date = now()->subDays($i);
+        $dateStr = $date->format('Y-m-d');
+        $timelineData[$dateStr] = $responses->where('created_at', '>=', $date->startOfDay())
+            ->where('created_at', '<=', $date->endOfDay())
+            ->count();
+    }
+
+    // Get popular questions with answer counts
+    $popularQuestions = $survey->questions()
+        ->withCount(['answers' => function($query) {
+            $query->whereNotNull('answer_text');
+        }])
+        ->orderBy('answers_count', 'desc')
+        ->take(5)
+        ->get();
+
+    // Prepare the popular questions for the chart
+    $popularQuestionsData = $popularQuestions->map(function ($question) {
+        return [
+            'title' => SurveyHelper::getLocalizedText($question->question_text),
+            'answers_count' => $question->answers_count
         ];
+    });
 
-        foreach ($survey->questions as $question) {
-            if (isset($questionTypes[$question->question_type])) {
-                $questionTypes[$question->question_type]++;
+    // Get all questions with answer counts for the table
+    $allQuestions = $survey->questions()
+        ->withCount(['answers' => function($query) {
+            $query->whereNotNull('answer_text');
+        }])
+        ->orderBy('answers_count', 'desc')
+        ->get();
+
+    // Prepare the data for the table
+    $allQuestionsData = $allQuestions->map(function ($question) {
+        return [
+            'id' => $question->id,
+            'title' => SurveyHelper::getLocalizedText($question->question_text),
+            'type' => $question->question_type,
+            'answers_count' => $question->answers_count
+        ];
+    });
+
+    // Get questions with options for the select dropdown
+    $questionsWithOptions = $survey->questions()
+        ->whereIn('question_type', ['radio', 'checkbox', 'select', 'stars', 'rating'])
+        ->get()
+        ->map(function ($question) {
+            $formattedOptions = [];
+
+            if (in_array($question->question_type, ['stars', 'rating'])) {
+                // For stars and rating, always generate options from 1 to 5
+                for ($i = 1; $i <= $question->settings['points']; $i++) {
+                    if ($question->question_type === 'stars') {
+                        $formattedOptions[] = str_repeat('★', $i); // ★, ★★, ★★★, etc.
+                    } else {
+                        $formattedOptions[] = (string)$i; // 1, 2, 3, etc.
+                    }
+                }
+            } elseif (is_array($question->options)) {
+                foreach ($question->options as $key => $option) {
+                    // Handle different option formats
+                    if (is_array($option)) {
+                        // If option is an array, try to get the label
+                        if (isset($option['label'])) {
+                            $formattedOptions[] = SurveyHelper::getLocalizedText($option['label']);
+                        } else {
+                            $formattedOptions[] = is_string($key) ? $key : json_encode($option);
+                        }
+                    } elseif (is_object($option)) {
+                        // If option is an object, convert to array and handle
+                        $optionArray = (array)$option;
+                        if (isset($optionArray['label'])) {
+                            $formattedOptions[] = SurveyHelper::getLocalizedText($optionArray['label']);
+                        } else {
+                            $formattedOptions[] = is_string($key) ? $key : json_encode($optionArray);
+                        }
+                    } else {
+                        // If option is a simple value, use it directly
+                        $formattedOptions[] = (string)$option;
+                    }
+                }
             }
-        }
 
-        // Get responses by date for the last 7 days
-        $timelineData = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $dateStr = $date->format('Y-m-d');
-            $timelineData[$dateStr] = $responses->where('created_at', '>=', $date->startOfDay())
-                ->where('created_at', '<=', $date->endOfDay())
-                ->count();
-        }
-
-        // Get popular questions with answer counts
-        $popularQuestions = $survey->questions()
-            ->withCount(['answers' => function($query) {
-                $query->whereNotNull('answer_text');
-            }])
-            ->orderBy('answers_count', 'desc')
-            ->take(5)
-            ->get();
-
-        // Prepare the popular questions for the chart
-        $popularQuestionsData = $popularQuestions->map(function ($question) {
-            return [
-                'title' => SurveyHelper::getLocalizedText($question->question_text),
-                'answers_count' => $question->answers_count
-            ];
-        });
-
-        // Get all questions with answer counts for the table
-        $allQuestions = $survey->questions()
-            ->withCount(['answers' => function($query) {
-                $query->whereNotNull('answer_text');
-            }])
-            ->orderBy('answers_count', 'desc')
-            ->get();
-
-        // Prepare the data for the table
-        $allQuestionsData = $allQuestions->map(function ($question) {
             return [
                 'id' => $question->id,
                 'title' => SurveyHelper::getLocalizedText($question->question_text),
                 'type' => $question->question_type,
-                'answers_count' => $question->answers_count
+                'options' => $formattedOptions
             ];
         });
 
-        // Get questions with options for the select dropdown
-        $questionsWithOptions = $survey->questions()
-            ->whereIn('question_type', ['radio', 'checkbox', 'select'])
-            ->get()
-            ->map(function ($question) {
-                // Ensure options are properly formatted as strings
-                $formattedOptions = [];
-                if (is_array($question->options)) {
-                    foreach ($question->options as $key => $option) {
-                        // Handle different option formats
-                        if (is_array($option)) {
-                            // If option is an array, try to get the label
-                            if (isset($option['label'])) {
-                                $formattedOptions[] = SurveyHelper::getLocalizedText($option['label']);
-                            } else {
-                                $formattedOptions[] = is_string($key) ? $key : json_encode($option);
-                            }
-                        } elseif (is_object($option)) {
-                            // If option is an object, convert to array and handle
-                            $optionArray = (array)$option;
-                            if (isset($optionArray['label'])) {
-                                $formattedOptions[] = SurveyHelper::getLocalizedText($optionArray['label']);
-                            } else {
-                                $formattedOptions[] = is_string($key) ? $key : json_encode($optionArray);
-                            }
-                        } else {
-                            // If option is a simple value, use it directly
-                            $formattedOptions[] = (string)$option;
-                        }
-                    }
-                }
-
-                return [
-                    'id' => $question->id,
-                    'title' => SurveyHelper::getLocalizedText($question->question_text),
-                    'type' => $question->question_type,
-                    'options' => $formattedOptions
-                ];
-            });
-
-        return view('dashboard.surveys.statistics')
-            ->with('survey', $survey)
-            ->with('totalResponses', $totalResponses)
-            ->with('questionTypes', $questionTypes)
-            ->with('timelineData', $timelineData)
-            ->with('popularQuestionsData', $popularQuestionsData)
-            ->with('allQuestionsData', $allQuestionsData)
-            ->with('responses', $responses)
-            ->with('questionsWithOptions', $questionsWithOptions);
-    }
-
+    return view('dashboard.surveys.statistics')
+        ->with('survey', $survey)
+        ->with('totalResponses', $totalResponses)
+        ->with('questionTypes', $questionTypes)
+        ->with('timelineData', $timelineData)
+        ->with('popularQuestionsData', $popularQuestionsData)
+        ->with('allQuestionsData', $allQuestionsData)
+        ->with('responses', $responses)
+        ->with('questionsWithOptions', $questionsWithOptions);
+}
     /**
      * Show the form for creating a new survey.
      *
@@ -143,7 +268,11 @@ class SurveyController extends Controller
      */
     public function create()
     {
-        $survey = Survey::with('questions')->find(1);
+        \Barryvdh\Debugbar\Facades\Debugbar::disable();
+
+        $survey = Survey::with(['questions' => function ($query) {
+            $query->where('hidden', 0); // only non-hidden questions
+        }])->find(1);
 
         // Transform the data to match JavaScript expectations
         if ($survey) {
@@ -154,7 +283,6 @@ class SurveyController extends Controller
             $survey = $surveyArray;
         }
 
-        Debugbar::disable();
         return view('dashboard.surveys.builder')
         ->with('survey', $survey);
     }
@@ -166,33 +294,63 @@ class SurveyController extends Controller
      * @param  \App\Models\Survey  $survey
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Survey $survey)
-    {
-        $validated = $request->validate([
-            'survey.title' => 'required|string|max:255',
-            'survey.description' => 'nullable|string',
-            'survey.questions' => 'required|array',
-            'survey.questions.*.question_text' => 'required|array',
-            'survey.questions.*.question_type' => 'required|string',
-            'survey.questions.*.placeholder' => 'nullable|array',
-            'survey.questions.*.help_text' => 'nullable|array',
-            'survey.questions.*.error_message' => 'nullable|string',
-            'survey.questions.*.options' => 'nullable|array',
-            'survey.questions.*.settings' => 'nullable|array',
-        ]);
+// In your SurveyController.php, update the update method
+// In your SurveyController.php, update the update method
+public function update(Request $request, Survey $survey)
+{
+    $validated = $request->validate([
+        'survey.title' => 'required|string|max:255',
+        'survey.description' => 'nullable|string',
+        'survey.questions' => 'required|array',
+        'survey.questions.*.id' => 'nullable|string', // Add this validation
+        'survey.questions.*.question_text' => 'required|array',
+        'survey.questions.*.question_type' => 'required|string',
+        'survey.questions.*.placeholder' => 'nullable|array',
+        'survey.questions.*.help_text' => 'nullable|array',
+        'survey.questions.*.error_message' => 'nullable|string',
+        'survey.questions.*.options' => 'nullable|array',
+        'survey.questions.*.settings' => 'nullable|array',
+    ]);
 
-        // Update survey
-        $survey->update([
-            'title' => $validated['survey']['title'],
-            'description' => $validated['survey']['description'] ?? null,
-        ]);
+    // Update survey
+    $survey->update([
+        'title' => $validated['survey']['title'],
+        'description' => $validated['survey']['description'] ?? null,
+    ]);
 
-        // Delete existing questions
-        $survey->questions()->delete();
+    // Get existing question IDs
+    $existingQuestionIds = $survey->questions()->pluck('id')->toArray();
+    $incomingQuestionIds = [];
 
-        // Create new questions
-        foreach ($validated['survey']['questions'] as $index => $questionData) {
-            SurveyQuestion::create([
+    // Process each question
+    foreach ($validated['survey']['questions'] as $index => $questionData) {
+        // Extract database ID from frontend ID if it exists
+        $questionId = null;
+        if (isset($questionData['id']) && strpos($questionData['id'], 'field_') === 0) {
+            $parts = explode('_', $questionData['id']);
+            if (count($parts) == 2 && is_numeric($parts[1])) {
+                $questionId = (int)$parts[1];
+            }
+        }
+
+        // Check if this is an existing question
+        if ($questionId && in_array($questionId, $existingQuestionIds)) {
+            // Update existing question
+            $question = SurveyQuestion::find($questionId);
+            $question->update([
+                'question_text' => $questionData['question_text'],
+                'question_type' => $questionData['question_type'],
+                'placeholder' => $questionData['placeholder'] ?? null,
+                'help_text' => $questionData['help_text'] ?? null,
+                'error_message' => $questionData['error_message'] ?? null,
+                'options' => $questionData['options'] ?? null,
+                'settings' => $questionData['settings'] ?? null,
+                'order' => $index,
+            ]);
+            $incomingQuestionIds[] = $questionId;
+        } else {
+            // Create new question
+            $newQuestion = SurveyQuestion::create([
                 'survey_id' => $survey->id,
                 'question_text' => $questionData['question_text'],
                 'question_type' => $questionData['question_type'],
@@ -203,10 +361,41 @@ class SurveyController extends Controller
                 'settings' => $questionData['settings'] ?? null,
                 'order' => $index,
             ]);
+            $incomingQuestionIds[] = $newQuestion->id;
+        }
+    }
+
+    // Find questions to delete (those not in the incoming list)
+    $questionsToDelete = array_diff($existingQuestionIds, $incomingQuestionIds);
+
+    if (!empty($questionsToDelete)) {
+        // Check if any of these questions have answers
+        $questionsWithAnswers = SurveyQuestion::whereIn('id', $questionsToDelete)
+            ->whereHas('answers')
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($questionsWithAnswers)) {
+            // Instead of deleting, mark them as hidden
+            // SurveyQuestion::whereIn('id', $questionsWithAnswers)->update(['hidden' => true]);
+            SurveyQuestion::whereIn('id', $questionsWithAnswers)->delete();
+
+            // Log which questions were hidden instead of deleted
+            \Log::info('Hidden questions with answers instead of deleting', [
+                'survey_id' => $survey->id,
+                'question_ids' => $questionsWithAnswers
+            ]);
         }
 
-        return response()->json(['success' => true]);
+        // Delete questions that don't have answers
+        $questionsWithoutAnswers = array_diff($questionsToDelete, $questionsWithAnswers);
+        if (!empty($questionsWithoutAnswers)) {
+            SurveyQuestion::whereIn('id', $questionsWithoutAnswers)->delete();
+        }
     }
+
+    return response()->json(['success' => true]);
+}
 
     /**
      * Display the specified survey.
@@ -216,7 +405,9 @@ class SurveyController extends Controller
      */
     public function show(Order $order)
     {
-        $survey = Survey::with('questions')->find(1);
+        $survey = Survey::with(['questions' => function ($query) {
+            $query->where('hidden', 0); // only non-hidden questions
+        }])->find(1);
 
         // Transform the data to match JavaScript expectations
         if ($survey) {
@@ -251,7 +442,9 @@ class SurveyController extends Controller
      */
     public function answer($id)
     {
-        $survey = Survey::with('questions')->find(1);
+        $survey = Survey::with(['questions' => function ($query) {
+            $query->where('hidden', 0); // only non-hidden questions
+        }])->find(1);
         $response = $survey->responses()->with(['answers.question', 'order.customer'])->findOrFail($id);
         return view('dashboard.surveys.answer', compact('survey','response'));
     }
