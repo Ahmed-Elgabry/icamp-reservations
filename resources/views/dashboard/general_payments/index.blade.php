@@ -17,31 +17,55 @@
                 </div>
                 <!--begin::Card title-->
                 <div class="card-title">
-                    <form action="" method="GET" class="row">
-                        <div class="form-group col-4 mt-3 ">
-                            <label for="">{{ __('dashboard.orders') }}</label>
-                            <select name="order_id" id="order_id" class="form-control">
-                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.orders') }}</option>
-                                @foreach($orders as $order)
-                                    <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>{{ $order->id }} [{{$order->customer->name }}]</option>
+                    <form action="" method="GET" class="row g-3 align-items-end">
+
+                        <div class="col-md-6">
+                            <label for="customer_id" class="form-label">
+                                {{ __('dashboard.select') }} {{ __('dashboard.customer') }}
+                            </label>
+                            <select name="customer_id" id="customer_id" class="form-select">
+                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.customer') }}</option>
+                                @foreach($customers as $customer)
+                                    <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                        {{ $customer->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-4 mt-3">
-                            <label for="">{{ __('dashboard.date_from') }}</label>
-                            <input type="date" name="date_from" class="form-control"
-                                placeholder="{{ __('dashboard.date_from') }}" value="{{ request('date_from') }}">
+
+                        <div class="col-md-6">
+                            <label for="order_id" class="form-label">
+                                {{ __('dashboard.orders') }}
+                            </label>
+                            <select name="order_id" id="order_id" class="form-select">
+                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.orders') }}</option>
+                                @foreach($orders as $order)
+                                    <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>
+                                        #{{ $order->id }} [{{ $order->customer->name }}]
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="form-group col-4 mt-3 ">
-                            <label for="">{{ __('dashboard.date_to') }}</label>
-                            <input type="date" name="date_to" class="form-control"
-                                placeholder="{{ __('dashboard.date_to') }}" value="{{ request('date_to') }}">
+
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label">{{ __('dashboard.date_from') }}</label>
+                            <input type="date" name="date_from" id="date_from" class="form-control"
+                                value="{{ request('date_from') }}">
                         </div>
-                        <button type="submit" class="btn btn-primary mt-3">{{ __('dashboard.search') }} <i
-                                class="fa fa-search"></i></button>
+
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label">{{ __('dashboard.date_to') }}</label>
+                            <input type="date" name="date_to" id="date_to" class="form-control"
+                                value="{{ request('date_to') }}">
+                        </div>
+
+                        <div class="col-md-4 d-flex">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fa fa-search me-1"></i> {{ __('dashboard.search') }}
+                            </button>
+                        </div>
 
                     </form>
-
                 </div>
                 <!--end::Card title-->
                 <!--begin::Card toolbar-->

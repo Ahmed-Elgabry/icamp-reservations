@@ -1,12 +1,11 @@
 @extends('dashboard.layouts.app')
+@props(['order' => null])
 @section('pageTitle', __('dashboard.orders'))
 @section('content')
     <!-------------->
     <div class="post d-flex flex-column-fluid" id="kt_post">
         <!--begin::Container-->
         <div id="kt_content_container" class="container-xxl">
-
-
 
             @include('dashboard.orders.nav')
             <!--begin::Basic info-->
@@ -180,6 +179,17 @@
                                 </div>
                             </div>
 
+                            {{-- delayed_reson --}}
+                            <div @class(['row mb-6' , 'd-none' => (!$order || $order->status != 'delayed') ]) id="delayed_reson">
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.delayed_reson')</label>
+                                <div class="col-lg-8">
+                                    <input type="text" class="form-control @error('delayed_reson') is-invalid @enderror" name="delayed_reson" value="{{ old('delayed_reson' , isset($order) ? $order->delayed_reson : '') }}">
+                                    @error('delayed_reson')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
                             @php $orderStatus = isset($order) ? ($order->status != 'pending_and_show_price' && $order->status != 'pending_and_Initial_reservation') : null  @endphp
                             <div @class(['row mb-6' , 'd-none' => $orderStatus ]) id="expired_price_offer">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.expired_price_offer') <span class="text-danger">*</span></label>
@@ -286,8 +296,10 @@
             $('#status').change(function() {
                 if ($(this).val() === 'pending_and_show_price' || $(this).val() === 'pending_and_Initial_reservation' ) {
                     $('#expired_price_offer').removeClass('d-none');
+                } else if($(this).val() === 'delayed') {
+                    $('#delayed_reson').removeClass('d-none');
                 } else {
-                    $('#expired_price_offer').addClass('d-none');
+                    $('#expired_price_offer,#delayed_reson').addClass('d-none');
                 }
             });
 

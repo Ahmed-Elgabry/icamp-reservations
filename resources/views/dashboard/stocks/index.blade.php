@@ -2,7 +2,7 @@
 
 @extends('dashboard.layouts.app')
 @section('content')
-<!-- عرض تنبيه إذا كانت هناك أي أسهم بكميات أقل من 6 -->
+
 @if($lowStock->count() > 0)
     <div class="alert alert-warning">
         <strong>@lang('dashboard.warning'):</strong> @lang('dashboard.The_following_products_contain_less_than_6_of:')</strong>

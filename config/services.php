@@ -31,4 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'paymennt' => [
+        'api_key' => env('PAYMENNT_API_KEY'),
+        'api_secret' => env('PAYMENNT_API_SECRET'),
+        'api_id' => env('PAYMENNT_API_ID'),
+        'webhook_secret' => env('PAYMENNT_WEBHOOK_SECRET'),
+        'test_mode' => env('PAYMENNT_TEST_MODE', true),
+    ],
+
 ];

@@ -95,15 +95,26 @@
                         <!-- Price input group -->
                         <div class="row mb-6">
                             <label
-                                class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.price')</label>
+                                class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.full_price')</label>
                             <div class="col-lg-8">
                                 <input type="number" step="0.01" name="price"
                                     class="form-control form-control-lg form-control-solid"
-                                    placeholder="@lang('dashboard.price')"
+                                    placeholder="@lang('dashboard.full_price')"
                                     value="{{ isset($stock) ? $stock->price : old('price') }}" required>
                             </div>
                         </div>
 
+                         <!-- Quantity input group -->
+                        <div class="row mb-6">
+                            <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.quantity')</label>
+                            <div class="col-lg-8">
+                                <input type="number" name="quantity"
+                                    class="form-control form-control-lg form-control-solid"
+                                    placeholder="@lang('dashboard.quantity')"
+                                    value="{{ isset($stock) ? $stock->quantity : old('quantity') }}">
+                            </div>
+                        </div>
+                        
                         <!-- Selling price input group -->
                         <div class="row mb-6">
                             <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.selling_price')</label>
@@ -115,22 +126,11 @@
                             </div>
                         </div>
 
-                        <!-- Quantity input group -->
-                        <div class="row mb-6">
-                            <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.quantity')</label>
-                            <div class="col-lg-8">
-                                <input type="number" name="quantity"
-                                    class="form-control form-control-lg form-control-solid"
-                                    placeholder="@lang('dashboard.quantity')"
-                                    value="{{ isset($stock) ? $stock->quantity : old('quantity') }}">
-                            </div>
-                        </div>
-
                         <!-- Percentage input group -->
                         <div class="row mb-6">
                             <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.Percentage')</label>
                             <div class="col-lg-8">
-                                <input type="text" name="percentage"
+                                <input type="number" name="percentage" min="0" max="100"
                                     class="form-control form-control-lg form-control-solid"
                                     placeholder="@lang('dashboard.Percentage')"
                                     value="{{ isset($stock) ? $stock->percentage : old('percentage') }}">

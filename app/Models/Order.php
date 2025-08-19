@@ -71,6 +71,11 @@ class Order extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function paymentLinks()
+    {
+        return $this->hasMany(PaymentLink::class);
+    }
     public function TermsSittng()
     {
         return $this->hasMany(TermsSittng::class);

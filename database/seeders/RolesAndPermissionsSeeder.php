@@ -28,37 +28,52 @@ class RolesAndPermissionsSeeder extends Seeder
         $seen_names = [];
 
         foreach (Route::getRoutes() as $route) {
-            if ($route->getName()){
-                // Skip duplicate route names
+            if ($route->getName()) {
+
                 if (in_array($route->getName(), $seen_names)) {
                     continue;
                 }
-
-                $seen_names[] = $route->getName();
-                $routes_data []   = [ 'name' => $route->getName() ,
-                'nickname_en' =>  $route->getName() ,
-                'nickname_ar' =>  $route->getName() ,
-                'guard_name' => 'web'
-            ];
+                $routes_data[]   = [
+                    'name' => $route->getName(),
+                    'nickname_en' =>  $route->getName(),
+                    'nickname_ar' =>  $route->getName(),
+                    'guard_name' => 'web'
+                ];
             }
         }
-        Permission::insert( $routes_data );
+
+        // Use updateOrCreate instead of insert to handle duplicates
+        foreach ($routes_data as $permissionData) {
+            Permission::updateOrCreate(
+                ['name' => $permissionData['name'], 'guard_name' => $permissionData['guard_name']],
+                $permissionData
+            );
+        }
 
         // create roles and assign created permissions
-        $role = Role::create(['name' => 'super-admin' ,'nickname_ar' => 'سوبر أدمن' , 'nickname_en' => 'Super Admin']);
-        Role::create(['name' => 'admin'  ,'nickname_ar' => 'أدمن' , 'nickname_en' => 'Admin']);
-        Role::create(['name' => 'employee'    ,'nickname_ar' => 'موظف' , 'nickname_en' => 'Employee']);
+        $role = Role::updateOrCreate(
+            ['name' => 'super-admin'],
+            ['nickname_ar' => 'سوبر أدمن', 'nickname_en' => 'Super Admin']
+        );
+        Role::updateOrCreate(
+            ['name' => 'admin'],
+            ['nickname_ar' => 'أدمن', 'nickname_en' => 'Admin']
+        );
+        Role::updateOrCreate(
+            ['name' => 'employee'],
+            ['nickname_ar' => 'موظف', 'nickname_en' => 'Employee']
+        );
 
 
 
-        $admin = User::create(
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
             [
                 'id' => 1,
                 'name' => 'admin',
                 'first_name' => 'admin',
                 'last_name' => 'admin',
                 'image' => Null,
-                'email' => 'admin@gmail.com',
                 'is_email_verified' => 1,
                 'is_phone_verified' => 0,
                 'password' => 'admin',
@@ -67,17 +82,16 @@ class RolesAndPermissionsSeeder extends Seeder
                 'is_active' => 1,
                 'created_at' => Carbon::now(),
             ]
-
         );
 
-        User::create([
-
+        User::updateOrCreate(
+            ['email' => 'manager@gmail.com'],
+            [
                 'id' => 2,
                 'name' => 'manager',
                 'first_name' => 'manager',
                 'last_name' => 'manager',
                 'image' => Null,
-                'email' => 'manager@gmail.com',
                 'is_email_verified' => 1,
                 'is_phone_verified' => 0,
                 'password' => 'user',
@@ -85,7 +99,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'user_type' => 2,
                 'is_active' => 1,
                 'created_at' => Carbon::now(),
-            ]);
+            ]
+        );
         $role->givePermissionTo(Permission::all());
         $admin->assignRole('super-admin');
     }

@@ -8,6 +8,7 @@ use App\Models\ServiceReport;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class ServicesController extends Controller
 {
@@ -27,84 +28,72 @@ class ServicesController extends Controller
 
     // Store a newly created service in the database
     public function store(Request $request)
-{
-    try {
-        // التحقق من صحة البيانات الواردة
-        $validatedData = $request->validate([
-            'name' => 'required|max:255',
-            'description' => 'nullable',
-            'price' => 'required|numeric',
-            'hours' => 'required|integer',
-            'hour_from' => 'required',
-            'hour_to' => 'required',
-            'stocks' => 'nullable|array',
-            'stocks.*' => 'nullable|distinct|min:1',
-            'counts' => 'nullable|array',
-            'counts.*' => 'nullable|integer|min:1',
-            'reports' => 'nullable|array',
-            'reports.*' => 'required|string|max:255',
-            'reports_counts' => 'nullable|array',
-            'reports_counts.*' => 'required|integer|min:1',
-            'reports_images' => 'nullable|array',
-            'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'report_orders' => 'nullable|array',
-            'report_orders.*' => 'nullable|integer',
-        ]);
+    {
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|max:255',
+                'description' => 'nullable',
+                'price' => 'required|numeric',
+                'hours' => 'required|integer',
+                'hour_from' => 'required',
+                'hour_to' => 'required',
+                'stocks' => 'nullable|array',
+                'stocks.*' => 'nullable|distinct|min:1',
+                'counts' => 'nullable|array',
+                'counts.*' => 'nullable|integer|min:1',
+                'reports' => 'nullable|array',
+                'reports.*' => 'required|string|max:255',
+                'reports_counts' => 'nullable|array',
+                'reports_counts.*' => 'required|integer|min:1',
+                'reports_images' => 'nullable|array',
+                'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'report_orders' => 'nullable|array',
+                'report_orders.*' => 'nullable|integer',
+            ]);
 
-        // تحديد الحقول المطلوبة فقط لإنشاء الخدمة
-        $serviceData = $request->only(['name', 'description', 'price', 'hours', 'hour_from', 'hour_to']);
+            \DB::beginTransaction();
+            $serviceData = $request->only(['name', 'description', 'price', 'hours', 'hour_from', 'hour_to']);
+            $service = Service::create($serviceData);
 
-        // إنشاء الخدمة
-        $service = Service::create($serviceData);
+            if (isset($request->stocks) && isset($request->counts)) {
+                $stocksData = array_combine($request->stocks, $request->counts);
+                $service->stocks()->sync([]);
 
-        // التعامل مع المخزون
-        if (isset($request->stocks) && isset($request->counts)) {
-            $stocksData = array_combine($request->stocks, $request->counts);
-            $service->stocks()->sync([]);
-
-            foreach ($stocksData as $stockId => $count) {
-                $service->stocks()->attach($stockId, ['count' => $count]);
-            }
-        }
-
-        // التعامل مع التقارير
-        if (isset($request->reports) && isset($request->reports_counts)) {
-            foreach ($request->reports as $index => $reportName) {
-                $count = $request->reports_counts[$index];
-                $order = $request->report_orders[$index] ?? $index;
-
-                // إنشاء التقرير
-                $newReport = $service->reports()->create([
-                    'name' => $reportName,
-                    'count' => $count,
-                    'report_orders' => $order
-                ]);
-
-                if ($files = $request->file("reports_images.{$index}")) {
-                    $path = $files->store('reports', 'public');
-                    $newReport->create([
-                        'image' => $path
-                    ]);
+                foreach ($stocksData as $stockId => $count) {
+                    $service->stocks()->attach($stockId, ['count' => $count]);
                 }
             }
+            if (isset($request->reports) && isset($request->reports_counts)) {
+                foreach ($request->reports as $index => $reportName) {
+                    $count = $request->reports_counts[$index];
+                    $order = $request->report_orders[$index] ?? $index;
+                    $newReport = $service->reports()->create([
+                        'name' => $reportName,
+                        'count' => $count,
+                        'report_orders' => $order
+                    ]);
+                    if ($files = $request->file("reports_images.{$index}")) {
+                        $path = $files->store('reports', 'public');
+                        $newReport->create([
+                            'image' => $path
+                        ]);
+                    }
+                }
+            }
+            \DB::commit();
+            return response()->json([
+                'message' => __('dashboard.service_created_successfully'),
+                'redirect' => route('services.index')
+            ], 201);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Error creating service: '.$e->getMessage());
+            return response()->json([
+                'errors' => ['server' => $e->getMessage()]
+            ], 500);
         }
-
-        // الرد بنجاح مع رسالة
-        return response()->json([
-            'message' => __('dashboard.service_created_successfully'),
-            'redirect' => route('services.index') // أو المسار الذي تريده
-        ], 201); // 201 Created
-    } catch (\Exception $e) {
-        // تسجيل الخطأ في السجلات
-        \Log::error('Error creating service: '.$e->getMessage());
-
-        // الرد بخطأ داخلي في الخادم مع تفاصيل الخطأ (للتطوير فقط)
-        return response()->json([
-            'errors' => ['server' => $e->getMessage()] // عرض رسالة الخطأ الحقيقية
-        ], 500);
     }
-}
-
 
     // Display the specified service
     public function show(Service $service)
@@ -117,105 +106,163 @@ class ServicesController extends Controller
     {
         $service = Service::findOrFail($service);
         $stocks = Stock::all();
-        $reports = ServiceReport::where('service_id', $service->id)->orderBy('id')->get();
+        $reports = ServiceReport::where('service_id', $service->id)
+                                    ->orderBy('ordered_count')
+                                    ->get();
 
         return view('dashboard.services.create', compact('service', 'stocks', 'reports'));
     }
 
-    // Update the specified service in the database
-    public function update(Request $request, $service)
+    public function update(Request $request, $serviceId)
     {
-        $service = Service::findOrFail($service);
+        $service = Service::findOrFail($serviceId);
 
-        $validatedData = $request->validate([
-            'name' => 'required|max:255',
-            'description' => 'nullable',
-            'price' => 'required|numeric',
-            'hours' => 'required|integer',
-            'hour_from' => 'required',
-            'hour_to' => 'required',
-            'stocks' => 'nullable|array',
-            'stocks.*' => 'nullable|distinct|min:1',
-            'counts' => 'nullable|array',
-            'counts.*' => 'nullable|integer|min:1',
-            'report_orders' => 'nullable|array',
-            'report_orders.*' => 'nullable|integer',
-            'images' => 'nullable|array',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        $validated = $request->validate([
+            'name'           => 'required|max:255',
+            'description'    => 'nullable',
+            'price'          => 'required|numeric',
+            'hours'          => 'required|integer',
+            'hour_from'      => 'required',
+            'hour_to'        => 'required',
+            'stocks'         => 'nullable|array',
+            'stocks.*'       => 'nullable|distinct|exists:stocks,id',
+            'counts'         => 'nullable|array',
+            'counts.*'       => 'nullable|integer|min:1',
+            'report_orders'  => 'nullable|array',
+            'report_orders.*'=> 'nullable|integer',
+            'images'         => 'nullable|array',
+            'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        unset($validatedData['stocks']);
-        unset($validatedData['counts']);
-        unset($validatedData['report_orders']);
-        $service->update($validatedData);
+        $requestedCounts = collect($validated['stocks'] ?? [])
+            ->mapWithKeys(function ($id, $idx) use ($validated) {
+                $sid = (int) $id;
+                $cnt = (int) ($validated['counts'][$idx] ?? 0);
+                return $sid ? [$sid => $cnt] : [];
+            })
+            ->filter(fn ($c) => $c > 0)
+            ->reduce(function ($carry, $count, $stockId) {
+                $carry[$stockId] = ($carry[$stockId] ?? 0) + $count;
+                return $carry;
+            }, []);
 
-        $service->stocks()->sync([]);
+        try {
+            \DB::beginTransaction();
+            $existingPivot = $service->stocks()
+                ->get()
+                ->mapWithKeys(fn ($s) => [(int)$s->id => (int)$s->pivot->count]);
+            $existingPivotKeys = $existingPivot->keys()->all();
 
-        if (isset($request->stocks) && isset($request->counts)) {
-            $stocksData = array_combine($request->stocks, $request->counts);
+            $lockIds = array_values(array_unique(array_merge(
+                array_keys($requestedCounts),
+                $existingPivotKeys
+            )));
+            $stockModels = Stock::whereIn('id', $lockIds)->lockForUpdate()->get()->keyBy('id');
 
-            foreach ($stocksData as $stockId => $count) {
-                $service->stocks()->attach($stockId, ['count' => $count]);
-            }
-        }
-
-        // Update or create reports
-        if (isset($request->reports) && isset($request->reports_counts)) {
-            $existingReports = $service->reports()->pluck('id', 'id')->toArray();
-            $updatedReports = [];
-
-            foreach ($request->reports as $index => $reportName) {
-                $count = $request->reports_counts[$index];
-                $reportId = $request->report_ids[$index] ?? null;
-
-                $reportData = [
-                    'name' => $reportName,
-                    'count' => $count,
-                    // 'order' => $order,
-                    'service_id' => $service->id
-                ];
-
-  if ($reportId && isset($existingReports[$reportId])) {
-    // Update existing report
-    $report = ServiceReport::findOrFail($reportId);
-    $report->update($reportData);
-
-    // Get the image for this index correctly
-    $file = $request->file('reports_images')[$index] ?? null;
-
-    if ($file instanceof \Illuminate\Http\UploadedFile) {
-        // Delete the old image if it exists
-        if ($report->image && Storage::disk('public')->exists($report->image)) {
-            Storage::disk('public')->delete($report->image);
-        }
-
-        // Store new image
-        $path = $file->store('reports', 'public');
-        $report->update(['image' => $path]);
-    }
-
-    $updatedReports[] = $reportId;
-    unset($existingReports[$reportId]);
-} else {
-    // Creating a new report
-    $file = $request->file('reports_images')[$index] ?? null;
-
-    if ($file instanceof \Illuminate\Http\UploadedFile) {
-        $reportData['image'] = $file->store('reports', 'public');
-    }
-
-    $newReport = ServiceReport::create($reportData);
-    $updatedReports[] = $newReport->id;
-}
-
+            foreach ($requestedCounts as $stockId => $newCount) {
+                $stock = $stockModels[$stockId] ?? null;
+                if (!$stock) {
+                    throw new \RuntimeException("Stock #{$stockId} not found.");
+                }
+                $old   = $existingPivot[$stockId] ?? 0;
+                $delta = $newCount - $old;
+                if ($delta > 0 && (int)$stock->quantity < $delta) {
+                    throw ValidationException::withMessages([
+                        'stocks' => ["Insufficient quantity for '{$stock->name}'. Need {$delta}, available {$stock->quantity}."],
+                    ]);
+                }
             }
 
-            ServiceReport::whereIn('id', array_keys($existingReports))->delete();
-        } else {
-            $service->reports()->delete();
-        }
+            foreach ($requestedCounts as $stockId => $newCount) {
+                $stock = $stockModels[$stockId];
+                $old   = $existingPivot[$stockId] ?? 0;
+                $delta = $newCount - $old;
 
-        return response()->json();
+                if ($delta > 0) {
+                    $stock->decrement('quantity', $delta);
+                } elseif ($delta < 0) {
+                    $stock->increment('quantity', -$delta);
+                }
+
+                unset($existingPivot[$stockId]);
+            }
+
+            foreach ($existingPivot as $stockId => $oldCount) {
+                if (isset($stockModels[$stockId]) && $oldCount > 0) {
+                    $stockModels[$stockId]->increment('quantity', $oldCount);
+                }
+            }
+
+            $syncPayload = [];
+            foreach ($requestedCounts as $stockId => $count) {
+                $syncPayload[$stockId] = ['count' => $count];
+            }
+            $service->stocks()->sync($syncPayload);
+
+            $service->update([
+                'name'        => $validated['name'],
+                'description' => $validated['description'] ?? null,
+                'price'       => $validated['price'],
+                'hours'       => $validated['hours'],
+                'hour_from'   => $validated['hour_from'],
+                'hour_to'     => $validated['hour_to'],
+            ]);
+
+            if ($request->filled('reports') && $request->filled('reports_counts')) {
+                $existingReports = $service->reports()->pluck('id', 'id')->toArray();
+                $updatedReports  = [];
+
+                foreach ($request->reports as $index => $reportName) {
+                    $count    = (int) ($request->reports_counts[$index] ?? 0);
+                    $reportId = $request->report_ids[$index] ?? null;
+
+                    $reportData = [
+                        'name'       => $reportName,
+                        'count'      => $count,
+                        'service_id' => $service->id,
+                    ];
+
+                    if ($reportId && isset($existingReports[$reportId])) {
+                        $report = ServiceReport::findOrFail($reportId);
+                        $report->update($reportData);
+
+                        $file = $request->file('reports_images')[$index] ?? null;
+                        if ($file instanceof \Illuminate\Http\UploadedFile) {
+                            if ($report->image && Storage::disk('public')->exists($report->image)) {
+                                Storage::disk('public')->delete($report->image);
+                            }
+                            $path = $file->store('reports', 'public');
+                            $report->update(['image' => $path]);
+                        }
+
+                        $updatedReports[] = $reportId;
+                        unset($existingReports[$reportId]);
+                    } else {
+                        $file = $request->file('reports_images')[$index] ?? null;
+                        if ($file instanceof \Illuminate\Http\UploadedFile) {
+                            $reportData['image'] = $file->store('reports', 'public');
+                        }
+                        $newReport = ServiceReport::create($reportData);
+                        $updatedReports[] = $newReport->id;
+                    }
+                }
+
+                if (!empty($existingReports)) {
+                    ServiceReport::whereIn('id', array_keys($existingReports))->delete();
+                }
+            } else {
+                $service->reports()->delete();
+            }
+
+            \DB::commit();
+            return response()->json();
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            \Log::error('Service update failed: '.$e->getMessage());
+            return response()->json([
+                'errors' => ['server' => $e->getMessage()],
+            ], 500);
+        }
     }
 
     // Remove the specified service from the database
@@ -237,6 +284,84 @@ class ServicesController extends Controller
             return response()->json('success');
         } else {
             return response()->json('failed');
+        }
+    }
+
+    public function move(Request $request, Service $service, ServiceReport $report)
+    {
+        $data = $request->validate([
+            'direction' => 'required|in:up,down',
+        ]);
+
+        return \DB::transaction(function () use ($service, $report, $data) {
+            $this->normalizeOrderedCounts($service);
+            $current = ServiceReport::where('service_id', $service->id)
+                ->where('id', $report->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $targetOrder = $data['direction'] === 'up' ? $current->ordered_count - 1 : $current->ordered_count + 1;
+
+            if ($targetOrder < 1) {
+                return response()->json(['message' => 'noop', 'moved' => false], 200);
+            }
+
+            $max = (int) ServiceReport::where('service_id', $service->id)->max('ordered_count');
+            if ($targetOrder > $max) {
+                return response()->json(['message' => 'noop', 'moved' => false], 200);
+            }
+
+            $neighbor = ServiceReport::where('service_id', $service->id)
+                ->where('ordered_count', $targetOrder)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$neighbor) {
+                $this->normalizeOrderedCounts($service);
+                $neighbor = ServiceReport::where('service_id', $service->id)
+                    ->where('ordered_count', $targetOrder)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$neighbor) {
+                    return response()->json(['message' => 'noop', 'moved' => false], 200);
+                }
+            }
+
+            $cur = $current->ordered_count;
+            $nbr = $neighbor->ordered_count;
+
+            $current->ordered_count = $nbr;
+            $neighbor->ordered_count = $cur;
+
+            $current->save();
+            $neighbor->save();
+
+            return response()->json([
+                'message' => 'ok',
+                'moved'   => true,
+                'current' => ['id' => $current->id, 'ordered_count' => $current->ordered_count],
+                'neighbor'=> ['id' => $neighbor->id, 'ordered_count' => $neighbor->ordered_count],
+            ], 200);
+        });
+    }
+
+    private function normalizeOrderedCounts(Service $service): void
+    {
+        $rows = ServiceReport::where('service_id', $service->id)
+            ->orderByRaw('CASE WHEN ordered_count IS NULL THEN 0 ELSE 1 END ASC')
+            ->orderBy('ordered_count')
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        $i = 1;
+        foreach ($rows as $r) {
+            if ((int)$r->ordered_count !== $i) {
+                $r->ordered_count = $i;
+                $r->save();
+            }
+            $i++;
         }
     }
 }

@@ -104,10 +104,11 @@ class ExpensesController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
+            'image' => 'nullable|image',
             'date' => 'nullable|date',
             'order_id' => 'nullable|exists:orders,id',
             'notes' => 'nullable|string',
@@ -119,16 +120,19 @@ class ExpensesController extends Controller
             'balance' => $bankAccount->balance - $request->price
         ]);
 
-        // Create the expense record
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('expenses', 'public');
+        }
+        
         Expense::create([
             'expense_item_id' => $request->expense_item_id,
             'account_id' => $request->account_id,
             'price' => $request->price,
             'date' => $date,
             'notes' => $request->notes,
+            'image' => $path ?? null,
             'order_id' => $request->order_id,
         ]);
-
 
         // that mean he is get form orders page
         if (!$request->date) {
@@ -158,35 +162,32 @@ class ExpensesController extends Controller
     public function update(Request $request, $expense)
     {
         $expense = Expense::findOrFail($expense);
-
         $data = $request->validate([
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
             'date' => 'nullable|date',
+            'image' => 'nullable|image',
             'notes' => 'nullable|string',
         ]);
-
         $data['date'] = $request->date ? $request->date : $expense->date;
-
-        $oldBankAccount = BankAccount::find($expense->account_id);
         $bankAccount = BankAccount::findOrFail($request->account_id);
-        //  return money back
         $bankAccount->update([
             'balance' => $bankAccount->balance + $expense->price
         ]);
-
-        // take money form bank
         $bankAccount->update([
             'balance' => $bankAccount->balance - $request->price
         ]);
-
+        if ($request->hasFile('image')) {
+            if ($expense->image) {
+                \Storage::disk('public')->delete($expense->image);
+            }
+            $data['image'] = $request->file('image')->store('expenses', 'public');
+        }
         $expense->update($data);
-
         if (!$request->date) {
             return back()->withSuccess(__('dashboard.success'));
         }
-
         return response()->json();
     }
 
