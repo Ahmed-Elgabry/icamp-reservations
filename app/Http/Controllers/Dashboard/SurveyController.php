@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Survey;
 use App\Models\SurveyQuestion;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 
 class SurveyController extends Controller
@@ -16,12 +17,97 @@ class SurveyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function statistics()
     {
-        $surveys = Survey::latest()->paginate(10);
-        return view('dashboard.surveys.index', compact('surveys'));
-    }
+        $survey = Survey::with('questions')->find(1);
+        $responses = $survey->responses()->with('answers.question')->get();
+        $totalResponses = $responses->count();
 
+        // Calculate average rating
+        $ratingsSum = $responses->whereNotNull('rating')->sum('rating');
+        $ratingsCount = $responses->whereNotNull('rating')->count();
+        $averageRating = $ratingsCount > 0 ? round($ratingsSum / $ratingsCount, 1) : 0;
+
+        // Get ratings distribution
+        $ratingsDistribution = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $ratingsDistribution[$i] = $responses->where('rating', $i)->count();
+        }
+
+        // Get question types distribution
+        $questionTypes = [
+            'text' => 0,
+            'textarea' => 0,
+            'radio' => 0,
+            'checkbox' => 0,
+            'select' => 0,
+            'stars' => 0,
+            'rating' => 0
+        ];
+
+        foreach ($survey->questions as $question) {
+            if (isset($questionTypes[$question->question_type])) {
+                $questionTypes[$question->question_type]++;
+            }
+        }
+
+        // Get responses by date for the last 7 days
+        $timelineData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $dateStr = $date->format('Y-m-d');
+            $timelineData[$dateStr] = $responses->where('created_at', '>=', $date->startOfDay())
+                ->where('created_at', '<=', $date->endOfDay())
+                ->count();
+        }
+
+        // Get popular questions with answer counts
+        $popularQuestions = $survey->questions()
+            ->withCount(['answers' => function($query) {
+                $query->whereNotNull('answer_text');
+            }])
+            ->orderBy('answers_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // Prepare the popular questions for the chart
+        $popularQuestionsData = $popularQuestions->map(function ($question) {
+            return [
+                'title' => SurveyHelper::getLocalizedText($question->question_text),
+                'answers_count' => $question->answers_count
+            ];
+        });
+
+        // Get all questions with answer counts for the table
+        $allQuestions = $survey->questions()
+            ->withCount(['answers' => function($query) {
+                $query->whereNotNull('answer_text');
+            }])
+            ->orderBy('answers_count', 'desc')
+            ->get();
+
+        // Prepare the data for the table
+        $allQuestionsData = $allQuestions->map(function ($question) {
+            return [
+                'id' => $question->id,
+                'title' => SurveyHelper::getLocalizedText($question->question_text),
+                'type' => $question->question_type,
+                'answers_count' => $question->answers_count
+            ];
+        });
+
+        return view('dashboard.surveys.statistics')
+            ->with('survey', $survey)
+            ->with('totalResponses', $totalResponses)
+            ->with('averageRating', $averageRating)
+            ->with('ratingsDistribution', $ratingsDistribution)
+            ->with('questionTypes', $questionTypes)
+            ->with('timelineData', $timelineData)
+            ->with('popularQuestionsData', $popularQuestionsData)
+            ->with('allQuestionsData', $allQuestionsData)
+            ->with('responses', $responses);
+    }
+    
     /**
      * Show the form for creating a new survey.
      *
@@ -40,76 +126,9 @@ class SurveyController extends Controller
             $survey = $surveyArray;
         }
 
+        Debugbar::disable();
         return view('dashboard.surveys.builder')
         ->with('survey', $survey);
-    }
-
-    /**
-     * Store a newly created survey in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'survey.title' => 'required|string|max:255',
-            'survey.description' => 'nullable|string',
-            'survey.is_active' => 'boolean',
-            'survey.starts_at' => 'nullable|date',
-            'survey.ends_at' => 'nullable|date|after_or_equal:starts_at',
-            'survey.questions' => 'required|array',
-            'survey.questions.*.question_text' => 'required|string',
-            'survey.questions.*.question_type' => 'required|string',
-            'survey.questions.*.placeholder' => 'nullable|string',
-            'survey.questions.*.help_text' => 'nullable|string',
-            'survey.questions.*.validation_type' => 'nullable|string',
-            'survey.questions.*.min_length' => 'nullable|integer|min:0',
-            'survey.questions.*.max_length' => 'nullable|integer|min:1',
-            'survey.questions.*.error_message' => 'nullable|string',
-            'survey.questions.*.options' => 'nullable|array',
-            'survey.questions.*.settings' => 'nullable|array',
-        ]);
-
-        // Create survey
-        $survey = Survey::create([
-            'title' => $validated['survey']['title'],
-            'description' => $validated['survey']['description'] ?? null,
-            'is_active' => $validated['survey']['is_active'] ?? true,
-            'starts_at' => $validated['survey']['starts_at'] ?? null,
-            'ends_at' => $validated['survey']['ends_at'] ?? null,
-        ]);
-
-        // Create questions
-        foreach ($validated['survey']['questions'] as $index => $questionData) {
-            SurveyQuestion::create([
-                'survey_id' => $survey->id,
-                'question_text' => $questionData['question_text'],
-                'question_type' => $questionData['question_type'],
-                'placeholder' => $questionData['placeholder'] ?? null,
-                'help_text' => $questionData['help_text'] ?? null,
-                'validation_type' => $questionData['validation_type'] ?? 'none',
-                'min_length' => $questionData['min_length'] ?? null,
-                'max_length' => $questionData['max_length'] ?? null,
-                'error_message' => $questionData['error_message'] ?? null,
-                'options' => $questionData['options'] ?? null,
-                'settings' => $questionData['settings'] ?? null,
-                'order' => $index,
-            ]);
-        }
-
-        return response()->json(['id' => $survey->id]);
-    }
-
-    /**
-     * Show the form for editing the specified survey.
-     *
-     * @param  \App\Models\Survey  $survey
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Survey $survey)
-    {
-        return view('dashboard.surveys.builder', compact('survey'));
     }
 
     /**
@@ -124,17 +143,11 @@ class SurveyController extends Controller
         $validated = $request->validate([
             'survey.title' => 'required|string|max:255',
             'survey.description' => 'nullable|string',
-            'survey.is_active' => 'boolean',
-            'survey.starts_at' => 'nullable|date',
-            'survey.ends_at' => 'nullable|date|after_or_equal:starts_at',
             'survey.questions' => 'required|array',
-            'survey.questions.*.question_text' => 'required|string',
+            'survey.questions.*.question_text' => 'required|array',
             'survey.questions.*.question_type' => 'required|string',
-            'survey.questions.*.placeholder' => 'nullable|string',
-            'survey.questions.*.help_text' => 'nullable|string',
-            'survey.questions.*.validation_type' => 'nullable|string',
-            'survey.questions.*.min_length' => 'nullable|integer|min:0',
-            'survey.questions.*.max_length' => 'nullable|integer|min:1',
+            'survey.questions.*.placeholder' => 'nullable|array',
+            'survey.questions.*.help_text' => 'nullable|array',
             'survey.questions.*.error_message' => 'nullable|string',
             'survey.questions.*.options' => 'nullable|array',
             'survey.questions.*.settings' => 'nullable|array',
@@ -144,9 +157,6 @@ class SurveyController extends Controller
         $survey->update([
             'title' => $validated['survey']['title'],
             'description' => $validated['survey']['description'] ?? null,
-            'is_active' => $validated['survey']['is_active'] ?? true,
-            'starts_at' => $validated['survey']['starts_at'] ?? null,
-            'ends_at' => $validated['survey']['ends_at'] ?? null,
         ]);
 
         // Delete existing questions
@@ -160,9 +170,6 @@ class SurveyController extends Controller
                 'question_type' => $questionData['question_type'],
                 'placeholder' => $questionData['placeholder'] ?? null,
                 'help_text' => $questionData['help_text'] ?? null,
-                'validation_type' => $questionData['validation_type'] ?? 'none',
-                'min_length' => $questionData['min_length'] ?? null,
-                'max_length' => $questionData['max_length'] ?? null,
                 'error_message' => $questionData['error_message'] ?? null,
                 'options' => $questionData['options'] ?? null,
                 'settings' => $questionData['settings'] ?? null,
@@ -171,18 +178,6 @@ class SurveyController extends Controller
         }
 
         return response()->json(['success' => true]);
-    }
-
-    /**
-     * Remove the specified survey from storage.
-     *
-     * @param  \App\Models\Survey  $survey
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Survey $survey)
-    {
-        $survey->delete();
-        return redirect()->route('admin.surveys.index')->with('success', 'Survey deleted successfully');
     }
 
     /**
@@ -216,7 +211,20 @@ class SurveyController extends Controller
      */
     public function results(Survey $survey)
     {
-        $responses = $survey->responses()->with('answers.question')->latest()->paginate(10);
+        $responses = $survey->responses()->with(['answers.question', 'order.customer'])->latest()->paginate(10);
         return view('dashboard.surveys.results', compact('survey', 'responses'));
+    }
+
+    /**
+     * Display survey answer details.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function answer($id)
+    {
+        $survey = Survey::with('questions')->find(1);
+        $response = $survey->responses()->with(['answers.question', 'order.customer'])->findOrFail($id);
+        return view('dashboard.surveys.answer', compact('survey','response'));
     }
 }

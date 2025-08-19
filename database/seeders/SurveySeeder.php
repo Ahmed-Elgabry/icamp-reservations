@@ -15,9 +15,6 @@ class SurveySeeder extends Seeder
         $survey = Survey::create([
             'title' => 'استبيان رضا العملاء',
             'description' => 'يساعدنا هذا الاستبيان في تحسين خدماتنا وتقديم تجربة أفضل لك',
-            'is_active' => true,
-            'starts_at' => now(),
-            'ends_at' => now()->addMonths(1),
         ]);
 
         // Add questions to the survey
@@ -25,29 +22,22 @@ class SurveySeeder extends Seeder
             [
                 'question_text' => 'كيف تقيم جودة خدماتنا بشكل عام؟',
                 'question_type' => 'stars',
-                'is_required' => true,
                 'settings' => [
                     'points' => 5,
-                    'lowLabel' => 'سيء جداً',
-                    'highLabel' => 'ممتاز'
                 ],
                 'order' => 1,
             ],
             [
                 'question_text' => 'ما مدى رضاك عن سرعة الاستجابة؟',
-                'question_type' => 'emojis',
-                'is_required' => true,
+                'question_type' => 'stars',
                 'settings' => [
                     'points' => 5,
-                    'lowLabel' => 'غير راضٍ',
-                    'highLabel' => 'راضٍ جداً'
                 ],
                 'order' => 2,
             ],
             [
                 'question_text' => 'ما هي الخدمة التي استخدمتها؟',
                 'question_type' => 'select',
-                'is_required' => true,
                 'options' => [
                     ['label' => 'الدعم الفني', 'value' => 'technical_support'],
                     ['label' => 'المبيعات', 'value' => 'sales'],
@@ -59,7 +49,6 @@ class SurveySeeder extends Seeder
             [
                 'question_text' => 'كم مرة استخدمت خدماتنا في الشهر الماضي؟',
                 'question_type' => 'radio',
-                'is_required' => true,
                 'options' => [
                     ['label' => 'هذه هي المرة الأولى', 'value' => 'first_time'],
                     ['label' => '1-2 مرات', 'value' => '1_2_times'],
@@ -71,7 +60,6 @@ class SurveySeeder extends Seeder
             [
                 'question_text' => 'ما هي الميزات التي تود أن نضيفها؟',
                 'question_type' => 'checkbox',
-                'is_required' => false,
                 'options' => [
                     ['label' => 'دردشة مباشرة', 'value' => 'live_chat'],
                     ['label' => 'دعم عبر الهاتف', 'value' => 'phone_support'],
@@ -82,19 +70,8 @@ class SurveySeeder extends Seeder
                 'order' => 5,
             ],
             [
-                'question_text' => 'كم من المحتمل أن توصي بنا لصديق أو زميل؟',
-                'question_type' => 'nps',
-                'is_required' => true,
-                'settings' => [
-                    'lowLabel' => 'غير محتمل على الإطلاق',
-                    'highLabel' => 'محتمل جداً'
-                ],
-                'order' => 6,
-            ],
-            [
                 'question_text' => 'أي ملاحظات إضافية لديك؟',
                 'question_type' => 'textarea',
-                'is_required' => false,
                 'placeholder' => 'اكتب ملاحظاتك هنا...',
                 'order' => 7,
             ],
@@ -105,7 +82,6 @@ class SurveySeeder extends Seeder
                 'survey_id' => $survey->id,
                 'question_text' => $question['question_text'],
                 'question_type' => $question['question_type'],
-                'is_required' => $question['is_required'],
                 'placeholder' => $question['placeholder'] ?? null,
                 'options' => $question['options'] ?? null,
                 'settings' => $question['settings'] ?? null,

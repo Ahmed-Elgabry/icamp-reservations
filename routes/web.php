@@ -1,7 +1,6 @@
 <?php
 
 
-use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Dashboard\AdminController;
 use App\Http\Controllers\Dashboard\DailyReportController;
@@ -15,9 +14,10 @@ use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
 use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\StockController;
+use App\Http\Controllers\Dashboard\SurveyController;
+use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use App\Http\Controllers\Dashboard\TermsSittngController;
 use App\Http\Controllers\Dashboard\ViolationController;
-use App\Http\Controllers\Dashboard\ViolationTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1002,15 +1002,16 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 
 /*** update route if i added new routes  */
 
+use App\Http\Controllers\Dashboard\ViolationTypeController;
 use App\Http\Controllers\OrderSignatureController;
 use App\Http\Controllers\statisticsController;
-use App\Http\Controllers\SurveySubmissionController;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+
 
 
 
@@ -1215,7 +1216,11 @@ Route::resource('violations', ViolationController::class)
 
 Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submit'])->name('surveys.submit');
 Route::get('survey/{survey}/thankyou', [SurveySubmissionController::class, 'thankyou'])->name('surveys.thankyou');
-Route::resource('surveys', SurveyController::class)->middleware(['auth']);
+Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);
+Route::get('survey/{response_id}/answer', [SurveyController::class, 'answer'])->name('surveys.answer')->middleware(['auth']);
+Route::put('surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update')->middleware(['auth']);
 Route::get('surveys/{survey}/results', [SurveyController::class, 'results'])->name('surveys.results')->middleware(['auth']);
+Route::get('surveys/statistics', [SurveyController::class, 'statistics'])->name('surveys.statistics')->middleware(['auth']);
+
 // Public survey route
 Route::get('survey/{order}', [SurveyController::class, 'show'])->name('surveys.public');

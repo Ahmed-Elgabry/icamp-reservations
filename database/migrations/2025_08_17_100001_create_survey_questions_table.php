@@ -13,13 +13,9 @@ return new class extends Migration
             $table->unsignedBigInteger('survey_id');
             $table->string('question_text');
             $table->string('question_type');
-            $table->boolean('is_required')->default(false);
             $table->integer('order')->default(0);
             $table->string('placeholder')->nullable();
             $table->text('help_text')->nullable();
-            $table->string('validation_type')->default('none');
-            $table->integer('min_length')->nullable();
-            $table->integer('max_length')->nullable();
             $table->text('error_message')->nullable();
             $table->json('options')->nullable(); // For multiple choice, checkbox, etc.
             $table->json('settings')->nullable(); // For additional settings like star count, emoji options, etc.

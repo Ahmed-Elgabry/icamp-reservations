@@ -19,32 +19,14 @@ class SurveySubmissionController extends Controller
      */
     public function submit(Request $request, Survey $survey)
     {
-        // Validate survey is active and within date range
-        if (!$survey->is_active) {
-            return redirect()->back()->with('error', 'هذا الاستبيان غير نشط حالياً');
-        }
-
-        if ($survey->starts_at && now()->lt($survey->starts_at)) {
-            return redirect()->back()->with('error', 'هذا الاستبيان لم يبدأ بعد');
-        }
-
-        if ($survey->ends_at && now()->gt($survey->ends_at)) {
-            return redirect()->back()->with('error', 'هذا الاستبيان انتهت صلاحيته');
-        }
-
         // Validate required questions
         $rules = [];
-        foreach ($survey->questions as $question) {
-            if ($question->is_required) {
-                $rules["question_{$question->id}"] = 'required';
-            }
-        }
-
         $validated = $request->validate($rules);
 
         // Create survey response
         $response = SurveyResponse::create([
             'survey_id' => $survey->id,
+            'reservation_id' => $request->order_id,
             'user_id' => auth()->id(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -53,11 +35,17 @@ class SurveySubmissionController extends Controller
 
         // Save answers
         foreach ($survey->questions as $question) {
-            $answerValue = $request->input("question_{$question->id}");
+            $answerValue = null;
 
-            // Handle different question types
-            if (in_array($question->question_type, ['checkbox'])) {
-                // Checkbox questions can have multiple values
+            // Check for both prefixes
+            if ($request->has("question_{$question->id}")) {
+                $answerValue = $request->input("question_{$question->id}");
+            } elseif ($request->has("field_{$question->id}")) {
+                $answerValue = $request->input("field_{$question->id}");
+            }
+
+            // Handle checkbox arrays
+            if ($question->question_type === 'checkbox') {
                 $answerValue = $request->input("question_{$question->id}", []);
             }
 
@@ -80,6 +68,6 @@ class SurveySubmissionController extends Controller
      */
     public function thankyou(Survey $survey)
     {
-        return view('surveys.thankyou', compact('survey'));
+        return view('dashboard.surveys.thankyou', compact('survey'));
     }
 }

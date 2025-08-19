@@ -10,7 +10,10 @@ class SurveyAnswer extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'survey_response_id', 'survey_question_id', 'answer_text', 'answer_option'
+        'survey_response_id',
+        'survey_question_id',
+        'answer_text',
+        'answer_option'
     ];
 
     protected $casts = [

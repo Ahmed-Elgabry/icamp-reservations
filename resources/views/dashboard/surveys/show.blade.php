@@ -11,56 +11,6 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
 
     <style>
-        /* Custom styles for star rating */
-        .star-rating {
-            display: flex;
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-        }
-
-        .star-rating input {
-            display: none;
-        }
-
-        .star-rating label {
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: #ddd;
-            transition: color 0.2s;
-        }
-
-        .star-rating input:checked ~ label,
-        .star-rating label:hover,
-        .star-rating label:hover ~ label {
-            color: #ffc107;
-        }
-
-        /* Custom styles for emoji rating */
-        .emoji-rating {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.5rem;
-        }
-
-        .emoji-rating input {
-            display: none;
-        }
-
-        .emoji-rating label {
-            cursor: pointer;
-            opacity: 0.5;
-            transition: all 0.2s;
-            transform: scale(1);
-        }
-
-        .emoji-rating input:checked + label,
-        .emoji-rating label:hover {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-    </style>
-
-    <style>
         body {
             font-family: "Cairo", sans-serif;
             background-color: #f2f2f2;
@@ -191,6 +141,11 @@
         .alert-error {
             background-color: #dc3545;
         }
+        .rating-scale-ar input[type="radio"],
+        .rating-scale-ar input[type="checkbox"] {
+            float: right;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body style="direction: @if (app()->getLocale() == 'ar') rtl @else ltr @endif" >
@@ -231,7 +186,7 @@
         <form action="{{ route('surveys.submit', $order->id) }}" method="POST">
             @csrf
             <input type="hidden" name="order_id" value="{{ $order->id }}">
-
+{{-- 
             <div class="rating-form-group">
                 <label class="rating-form-label">{{ __('dashboard.Rate') }}</label>
                 <div class="rating-form-stars">
@@ -246,7 +201,7 @@
             <div class="rating-form-group">
                 <label for="review" class="rating-form-label">{{ __('dashboard.review') }}</label>
                 <textarea id="review" name="review" class="rating-form-textarea" placeholder={{ __('dashboard.review_placeholder') }}> {{$order->rate ? $order->rate->review : ''}}</textarea>
-            </div>
+            </div> --}}
             <div>
                 @foreach($survey['fields'] as $question)
                     <div class="mb-4 {{ $question['settings']['width'] ?? 'col-12' }}">

@@ -1,24 +1,30 @@
 {{-- resources/views/admin/surveys/builder.blade.php --}}
 {{-- @extends('layouts.app')
+
 @section('title', 'Survey Builder')
 @section('content') --}}
+
 {{-- @section('styles') --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-utilities.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         :root {
             --bs-primary: #2563eb;
             --bs-secondary: #6b7280;
         }
+
         body {
             background-color: #f9fafb;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         .sidebar-field {
             cursor: pointer;
             transition: all 0.2s;
@@ -27,10 +33,12 @@
             text-align: center;
             margin-bottom: 0.5rem;
         }
+
         .sidebar-field:hover {
             background-color: #dbeafe;
             transform: translateY(-2px);
         }
+
         .form-field {
             border: 2px dashed #d1d5db;
             border-radius: 0.5rem;
@@ -40,14 +48,17 @@
             transition: all 0.2s;
             cursor: move;
         }
+
         .form-field:hover {
             border-color: #9ca3af;
             background-color: #f9fafb;
         }
+
         .form-field.selected {
             border-color: #2563eb;
             background-color: #eff6ff;
         }
+
         .field-actions {
             position: absolute;
             top: 0.5rem;
@@ -55,9 +66,11 @@
             opacity: 0;
             transition: opacity 0.2s;
         }
+
         .form-field:hover .field-actions {
             opacity: 1;
         }
+
         .properties-panel {
             background-color: white;
             border-radius: 0.5rem;
@@ -65,6 +78,7 @@
             /* height: calc(100vh - 120px); */
             overflow-y: auto;
         }
+
         .preview-btn {
             position: fixed;
             bottom: 1.5rem;
@@ -77,15 +91,18 @@
             align-items: center;
             justify-content: center;
         }
+
         .ui-sortable-helper {
             transform: rotate(5deg);
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
+
         .field-type-label {
             font-size: 0.75rem;
             color: #6b7280;
             margin-top: 0.25rem;
         }
+
         .unsaved-indicator {
             width: 0.5rem;
             height: 0.5rem;
@@ -93,15 +110,18 @@
             border-radius: 50%;
             display: inline-block;
         }
+
         .option-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             margin-bottom: 0.5rem;
         }
+
         .option-item input[type="text"] {
             flex: 1;
         }
+
         .option-item button {
             padding: 0.25rem;
             border: none;
@@ -109,9 +129,11 @@
             color: #dc2626;
             cursor: pointer;
         }
+
         .option-item button:hover {
             color: #b91c1c;
         }
+
         .rating-form-stars {
             display: flex;
             justify-content: space-between;
@@ -136,20 +158,9 @@
             float: right;
             margin-left: 10px;
         }
-        .lang-inputs {
-            display: flex;
-            gap: 10px;
-        }
-        .lang-inputs .form-control {
-            flex: 1;
-        }
-        .lang-label {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-bottom: 0.25rem;
-        }
     </style>
 {{-- @endsection --}}
+
 <div class="container-fluid" style="height: 100vh;">
     <div class="row">
         <!-- Left Sidebar - Question Types -->
@@ -209,6 +220,7 @@
                 </div>
             </div>
         </div>
+
         <!-- Main Content - Survey Builder -->
         <div class="col-md-8 p-2" style="height: 100vh; overflow-y: auto;">
             <div class="bg-white rounded shadow-sm mb-4 p-3 d-flex justify-content-between align-items-center">
@@ -229,6 +241,7 @@
                     </button>
                 </div>
             </div>
+
             <div class="bg-white rounded shadow-sm p-4" style="min-height: 70vh;">
                 <div id="formFields" class="sortable-container">
                     <!-- Survey questions will be added here dynamically -->
@@ -264,6 +277,7 @@
                 </div>
             </div>
         </div>
+
         <!-- Right Sidebar - Question Properties -->
         <div class="col-md-3 p-3">
             <div class="properties-panel">
@@ -271,46 +285,21 @@
                     <h5 class="mb-1">خصائص السؤال</h5>
                     <p class="text-muted small mb-0" id="fieldTypeLabel">حدد سؤالاً لتحرير خصائصه</p>
                 </div>
+
                 <div class="p-3">
                     <div class="mb-3">
                         <label class="form-label">نص السؤال</label>
-                        <div class="lang-inputs">
-                            <div class="flex-1">
-                                <div class="lang-label">العربية</div>
-                                <input type="text" class="form-control" id="fieldLabelAr" placeholder="أدخل نص السؤال بالعربية">
-                            </div>
-                            <div class="flex-1">
-                                <div class="lang-label">English</div>
-                                <input type="text" class="form-control" id="fieldLabelEn" placeholder="Enter question text in English">
-                            </div>
-                        </div>
+                        <input type="text" class="form-control" id="fieldLabel" placeholder="أدخل نص السؤال">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">النص البديل</label>
-                        <div class="lang-inputs">
-                            <div class="flex-1">
-                                <div class="lang-label">العربية</div>
-                                <input type="text" class="form-control" id="fieldPlaceholderAr" placeholder="أدخل النص البديل بالعربية">
-                            </div>
-                            <div class="flex-1">
-                                <div class="lang-label">English</div>
-                                <input type="text" class="form-control" id="fieldPlaceholderEn" placeholder="Enter placeholder text in English">
-                            </div>
-                        </div>
+                        <input type="text" class="form-control" id="fieldPlaceholder" placeholder="أدخل النص البديل">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">نص المساعدة</label>
-                        <div class="lang-inputs">
-                            <div class="flex-1">
-                                <div class="lang-label">العربية</div>
-                                <textarea class="form-control" id="fieldHelpTextAr" rows="2" placeholder="نص مساعدة إضافي بالعربية"></textarea>
-                            </div>
-                            <div class="flex-1">
-                                <div class="lang-label">English</div>
-                                <textarea class="form-control" id="fieldHelpTextEn" rows="2" placeholder="Additional help text in English"></textarea>
-                            </div>
-                        </div>
+                        <textarea class="form-control" id="fieldHelpText" rows="2" placeholder="نص مساعدة إضافي"></textarea>
                     </div>
+
                     <!-- Options Editor (for select, radio, checkbox) -->
                     <div id="optionsEditor" class="mb-3" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -323,6 +312,7 @@
                             <!-- Options will be added here dynamically -->
                         </div>
                     </div>
+
                     <!-- Rating Settings (for stars, rating) -->
                     <div id="ratingSettings" class="mb-3" style="display: none;">
                         <div class="mb-3">
@@ -339,13 +329,16 @@
         </div>
     </div>
 </div>
+
 <!-- Preview Button -->
 <button class="btn btn-primary preview-btn" id="previewFormBtn">
     <i class="mdi mdi-open-in-new mdi-24px"></i>
 </button>
+
 <!-- Hidden fields for survey data -->
 <input type="hidden" id="surveyId" value="{{ $survey['id'] ?? '' }}">
 <input type="hidden" id="surveyData" value='{!! isset($survey) ? json_encode($survey) : '{}' !!}'>
+
 <!-- Toast for save confirmation -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
     <div id="saveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -359,8 +352,11 @@
         </div>
     </div>
 </div>
+
 {{-- @endsection --}}
+
 {{-- @section('scripts') --}}
+
     <script>
         $(document).ready(function() {
             let selectedField = null;
@@ -389,8 +385,8 @@
                 const fieldData = {
                     id: fieldId,
                     type: type,
-                    label: { ar: getDefaultLabel(type, 'ar'), en: getDefaultLabel(type, 'en') },
-                    placeholder: { ar: "", en: "" },
+                    label: getDefaultLabel(type),
+                    placeholder: "",
                     width: "col-12",
                     errorMessage: "",
                     bgColor: "#ffffff",
@@ -408,8 +404,8 @@
                 // Add options for fields that support them
                 if (type === 'select' || type === 'radio' || type === 'checkbox') {
                     fieldData.options = [
-                        { label: { ar: "الخيار 1", en: "Option 1" }, value: "option1" },
-                        { label: { ar: "الخيار 2", en: "Option 2" }, value: "option2" },
+                        { label: "الخيار 1", value: "option1" },
+                        { label: "الخيار 2", value: "option2" },
                     ];
                 }
 
@@ -425,6 +421,7 @@
                     surveyData.fields = [];
                 }
                 surveyData.fields.push(fieldData);
+
                 renderField(fieldData);
 
                 // Remove empty state message if it exists
@@ -434,41 +431,24 @@
                 selectField(fieldId);
             }
 
-            // Get default label based on field type and language
-            function getDefaultLabel(type, lang) {
+            // Get default label based on field type
+            function getDefaultLabel(type) {
                 const labels = {
-                    ar: {
-                        text: "سؤال نصي",
-                        textarea: "منطقة نص",
-                        select: "قائمة منسدلة",
-                        radio: "مجموعة خيارات",
-                        checkbox: "مجموعة خانات اختيار",
-                        date: "التاريخ",
-                        datetime: "التاريخ والوقت",
-                        number: "رقم",
-                        email: "البريد الإلكتروني",
-                        tel: "رقم الهاتف",
-                        url: "رابط الموقع",
-                        stars: "تقييم بالنجوم",
-                        rating: "مقياس التقييم",
-                    },
-                    en: {
-                        text: "Text Question",
-                        textarea: "Textarea Question",
-                        select: "Dropdown Question",
-                        radio: "Radio Group",
-                        checkbox: "Checkbox Group",
-                        date: "Date",
-                        datetime: "Date and Time",
-                        number: "Number",
-                        email: "Email",
-                        tel: "Phone",
-                        url: "URL",
-                        stars: "Star Rating",
-                        rating: "Rating Scale",
-                    }
+                    text: "سؤال نصي",
+                    textarea: "منطقة نص",
+                    select: "قائمة منسدلة",
+                    radio: "مجموعة خيارات",
+                    checkbox: "مجموعة خانات اختيار",
+                    date: "التاريخ",
+                    datetime: "التاريخ والوقت",
+                    number: "رقم",
+                    email: "البريد الإلكتروني",
+                    tel: "رقم الهاتف",
+                    url: "رابط الموقع",
+                    stars: "تقييم بالنجوم",
+                    rating: "مقياس التقييم",
                 };
-                return labels[lang][type] || (lang === 'ar' ? "سؤال جديد" : "New Question");
+                return labels[type] || "سؤال جديد";
             }
 
             // Render field in the survey builder
@@ -495,6 +475,7 @@
                         <div class="field-type-label text-start">${getFieldTypeName(fieldData.type)}</div>
                     </div>
                 `;
+
                 $("#formFields").append(fieldHtml);
 
                 // Add event listeners to the new field
@@ -504,8 +485,6 @@
             // Generate HTML for specific field type
             function generateFieldHtml(fieldData) {
                 const { type, label, placeholder, options, settings } = fieldData;
-                const currentLocale = '{{ app()->getLocale() }}';
-                const currentLang = currentLocale === 'ar' ? 'ar' : 'en';
 
                 switch(type) {
                     case "text":
@@ -514,22 +493,22 @@
                     case "url":
                     case "number":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <input type="${type}" class="form-control" placeholder="${placeholder[currentLang]}" disabled>
+                            <label class="form-label">${label} </label>
+                            <input type="${type}" class="form-control" placeholder="${placeholder}" disabled>
                         `;
                     case "textarea":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <textarea class="form-control" rows="3" placeholder="${placeholder[currentLang]}" disabled></textarea>
+                            <label class="form-label">${label} </label>
+                            <textarea class="form-control" rows="3" placeholder="${placeholder}" disabled></textarea>
                         `;
                     case "select":
                         let selectOptions = options.map(opt =>
-                            `<option value="${opt.value}">${opt.label[currentLang]}</option>`
+                            `<option value="${opt.value}">${opt.label}</option>`
                         ).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label} </label>
                             <select class="form-select" disabled>
-                                <option value="">${currentLang === 'ar' ? 'حدد خيارًا...' : 'Select an option...'}</option>
+                                <option value="">حدد خيارًا...</option>
                                 ${selectOptions}
                             </select>
                         `;
@@ -538,12 +517,12 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="${fieldData.id}" id="${fieldData.id}_${index}" value="${opt.value}" disabled>
                                 <label class="form-check-label" for="${fieldData.id}_${index}">
-                                    ${opt.label[currentLang]}
+                                    ${opt.label}
                                 </label>
                             </div>
                         `).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label} </label>
                             <div>
                                 ${radioOptions}
                             </div>
@@ -553,26 +532,27 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="${fieldData.id}_${index}" value="${opt.value}" disabled>
                                 <label class="form-check-label" for="${fieldData.id}_${index}">
-                                    ${opt.label[currentLang]}
+                                    ${opt.label}
                                 </label>
                             </div>
                         `).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label} </label>
                             <div>
                                 ${checkboxOptions}
                             </div>
                         `;
                     case "date":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label} </label>
                             <input type="date" class="form-control" disabled>
                         `;
                     case "datetime":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label} </label>
                             <input type="datetime-local" class="form-control" disabled>
                         `;
+
                     case "stars":
                         const ratingPoints = settings.points || 5;
                         let ratingStars = '';
@@ -583,7 +563,7 @@
                             `;
                         }
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label} </label>
                             <div class="rating-form-stars">
                                 ${ratingStars}
                             </div>
@@ -599,7 +579,7 @@
                             </div>
                         `).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label} </label>
                             <div class="rating-scale {{ app()->getLocale() == "ar" ? "rating-scale-ar" : "" }}">
                                 <div class="row">
                                     ${ratingOptions}
@@ -608,13 +588,13 @@
                         `;
                     default:
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <input type="text" class="form-control" placeholder="${placeholder[currentLang]}" disabled>
+                            <label class="form-label">${label} </label>
+                            <input type="text" class="form-control" placeholder="${placeholder}" disabled>
                         `;
                 }
             }
 
-            // Get field type name
+            // Get field type name in Arabic
             function getFieldTypeName(type) {
                 const names = {
                     text: "Text",
@@ -682,12 +662,9 @@
 
                 // Update properties panel
                 $("#fieldTypeLabel").text(`${getFieldTypeName(fieldData.type)} سؤال`);
-                $("#fieldLabelAr").val(fieldData.label.ar || "");
-                $("#fieldLabelEn").val(fieldData.label.en || "");
-                $("#fieldPlaceholderAr").val(fieldData.placeholder.ar || "");
-                $("#fieldPlaceholderEn").val(fieldData.placeholder.en || "");
-                $("#fieldHelpTextAr").val(fieldData.helpText ? fieldData.helpText.ar || "" : "");
-                $("#fieldHelpTextEn").val(fieldData.helpText ? fieldData.helpText.en || "" : "");
+                $("#fieldLabel").val(fieldData.label);
+                $("#fieldPlaceholder").val(fieldData.placeholder);
+                $("#fieldHelpText").val(fieldData.helpText || "");
 
                 // Show/hide options editor based on field type
                 if (fieldData.type === 'select' || fieldData.type === 'radio' || fieldData.type === 'checkbox') {
@@ -715,16 +692,7 @@
                 fieldData.options.forEach((option, index) => {
                     const optionHtml = `
                         <div class="option-item" data-index="${index}">
-                            <div class="lang-inputs" style="width: 100%">
-                                <div class="flex-1">
-                                    <div class="lang-label">العربية</div>
-                                    <input type="text" class="form-control form-control-sm option-label-ar" placeholder="تسمية الخيار بالعربية" value="${option.label.ar || ''}">
-                                </div>
-                                <div class="flex-1">
-                                    <div class="lang-label">English</div>
-                                    <input type="text" class="form-control form-control-sm option-label-en" placeholder="Option label in English" value="${option.label.en || ''}">
-                                </div>
-                            </div>
+                            <input type="text" class="form-control form-control-sm" placeholder="تسمية الخيار" value="${option.label}">
                             <button class="btn btn-sm btn-link text-danger p-0 delete-option">
                                 <i class="mdi mdi-delete"></i>
                             </button>
@@ -734,16 +702,10 @@
                 });
 
                 // Add event listeners to option inputs
-                optionsList.find(".option-label-ar").on("input", function() {
+                optionsList.find("input").on("input", function() {
                     const index = $(this).closest(".option-item").data("index");
                     const newLabel = $(this).val();
-                    updateOptionLabel(fieldData.id, index, newLabel, 'ar');
-                });
-
-                optionsList.find(".option-label-en").on("input", function() {
-                    const index = $(this).closest(".option-item").data("index");
-                    const newLabel = $(this).val();
-                    updateOptionLabel(fieldData.id, index, newLabel, 'en');
+                    updateOptionLabel(fieldData.id, index, newLabel);
                 });
 
                 // Add event listeners to delete buttons
@@ -759,22 +721,26 @@
             }
 
             // Update option label
-            function updateOptionLabel(fieldId, optionIndex, newLabel, lang) {
+            function updateOptionLabel(fieldId, optionIndex, newLabel) {
                 const fieldData = surveyData.fields.find(field => field.id === fieldId);
                 if (!fieldData || !fieldData.options || !fieldData.options[optionIndex]) return;
 
-                // Initialize label object if it doesn't exist
-                if (!fieldData.options[optionIndex].label) {
-                    fieldData.options[optionIndex].label = { ar: '', en: '' };
-                }
-
-                fieldData.options[optionIndex].label[lang] = newLabel;
+                fieldData.options[optionIndex].label = newLabel;
+                fieldData.options[optionIndex].value = generateOptionValue(newLabel);
 
                 // Update field HTML
                 $(`#${fieldId} .field-content`).html(generateFieldHtml(fieldData));
 
                 // Mark as unsaved
                 $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+            }
+
+            // Generate option value from label
+            function generateOptionValue(label) {
+                return label.toLowerCase()
+                    .replace(/\s+/g, '_')
+                    .replace(/[^\w-]+/g, '')
+                    .replace(/-+/g, '_');
             }
 
             // Delete option
@@ -802,7 +768,7 @@
                 if (!fieldData || !fieldData.options) return;
 
                 const newOption = {
-                    label: { ar: `الخيار ${fieldData.options.length + 1}`, en: `Option ${fieldData.options.length + 1}` },
+                    label: `الخيار ${fieldData.options.length + 1}`,
                     value: `option${fieldData.options.length + 1}`
                 };
 
@@ -835,61 +801,15 @@
             });
 
             // Update field when properties change
-            $("#fieldLabelAr, #fieldLabelEn").on("input", function() {
+            $("#fieldLabel, #fieldPlaceholder, #fieldHelpText").on("input", function() {
                 if (!selectedField) return;
 
                 const fieldData = surveyData.fields.find(field => field.id === selectedField);
                 if (!fieldData) return;
 
-                // Initialize label object if it doesn't exist
-                if (!fieldData.label) {
-                    fieldData.label = { ar: '', en: '' };
-                }
-
-                fieldData.label.ar = $("#fieldLabelAr").val();
-                fieldData.label.en = $("#fieldLabelEn").val();
-
-                // Update field HTML
-                $(`#${selectedField} .field-content`).html(generateFieldHtml(fieldData));
-
-                // Mark as unsaved
-                $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-            });
-
-            $("#fieldPlaceholderAr, #fieldPlaceholderEn").on("input", function() {
-                if (!selectedField) return;
-
-                const fieldData = surveyData.fields.find(field => field.id === selectedField);
-                if (!fieldData) return;
-
-                // Initialize placeholder object if it doesn't exist
-                if (!fieldData.placeholder) {
-                    fieldData.placeholder = { ar: '', en: '' };
-                }
-
-                fieldData.placeholder.ar = $("#fieldPlaceholderAr").val();
-                fieldData.placeholder.en = $("#fieldPlaceholderEn").val();
-
-                // Update field HTML
-                $(`#${selectedField} .field-content`).html(generateFieldHtml(fieldData));
-
-                // Mark as unsaved
-                $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-            });
-
-            $("#fieldHelpTextAr, #fieldHelpTextEn").on("input", function() {
-                if (!selectedField) return;
-
-                const fieldData = surveyData.fields.find(field => field.id === selectedField);
-                if (!fieldData) return;
-
-                // Initialize helpText object if it doesn't exist
-                if (!fieldData.helpText) {
-                    fieldData.helpText = { ar: '', en: '' };
-                }
-
-                fieldData.helpText.ar = $("#fieldHelpTextAr").val();
-                fieldData.helpText.en = $("#fieldHelpTextEn").val();
+                fieldData.label = $("#fieldLabel").val();
+                fieldData.placeholder = $("#fieldPlaceholder").val();
+                fieldData.helpText = $("#fieldHelpText").val();
 
                 // Update field HTML
                 $(`#${selectedField} .field-content`).html(generateFieldHtml(fieldData));
@@ -970,12 +890,9 @@
                     if (selectedField === fieldId) {
                         selectedField = null;
                         $("#fieldTypeLabel").text("حدد سؤالاً لتحرير خصائصه");
-                        $("#fieldLabelAr").val("");
-                        $("#fieldLabelEn").val("");
-                        $("#fieldPlaceholderAr").val("");
-                        $("#fieldPlaceholderEn").val("");
-                        $("#fieldHelpTextAr").val("");
-                        $("#fieldHelpTextEn").val("");
+                        $("#fieldLabel").val("");
+                        $("#fieldPlaceholder").val("");
+                        $("#fieldHelpText").val("");
                         $("#optionsEditor").hide();
                         $("#ratingSettings").hide();
                     }
@@ -1061,15 +978,16 @@
                         $(".unsaved-indicator").addClass("bg-success").removeClass("bg-warning");
                     },
                     error: function(xhr) {
-                        let response = JSON.parse(xhr.responseText);
+                        let response = JSON.parse(xhr.responseText); // تحويل النص إلى JSON
                         if (response.errors) {
-                            // Display first error only
+                            // عرض أول خطأ فقط
                             let firstError = Object.values(response.errors)[0][0];
                             alert('Error: ' + firstError);
                         } else {
                             alert('Unexpected error occurred.');
                         }
                     }
+
                 });
             });
 
@@ -1081,6 +999,7 @@
                         <h2 class="mb-4">${surveyData.title}</h2>
                         <form id="previewForm">
                 `;
+
                 surveyData.fields.forEach(field => {
                     previewHtml += `
                         <div class="mb-3 ${field.width}">
@@ -1088,8 +1007,8 @@
                         </div>
                     `;
                 });
+
                 previewHtml += `
-                            <button type="submit" class="btn btn-primary">إرسال</button>
                         </form>
                     </div>
                 `;
@@ -1232,34 +1151,31 @@
                                 <div>
                                     <a href="#">English</a>
                                 </div>
+
                                 <div class="order-details">
                                     <h2>تفاصيل الطلب</h2>
                                     <p>رقم الطلب: 12345</p>
                                     <p>تاريخ الطلب: 2023-06-15</p>
                                     <p>العميل: أحمد محمد</p>
                                 </div>
+
                                 <div class="rating-form-header">قيم الطلب</div>
+
                                 <div class="rating-form-body">
                                     <form action="#" method="POST">
-                                        <input type="hidden" name="order_id" value="12345">
+
                                         <div>
                                             ${previewHtml}
                                         </div>
+
                                         <div class="rating-form-footer">
                                             <button type="submit" class="rating-form-submit">إرسال التقييم ⭐</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
+
                             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"><\/script>
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    document.getElementById('previewForm').addEventListener('submit', function(e) {
-                                        e.preventDefault();
-                                        alert('تم إرسال الاستبيان بنجاح');
-                                    });
-                                });
-                            <\/script>
                         </body>
                     </html>
                 `);
@@ -1269,8 +1185,7 @@
             // Generate preview field HTML (without disabled attribute)
             function generatePreviewFieldHtml(fieldData) {
                 const { type, label, placeholder, options, settings } = fieldData;
-                const currentLocale = '{{ app()->getLocale() }}';
-                const currentLang = currentLocale === 'ar' ? 'ar' : 'en';
+
 
                 switch(type) {
                     case "text":
@@ -1280,16 +1195,16 @@
                     case "number":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="${type}" class="rating-form-input" placeholder="${placeholder[currentLang]}">
+                            <label class="rating-form-label">${label}</label>
+                            <input type="${type}" class="rating-form-input" placeholder="${placeholder}"  >
                         </div>
                         `;
                         break;
                     case "textarea":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <textarea class="rating-form-textarea" rows="3" placeholder="${placeholder[currentLang]}"></textarea>
+                            <label class="rating-form-label">${label}</label>
+                            <textarea class="rating-form-textarea" rows="3" placeholder="${placeholder}" ></textarea>
                         </div>
                         `;
                         break;
@@ -1297,14 +1212,14 @@
                         let selectOptions = '';
                         if (options) {
                             options.forEach(option => {
-                                selectOptions += `<option value="${option.value}">${option.label[currentLang]}</option>`;
+                                selectOptions += `<option value="${option.value}">${option.label}</option>`;
                             });
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <select class="form-select">
-                                <option value="">${currentLang === 'ar' ? 'حدد خيارًا...' : 'Select an option...'}</option>
+                            <label class="rating-form-label">${label}</label>
+                            <select class="form-select" >
+                                <option value="">حدد خيارًا...</option>
                                 ${selectOptions}
                             </select>
                         </div>
@@ -1316,9 +1231,9 @@
                             options.forEach((option, index) => {
                                 radioOptions += `
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" id="question_${index}" value="${option.value}">
+                                        <input class="form-check-input" type="radio"  id="question_${index}" value="${option.value}" >
                                         <label class="form-check-label" for="question_${index}">
-                                            ${option.label[currentLang]}
+                                            ${option.label}
                                         </label>
                                     </div>
                                 `;
@@ -1326,7 +1241,7 @@
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
+                            <label class="rating-form-label">${label}</label>
                             <div>
                                 ${radioOptions}
                             </div>
@@ -1341,7 +1256,7 @@
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="question[]" id="question_${index}" value="${option.value}">
                                         <label class="form-check-label" for="question_${index}">
-                                            ${option.label[currentLang]}
+                                            ${option.label}
                                         </label>
                                     </div>
                                 `;
@@ -1349,7 +1264,7 @@
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
+                            <label class="rating-form-label">${label}</label>
                             <div>
                                 ${checkboxOptions}
                             </div>
@@ -1359,36 +1274,36 @@
                     case "date":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="date" class="rating-form-input">
+                            <label class="rating-form-label">${label}</label>
+                            <input type="date" class="rating-form-input"  >
                         </div>
                         `;
                         break;
                     case "datetime":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="datetime-local" class="rating-form-input">
+                            <label class="rating-form-label">${label}</label>
+                            <input type="datetime-local" class="rating-form-input"  >
                         </div>
                         `;
                         break;
-                    case "stars":
-                        const points = settings.points || 5;
-                        let stars = '';
-                        for (let i = points; i >= 1; i--) {
-                            stars += `
-                                <input type="radio" id="${fieldData.id}_star${i}" value="${i}" name="${fieldData.id}">
-                                <label for="${fieldData.id}_star${i}">★</label>
-                            `;
-                        }
-                        return `
-                        <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <div class="rating-form-stars">
-                                ${stars}
+                        case "stars":
+                            const points = settings.points || 5;
+                            let stars = '';
+                            for (let i = points; i >= 1; i--) {
+                                stars += `
+                                    <input type="radio" id="${fieldData.id}_star${i}" value="${i}" name="${fieldData.id}">
+                                    <label for="${fieldData.id}_star${i}">★</label>
+                                `;
+                            }
+                            return `
+                            <div class="rating-form-group">
+                                <label class="rating-form-label">${label}</label>
+                                <div class="rating-form-stars">
+                                    ${stars}
+                                </div>
                             </div>
-                        </div>
-                        `;
+                            `;
                         break;
                     case "rating":
                         const ratingPoints = settings.points || 5;
@@ -1396,7 +1311,7 @@
                         for (let i = 1; i <= ratingPoints; i++) {
                             ratingOptions += `
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="question_${i}" value="${i}">
+                                    <input class="form-check-input" type="radio" id="question_${i}" value="${i}" >
                                     <label class="form-check-label" for="question_${i}">
                                         ${i}
                                     </label>
@@ -1405,7 +1320,7 @@
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
+                            <label class="rating-form-label">${label}</label>
                             <div class="rating-scale {{ app()->getLocale() == "ar" ? "rating-scale-ar" : "" }}">
                                 <div class="row">
                                     ${ratingOptions}
@@ -1417,8 +1332,8 @@
                     default:
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="text" class="rating-form-input" placeholder="${placeholder[currentLang]}">
+                            <label class="rating-form-label">${label}</label>
+                            <input type="text" class="rating-form-input" placeholder="${placeholder}" >
                         </div>
                         `;
                 }
@@ -1433,18 +1348,17 @@
                     description: "{{ $survey['description'] }}",
                     fields: [
                         @foreach($survey['fields'] as $question)
-                       {
-                            id: "field_{{ $question['id'] }}",
-                            type: "{{ $question['question_type'] }}",
-                            label: {!! json_encode(is_array($question['question_text']) ? $question['question_text'] : ['ar' => $question['question_text'], 'en' => $question['question_text']]) !!},
-                            placeholder: {!! json_encode(is_array($question['placeholder']) ? $question['placeholder'] : ['ar' => $question['placeholder'], 'en' => $question['placeholder']]) !!},
-                            helpText: {!! json_encode(is_array($question['help_text']) ? $question['help_text'] : ['ar' => $question['help_text'], 'en' => $question['help_text']]) !!},
-                            width: "{{ $question['settings']['width'] ?? 'col-12' }}",
-                            errorMessage: "{{ $question['error_message'] }}",
-                            options: {!! $question['options'] ? json_encode($question['options']) : 'null' !!},
-                            settings: {!! $question['settings'] ? json_encode($question['settings']) : '{}' !!}
-                        }
-                        @if(!$loop->last),@endif
+                            {
+                                id: "field_{{ $question['id'] }}",
+                                type: "{{ $question['question_type'] }}",
+                                label: "{{ $question['question_text'] }}",
+                                placeholder: "{{ $question['placeholder'] }}",
+                                helpText: "{{ $question['help_text'] }}",
+                                width: "{{ $question['settings']['width'] ?? 'col-12' }}",
+                                errorMessage: "{{ $question['error_message'] }}",
+                                options: {!! $question['options'] ? json_encode($question['options']) : 'null' !!},
+                                settings: {!! $question['settings'] ? json_encode($question['settings']) : '{}' !!}
+                            }@if(!$loop->last),@endif
                         @endforeach
                     ]
                 };

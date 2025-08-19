@@ -10,13 +10,8 @@ class Survey extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'title', 'description', 'is_active', 'starts_at', 'ends_at'
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
-        'starts_at' => 'datetime',
-        'ends_at' => 'datetime'
+        'title',
+        'description'
     ];
 
     public function questions()

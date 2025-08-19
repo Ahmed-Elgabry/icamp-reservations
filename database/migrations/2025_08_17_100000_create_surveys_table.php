@@ -12,9 +12,6 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamp('starts_at')->nullable();
-            $table->timestamp('ends_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

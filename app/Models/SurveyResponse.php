@@ -10,8 +10,12 @@ class SurveyResponse extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'survey_id', 'user_id', 'reservation_id', 'ip_address',
-        'user_agent', 'submitted_at'
+        'survey_id',
+        'user_id',
+        'reservation_id',
+        'ip_address',
+        'user_agent',
+        'submitted_at'
     ];
 
     protected $casts = [
@@ -31,5 +35,11 @@ class SurveyResponse extends Model
     public function answers()
     {
         return $this->hasMany(SurveyAnswer::class);
+    }
+
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'reservation_id');
     }
 }
