@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('QR Code generated successfully!');
     } catch (error) {
         console.error('QR Code generation error:', error);
-        document.getElementById('qrcode').innerHTML = '<p class="text-danger">خطأ في إنشاء رمز QR</p>';
+                        document.getElementById('qrcode').innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
         document.getElementById('downloadQrBtn').style.display = 'none';
     }
 
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Change button appearance while copying
         button.disabled = true;
-        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري النسخ...';
+                        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.copying") }}';
         
         // Select the text in the input field
         input.select();
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
             navigator.clipboard.writeText(textToCopy).then(function() {
                 copySuccess = true;
                 showSuccessState(button, originalText);
-                showToast('تم نسخ رابط الدفع بنجاح', 'success');
+                showToast('{{ __("dashboard.payment_link_copied_success") }}', 'success');
             }).catch(function(err) {
                 console.error('Clipboard API failed: ', err);
                 // Try fallback method
@@ -220,14 +220,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalText = button.innerHTML;
         
         if (!qrCodeDataURL) {
-            showToast('فشل في تحضير رمز QR للتحميل', 'error');
+            showToast('{{ __("dashboard.failed_to_prepare_qr_download") }}', 'error');
             return;
         }
         
         try {
             // Change button state
             button.disabled = true;
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري التحميل...';
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.downloading") }}';
             
             // Create download link
             const downloadLink = document.createElement('a');
@@ -242,9 +242,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show success state
             button.classList.remove('btn-outline-secondary');
             button.classList.add('btn-success');
-            button.innerHTML = '<i class="fa fa-check"></i> تم التحميل!';
+            button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.downloaded") }}';
             
-            showToast('تم تحميل رمز QR بنجاح', 'success');
+            showToast('{{ __("dashboard.qr_code_downloaded_success") }}', 'success');
             
             // Reset button after 2 seconds
             setTimeout(function() {
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Download failed:', error);
             button.disabled = false;
             button.innerHTML = originalText;
-            showToast('فشل في تحميل رمز QR', 'error');
+            showToast('{{ __("dashboard.failed_to_download_qr") }}', 'error');
         }
     });
         } else {
@@ -287,17 +287,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (successful) {
                 showSuccessState(button, originalText);
-                showToast('تم نسخ رابط الدفع بنجاح', 'success');
+                showToast('{{ __("dashboard.payment_link_copied_success") }}', 'success');
             } else {
                 throw new Error('Copy command failed');
             }
         } catch (err) {
             console.error('All copy methods failed: ', err);
             resetButton(button, originalText);
-            showToast('فشل في نسخ الرابط', 'error');
+            showToast('{{ __("dashboard.copy_failed_error") }}', 'error');
             
             // Last resort: prompt user to copy manually
-            prompt('انسخ الرابط يدوياً:', text);
+            prompt('{{ __("dashboard.copy_manually_prompt") }}', text);
         }
     }
 
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSuccessState(button, originalText) {
         button.classList.remove('btn-success');
         button.classList.add('btn-info');
-        button.innerHTML = '<i class="fa fa-check"></i> تم النسخ بنجاح!';
+        button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.copy_success") }}';
         
         // Reset button after 2 seconds
         setTimeout(function() {
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Optional: Add click to copy functionality on the QR code
     qrcodeElement.style.cursor = 'pointer';
-    qrcodeElement.title = 'انقر لنسخ الرابط';
+    qrcodeElement.title = '{{ __("dashboard.click_to_copy_link") }}';
     qrcodeElement.addEventListener('click', function() {
         document.getElementById('copyLinkBtn').click();
     });

@@ -170,7 +170,7 @@
                                     <label class="required form-label">{{ __('dashboard.statement') }}</label>
                                     <select name="statement" id="" class="form-select" required>
                                         @foreach(statements() as $statement)
-                                            <option {{$order->statement == $statement ? 'selected' : ''}} value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
+                                            <option {{$payment->statement == $statement ? 'selected' : ''}} value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -179,7 +179,7 @@
                                     <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
                                     <select name="account_id" id="" class="form-select" required>
                                         @foreach($bankAccounts as $bankAccount)
-                                            <option {{$order->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                                            <option {{$payment->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -195,7 +195,7 @@
                                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                                     <select name="payment_method" id="" class="form-select" required>
                                         @foreach(paymentMethod() as $paymentSelect)
-                                            <option {{$order->payment_method == $paymentSelect ? 'selected' : ''}} value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                            <option {{$payment->payment_method == $paymentSelect ? 'selected' : ''}} value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                         @endforeach
                                     </select>
                                 </div>

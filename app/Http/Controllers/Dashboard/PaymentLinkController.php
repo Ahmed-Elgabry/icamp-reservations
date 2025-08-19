@@ -107,8 +107,8 @@ class PaymentLinkController extends Controller
                 'customer_phone' => $customer->phone ?? '+971500000000',
                 'order_id' => $request->order_id ?? uniqid('ORD-'),
                 'currency' => 'AED',
-                'send_email' => $request->send_email ?? false,
-                'send_sms' => $request->send_sms ?? false,
+                'send_email' => filter_var($request->send_email, FILTER_VALIDATE_BOOLEAN),
+                'send_sms' => filter_var($request->send_sms, FILTER_VALIDATE_BOOLEAN),
                 'expires_in' => $request->expires_at ? now()->diffInMinutes($request->expires_at) : null,
                 'items' => [
                     [
@@ -147,7 +147,7 @@ class PaymentLinkController extends Controller
             ]);
 
             // Send email to customer if email exists and send_email is checked
-            if ($customer->email && $request->has('send_email') && $request->send_email) {
+            if ($customer->email && filter_var($request->send_email, FILTER_VALIDATE_BOOLEAN)) {
                 try {
                     $emailData = [
                         'customer_name' => $customer->name ?? 'Customer',
@@ -184,7 +184,7 @@ class PaymentLinkController extends Controller
                 'amount' => $request->amount,
                 'description' => $request->description,
                 'expires_at' => $request->expires_at,
-                'email_sent' => $request->has('send_email') && $request->send_email && $customer->email ? '1' : '0'
+                'email_sent' => filter_var($request->send_email, FILTER_VALIDATE_BOOLEAN) && $customer->email ? '1' : '0'
             ]);
         } catch (\Exception $e) {
             Log::error('Payment Link Creation Error', [

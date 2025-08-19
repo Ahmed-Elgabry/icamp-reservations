@@ -43,8 +43,9 @@
                                         </div>
                                     </th>
                                     <th class="min-w-150px">{{ __('dashboard.serial_number') }}</th>
-                                    <th class="min-w-140px">{{ __('dashboard.customer_name') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.reservation_number') }}</th>
+
+                                    <th class="min-w-140px">{{ __('dashboard.customer_name') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.amount_aed') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.request_id') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.checkout_id') }}</th>
@@ -83,8 +84,8 @@
                                         </td>
                                         
                                         <!-- Request ID -->
-                                        <td>
-                                            <div class="d-flex align-items-center">
+                                        <td class="text-center">
+                                            <div class="d-flex align-items-center justify-content-center">
                                               
                                                 @if($paymentLink->request_id)
                                                     <i class="fa fa-eye text-primary preview-icon" 
@@ -104,8 +105,8 @@
                                         </td>
                                         
                                         <!-- Checkout ID -->
-                                        <td>
-                                            <div class="d-flex align-items-center">
+                                        <td class="text-center">
+                                            <div class="d-flex align-items-center justify-content-center">
                                                
                                                 @if($paymentLink->checkout_id)
                                                     <i class="fa fa-eye text-primary preview-icon" 
@@ -125,8 +126,8 @@
                                         </td>
                                         
                                         <!-- Checkout Key -->
-                                        <td>
-                                            <div class="d-flex align-items-center">
+                                        <td class="text-center">
+                                            <div class="d-flex align-items-center justify-content-center">
                                           
                                                 @if($paymentLink->checkout_key)
                                                     <i class="fa fa-eye text-primary preview-icon" 
@@ -350,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         } catch (error) {
             console.error('QR Code generation error:', error);
-            document.getElementById(containerId).innerHTML = '<p class="text-danger">خطأ في إنشاء رمز QR</p>';
+                            document.getElementById(containerId).innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
             return false;
         }
     }
@@ -417,10 +418,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         modal.show();
                     }
                 } else {
-                    showToast(response.message || 'فشل في تحميل QR Code', 'error');
+                    showToast(response.message || '{{ __("dashboard.qr_code_load_error") }}', 'error');
                 }
             } catch (error) {
-                showToast('حدث خطأ في تحميل QR Code', 'error');
+                showToast('{{ __("dashboard.qr_code_load_error_general") }}', 'error');
             } finally {
                 button.disabled = false;
                 button.innerHTML = '<i class="fa fa-qrcode"></i>';
@@ -439,12 +440,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (response.success) {
                     const success = await copyToClipboard(response.url);
-                    showToast(success ? '{{ __('dashboard.payment_link_copied') }}' : 'فشل في النسخ', success ? 'success' : 'error');
+                                            showToast(success ? '{{ __('dashboard.payment_link_copied') }}' : '{{ __('dashboard.copy_failed') }}', success ? 'success' : 'error');
                 } else {
-                    showToast(response.message || 'فشل في الحصول على الرابط', 'error');
+                                          showToast(response.message || '{{ __('dashboard.failed_to_get_link') }}', 'error');
                 }
             } catch (error) {
-                showToast('حدث خطأ في نسخ الرابط', 'error');
+                showToast('{{ __("dashboard.link_copy_error") }}', 'error');
             }
         }
     });
@@ -489,13 +490,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalText = button.innerHTML;
         
         if (!currentQrCodeDataURL) {
-            showToast('فشل في تحضير QR Code للتحميل', 'error');
+            showToast('{{ __("dashboard.qr_code_prepare_error") }}', 'error');
             return;
         }
         
         try {
             button.disabled = true;
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري التحميل...';
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.downloading") }}';
             
             const downloadLink = document.createElement('a');
             downloadLink.href = currentQrCodeDataURL;
@@ -507,9 +508,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             button.classList.remove('btn-success');
             button.classList.add('btn-info');
-            button.innerHTML = '<i class="fa fa-check"></i> تم التحميل!';
+            button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.downloaded") }}';
             
-            showToast('تم تحميل QR Code بنجاح', 'success');
+            showToast('{{ __("dashboard.qr_code_download_success") }}', 'success');
             
             setTimeout(function() {
                 button.classList.remove('btn-info');
@@ -522,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Download failed:', error);
             button.disabled = false;
             button.innerHTML = originalText;
-            showToast('فشل في تحميل QR Code', 'error');
+            showToast('{{ __("dashboard.failed_to_download_qr") }}', 'error');
         }
     });
     

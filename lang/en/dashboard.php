@@ -796,6 +796,35 @@ return [
     'payment_link_status_update_success' => 'Payment status updated successfully',
     'payment_link_qr_code_coming_soon' => 'QR Code will be added soon',
     'payment_link_copy_success' => 'Payment link copied',
+
+    // Additional missing translations for payment links
+    'currency_aed' => 'AED',
+    'scan_qr_code_to_pay' => 'Scan QR code to pay',
+    'additional_options' => 'Additional Options',
+    'hide_options' => 'Hide Options',
+    'phone' => 'Phone',
+    'copy_failed' => 'Copy failed',
+    'failed_to_get_link' => 'Failed to get link',
+
+    // Additional JavaScript translations for payment links
+    'qr_code_creation_error' => 'Error creating QR code',
+    'copying' => 'Copying...',
+    'payment_link_copied_success' => 'Payment link copied successfully',
+    'failed_to_prepare_qr_download' => 'Failed to prepare QR code for download',
+    'downloading' => 'Downloading...',
+    'downloaded' => 'Downloaded!',
+    'qr_code_downloaded_success' => 'QR code downloaded successfully',
+    'failed_to_download_qr' => 'Failed to download QR code',
+    'copy_failed_error' => 'Failed to copy link',
+    'copy_manually_prompt' => 'Copy link manually:',
+    'copy_success' => 'Copied successfully!',
+    'click_to_copy_link' => 'Click to copy link',
+    'qr_code_load_error' => 'Failed to load QR Code',
+    'qr_code_load_error_general' => 'Error loading QR Code',
+    'link_copy_error' => 'Error copying link',
+    'qr_code_prepare_error' => 'Failed to prepare QR Code for download',
+    'qr_code_download_success' => 'QR Code downloaded successfully',
+
     'payment_link_errors' => [
         'creation_error' => 'Error creating payment link',
         'resend_failed' => 'Failed to resend payment link',

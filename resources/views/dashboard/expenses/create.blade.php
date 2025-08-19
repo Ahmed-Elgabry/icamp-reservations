@@ -94,6 +94,22 @@
                                                     </div>
                                                 
                                                     <div class="form-group col-6 mt-5">
+                                                        <label for="payment_method" class="required">{{ __('dashboard.payment_method') }}</label>
+                                                        <select name="payment_method" id="payment_method" class="form-control" required>
+                                                            <option value="">{{ __('dashboard.choose_payment_method') }}</option>
+                                                            @foreach(paymentMethod() as $paymentSelect)
+                                                                <option 
+                                                                        @if(isset($expense) && $expense->payment_method)   
+                                                                            {{ $expense->payment_method == $paymentSelect ? 'selected' : ''}}
+                                                                        @else 
+                                                                            {{ old('payment_method') == $paymentSelect ? 'selected' : '' }}
+                                                                        @endif
+                                                                value="{{ $paymentSelect }}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                
+                                                    <div class="form-group col-6 mt-5">
                                                         <label for="date" class="required">تاريخ المصاريف</label>
                                                         <input type="date" name="date" id="date" class="form-control" value="{{ isset($expense) ? $expense->date : (old('date') ? old('date') : date('Y-m-d')) }}" required>
                                                     </div>

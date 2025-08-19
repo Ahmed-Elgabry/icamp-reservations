@@ -46,6 +46,7 @@
                             </th>
                             <th class="">@lang('dashboard.source')</th>
                             <th class="">@lang('dashboard.price')</th>
+                            <th class="">@lang('dashboard.payment_method')</th>
                             <th class="">@lang('dashboard.date')</th>
                             <th class="">@lang('dashboard.notes')</th>
                             <th class=" min-w-70px">@lang('dashboard.actions')</th>
@@ -75,6 +76,7 @@
                                     </div>
                                 </td>
                                 <td>{{$expense->price}} </td>
+                                <td>{{$expense->payment_method ? __('dashboard.' . $expense->payment_method) : __('dashboard.not_specified')}} </td>
                                 <td>{{$expense->date }} </td>
                                 <td>{{$expense->notes }} </td>
 

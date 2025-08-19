@@ -65,6 +65,7 @@
                         </div>
                     </th>
                     <th>{{ __('dashboard.price') }}</th>
+                    <th class="">{{ __('dashboard.payment_method') }}</th>
                     <th class="">{{ __('dashboard.verified') }}</th>
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
@@ -96,6 +97,9 @@
                                     <!--end::Title-->
                                 </div>
                             </div>
+                        </td>
+                        <td>
+                            {{$payment->payment_method ? __('dashboard.' . $payment->payment_method) : __('dashboard.not_specified')}}
                         </td>
                         <td>
                             {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
@@ -167,6 +171,16 @@
                                 </div>
 
                                 <div class="mb-5 fv-row col-md-12">
+                                    <label for="payment_method" class="required">{{ __('dashboard.payment_method') }}</label>
+                                    <select name="payment_method" id="payment_method" class="form-control" required>
+                                        <option value="">{{ __('dashboard.choose_payment_method') }}</option>
+                                        @foreach(paymentMethod() as $paymentSelect)
+                                            <option {{ $payment->payment_method == $paymentSelect ? 'selected' : ''}} value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="mb-5 fv-row col-md-12">
                                 <label for="account_id" class="required">{{ __('dashboard.bank_account') }}</label>
                                 <select name="account_id" id="account_id" class="form-control" required>
                                     <option value="">{{ __('dashboard.choose_bank_account') }}</option>
@@ -220,6 +234,16 @@
                 <input type="number" name="price" id="price" value="{{   old('price') }}"
                     class="form-control mb-2" required
                     value="" />
+            </div>
+
+            <div class="mb-5 fv-row col-md-12">
+                <label for="payment_method" class="required">{{ __('dashboard.payment_method') }}</label>
+                <select name="payment_method" id="payment_method" class="form-control" required>
+                    <option value="">{{ __('dashboard.choose_payment_method') }}</option>
+                    @foreach(paymentMethod() as $paymentSelect)
+                        <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                    @endforeach
+                </select>
             </div>
 
             <div class="mb-5 fv-row col-md-12">
