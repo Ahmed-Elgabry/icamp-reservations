@@ -33,7 +33,7 @@ class SendSurveyEmails extends Command
     public function handle()
     {
         $this->info('Starting to send survey emails...');
-
+        $count = 0;
         // Get the survey (assuming there's only one survey with ID 1)
         $survey = Survey::find(1);
         if (!$survey) {
@@ -46,10 +46,9 @@ class SendSurveyEmails extends Command
         $orders = Order::where('status', 'completed')
             ->where('updated_at', '<=', $completedAt)
             ->whereDoesntHave('surveyResponses') // Check if the order doesn't have any survey responses
+            ->whereDoesntHave('surveyEmailLog') // Check if the order doesn't have any survey email logs
             ->with('customer')
             ->get();
-
-        $count = 0;
 
         foreach ($orders as $order) {
             if (!$order->customer || !$order->customer->email) {

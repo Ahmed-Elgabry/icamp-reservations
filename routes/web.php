@@ -1341,14 +1341,15 @@ Route::resource('violations', ViolationController::class)
     ->middleware(['auth']);
 
 
-
-Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submit'])->name('surveys.submit');
-Route::get('survey/{survey}/thankyou', [SurveySubmissionController::class, 'thankyou'])->name('surveys.thankyou');
-Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);
-Route::get('survey/{response_id}/answer', [SurveyController::class, 'answer'])->name('surveys.answer')->middleware(['auth']);
-Route::put('surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update')->middleware(['auth']);
-Route::get('surveys/{survey}/results', [SurveyController::class, 'results'])->name('surveys.results')->middleware(['auth']);
-Route::get('surveys/statistics', [SurveyController::class, 'statistics'])->name('surveys.statistics')->middleware(['auth']);
+Route::group(['middleware' => ['auth', 'admin']], function () {
+    Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);
+    Route::get('survey/{response_id}/answer', [SurveyController::class, 'answer'])->name('surveys.answer')->middleware(['auth']);
+    Route::put('surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update')->middleware(['auth']);
+    Route::get('surveys/{survey}/results', [SurveyController::class, 'results'])->name('surveys.results')->middleware(['auth']);
+    Route::get('surveys/statistics', [SurveyController::class, 'statistics'])->name('surveys.statistics')->middleware(['auth']);
+});
 
 // Public survey route
+Route::get('survey/{survey}/thankyou', [SurveySubmissionController::class, 'thankyou'])->name('surveys.thankyou');
+Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submit'])->name('surveys.submit');
 Route::get('survey/{order}', [SurveyController::class, 'show'])->name('surveys.public');
