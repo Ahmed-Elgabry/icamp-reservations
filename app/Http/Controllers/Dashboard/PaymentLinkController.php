@@ -11,6 +11,7 @@ use App\Mail\PaymentLinkCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 
 class PaymentLinkController extends Controller
 {
@@ -215,9 +216,11 @@ class PaymentLinkController extends Controller
         ]);
 
         $order = Order::with('customer')->findOrFail($request->order_id);
+        $paymentLink = PaymentLink::findOrFail($request->payment_link_id);
 
         return view('dashboard.payment_links.show_created', [
             'order' => $order,
+            'paymentLink' => $paymentLink,
             'payment_url' => $request->payment_url,
             'checkout_id' => $request->checkout_id,
             'payment_link_id' => $request->payment_link_id,
@@ -269,6 +272,9 @@ class PaymentLinkController extends Controller
     public function resendEmail(PaymentLink $paymentLink)
     {
         try {
+            // Load the payment link with customer relationship directly
+            $paymentLink->load(['customer']);
+
             $customer = $paymentLink->customer;
 
             if (!$customer || !$customer->email) {
@@ -287,18 +293,32 @@ class PaymentLinkController extends Controller
                 'expires_at' => $paymentLink->expires_at,
             ];
 
-            Mail::to($customer->email)->send(new PaymentLinkCreated($emailData));
+            // Send email to customer
+            try {
+                Mail::to($customer->email)->send(new PaymentLinkCreated($emailData));
 
-            Log::info('Payment link email resent successfully', [
-                'customer_email' => $customer->email,
-                'payment_link_id' => $paymentLink->id,
-                'order_id' => $paymentLink->order_id
-            ]);
+                Log::info('Payment link email resent successfully', [
+                    'customer_email' => $customer->email,
+                    'payment_link_id' => $paymentLink->id
+                ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => __('dashboard.payment_link_email_resent_success')
-            ]);
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.payment_link_email_resent_success')
+                ]);
+            } catch (\Exception $emailException) {
+                Log::error('Failed to resend payment link email', [
+                    'customer_email' => $customer->email,
+                    'payment_link_id' => $paymentLink->id,
+                    'error' => $emailException->getMessage()
+                ]);
+
+                // Return error but don't fail the entire request
+                return response()->json([
+                    'success' => false,
+                    'message' => __('dashboard.payment_link_email_resent_error')
+                ]);
+            }
         } catch (\Exception $e) {
             Log::error('Payment Link Email Resend Error', [
                 'payment_link_id' => $paymentLink->id,
