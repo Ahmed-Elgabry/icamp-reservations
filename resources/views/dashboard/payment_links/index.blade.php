@@ -67,14 +67,15 @@
                                         </td>
                                         <td>
                                             <span class="text-dark fw-bolder text-h6 d-block fs-6">
-                                                {{ $paymentLink->customer->name ?? __('dashboard.not_specified') }}
+                                                {{ $paymentLink->order_id ?? __('dashboard.not_specified') }}
                                             </span>
                                         </td>
                                         <td>
                                             <span class="text-dark fw-bolder text-h6 d-block fs-6">
-                                                {{ $paymentLink->order_id ?? __('dashboard.not_specified') }}
+                                                {{ $paymentLink->customer->name ?? __('dashboard.not_specified') }}
                                             </span>
                                         </td>
+                                    
                                         <td>
                                             <span class="text-dark fw-bolder text-h6 d-block fs-6">
                                                 {{ number_format($paymentLink->amount, 2) }}
@@ -167,6 +168,15 @@
                                                             title="{{ __('dashboard.view_and_copy') }}">
                                                         <i class="fa fa-copy"></i>
                                                     </button>
+
+                                                    @if($paymentLink->customer && $paymentLink->customer->email)
+                                                        <button class="btn btn-icon btn-bg-light btn-active-color-warning btn-sm me-1 resend-email-btn"
+                                                                data-id="{{ $paymentLink->id }}"
+                                                                data-customer-name="{{ $paymentLink->customer->name ?? __('dashboard.not_specified') }}"
+                                                                title="{{ __('dashboard.resend_email') }}">
+                                                            <i class="fa fa-envelope"></i>
+                                                        </button>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </td>
@@ -435,6 +445,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 showToast('حدث خطأ في نسخ الرابط', 'error');
+            }
+        }
+    });
+
+    // Handle Resend Email button clicks
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.resend-email-btn')) {
+            const button = e.target.closest('.resend-email-btn');
+            const id = button.getAttribute('data-id');
+            const customerName = button.getAttribute('data-customer-name');
+            
+            // Confirm before sending
+            if (!confirm('{{ __('dashboard.confirm_resend_email') }} ' + customerName + '?')) {
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            
+            try {
+                const response = await fetchAPI(`/payment-links/${id}/resend-email`, {
+                    method: 'POST'
+                });
+                
+                if (response.success) {
+                    showToast(response.message || '{{ __('dashboard.payment_link_email_resent_success') }}', 'success');
+                } else {
+                    showToast(response.message || '{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
+                }
+            } catch (error) {
+                showToast('{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fa fa-envelope"></i>';
             }
         }
     });

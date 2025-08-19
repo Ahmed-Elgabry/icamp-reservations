@@ -852,4 +852,21 @@ return [
     'view_and_copy' => 'View and Copy',
     'payment_link_copied' => 'Payment link copied successfully!',
     'view_details' => 'View Details',
+
+    // Email-related translations
+    'hello' => 'Hello',
+    'payment_link_email_message' => 'A new payment link has been created for your order. Please click the button below to complete your payment.',
+    'pay_now' => 'Pay Now',
+    'payment_link_email_footer' => 'If you have any questions about this payment, please contact our support team.',
+    'payment_link_email_support' => 'Payment Support',
+    'payment_link_expires_warning' => 'This payment link will expire on the specified date. Please complete your payment before then.',
+    'send_email_to_customer' => 'Send Email to Customer',
+    'send_email_to_customer_help' => 'Send a notification email to the customer with payment link details',
+    'email_sent_to_customer' => 'Email notification sent to customer successfully',
+    'customer_email_not_found' => 'Customer email not found',
+    'payment_link_email_resent_success' => 'Payment link email resent successfully',
+    'payment_link_email_resent_error' => 'Error resending payment link email',
+    'resend_email' => 'Resend Email',
+    'confirm_resend_email' => 'Are you sure you want to resend the payment link email to',
+    'sending' => 'Sending',
 ];
