@@ -235,6 +235,7 @@ return [
     'create_question' => 'Add Question',
     'questions_list' => 'Questions List',
     'question' => 'Question Text*',
+    'payment-links' => 'Payment Links',
     'responses_count' => 'Responses Count',
     'delete_voice_note' => 'Delete Voice Clip',
     'terms' => 'Terms and Conditions',
