@@ -205,6 +205,7 @@ return [
     'delete_video_note' => 'د ويديو يادښت حذف کړئ',
     'service' => 'خدمت',
     'payment_method' => 'د پیسو ورکولو طریقه',
+    'choose_payment_method' => 'د پیسو ورکولو طریقه وټاکئ',
     'date' => 'نیټه',
     'all_questions' => 'ټولې پوښتنې',
     'questions' => 'پوښتنې',

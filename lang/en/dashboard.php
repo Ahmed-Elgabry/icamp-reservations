@@ -223,6 +223,7 @@ return [
     'delete_video_note' => 'Delete Video Clip',
     'service' => 'Service',
     'payment_method' => 'Payment Method',
+    'choose_payment_method' => 'Choose Payment Method',
     'date' => 'Date',
     'all_questions' => 'All Questions',
     'questions' => 'Questions',
