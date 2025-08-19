@@ -114,11 +114,11 @@
     @can('customers.index')
         <!--begin::Menu item-->
 
-        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index','notice-types.index'])}}"
             data-kt-menu-trigger="click">
             <!--begin::Menu link-->
             <a href="#"
-                class="menu-link py-3 {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index'])}}">
+                class="menu-link py-3 {{areActiveRoutes(['customers.index', 'customers.create', 'customers.edit','notices.index','notice-types.index'])}}">
                 <span class="menu-icon">
                     <img src="{{ asset('images/customers.png') }}" style="width:25px;height:25px">
                 </span>
@@ -164,6 +164,72 @@
                     </a>
                 </div>
                 {{--    @endcan--}}
+{{--                @can('notice-types.index')--}}
+                    <!--begin::Menu item-->
+                    <div class="menu-item">
+                        <a href="{{ route('notice-types.index') }}" class="menu-link py-3 {{ isActiveRoute('notice-types.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">@lang('dashboard.notice_types')</span>
+                        </a>
+                    </div>
+                    <!--end::Menu item-->
+{{--                @endcan--}}
+            </div>
+            <!--end::Menu sub-->
+        </div>
+        <!--end::Menu item-->
+    @endcan
+    @can('surveys.create')
+        <!--begin::Menu item-->
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['surveys.create', 'surveys.answer', 'surveys.results', 'surveys.statistics'])}}" data-kt-menu-trigger="click">
+            <!--begin::Menu link-->
+            <a href="#" class="menu-link py-3 {{areActiveRoutes(['surveys.create', 'surveys.answer', 'surveys.results', 'surveys.statistics'])}}">
+                <span class="menu-icon">
+                    <img src="{{ asset('images/tasks.png') }}" style="width:25px;height:25px">
+                </span>
+                <span class="menu-title">@lang('dashboard.surveys')</span>
+                <span class="menu-arrow"></span>
+            </a>
+            <!--end::Menu link-->
+
+            <!--begin::Menu sub-->
+            <div class="menu-sub menu-sub-accordion pt-3">
+                @can('surveys.create')
+                    <!--begin::Menu item-->
+                    <div class="menu-item">
+                        <a href="{{route('surveys.create')}}" class="menu-link py-3 {{ isActiveRoute('surveys.create') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">@lang('dashboard.create_survey')</span>
+                        </a>
+                    </div>
+                    <!--end::Menu item-->
+                @endcan
+
+                <!--begin::Menu item-->
+                <div class="menu-item">
+                    <a href="{{route('surveys.results', 1)}}" class="menu-link py-3 {{ isActiveRoute('surveys.results') }}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span class="menu-title">@lang('dashboard.survey_results')</span>
+                    </a>
+                </div>
+                <!--end::Menu item-->
+
+                <!--begin::Menu item-->
+                <div class="menu-item">
+                    <a href="{{route('surveys.statistics')}}" class="menu-link py-3 {{ isActiveRoute('surveys.statistics') }}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span class="menu-title">@lang('dashboard.survey_statistics')</span>
+                    </a>
+                </div>
+                <!--end::Menu item-->
             </div>
             <!--end::Menu sub-->
         </div>
@@ -646,7 +712,7 @@
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                            <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.tasks')])</span>
+                            <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.tasks')])</span>
                         </a>
                     </div>
                     <!--end::Menu item-->
@@ -922,7 +988,7 @@
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
-                            <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.violation')])</span>
+                            <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.violation')])</span>
                         </a>
                     </div>
                     <!--end::Menu item-->

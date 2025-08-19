@@ -107,7 +107,9 @@
                         <div class="card-body">
                             <div class="mb-4">
                                 <h6 class="text-muted mb-2">@lang('dashboard.discussion')</h6>
-                                <p class="fs-6">{{ $topic->discussion }}</p>
+                                <div class="fs-6" dir="ltr">
+                                    {!! $topic->discussion !!}
+                                </div>
                             </div>
                         </div>
                     </div>

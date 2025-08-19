@@ -44,7 +44,6 @@
                                     <div class="col-1 small-text">البيان</div>
                                     <div class="col-2 small-text">الكمية المتاحة</div>
                                     <div class="col-2 small-text">الكمية المطلوبة</div>
-                                    <div class="col-2 small-text">تعديل السعر</div>
                                     <div class="col-2 small-text">حالة الاكتمال</div>
                                 </div>
                             </div>
@@ -55,7 +54,6 @@
                                     <div class="col-1 small-text">البيان</div>
                                     <div class="col-2 small-text">الكمية المتاحة</div>
                                     <div class="col-2 small-text">الكمية المطلوبة</div>
-                                    <div class="col-2 small-text">تعديل السعر</div>
                                     <div class="col-2 small-text">حالة الاكتمال</div>
                                 </div>
                             </div>
@@ -96,11 +94,6 @@
                                                 <input type="number" name="ordered_count[{{ $report->id }}]" min="0"
                                                     max="{{ $report->count }}" class="form-control"
                                                     value="{{ $orderReport->ordered_count ?? '' }}">
-                                            </div>
-                                            <div class="col-2 col-md-2">
-                                                <input type="text" name="ordered_price[{{ $report->id }}]" min="0"
-                                                    class="form-control"
-                                                    value="{{ $orderReport->ordered_price ?? '' }}">
                                             </div>
                                             <div class="col-6 col-md-2">
                                                 <input type="checkbox" class="reports-check" data-report="{{ $report->id }}"

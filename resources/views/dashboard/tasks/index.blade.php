@@ -39,7 +39,8 @@
                 <!--begin::Card body-->
                 <div class="card-body pt-0">
                     <!--begin::Table-->
-                    <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_task_table">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_task_table">
                         <!--begin::Table head-->
                         <thead>
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
@@ -47,7 +48,7 @@
                             <th class="min-w-100px">@lang('dashboard.assigned_to')</th>
                             <th class="min-w-100px">@lang('dashboard.due_date')</th>
                             <th class="min-w-100px">@lang('dashboard.priority')</th>
-                            <th class="min-w-100px">@lang('dashboard.status')</th>
+                            <th class="min-w-100px">@lang('dashboard.task_status')</th>
                             <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                         </tr>
                         </thead>
@@ -107,6 +108,7 @@
                         <!--end::Table body-->
                     </table>
                     <!--end::Table-->
+                    </div>
                 </div>
                 <!--end::Card body-->
             </div>

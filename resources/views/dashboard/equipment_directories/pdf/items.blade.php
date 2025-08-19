@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
-    <title>{{ $equipmentDirectory->name }} - Items</title>
+    <title>أصناف - {{ $equipmentDirectory->name }}</title>
     <style>
         body { font-family: Arial, sans-serif; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
         th { background-color: #f2f2f2; }
         .badge { padding: 3px 6px; border-radius: 3px; font-size: 12px; }
         .badge-success { background-color: #28a745; color: white; }
@@ -14,21 +14,21 @@
     </style>
 </head>
 <body>
-<h2>{{ $equipmentDirectory->name }} - Items</h2>
-<p>Generated on: {{ now()->format('Y-m-d H:i') }}</p>
+<h2>أصناف - {{ $equipmentDirectory->name }}</h2>
+<p>تاريخ الاصدار: {{ now()->format('Y-m-d H:i') }}</p>
 
 <table>
     <thead>
     <tr>
         <th>#</th>
-        <th>Item Type</th>
-        <th>Item Name</th>
-        <th>Location</th>
-        <th>Quantity</th>
-        <th>Notes</th>
-        <th>Creator / Date</th>
-        <th>Media Count</th>
-        <th>Status</th>
+        <th>نوع الصنف</th>
+        <th>اسم الصنف</th>
+        <th>الموقع</th>
+        <th>الكمية</th>
+        <th>ملاحظات</th>
+        <th>المنشئ / التاريخ</th>
+        <th>عدد الوسائط</th>
+        <th>الحالة</th>
     </tr>
     </thead>
     <tbody>

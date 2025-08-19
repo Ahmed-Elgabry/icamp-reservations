@@ -40,7 +40,6 @@
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <h3 class="card-title">{{ __('dashboard.edit_time_and_image') }}</h3>
             </div>
-            <!-- Confirmation Modal for Deleting Voice Note -->
             <div class="modal fade" id="deleteVoiceNoteModal" tabindex="-1" aria-labelledby="deleteVoiceNoteModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">

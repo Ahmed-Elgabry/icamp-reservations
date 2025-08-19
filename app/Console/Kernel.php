@@ -12,6 +12,7 @@ class Kernel extends ConsoleKernel
 
     protected $commands = [
         Commands\crud::class,
+        Commands\SendSurveyEmails::class,
     ];
     /**
      * Define the application's command schedule.
@@ -22,6 +23,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
+        // $schedule->command('survey:send-emails')->dailyAt('09:00');
+        $schedule->command('survey:send-emails')->everyMinute();
+        // * * * * * php /home/USERNAME/yourproject/artisan schedule:run >> /dev/null 2>&1
+
     }
 
     /**

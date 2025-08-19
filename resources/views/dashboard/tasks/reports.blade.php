@@ -22,7 +22,7 @@
                     <form method="GET" class="mb-10">
                         <div class="row">
                             <div class="col-md-3">
-                                <label>@lang('dashboard.status')</label>
+                                <label>@lang('dashboard.task_status')</label>
                                 <select name="status" class="form-select">
                                     <option value="">@lang('dashboard.all')</option>
                                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>@lang('dashboard.pending')</option>
@@ -103,7 +103,7 @@
                             <th>@lang('dashboard.title')</th>
                             <th>@lang('dashboard.assigned_to')</th>
                             <th>@lang('dashboard.due_date')</th>
-                            <th>@lang('dashboard.status')</th>
+                            <th>@lang('dashboard.task_status')</th>
                             <th>@lang('dashboard.completion_date')</th>
                         </tr>
                         </thead>

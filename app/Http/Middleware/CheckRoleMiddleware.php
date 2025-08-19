@@ -29,7 +29,7 @@ class CheckRoleMiddleware
     $permissions->push('logout');
     $permissions = $permissions->toArray();
     // some exception
-    $excpetions = ['edit-profile', 'home', 'logout', 'payments.print', 'orders.quote', 'orders.invoice', 'addons.print', 'warehouse_sales.show', 'warehouse_sales.store', 'warehouse_sales.destroy', 'warehouse_sales.update', 'stocks.destroyServiceStock', 'order.verified', 'payment-links.*'];
+    $excpetions = ['edit-profile', 'home', 'logout', 'payments.print', 'orders.quote', 'orders.invoice', 'addons.print', 'warehouse_sales.show', 'warehouse_sales.store', 'warehouse_sales.destroy', 'warehouse_sales.update', 'stocks.destroyServiceStock', 'order.verified', 'payment-links.*' , 'payment-links.create' , 'payment-links.index'];
 
     $currunt_route = Route::currentRouteName();
     $route = Route::current();
@@ -71,9 +71,6 @@ class CheckRoleMiddleware
         $currunt_route = str_replace($currunt_route, $actAs, $currunt_route);
       }
     }
-
-
-
     if (!str_contains($currunt_route, 'settings') and !\str_contains($currunt_route, 'sms') and !in_array($currunt_route, $excpetions)) {
       $currunt_route = str_replace('update', 'edit', $currunt_route);
     }
