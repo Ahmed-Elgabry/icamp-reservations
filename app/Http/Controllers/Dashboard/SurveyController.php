@@ -23,17 +23,6 @@ class SurveyController extends Controller
         $responses = $survey->responses()->with('answers.question')->get();
         $totalResponses = $responses->count();
 
-        // Calculate average rating
-        $ratingsSum = $responses->whereNotNull('rating')->sum('rating');
-        $ratingsCount = $responses->whereNotNull('rating')->count();
-        $averageRating = $ratingsCount > 0 ? round($ratingsSum / $ratingsCount, 1) : 0;
-
-        // Get ratings distribution
-        $ratingsDistribution = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $ratingsDistribution[$i] = $responses->where('rating', $i)->count();
-        }
-
         // Get question types distribution
         $questionTypes = [
             'text' => 0,
@@ -96,18 +85,57 @@ class SurveyController extends Controller
             ];
         });
 
+        // Get questions with options for the select dropdown
+        $questionsWithOptions = $survey->questions()
+            ->whereIn('question_type', ['radio', 'checkbox', 'select'])
+            ->get()
+            ->map(function ($question) {
+                // Ensure options are properly formatted as strings
+                $formattedOptions = [];
+                if (is_array($question->options)) {
+                    foreach ($question->options as $key => $option) {
+                        // Handle different option formats
+                        if (is_array($option)) {
+                            // If option is an array, try to get the label
+                            if (isset($option['label'])) {
+                                $formattedOptions[] = SurveyHelper::getLocalizedText($option['label']);
+                            } else {
+                                $formattedOptions[] = is_string($key) ? $key : json_encode($option);
+                            }
+                        } elseif (is_object($option)) {
+                            // If option is an object, convert to array and handle
+                            $optionArray = (array)$option;
+                            if (isset($optionArray['label'])) {
+                                $formattedOptions[] = SurveyHelper::getLocalizedText($optionArray['label']);
+                            } else {
+                                $formattedOptions[] = is_string($key) ? $key : json_encode($optionArray);
+                            }
+                        } else {
+                            // If option is a simple value, use it directly
+                            $formattedOptions[] = (string)$option;
+                        }
+                    }
+                }
+
+                return [
+                    'id' => $question->id,
+                    'title' => SurveyHelper::getLocalizedText($question->question_text),
+                    'type' => $question->question_type,
+                    'options' => $formattedOptions
+                ];
+            });
+
         return view('dashboard.surveys.statistics')
             ->with('survey', $survey)
             ->with('totalResponses', $totalResponses)
-            ->with('averageRating', $averageRating)
-            ->with('ratingsDistribution', $ratingsDistribution)
             ->with('questionTypes', $questionTypes)
             ->with('timelineData', $timelineData)
             ->with('popularQuestionsData', $popularQuestionsData)
             ->with('allQuestionsData', $allQuestionsData)
-            ->with('responses', $responses);
+            ->with('responses', $responses)
+            ->with('questionsWithOptions', $questionsWithOptions);
     }
-    
+
     /**
      * Show the form for creating a new survey.
      *

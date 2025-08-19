@@ -123,56 +123,7 @@
             <!--end::Col-->
         </div>
         <!--end::Statistics-->
-        <!--begin::Charts Row-->
-        <div class="row g-5 g-xl-8">
-            <!--begin::Col-->
-            <div class="col-xl-6">
-                <!--begin::Chart Widget 1-->
-                <div class="card card-xl-stretch mb-xl-8">
-                    <!--begin::Header-->
-                    <div class="card-header border-0 pt-5">
-                        <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold fs-3 mb-1">@lang('dashboard.ratings_distribution')</span>
-                            <span class="text-muted fw-semibold fs-7">@lang('dashboard.ratings_distribution_desc')</span>
-                        </h3>
-                    </div>
-                    <!--end::Header-->
-                    <!--begin::Body-->
-                    <div class="card-body">
-                        <!--begin::Chart-->
-                        <canvas id="ratingsChart" style="height: 300px;"></canvas>
-                        <!--end::Chart-->
-                    </div>
-                    <!--end::Body-->
-                </div>
-                <!--end::Chart Widget 1-->
-            </div>
-            <!--end::Col-->
-            <!--begin::Col-->
-            <div class="col-xl-6">
-                <!--begin::Chart Widget 2-->
-                <div class="card card-xl-stretch mb-xl-8">
-                    <!--begin::Header-->
-                    <div class="card-header border-0 pt-5">
-                        <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold fs-3 mb-1">@lang('dashboard.question_answers')</span>
-                            <span class="text-muted fw-semibold fs-7">@lang('dashboard.question_answers_desc')</span>
-                        </h3>
-                    </div>
-                    <!--end::Header-->
-                    <!--begin::Body-->
-                    <div class="card-body">
-                        <!--begin::Chart-->
-                        <canvas id="questionsChart" style="height: 300px;"></canvas>
-                        <!--end::Chart-->
-                    </div>
-                    <!--end::Body-->
-                </div>
-                <!--end::Chart Widget 2-->
-            </div>
-            <!--end::Col-->
-        </div>
-        <!--end::Charts Row-->
+
         <!--begin::Charts Row 2-->
         <div class="row g-5 g-xl-8">
             <!--begin::Col-->
@@ -203,17 +154,27 @@
                 <!--begin::Chart Widget 4-->
                 <div class="card card-xl-stretch mb-xl-8">
                     <!--begin::Header-->
-                    <div class="card-header border-0 pt-5">
-                        <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold fs-3 mb-1">@lang('dashboard.popular_questions')</span>
-                            <span class="text-muted fw-semibold fs-7">@lang('dashboard.popular_questions_desc')</span>
-                        </h3>
+                    <div class="card-header border-0 pt-5 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold fs-3 mb-1">@lang('dashboard.question_options')</span>
+                                <span class="text-muted fw-semibold fs-7">@lang('dashboard.question_options_desc')</span>
+                            </h3>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <select class="form-select form-select-sm w-auto" id="questionSelect">
+                                <option value="" selected disabled>@lang('dashboard.select_question')</option>
+                                @foreach($questionsWithOptions as $question)
+                                    <option value="{{ $question['id'] }}">{{ $question['title'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <!--end::Header-->
                     <!--begin::Body-->
                     <div class="card-body">
                         <!--begin::Chart-->
-                        <canvas id="popularQuestionsChart" style="height: 300px;"></canvas>
+                        <canvas id="questionOptionsChart" style="height: 300px;"></canvas>
                         <!--end::Chart-->
                     </div>
                     <!--end::Body-->
@@ -223,7 +184,33 @@
             <!--end::Col-->
         </div>
         <!--end::Charts Row 2-->
-
+        <!--begin::Charts Row-->
+        <div class="row g-5 g-xl-8">
+            <!--begin::Col-->
+            <div class="col-xl-6">
+                <!--begin::Chart Widget 1-->
+                <div class="card card-xl-stretch mb-xl-8">
+                    <!--begin::Header-->
+                    <div class="card-header border-0 pt-5">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bold fs-3 mb-1">@lang('dashboard.question_types')</span>
+                            <span class="text-muted fw-semibold fs-7">@lang('dashboard.question_types_desc')</span>
+                        </h3>
+                    </div>
+                    <!--end::Header-->
+                    <!--begin::Body-->
+                    <div class="card-body">
+                        <!--begin::Chart-->
+                        <canvas id="questionsChart" style="height: 300px;"></canvas>
+                        <!--end::Chart-->
+                    </div>
+                    <!--end::Body-->
+                </div>
+                <!--end::Chart Widget 1-->
+            </div>
+            <!--end::Col-->
+        </div>
+        <!--end::Charts Row-->
         <!--begin::Questions Table-->
         <div class="row g-5 g-xl-8">
             <div class="col-xl-12">
@@ -290,66 +277,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Ratings Distribution Chart
-        const ratingsCtx = document.getElementById('ratingsChart').getContext('2d');
-        const ratingsChart = new Chart(ratingsCtx, {
-            type: 'bar',
-            data: {
-                labels: [
-                    '@lang('dashboard.one_star')',
-                    '@lang('dashboard.two_stars')',
-                    '@lang('dashboard.three_stars')',
-                    '@lang('dashboard.four_stars')',
-                    '@lang('dashboard.five_stars')'
-                ],
-                datasets: [{
-                    label: '@lang('dashboard.ratings_count')',
-                    data: [
-                        {{ $ratingsDistribution[1] ?? 0 }},
-                        {{ $ratingsDistribution[2] ?? 0 }},
-                        {{ $ratingsDistribution[3] ?? 0 }},
-                        {{ $ratingsDistribution[4] ?? 0 }},
-                        {{ $ratingsDistribution[5] ?? 0 }}
-                    ],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(255, 159, 64, 0.7)',
-                        'rgba(255, 205, 86, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(54, 162, 235, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgb(255, 99, 132)',
-                        'rgb(255, 159, 64)',
-                        'rgb(255, 205, 86)',
-                        'rgb(75, 192, 192)',
-                        'rgb(54, 162, 235)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    title: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
-        });
-
         // Questions Types Chart
         const questionsCtx = document.getElementById('questionsChart').getContext('2d');
         const questionsChart = new Chart(questionsCtx, {
@@ -447,46 +374,317 @@
             }
         });
 
-        // Popular Questions Chart
-        const popularQuestionsCtx = document.getElementById('popularQuestionsChart').getContext('2d');
-        const popularQuestionsChart = new Chart(popularQuestionsCtx, {
-            type: 'bar',
+        // Question Options Chart
+        const questionOptionsCtx = document.getElementById('questionOptionsChart').getContext('2d');
+        const questionOptionsChart = new Chart(questionOptionsCtx, {
+            type: 'doughnut',
             data: {
-                labels: [
-                    @foreach($popularQuestionsData as $question)
-                        '{{ $question['title'] }}',
-                    @endforeach
-                ],
+                labels: [],
                 datasets: [{
-                    label: '@lang('dashboard.answers_count')',
-                    data: [
-                        @foreach($popularQuestionsData as $question)
-                            {{ $question['answers_count'] }},
-                        @endforeach
+                    data: [],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
                     ],
-                    backgroundColor: 'rgba(153, 102, 255, 0.7)',
-                    borderColor: 'rgb(153, 102, 255)',
+                    borderColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 206, 86)',
+                        'rgb(75, 192, 192)',
+                        'rgb(153, 102, 255)',
+                        'rgb(255, 159, 64)',
+                        'rgb(75, 192, 192)'
+                    ],
                     borderWidth: 1
                 }]
             },
             options: {
-                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '60%',
                 plugins: {
                     legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 12
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const data = context.dataset.data;
+                                const total = data.reduce((a, b) => a + b, 0);
+
+                                console.log('Tooltip data:', {
+                                    label,
+                                    value,
+                                    total,
+                                    data
+                                });
+
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
                         }
                     }
                 }
             }
+        });
+
+        // Store questions with options data
+        const questionsWithOptions = [
+            @foreach($questionsWithOptions as $question)
+                {
+                    id: {{ $question['id'] }},
+                    title: '{{ $question['title'] }}',
+                    type: '{{ $question['type'] }}',
+                    options: {!! json_encode($question['options']) !!}
+                },
+            @endforeach
+        ];
+
+        // Store survey responses data
+        const responses = [
+            @foreach($responses as $response)
+                {
+                    id: {{ $response->id }},
+                    answers: [
+                        @foreach($response->answers as $answer)
+                            {
+                                question_id: {{ $answer->survey_question_id }},
+                                answer_text: '{{ addslashes($answer->answer_text) }}',
+                                answer_option: {!! is_array($answer->answer_option) ? json_encode($answer->answer_option) : "'".addslashes($answer->answer_option)."'" !!}
+                            },
+                        @endforeach
+                    ]
+                },
+            @endforeach
+        ];
+
+        // Handle question selection change
+        document.getElementById('questionSelect').addEventListener('change', function(e) {
+            const questionId = parseInt(e.target.value);
+            console.log('Selected question ID:', questionId);
+
+            if (!questionId) {
+                console.log('No question selected, resetting chart');
+                questionOptionsChart.data.labels = ['No data'];
+                questionOptionsChart.data.datasets[0].data = [1];
+                questionOptionsChart.update();
+                return;
+            }
+
+            const selectedQuestion = questionsWithOptions.find(q => q.id === questionId);
+            console.log('Selected question:', selectedQuestion);
+
+            if (!selectedQuestion) {
+                console.log('Question not found in questionsWithOptions');
+                questionOptionsChart.data.labels = ['Question not found'];
+                questionOptionsChart.data.datasets[0].data = [1];
+                questionOptionsChart.update();
+                return;
+            }
+
+            if (!selectedQuestion.options || selectedQuestion.options.length === 0) {
+                console.log('Question has no options');
+                questionOptionsChart.data.labels = ['No options'];
+                questionOptionsChart.data.datasets[0].data = [1];
+                questionOptionsChart.update();
+                return;
+            }
+
+            console.log('Question options:', selectedQuestion.options);
+
+            // Create a mapping from value to label
+            const valueToLabel = {};
+            const optionCounts = {};
+
+            // Create a mapping for different option formats
+            selectedQuestion.options.forEach((option, index) => {
+                let value, label;
+
+                if (typeof option === 'object' && option !== null) {
+                    // If option is an object, get value and label separately
+                    value = String(option.value || option.label || '');
+                    label = option.label || option.value || '';
+                } else {
+                    // If option is a simple value, use it as both value and label
+                    value = String(option);
+                    label = option;
+
+                    // Also create potential mappings for different formats
+                    // For example, map "الخيار 1" to "option1"
+                    const optionNumber = index + 1;
+                    const potentialValue = `option${optionNumber}`;
+                    valueToLabel[potentialValue] = label;
+                }
+
+                valueToLabel[value] = label;
+                optionCounts[value] = 0;
+            });
+
+            console.log('Value to label mapping:', valueToLabel);
+            console.log('Initial option counts:', optionCounts);
+
+            // Log responses structure
+            console.log('Total responses:', responses.length);
+            console.log('First response sample:', responses[0]);
+
+            responses.forEach((response, responseIndex) => {
+                console.log(`Processing response ${responseIndex}:`, response);
+
+                const answer = response.answers.find(a => a.question_id === questionId);
+                console.log(`Answer for question ${questionId}:`, answer);
+
+                if (!answer) {
+                    console.log(`No answer found for question ${questionId} in response ${responseIndex}`);
+                    return;
+                }
+
+                if (selectedQuestion.type === 'checkbox') {
+                    console.log('Processing checkbox answer:', answer.answer_option);
+
+                    let options = [];
+                    if (Array.isArray(answer.answer_option)) {
+                        options = answer.answer_option;
+                        console.log('Options is array:', options);
+                    } else if (answer.answer_option) {
+                        try {
+                            options = JSON.parse(answer.answer_option);
+                            console.log('Parsed options from JSON:', options);
+                        } catch (e) {
+                            console.log('Failed to parse JSON, using as string:', answer.answer_option);
+                            options = [answer.answer_option];
+                        }
+                    }
+
+                    options.forEach(option => {
+                        const value = String(option);
+                        console.log(`Processing option value: ${value}`);
+
+                        // Try to find a matching key in our mapping
+                        let matchedKey = null;
+                        if (optionCounts.hasOwnProperty(value)) {
+                            matchedKey = value;
+                        } else if (valueToLabel.hasOwnProperty(value)) {
+                            // This value maps to a label, so we need to find the original key
+                            // This is a reverse mapping scenario
+                            for (const key in optionCounts) {
+                                if (valueToLabel[key] === valueToLabel[value]) {
+                                    matchedKey = key;
+                                    break;
+                                }
+                            }
+                        } else {
+                            // Try to extract a number from the value and match with index
+                            const match = value.match(/option(\d+)/i);
+                            if (match) {
+                                const optionNumber = parseInt(match[1]);
+                                const optionIndex = optionNumber - 1;
+                                if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+                                    // Find the key for this option
+                                    for (const key in optionCounts) {
+                                        if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+                                            matchedKey = key;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+                            optionCounts[matchedKey]++;
+                            console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
+                        } else {
+                            console.log(`Option value ${value} not found in question options`);
+                        }
+                    });
+                } else {
+                    console.log('Processing non-checkbox answer:', answer.answer_text);
+                    const value = String(answer.answer_text || '');
+                    console.log(`Processing value: ${value}`);
+
+                    // Try to find a matching key in our mapping
+                    let matchedKey = null;
+                    if (optionCounts.hasOwnProperty(value)) {
+                        matchedKey = value;
+                    } else if (valueToLabel.hasOwnProperty(value)) {
+                        // This value maps to a label, so we need to find the original key
+                        // This is a reverse mapping scenario
+                        for (const key in optionCounts) {
+                            if (valueToLabel[key] === valueToLabel[value]) {
+                                matchedKey = key;
+                                break;
+                            }
+                        }
+                    } else {
+                        // Try to extract a number from the value and match with index
+                        const match = value.match(/option(\d+)/i);
+                        if (match) {
+                            const optionNumber = parseInt(match[1]);
+                            const optionIndex = optionNumber - 1;
+                            if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+                                // Find the key for this option
+                                for (const key in optionCounts) {
+                                    if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+                                        matchedKey = key;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+                        optionCounts[matchedKey]++;
+                        console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
+                    } else {
+                        console.log(`Value ${value} not found in question options`);
+                    }
+                }
+            });
+
+            console.log('Final option counts:', optionCounts);
+
+            // Convert value counts to label counts for display
+            const labels = [];
+            const data = [];
+
+            for (const value in optionCounts) {
+                labels.push(valueToLabel[value]);
+                data.push(optionCounts[value]);
+            }
+
+            const total = data.reduce((a, b) => a + b, 0);
+            console.log('Total responses for this question:', total);
+            console.log('Chart labels:', labels);
+            console.log('Chart data:', data);
+
+            if (total === 0) {
+                console.log('No responses found, showing fallback');
+                questionOptionsChart.data.labels = ['No responses'];
+                questionOptionsChart.data.datasets[0].data = [1];
+            } else {
+                questionOptionsChart.data.labels = labels;
+                questionOptionsChart.data.datasets[0].data = data;
+                console.log('Updating chart with actual data');
+            }
+
+            questionOptionsChart.update('none');
+            setTimeout(() => {
+                questionOptionsChart.resize();
+            }, 100);
         });
     });
 </script>

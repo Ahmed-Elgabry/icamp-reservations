@@ -958,65 +958,104 @@
             }
 
             // Delete field
-            function deleteField(fieldId) {
-                if (confirm("هل أنت متأكد من حذف هذا السؤال؟")) {
-                    // Remove from DOM
-                    $(`#${fieldId}`).remove();
+function deleteField(fieldId) {
+    if (confirm("هل أنت متأكد من حذف هذا السؤال؟")) {
+        console.log("Deleting field with ID:", fieldId);
+        console.log("Fields before deletion:", surveyData.fields.map(f => f.id));
 
-                    // Remove from survey data
-                    surveyData.fields = surveyData.fields.filter(field => field.id !== fieldId);
+        // Remove from DOM
+        $(`#${fieldId}`).remove();
 
-                    // Clear selection if deleted field was selected
-                    if (selectedField === fieldId) {
-                        selectedField = null;
-                        $("#fieldTypeLabel").text("حدد سؤالاً لتحرير خصائصه");
-                        $("#fieldLabelAr").val("");
-                        $("#fieldLabelEn").val("");
-                        $("#fieldPlaceholderAr").val("");
-                        $("#fieldPlaceholderEn").val("");
-                        $("#fieldHelpTextAr").val("");
-                        $("#fieldHelpTextEn").val("");
-                        $("#optionsEditor").hide();
-                        $("#ratingSettings").hide();
-                    }
+        // Find the field index in the array
+        const fieldIndex = surveyData.fields.findIndex(field => field.id === fieldId);
+        if (fieldIndex !== -1) {
+            console.log("Found field at index:", fieldIndex);
+            // Remove the field from the array
+            surveyData.fields.splice(fieldIndex, 1);
+        } else {
+            console.error("Field not found in survey data!");
+        }
 
-                    // Show empty state if no fields
-                    if (surveyData.fields.length === 0) {
-                        $("#formFields").html(`
-                            <div class="text-center text-muted py-5">
-                                <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
-                                <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
-                            </div>
-                        `);
-                    }
+        console.log("Fields after deletion:", surveyData.fields.map(f => f.id));
 
-                    // Mark as unsaved
-                    $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-                }
-            }
+        // Clear selection if deleted field was selected
+        if (selectedField === fieldId) {
+            selectedField = null;
+            $("#fieldTypeLabel").text("حدد سؤالاً لتحرير خصائصه");
+            $("#fieldLabelAr").val("");
+            $("#fieldLabelEn").val("");
+            $("#fieldPlaceholderAr").val("");
+            $("#fieldPlaceholderEn").val("");
+            $("#fieldHelpTextAr").val("");
+            $("#fieldHelpTextEn").val("");
+            $("#optionsEditor").hide();
+            $("#ratingSettings").hide();
+        }
+
+        // Show empty state if no fields
+        if (surveyData.fields.length === 0) {
+            $("#formFields").html(`
+                <div class="text-center text-muted py-5">
+                    <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
+                    <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
+                </div>
+            `);
+        }
+
+        // Mark as unsaved
+        $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+    }
+}
 
             // Update field order in survey data
-            function updateFieldOrder() {
-                const fieldOrder = [];
-                $("#formFields .form-field").each(function() {
-                    fieldOrder.push($(this).data("field-id"));
-                });
+            // function updateFieldOrder() {
+            //     const fieldOrder = [];
+            //     $("#formFields .form-field").each(function() {
+            //         fieldOrder.push($(this).data("field-id"));
+            //     });
 
-                // Reorder fields in survey data
-                const orderedFields = [];
-                fieldOrder.forEach(fieldId => {
-                    const field = surveyData.fields.find(f => f.id === fieldId);
-                    if (field) {
-                        orderedFields.push(field);
-                    }
-                });
+            //     // Reorder fields in survey data
+            //     const orderedFields = [];
+            //     fieldOrder.forEach(fieldId => {
+            //         const field = surveyData.fields.find(f => f.id === fieldId);
+            //         if (field) {
+            //             orderedFields.push(field);
+            //         }
+            //     });
 
-                surveyData.fields = orderedFields;
+            //     surveyData.fields = orderedFields;
 
-                // Mark as unsaved
-                $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-            }
+            //     // Mark as unsaved
+            //     $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+            // }
+function updateFieldOrder() {
+    const fieldOrder = [];
+    $("#formFields .form-field").each(function() {
+        fieldOrder.push($(this).data("field-id"));
+    });
 
+    // Create a map of field IDs to their data for quick lookup
+    const fieldMap = {};
+    surveyData.fields.forEach(field => {
+        fieldMap[field.id] = field;
+    });
+
+    // Rebuild the fields array in the new order
+    const orderedFields = [];
+    fieldOrder.forEach(fieldId => {
+        if (fieldMap[fieldId]) {
+            orderedFields.push(fieldMap[fieldId]);
+        } else {
+            console.error("Field not found in survey data:", fieldId);
+        }
+    });
+
+    // Update the survey data with the reordered fields
+    surveyData.fields = orderedFields;
+
+    // Mark as unsaved
+    $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+}
             // Save survey
             $("#saveBtn, #saveFormBtn").on("click", function() {
                 // Get survey ID from hidden field
