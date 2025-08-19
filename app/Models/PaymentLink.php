@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class PaymentLink extends Model
 {
     use HasFactory;
-    
+
     protected $guarded = [];
-    
+
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',
         'expires_at' => 'datetime',
+        'last_status_check' => 'datetime',
     ];
 
     public function order()
@@ -42,6 +43,17 @@ class PaymentLink extends Model
         return $query->where('expires_at', '<', now());
     }
 
+    /**
+     * Scope للاستعلامات الدورية - المدفوعات التي لم يتم فحصها مؤخراً
+     */
+    public function scopeNeedsStatusCheck($query, $minutes = 5)
+    {
+        return $query->where(function ($q) use ($minutes) {
+            $q->whereNull('last_status_check')
+                ->orWhere('last_status_check', '<=', now()->subMinutes($minutes));
+        });
+    }
+
     public function isExpired()
     {
         return $this->expires_at && $this->expires_at->isPast();
@@ -54,7 +66,7 @@ class PaymentLink extends Model
 
     public function getStatusBadgeAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'paid' => '<span class="badge badge-success">تم الدفع</span>',
             'pending' => '<span class="badge badge-warning">معلق</span>',
             'expired' => '<span class="badge badge-danger">منتهي الصلاحية</span>',

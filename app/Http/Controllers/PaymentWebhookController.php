@@ -70,7 +70,7 @@ class PaymentWebhookController extends Controller
 
         return hash_equals($expectedSignature, $signature);
     }
-
+ 
     /**
      * Handle payment completion
      */

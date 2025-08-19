@@ -436,36 +436,12 @@ class PaymentLinkController extends Controller
     public function updateStatus(PaymentLink $paymentLink)
     {
         try {
-            $result = $this->paymenntService->getCheckoutStatus($paymentLink->checkout_id);
-
-            if ($result['success']) {
-                $status = $result['data']['status'] ?? 'pending';
-                $paidAt = null;
-
-                if ($status === 'PAID') {
-                    $status = 'paid';
-                    $paidAt = now();
-                } elseif ($status === 'CANCELLED') {
-                    $status = 'cancelled';
-                } elseif ($status === 'EXPIRED') {
-                    $status = 'expired';
-                }
-
-                $paymentLink->update([
-                    'status' => $status,
-                    'paid_at' => $paidAt
-                ]);
-
-                return response()->json([
-                    'success' => true,
-                    'status' => $status,
-                    'message' => __('dashboard.payment_link_status_update_success')
-                ]);
-            }
+            // Dispatch job to check payment status
+            \App\Jobs\CheckPaymentStatusJob::dispatch($paymentLink->id);
 
             return response()->json([
-                'success' => false,
-                'message' => __('dashboard.payment_link_errors.status_update_failed')
+                'success' => true,
+                'message' => 'تم إرسال طلب فحص حالة الدفع. سيتم تحديث الحالة قريباً.'
             ]);
         } catch (\Exception $e) {
             Log::error('Payment Link Status Update Error', [
@@ -513,6 +489,32 @@ class PaymentLinkController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Test email failed: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Check all pending payment links status
+     */
+    public function checkAllStatus()
+    {
+        try {
+            // Dispatch job to check all payment statuses
+            \App\Jobs\CheckPaymentStatusJob::dispatch(null, true);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إرسال طلب فحص حالة جميع المدفوعات. سيتم تحديث الحالات قريباً.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Check All Payment Status Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء فحص حالة المدفوعات'
             ]);
         }
     }

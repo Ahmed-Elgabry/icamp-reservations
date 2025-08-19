@@ -972,6 +972,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payment-links.test-email',
         'title' => ['actions.test_email', 'dashboard.payment-links']
     ]);
+
+    # payment-links check-all-status
+    Route::post('payment-links/check-all-status', [
+        'uses' => 'PaymentLinkController@checkAllStatus',
+        'as' => 'payment-links.check-all-status',
+        'title' => ['actions.check_all_status', 'dashboard.payment-links']
+    ]);
     /*------------ end Of payment-links ----------*/
     /*------------ start Of warehouse_sales ----------*/
     Route::get('warehouse-sales', [
