@@ -44,8 +44,29 @@ class SendSurveyEmails extends Command
             return 1;
         }
 
-        // Get orders that were completed 24 hours ago and haven't received a survey email yet
-        $completedAt = Carbon::now()->subHours(24);
+        // Get survey settings
+        $survey = Survey::find(1);
+        $settings = $survey->settings ?? [];
+        
+        // Check if survey emails are enabled
+        if (!isset($settings['enabled']) || !$settings['enabled']) {
+            $this->info('Survey emails are disabled in settings.');
+            return 0;
+        }
+        
+        // Get days after completion and send time from settings
+        $daysAfterCompletion = $settings['days_after_completion'] ?? 1;
+        $sendTime = $settings['send_time'] ?? '15:00';
+        
+        // Calculate completedAt based on settings
+        $completedAt = Carbon::now()->subDays($daysAfterCompletion);
+        
+        // Check if current time matches the send time
+        $currentTime = Carbon::now()->format('H:i');
+        if ($currentTime !== $sendTime) {
+            $this->info("Current time ($currentTime) does not match send time ($sendTime). Skipping.");
+            // return 0;
+        }
         $orders = Order::where('status', 'completed')
             ->where('updated_at', '<=', $completedAt)
             ->whereDoesntHave('surveyResponses') // Check if the order doesn't have any survey responses

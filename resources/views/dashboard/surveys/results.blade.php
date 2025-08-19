@@ -27,7 +27,7 @@
                 </div>
                 <!--end::Card title-->
                 <!--begin::Card toolbar-->
-                <div class="card-toolbar">
+                {{-- <div class="card-toolbar">
                     <!--begin::Export-->
                     <button type="button" class="btn btn-flex btn-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                         <span class="svg-icon svg-icon-2">
@@ -58,7 +58,7 @@
                     </div>
                     <!--end::Menu-->
                     <!--end::Export-->
-                </div>
+                </div> --}}
                 <!--end::Card toolbar-->
             </div>
             <!--end::Card header-->

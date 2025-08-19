@@ -23,12 +23,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
-        // $schedule->command('survey:send-emails')->dailyAt('09:00');
-        $schedule->command('survey:send-emails')->everyMinute();
-
+      
         // فحص حالة المدفوعات كل دقيقتين
         $schedule->command('payments:check-status')->everyMinute();
+
+
+        $schedule->command('survey:send-emails')
+            ->everyMinute()
+            ->appendOutputTo(storage_path('logs/survey.log'));
 
         // * * * * * php /home/USERNAME/yourproject/artisan schedule:run >> /dev/null 2>&1
 

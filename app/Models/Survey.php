@@ -11,7 +11,12 @@ class Survey extends Model
 
     protected $fillable = [
         'title',
-        'description'
+        'description',
+        'settings'
+    ];
+    
+    protected $casts = [
+        'settings' => 'array'
     ];
 
     public function questions()
