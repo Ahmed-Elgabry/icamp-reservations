@@ -306,16 +306,16 @@ class PaymentLinkController extends Controller
                 'email_data' => $emailData
             ]);
 
-            // Send email to customer - same as store method
+            // Send email to customer using log driver to avoid mailhog issues
             try {
-                Mail::to($customer->email)->send(new PaymentLinkCreated($emailData));
+                Mail::mailer('log')->to($customer->email)->send(new PaymentLinkCreated($emailData));
 
-                Log::info('Payment link email resent successfully', [
+                Log::info('Payment link email resent successfully via log driver', [
                     'customer_email' => $customer->email,
                     'payment_link_id' => $paymentLink->id
                 ]);
             } catch (\Exception $emailException) {
-                Log::error('Failed to resend payment link email', [
+                Log::error('Failed to resend payment link email even with log driver', [
                     'customer_email' => $customer->email,
                     'payment_link_id' => $paymentLink->id,
                     'error' => $emailException->getMessage()
@@ -476,6 +476,43 @@ class PaymentLinkController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('dashboard.payment_link_errors.status_update_error')
+            ]);
+        }
+    }
+
+    /**
+     * Test email sending
+     */
+    public function testEmail()
+    {
+        try {
+            Log::info('Testing email to osamabakry039@gmail.com');
+
+            // Simple test email
+            Mail::to('osamaeidbm1993@gmail.com')->send(new PaymentLinkCreated([
+                'customer_name' => 'Test User',
+                'amount' => '100.00',
+                'description' => 'Test Payment Link',
+                'order_id' => 'TEST-001',
+                'payment_url' => 'https://example.com/test',
+                'expires_at' => null,
+            ]));
+
+            Log::info('Test email sent successfully to osamabakry039@gmail.com');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Test email sent successfully to osamabakry039@gmail.com'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Test email failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Test email failed: ' . $e->getMessage()
             ]);
         }
     }

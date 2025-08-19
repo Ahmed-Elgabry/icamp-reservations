@@ -233,7 +233,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.index',
         'title' => 'dashboard.stocks',
         'type' => 'parent',
-        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock' , 'stocks.destroyServiceReport']
+        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock', 'stocks.destroyServiceReport']
     ]);
 
     # stocks store
@@ -422,7 +422,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'services.index',
         'title' => 'dashboard.services',
         'type' => 'parent',
-        'child' => ['services.store', 'services.show', 'services.edit', 'services.update', 'services.destroy' , 'services.reports.move']
+        'child' => ['services.store', 'services.show', 'services.edit', 'services.update', 'services.destroy', 'services.reports.move']
     ]);
 
     # services store
@@ -492,7 +492,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'orders.index',
         'title' => 'dashboard.orders',
         'type' => 'parent',
-        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll' , 'order.verified' , 'orders.accept_terms', 'orders.updateNotes']
+        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes']
     ]);
 
     # orders store
@@ -965,6 +965,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payment-links.update-status',
         'title' => ['actions.update-status', 'dashboard.payment-links']
     ]);
+
+    # payment-links test email
+    Route::get('payment-links/test-email', [
+        'uses' => 'PaymentLinkController@testEmail',
+        'as' => 'payment-links.test-email',
+        'title' => ['actions.test_email', 'dashboard.payment-links']
+    ]);
     /*------------ end Of payment-links ----------*/
     /*------------ start Of warehouse_sales ----------*/
     Route::get('warehouse-sales', [
@@ -1293,6 +1300,12 @@ Route::post('webhooks/paymennt', [App\Http\Controllers\PaymentWebhookController:
 // Payment Callback Route
 Route::get('payment/callback', [App\Http\Controllers\PaymentWebhookController::class, 'callback'])
     ->name('payment.callback');
+
+// Test email route (public access)
+Route::get('test-email', [
+    'uses' => 'App\Http\Controllers\Dashboard\PaymentLinkController@testEmail',
+    'as' => 'test.email'
+]);
 
 Route::group(['middleware' => ['auth']], function () {
     Route::resource('daily-reports', 'Dashboard\DailyReportController');

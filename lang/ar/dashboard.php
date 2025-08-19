@@ -793,6 +793,7 @@ return [
     'create_another_payment_link' => 'إنشاء رابط دفع آخر',
     'view_all_payment_links' => 'عرض جميع روابط الدفع',
     'payment_link_copied_successfully' => 'تم نسخ رابط الدفع بنجاح!',
+    'payment_link_copied_success' => 'تم نسخ رابط الدفع بنجاح',
     'back_to_list' => 'العودة للقائمة',
     'payment_link_updated' => 'تم تحديث رابط الدفع بنجاح',
     'payment_link_deleted' => 'تم حذف رابط الدفع بنجاح',
@@ -889,6 +890,22 @@ return [
     'view_and_copy' => 'عرض ونسخ',
     'payment_link_copied' => 'تم نسخ رابط الدفع بنجاح!',
     'view_details' => 'عرض التفاصيل',
+    
+    // QR Code and Download related translations
+    'scan_qr_code_to_pay' => 'امسح رمز QR للدفع',
+    'qr_code_creation_error' => 'فشل في إنشاء رمز QR',
+    'failed_to_prepare_qr_download' => 'فشل في تحضير رمز QR للتحميل',
+    'downloading' => 'جاري التحميل...',
+    'downloaded' => 'تم التحميل!',
+    'qr_code_downloaded_success' => 'تم تحميل رمز QR بنجاح',
+    'failed_to_download_qr' => 'فشل في تحميل رمز QR',
+    
+    // Copy functionality translations
+    'copying' => 'جاري النسخ...',
+    'copy_success' => 'تم النسخ!',
+    'copy_failed_error' => 'فشل في النسخ إلى الحافظة',
+    'copy_manually_prompt' => 'يرجى نسخ هذا النص يدوياً:',
+    'click_to_copy_link' => 'انقر لنسخ رابط الدفع',
 
     // Email-related translations
     'hello' => 'مرحباً',
