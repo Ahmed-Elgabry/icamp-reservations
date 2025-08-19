@@ -24,7 +24,9 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         // $schedule->command('survey:send-emails')->dailyAt('09:00');
-        $schedule->command('survey:send-emails')->everyMinute();
+        $schedule->command('survey:send-emails')
+            ->everyMinute()
+            ->appendOutputTo(storage_path('logs/survey.log'));
         // * * * * * php /home/USERNAME/yourproject/artisan schedule:run >> /dev/null 2>&1
 
     }
