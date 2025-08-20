@@ -471,21 +471,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="manualCopyModalLabel">Copy Payment Link</h5>
+                            <h5 class="modal-title" id="manualCopyModalLabel">{{ __('dashboard.copy_payment_link') }}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <p class="mb-3">Tap and hold the text below to copy it:</p>
+                            <p class="mb-3">{{ __('dashboard.tap_and_hold_to_copy') }}</p>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="manualCopyInput" value="${url}" readonly>
                                 <button class="btn btn-primary" type="button" id="manualCopyBtn">
-                                    <i class="fa fa-copy"></i> Copy
+                                    <i class="fa fa-copy"></i> {{ __('dashboard.copy') }}
                                 </button>
                             </div>
-                            <small class="text-muted mt-2 d-block">Or tap the link below to open it directly:</small>
+                            <small class="text-muted mt-2 d-block">{{ __('dashboard.or_tap_link_to_open') }}</small>
                             <div class="mt-3">
                                 <a href="${url}" target="_blank" class="btn btn-outline-primary w-100">
-                                    <i class="fa fa-external-link"></i> Open Payment Link
+                                    <i class="fa fa-external-link"></i> {{ __('dashboard.open_payment_link') }}
                                 </a>
                             </div>
                         </div>
@@ -514,18 +514,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Try to copy
             const success = await copyToClipboard(url);
             
-            if (success) {
-                button.innerHTML = '<i class="fa fa-check"></i> Copied!';
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-success');
-                showToast('Payment link copied to clipboard!', 'success');
-                
-                setTimeout(() => {
-                    modal.hide();
-                }, 1000);
-            } else {
-                showToast('Please copy the link manually', 'info');
-            }
+                         if (success) {
+                 button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.copy_success") }}';
+                 button.classList.remove('btn-primary');
+                 button.classList.add('btn-success');
+                 showToast('{{ __("dashboard.payment_link_copied") }}', 'success');
+                 
+                 setTimeout(() => {
+                     modal.hide();
+                 }, 1000);
+             } else {
+                 showToast('{{ __("dashboard.please_copy_manually") }}', 'info');
+             }
         });
         
         // Auto-select text when modal is shown
@@ -644,12 +644,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         const modal = new bootstrap.Modal(document.getElementById('qrModal'));
                         modal.show();
                     }
-                } else {
-                    showToast(response.message || 'Failed to load QR code', 'error');
-                }
-            } catch (error) {
-                showToast('Failed to load QR code', 'error');
-            } finally {
+                                 } else {
+                     showToast(response.message || '{{ __("dashboard.failed_to_load_qr") }}', 'error');
+                 }
+             } catch (error) {
+                 showToast('{{ __("dashboard.failed_to_load_qr") }}', 'error');
+             } finally {
                 button.disabled = false;
                 button.innerHTML = '<i class="fa fa-qrcode"></i>';
             }
@@ -695,20 +695,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (copySuccess) {
                             showSuccessState(button, originalText);
                           
-                        } else {
-                            showToast('Failed to copy to clipboard', 'error');
-                            resetButton(button, originalText);
-                        }
+                                                 } else {
+                             showToast('{{ __("dashboard.failed_to_copy") }}', 'error');
+                             resetButton(button, originalText);
+                         }
                     }
                 } else {
-                    showToast(response.message || 'Failed to get payment link', 'error');
-                    resetButton(button, originalText);
-                }
-            } catch (error) {
-                console.error('Copy error:', error);
-                showToast('Failed to copy link', 'error');
-                resetButton(button, originalText);
-            }
+                                         showToast(response.message || '{{ __("dashboard.failed_to_get_payment_link") }}', 'error');
+                     resetButton(button, originalText);
+                 }
+             } catch (error) {
+                 console.error('Copy error:', error);
+                 showToast('{{ __("dashboard.failed_to_copy_link") }}', 'error');
+                 resetButton(button, originalText);
+             }
         }
     });
 
@@ -732,14 +732,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST'
                 });
                 
-                if (response.success) {
-                    showToast(response.message || 'Email sent successfully!', 'success');
-                } else {
-                    showToast(response.message || 'Failed to send email', 'error');
-                }
-            } catch (error) {
-                showToast('Failed to send email', 'error');
-            } finally {
+                                 if (response.success) {
+                     showToast(response.message || '{{ __("dashboard.email_sent_to_customer") }}', 'success');
+                 } else {
+                     showToast(response.message || '{{ __("dashboard.payment_link_email_resent_error") }}', 'error');
+                 }
+             } catch (error) {
+                 showToast('{{ __("dashboard.payment_link_email_resent_error") }}', 'error');
+             } finally {
                 button.disabled = false;
                 button.innerHTML = '<i class="fa fa-envelope"></i>';
             }
@@ -751,10 +751,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const button = this;
         const originalText = button.innerHTML;
         
-        if (!currentQrCodeDataURL) {
-            showToast('QR code not ready for download', 'error');
-            return;
-        }
+                 if (!currentQrCodeDataURL) {
+             showToast('{{ __("dashboard.qr_code_prepare_error") }}', 'error');
+             return;
+         }
         
         try {
             button.disabled = true;
@@ -770,9 +770,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             button.classList.remove('btn-success');
             button.classList.add('btn-info');
-            button.innerHTML = '<i class="fa fa-check"></i> Downloaded!';
-            
-            showToast('QR code downloaded successfully!', 'success');
+                         button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.downloaded") }}';
+             
+             showToast('{{ __("dashboard.qr_code_downloaded_success") }}', 'success');
             
             setTimeout(function() {
                 button.classList.remove('btn-info');
@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Download failed:', error);
             button.disabled = false;
             button.innerHTML = originalText;
-            showToast('Failed to download QR code', 'error');
+                         showToast('{{ __("dashboard.failed_to_download_qr") }}', 'error');
         }
     });
 });
