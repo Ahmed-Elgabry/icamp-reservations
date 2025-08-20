@@ -238,9 +238,7 @@
                         <button id="downloadQrBtn" class="btn btn-success me-2">
                             <i class="fa fa-download"></i> {{ __('dashboard.download_qr_code') }}
                         </button>
-                        <button id="copyLinkBtn" class="btn btn-info me-2">
-                            <i class="fa fa-copy"></i> {{ __('dashboard.copy_payment_link') }}
-                        </button>
+                     
                         <a href="#" id="qrLinkBtn" target="_blank" class="btn btn-primary">
                             <i class="fa fa-external-link"></i> {{ __('dashboard.open_payment_link') }}
                         </a>
