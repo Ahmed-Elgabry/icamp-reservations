@@ -8,7 +8,7 @@
             <div id="kt_content_container" class="container-xxl">
 
                 <!--begin::Card-->
-                <div class="card mb-5 mb-xl-10">
+                <div class="card mb-5 mb-xl-10"> 
                     <div class="card-header border-0">
                         <div class="card-title m-0">
                             <h3 class="fw-bolder m-0">
@@ -285,26 +285,89 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
 
-    // Copy to clipboard function
+    // Enhanced copy functionality with iOS support
     async function copyToClipboard(text) {
         try {
+            // Try modern clipboard API first
             if (navigator.clipboard && window.isSecureContext) {
                 await navigator.clipboard.writeText(text);
                 return true;
-            } else {
-                const tempInput = document.createElement('input');
-                tempInput.value = text;
-                tempInput.style.position = 'fixed';
-                tempInput.style.left = '-9999px';
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                tempInput.setSelectionRange(0, 99999);
-                const successful = document.execCommand('copy');
-                document.body.removeChild(tempInput);
-                return successful;
             }
+            
+            // Fallback for older browsers and iOS
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            tempInput.style.position = 'fixed';
+            tempInput.style.left = '-9999px';
+            tempInput.style.top = '-9999px';
+            document.body.appendChild(tempInput);
+            
+            // Select and copy
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999);
+            
+            const successful = document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            
+            if (successful) {
+                return true;
+            } else {
+                throw new Error('Copy command failed');
+            }
+            
         } catch (err) {
             console.error('Copy failed:', err);
+            
+            // iOS fallback - show text for manual copy
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                // Create a modal to show the text for manual copy
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.8);
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                `;
+                
+                const modalContent = document.createElement('div');
+                modalContent.style.cssText = `
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    max-width: 90%;
+                    text-align: center;
+                `;
+                
+                modalContent.innerHTML = `
+                    <h5 style="margin-bottom: 20px; color: #333;">{{ __('dashboard.copy_for_ios') }}</h5>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; word-break: break-all; font-family: monospace; font-size: 14px; border: 1px solid #dee2e6;">${text}</div>
+                    <p style="color: #666; margin-bottom: 20px; font-size: 14px;">{{ __('dashboard.ios_copy_instructions') }}</p>
+                    <button id="closeIosModal" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">{{ __('dashboard.close') }}</button>
+                `;
+                
+                modal.appendChild(modalContent);
+                document.body.appendChild(modal);
+                
+                // Close modal when clicking close button
+                document.getElementById('closeIosModal').addEventListener('click', function() {
+                    document.body.removeChild(modal);
+                });
+                
+                // Close modal when clicking outside
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+            }
+            
             return false;
         }
     }
