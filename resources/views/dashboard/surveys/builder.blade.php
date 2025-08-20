@@ -427,7 +427,9 @@
                     attributes: "",
                     disabled: false,
                     hidden: false,
-                    settings: {}
+                    settings: {
+                        required: false // Always include required default
+                    }
                 };
 
                 // Add options for fields that support them
@@ -438,11 +440,10 @@
                     ];
                 }
 
-                // Add settings for rating fields
+                // Add settings for rating fields - FIXED: Include default points
                 if (type === 'stars' || type === 'rating') {
-                    fieldData.settings = {
-                        points: 5,
-                    };
+                    fieldData.settings.points = 5; // Set default points
+                    console.log("Created new rating field with default points:", fieldData.settings);
                 }
 
                 // Add to survey data
@@ -858,9 +859,19 @@ function renderField(fieldData) {
                 if (!selectedField) return;
 
                 const fieldData = surveyData.fields.find(field => field.id === selectedField);
-                if (!fieldData || !fieldData.settings) return;
+                if (!fieldData) return;
 
-                fieldData.settings.points = parseInt($("#ratingPoints").val()) || 5;
+                // Initialize settings if it doesn't exist
+                if (!fieldData.settings) {
+                    fieldData.settings = {};
+                }
+
+                // Make sure to save the points value
+                const pointsValue = parseInt($("#ratingPoints").val()) || 5;
+                fieldData.settings.points = pointsValue;
+
+                console.log("Updated points for field", selectedField, "to", pointsValue);
+                console.log("Field settings:", fieldData.settings);
 
                 // Update field HTML
                 $(`#${selectedField} .field-content`).html(generateFieldHtml(fieldData));
@@ -1096,103 +1107,126 @@ function renderField(fieldData) {
                 console.log("================================");
             }
 
-function updateFieldOrder() {
-    const fieldOrder = [];
-    $("#formFields .form-field").each(function() {
-        fieldOrder.push($(this).data("field-id"));
-    });
+            function updateFieldOrder() {
+                const fieldOrder = [];
+                $("#formFields .form-field").each(function() {
+                    fieldOrder.push($(this).data("field-id"));
+                });
 
-    console.log("DOM field order:", fieldOrder);
-    console.log("Current survey fields:", surveyData.fields.map(f => f.id));
+                console.log("DOM field order:", fieldOrder);
+                console.log("Current survey fields:", surveyData.fields.map(f => f.id));
 
-    // Create a map of field IDs to their data for quick lookup
-    const fieldMap = {};
-    surveyData.fields.forEach(field => {
-        fieldMap[field.id] = field;
-    });
+                // Create a map of field IDs to their data for quick lookup
+                const fieldMap = {};
+                surveyData.fields.forEach(field => {
+                    fieldMap[field.id] = field;
+                });
 
-    // Rebuild the fields array in the new order
-    const orderedFields = [];
-    fieldOrder.forEach(fieldId => {
-        if (fieldMap[fieldId]) {
-            orderedFields.push(fieldMap[fieldId]);
-        } else {
-            console.error("Field not found in survey data:", fieldId);
-            console.log("Available field IDs:", Object.keys(fieldMap));
+                // Rebuild the fields array in the new order
+                const orderedFields = [];
+                fieldOrder.forEach(fieldId => {
+                    if (fieldMap[fieldId]) {
+                        orderedFields.push(fieldMap[fieldId]);
+                    } else {
+                        console.error("Field not found in survey data:", fieldId);
+                        console.log("Available field IDs:", Object.keys(fieldMap));
+                    }
+                });
+
+                // Only update if we found all fields
+                if (orderedFields.length === fieldOrder.length) {
+                    surveyData.fields = orderedFields;
+                    console.log("Successfully updated field order");
+                } else {
+                    console.error("Not all fields found in survey data. Aborting order update.");
+                    console.log("Expected fields:", fieldOrder);
+                    console.log("Found fields:", orderedFields.map(f => f.id));
+                }
+
+                // Mark as unsaved
+                $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+            }
+
+            // Save survey
+// Save survey
+$("#saveBtn, #saveFormBtn").on("click", function() {
+    // Get survey ID from hidden field
+    const surveyId = $("#surveyId").val();
+
+    // Prepare data for saving
+    const saveData = {
+        title: surveyData.title,
+        description: surveyData.description || "",
+        questions: surveyData.fields.map((field, index) => {
+            const questionData = {
+                id: field.id,
+                question_text: field.label,
+                question_type: field.type,
+                placeholder: field.placeholder,
+                help_text: field.helpText,
+                error_message: field.errorMessage,
+                options: field.options || null,
+                settings: field.settings || {},
+                order: index
+            };
+
+            // Debug each field being saved
+            console.log(`Field ${field.id}:`, {
+                type: field.type,
+                settings: field.settings,
+                hasPoints: field.settings && field.settings.points !== undefined
+            });
+
+            return questionData;
+        })
+    };
+
+    // Debug the complete save data
+    console.log("Complete save data:", saveData);
+
+    // Show which fields have points
+    saveData.questions.forEach(q => {
+        if (q.question_type === 'stars' || q.question_type === 'rating') {
+            console.log(`${q.question_type} field ${q.id} points:`, q.settings.points);
         }
     });
 
-    // Only update if we found all fields
-    if (orderedFields.length === fieldOrder.length) {
-        surveyData.fields = orderedFields;
-        console.log("Successfully updated field order");
-    } else {
-        console.error("Not all fields found in survey data. Aborting order update.");
-        console.log("Expected fields:", fieldOrder);
-        console.log("Found fields:", orderedFields.map(f => f.id));
-    }
+    // Send data to server
+    $.ajax({
+        url: `/surveys/${surveyId}`,
+        type: 'PUT',
+        data: {
+            _token: '{{ csrf_token() }}',
+            _method: 'PUT',
+            survey: saveData
+        },
+        success: function(response) {
+            // Update survey ID if this was a new survey
+            if (!surveyId && response.id) {
+                $("#surveyId").val(response.id);
+            }
 
-    // Mark as unsaved
-    $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
-}
+            // Show success message
+            const toast = new bootstrap.Toast(document.getElementById('saveToast'));
+            toast.show();
 
+            // Mark as saved
+            $(".unsaved-indicator").addClass("bg-success").removeClass("bg-warning");
+        },
+        error: function(xhr) {
+            console.error("Save error:", xhr.responseText);
+            let response = JSON.parse(xhr.responseText);
+            if (response.errors) {
+                // Display first error only
+                let firstError = Object.values(response.errors)[0][0];
+                alert('Error: ' + firstError);
+            } else {
+                alert('Unexpected error occurred.');
+            }
+        }
+    });
+});
 
-            // Save survey
-            $("#saveBtn, #saveFormBtn").on("click", function() {
-                // Get survey ID from hidden field
-                const surveyId = $("#surveyId").val();
-
-                // Prepare data for saving
-                const saveData = {
-                    title: surveyData.title,
-                    description: surveyData.description || "",
-                    questions: surveyData.fields.map((field, index) => ({
-                        id: field.id,
-                        question_text: field.label,
-                        question_type: field.type,
-                        placeholder: field.placeholder,
-                        help_text: field.helpText,
-                        error_message: field.errorMessage,
-                        options: field.options || null,
-                        settings: field.settings || null,
-                        order: index
-                    }))
-                };
-
-                // Send data to server
-                $.ajax({
-                    url: `/surveys/${surveyId}`,
-                    type: 'PUT',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        _method: 'PUT',
-                        survey: saveData
-                    },
-                    success: function(response) {
-                        // Update survey ID if this was a new survey
-                        if (!surveyId && response.id) {
-                            $("#surveyId").val(response.id);
-                        }
-
-                        // Show success message
-                        const toast = new bootstrap.Toast(document.getElementById('saveToast'));
-                        toast.show();
-
-                        // Mark as saved
-                        $(".unsaved-indicator").addClass("bg-success").removeClass("bg-warning");
-                    },
-                    error: function(xhr) {
-                        let response = JSON.parse(xhr.responseText);
-                        if (response.errors) {
-                            // Display first error only
-                            let firstError = Object.values(response.errors)[0][0];
-                            alert('Error: ' + firstError);
-                        } else {
-                            alert('Unexpected error occurred.');
-                        }
-                    }
-                });
-            });
 
             // Generate preview field HTML (without disabled attribute)
             function generatePreviewFieldHtml(fieldData) {

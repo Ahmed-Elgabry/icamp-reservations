@@ -7,6 +7,7 @@ use App\Models\Survey;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SurveySubmissionController extends Controller
 {
