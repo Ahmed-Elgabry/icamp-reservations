@@ -987,6 +987,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'uses' => 'WebhookController@handle',
         'as' => 'webhook.paymennt'
     ])->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
+
+    # test webhook route
+    Route::get('webhook/test', function () {
+        return response()->json(['message' => 'Webhook route is working!']);
+    })->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
     /*------------ end Of webhooks ----------*/
     /*------------ start Of warehouse_sales ----------*/
     Route::get('warehouse-sales', [
