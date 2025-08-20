@@ -985,7 +985,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     /*------------ start Of webhooks ----------*/
     # webhook for Paymennt
     Route::post('webhook/paymennt', [
-        'uses' => 'App\Http\Controllers\WebhookController@handle',
+        'uses' => 'WebhookController@handle',
         'as' => 'webhook.paymennt'
     ])->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
 
