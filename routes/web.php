@@ -980,7 +980,20 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.check_all_status', 'dashboard.payment-links']
     ]);
     /*------------ end Of payment-links ----------*/
-    /*------------ start Of warehouse_sales ----------*/
+
+    /*------------ start Of webhooks ----------*/
+    # webhook for Paymennt
+    Route::post('webhooks/paymennt', [
+        'uses' => 'WebhookController@handle',
+        'as' => 'webhook.paymennt'
+    ])->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
+
+    # test webhook route
+    Route::get('webhook/test', function () {
+        return response()->json(['message' => 'Webhook route is working!']);
+    })->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
+    /*------------ end Of webhooks ----------*/
+
     Route::get('warehouse-sales', [
         'uses' => 'WarehousesalesController@index',
         'as' => 'warehouse_sales.index',
@@ -1300,9 +1313,7 @@ Route::get('orders/check-customer-notices/{customerId}', [
     'as' => 'orders.check-customer-notices'
 ])->middleware(['auth']);
 
-// Paymennt Webhook Route
-Route::post('webhooks/paymennt', [App\Http\Controllers\PaymentWebhookController::class, 'handle'])
-    ->name('webhooks.paymennt');
+
 
 // Payment Callback Route
 Route::get('payment/callback', [App\Http\Controllers\PaymentWebhookController::class, 'callback'])

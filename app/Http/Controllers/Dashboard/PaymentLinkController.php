@@ -308,7 +308,7 @@ class PaymentLinkController extends Controller
 
             // Send email to customer using log driver to avoid mailhog issues
             try {
-                Mail::mailer('log')->to($customer->email)->send(new PaymentLinkCreated($emailData));
+                Mail::to($customer->email)->send(new PaymentLinkCreated($emailData));
 
                 Log::info('Payment link email resent successfully via log driver', [
                     'customer_email' => $customer->email,
