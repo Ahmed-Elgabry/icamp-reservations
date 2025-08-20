@@ -251,35 +251,36 @@
             <div class="bg-white rounded shadow-sm p-4" style="min-height: 70vh;">
                 <div id="formFields" class="sortable-container">
                     <!-- Survey questions will be added here dynamically -->
-@if(isset($survey) && isset($survey['fields']) && count($survey['fields']) > 0)
-    @foreach($survey['fields'] as $question)
-        <div dir="rtl" class="form-field {{ $question['settings']['width'] ?? 'col-12' }}" id="field_{{ $question['id'] }}" data-field-id="field_{{ $question['id'] }}">
-            <div class="field-actions">
-                <button class="btn btn-sm btn-light me-1 duplicate-field" title="نسخ">
-                    <i class="mdi mdi-content-copy"></i>
-                </button>
-                <button class="btn btn-sm btn-light me-1 move-up" title="تحريك للأعلى">
-                    <i class="mdi mdi-arrow-up"></i>
-                </button>
-                <button class="btn btn-sm btn-light me-1 move-down" title="تحريك للأسفل">
-                    <i class="mdi mdi-arrow-down"></i>
-                </button>
-                <button class="btn btn-sm btn-light delete-field" title="حذف">
-                    <i class="mdi mdi-delete-outline text-danger"></i>
-                </button>
-            </div>
-            <div class="field-content">
-                {!! SurveyHelper::generateQuestionHtml($question) !!}
-            </div>
-            <div class="field-type-label text-start">{{ SurveyHelper::getQuestionTypeName($question["question_type"]) }}</div>
-        </div>
-    @endforeach
-@else
-    <div class="text-center text-muted py-5">
-        <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
-        <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
-    </div>
-@endif                </div>
+                    @if(isset($survey) && isset($survey['fields']) && count($survey['fields']) > 0)
+                        @foreach($survey['fields'] as $question)
+                            <div dir="rtl" class="form-field {{ $question['settings']['width'] ?? 'col-12' }}" id="field_{{ $question['id'] }}" data-field-id="field_{{ $question['id'] }}">
+                                <div class="field-actions">
+                                    <button class="btn btn-sm btn-light me-1 duplicate-field" title="نسخ">
+                                        <i class="mdi mdi-content-copy"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light me-1 move-up" title="تحريك للأعلى">
+                                        <i class="mdi mdi-arrow-up"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light me-1 move-down" title="تحريك للأسفل">
+                                        <i class="mdi mdi-arrow-down"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light delete-field" title="حذف">
+                                        <i class="mdi mdi-delete-outline text-danger"></i>
+                                    </button>
+                                </div>
+                                <div class="field-content">
+                                    {!! SurveyHelper::generateQuestionHtml($question) !!}
+                                </div>
+                                <div class="field-type-label text-start">{{ SurveyHelper::getQuestionTypeName($question["question_type"]) }}</div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="text-center text-muted py-5">
+                            <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
+                            <p>اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
         <!-- Right Sidebar - Question Properties -->

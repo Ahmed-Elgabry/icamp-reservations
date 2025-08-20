@@ -40,8 +40,17 @@ class SurveyHelper
         $options = $question['options'];
         $settings = $question['settings'];
         $required = isset($settings['required']) && $settings['required'] ? ' required' : '';
-        $requiredLabel = isset($settings['required']) && $settings['required'] ? ' *' : '';
+        $isRequired = isset($settings['required']) && $settings['required'];
+        $locale = app()->getLocale(); // أو Auth::user()->locale لو عندك
+        $requiredLabel = '';
 
+        if ($isRequired) {
+            if ($locale === 'ar') {
+                $requiredLabel = '<span class="text-danger" style="font-size: small;"> (مطلوب)</span>';
+            } else {
+                $requiredLabel = '<span class="text-danger" style="font-size: small;"> (required)</span>';
+            }
+        }
         switch($type) {
             case "text":
             case "email":
@@ -188,8 +197,17 @@ class SurveyHelper
         $options = $question['options'] ?? [];
         $settings = $question['settings'] ?? [];
         $required = isset($settings['required']) && $settings['required'] ? ' required' : '';
-        $requiredLabel = isset($settings['required']) && $settings['required'] ? ' *' : '';
+        $isRequired = isset($settings['required']) && $settings['required'];
+        $locale = app()->getLocale(); // أو Auth::user()->locale لو عندك
+        $requiredLabel = '';
 
+        if ($isRequired) {
+            if ($locale === 'ar') {
+                $requiredLabel = '<span class="text-danger" style="font-size: small;"> (مطلوب)</span>';
+            } else {
+                $requiredLabel = '<span class="text-danger" style="font-size: small;"> (required)</span>';
+            }
+        }
         $html = '<div class="mb-4 ' . ($settings['width'] ?? 'col-12') . '">';
 
         switch($type) {

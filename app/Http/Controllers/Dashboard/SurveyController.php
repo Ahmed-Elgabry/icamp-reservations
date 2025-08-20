@@ -292,112 +292,128 @@ class SurveyController extends Controller
      * @return \Illuminate\Http\Response
      */
     // In your SurveyController.php, update the update method
-    public function update(Request $request, Survey $survey)
-    {
-        $validated = $request->validate([
-            'survey.title' => 'required|string|max:255',
-            'survey.description' => 'nullable|string',
-            'survey.questions' => 'required|array',
-            'survey.questions.*.id' => 'nullable|string',
-            'survey.questions.*.question_text' => 'required|array',
-            'survey.questions.*.question_type' => 'required|string',
-            'survey.questions.*.placeholder' => 'nullable|array',
-            'survey.questions.*.help_text' => 'nullable|array',
-            'survey.questions.*.error_message' => 'nullable|string',
-            'survey.questions.*.options' => 'nullable|array',
-            'survey.questions.*.settings' => 'nullable|array',
-            'survey.questions.*.settings.required' => 'sometimes|in:true,false,1,0',
-        ]);
+public function update(Request $request, Survey $survey)
+{
+    $validated = $request->validate([
+        'survey.title' => 'required|string|max:255',
+        'survey.description' => 'nullable|string',
+        'survey.questions' => 'required|array',
+        'survey.questions.*.id' => 'nullable|string',
+        'survey.questions.*.question_text' => 'required|array',
+        'survey.questions.*.question_type' => 'required|string',
+        'survey.questions.*.placeholder' => 'nullable|array',
+        'survey.questions.*.help_text' => 'nullable|array',
+        'survey.questions.*.error_message' => 'nullable|string',
+        'survey.questions.*.options' => 'nullable|array',
+        'survey.questions.*.settings' => 'nullable|array',
+        'survey.questions.*.settings.required' => 'sometimes|in:true,false,1,0',
+    ]);
 
-        // Update survey
-        $survey->update([
-            'title' => $validated['survey']['title'],
-            'description' => $validated['survey']['description'] ?? null,
-        ]);
+    // Update survey
+    $survey->update([
+        'title' => $validated['survey']['title'],
+        'description' => $validated['survey']['description'] ?? null,
+    ]);
 
-        // Get existing question IDs
-        $existingQuestionIds = $survey->questions()->pluck('id')->toArray();
-        $incomingQuestionIds = [];
+    // Get existing question IDs
+    $existingQuestionIds = $survey->questions()->pluck('id')->toArray();
+    $incomingQuestionIds = [];
 
-        // Process each question
-        foreach ($validated['survey']['questions'] as $index => $questionData) {
-            // Extract database ID from frontend ID if it exists
-            $questionId = null;
-            if (isset($questionData['id']) && strpos($questionData['id'], 'field_') === 0) {
-                $parts = explode('_', $questionData['id']);
-                if (count($parts) == 2 && is_numeric($parts[1])) {
-                    $questionId = (int)$parts[1];
-                }
+    // Process each question
+    foreach ($validated['survey']['questions'] as $index => $questionData) {
+        // Extract database ID from frontend ID if it exists
+        $questionId = null;
+        if (isset($questionData['id']) && strpos($questionData['id'], 'field_') === 0) {
+            $parts = explode('_', $questionData['id']);
+            if (count($parts) == 2 && is_numeric($parts[1])) {
+                $questionId = (int)$parts[1];
             }
+        }
 
-            // Ensure settings array exists and has required value
-            $settings = $questionData['settings'] ?? [];
+        // Handle settings properly - preserve existing settings and only update what's provided
+        $settings = $questionData['settings'] ?? [];
+
+        // Convert string boolean values to actual booleans for 'required' field
+        if (isset($settings['required'])) {
+            if (is_string($settings['required'])) {
+                $settings['required'] = in_array(strtolower($settings['required']), ['true', '1', 'on', 'yes']);
+            } else {
+                $settings['required'] = (bool)$settings['required'];
+            }
+        }
+        // Don't set required to false if it's not provided - let it be null/unset
+
+        // Check if this is an existing question
+        if ($questionId && in_array($questionId, $existingQuestionIds)) {
+            // Update existing question
+            $question = SurveyQuestion::find($questionId);
+
+            // Get existing settings and merge with new ones
+            $existingSettings = $question->settings ?? [];
+            $mergedSettings = array_merge($existingSettings, $settings);
+
+            $question->update([
+                'question_text' => $questionData['question_text'],
+                'question_type' => $questionData['question_type'],
+                'placeholder' => $questionData['placeholder'] ?? null,
+                'help_text' => $questionData['help_text'] ?? null,
+                'error_message' => $questionData['error_message'] ?? null,
+                'options' => $questionData['options'] ?? null,
+                'settings' => $mergedSettings,
+                'order' => $index,
+            ]);
+            $incomingQuestionIds[] = $questionId;
+        } else {
+            // Create new question
+            // For new questions, set default values
             if (!isset($settings['required'])) {
                 $settings['required'] = false;
             }
 
-            // Check if this is an existing question
-            if ($questionId && in_array($questionId, $existingQuestionIds)) {
-                // Update existing question
-                $question = SurveyQuestion::find($questionId);
-                $question->update([
-                    'question_text' => $questionData['question_text'],
-                    'question_type' => $questionData['question_type'],
-                    'placeholder' => $questionData['placeholder'] ?? null,
-                    'help_text' => $questionData['help_text'] ?? null,
-                    'error_message' => $questionData['error_message'] ?? null,
-                    'options' => $questionData['options'] ?? null,
-                    'settings' => $settings, // Use the updated settings
-                    'order' => $index,
-                ]);
-                $incomingQuestionIds[] = $questionId;
-            } else {
-                // Create new question
-                $newQuestion = SurveyQuestion::create([
-                    'survey_id' => $survey->id,
-                    'question_text' => $questionData['question_text'],
-                    'question_type' => $questionData['question_type'],
-                    'placeholder' => $questionData['placeholder'] ?? null,
-                    'help_text' => $questionData['help_text'] ?? null,
-                    'error_message' => $questionData['error_message'] ?? null,
-                    'options' => $questionData['options'] ?? null,
-                    'settings' => $settings, // Use the updated settings
-                    'order' => $index,
-                ]);
-                $incomingQuestionIds[] = $newQuestion->id;
-            }
+            $newQuestion = SurveyQuestion::create([
+                'survey_id' => $survey->id,
+                'question_text' => $questionData['question_text'],
+                'question_type' => $questionData['question_type'],
+                'placeholder' => $questionData['placeholder'] ?? null,
+                'help_text' => $questionData['help_text'] ?? null,
+                'error_message' => $questionData['error_message'] ?? null,
+                'options' => $questionData['options'] ?? null,
+                'settings' => $settings,
+                'order' => $index,
+            ]);
+            $incomingQuestionIds[] = $newQuestion->id;
         }
-
-        // Find questions to delete (those not in the incoming list)
-        $questionsToDelete = array_diff($existingQuestionIds, $incomingQuestionIds);
-        if (!empty($questionsToDelete)) {
-            // Check if any of these questions have answers
-            $questionsWithAnswers = SurveyQuestion::whereIn('id', $questionsToDelete)
-                ->whereHas('answers')
-                ->pluck('id')
-                ->toArray();
-
-            if (!empty($questionsWithAnswers)) {
-                // Instead of deleting, mark them as hidden
-                SurveyQuestion::whereIn('id', $questionsWithAnswers)->update(['hidden' => true]);
-
-                // Log which questions were hidden instead of deleted
-                \Log::info('Hidden questions with answers instead of deleting', [
-                    'survey_id' => $survey->id,
-                    'question_ids' => $questionsWithAnswers
-                ]);
-            }
-
-            // Delete questions that don't have answers
-            $questionsWithoutAnswers = array_diff($questionsToDelete, $questionsWithAnswers);
-            if (!empty($questionsWithoutAnswers)) {
-                SurveyQuestion::whereIn('id', $questionsWithoutAnswers)->delete();
-            }
-        }
-
-        return response()->json(['success' => true]);
     }
 
+    // Find questions to delete (those not in the incoming list)
+    $questionsToDelete = array_diff($existingQuestionIds, $incomingQuestionIds);
+    if (!empty($questionsToDelete)) {
+        // Check if any of these questions have answers
+        $questionsWithAnswers = SurveyQuestion::whereIn('id', $questionsToDelete)
+            ->whereHas('answers')
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($questionsWithAnswers)) {
+            // Instead of deleting, mark them as hidden
+            SurveyQuestion::whereIn('id', $questionsWithAnswers)->update(['hidden' => true]);
+
+            // Log which questions were hidden instead of deleted
+            \Log::info('Hidden questions with answers instead of deleting', [
+                'survey_id' => $survey->id,
+                'question_ids' => $questionsWithAnswers
+            ]);
+        }
+
+        // Delete questions that don't have answers
+        $questionsWithoutAnswers = array_diff($questionsToDelete, $questionsWithAnswers);
+        if (!empty($questionsWithoutAnswers)) {
+            SurveyQuestion::whereIn('id', $questionsWithoutAnswers)->delete();
+        }
+    }
+
+    return response()->json(['success' => true]);
+}
 
     /**
      * Display the specified survey.
