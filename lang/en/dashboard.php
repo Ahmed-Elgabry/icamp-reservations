@@ -97,6 +97,8 @@ return [
     'take_picture' => 'Take Picture',
     'The_following_products_contain_less_than_6_of:' => 'The following products contain less than 6 of:',
     'open_camera_to_scan_qr' => 'Open camera to scan QR',
+    'copy_for_ios' => 'Copy Payment Link',
+    'ios_copy_instructions' => 'Long press on the text above, then select "Copy" from the menu that appears.',
 
     // v2
     'insurance' => 'Insurance',
