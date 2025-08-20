@@ -909,6 +909,17 @@ return [
     'copy_failed_error' => 'Failed to copy to clipboard',
     'copy_manually_prompt' => 'Please copy this text manually:',
     'click_to_copy_link' => 'Click to copy payment link',
+    'copy_payment_link' => 'Copy Payment Link',
+    'tap_and_hold_to_copy' => 'Tap and hold the text below to copy it:',
+    'copy' => 'Copy',
+    'or_tap_link_to_open' => 'Or tap the link below to open it directly:',
+    'open_payment_link' => 'Open Payment Link',
+    'please_copy_manually' => 'Please copy the link manually',
+    'failed_to_load_qr' => 'Failed to load QR code',
+    'failed_to_copy' => 'Failed to copy to clipboard',
+    'failed_to_get_payment_link' => 'Failed to get payment link',
+    'failed_to_copy_link' => 'Failed to copy link',
+    'payment_link_copied' => 'Payment link copied to clipboard!',
 
     // Email-related translations
     'hello' => 'Hello',

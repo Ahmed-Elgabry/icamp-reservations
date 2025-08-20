@@ -909,6 +909,17 @@ return [
     'copy_failed_error' => 'فشل في النسخ إلى الحافظة',
     'copy_manually_prompt' => 'يرجى نسخ هذا النص يدوياً:',
     'click_to_copy_link' => 'انقر لنسخ رابط الدفع',
+    'copy_payment_link' => 'نسخ رابط الدفع',
+    'tap_and_hold_to_copy' => 'اضغط واستمر بالضغط على النص أدناه لنسخه:',
+    'copy' => 'نسخ',
+    'or_tap_link_to_open' => 'أو اضغط على الرابط أدناه لفتحه مباشرة:',
+    'open_payment_link' => 'فتح رابط الدفع',
+    'please_copy_manually' => 'يرجى نسخ الرابط يدوياً',
+    'failed_to_load_qr' => 'فشل في تحميل رمز QR',
+    'failed_to_copy' => 'فشل في النسخ إلى الحافظة',
+    'failed_to_get_payment_link' => 'فشل في الحصول على رابط الدفع',
+    'failed_to_copy_link' => 'فشل في نسخ الرابط',
+    'payment_link_copied' => 'تم نسخ رابط الدفع إلى الحافظة!',
 
     // Email-related translations
     'hello' => 'مرحباً',
