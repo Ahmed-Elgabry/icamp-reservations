@@ -306,16 +306,16 @@ class PaymentLinkController extends Controller
                 'email_data' => $emailData
             ]);
 
-            // Send email to customer using log driver to avoid mailhog issues
+            // Send email to customer using mailhog
             try {
-                Mail::mailer('log')->to($customer->email)->send(new PaymentLinkCreated($emailData));
+                Mail::to($customer->email)->send(new PaymentLinkCreated($emailData));
 
-                Log::info('Payment link email resent successfully via log driver', [
+                Log::info('Payment link email resent successfully via mailhog', [
                     'customer_email' => $customer->email,
                     'payment_link_id' => $paymentLink->id
                 ]);
             } catch (\Exception $emailException) {
-                Log::error('Failed to resend payment link email even with log driver', [
+                Log::error('Failed to resend payment link email via mailhog', [
                     'customer_email' => $customer->email,
                     'payment_link_id' => $paymentLink->id,
                     'error' => $emailException->getMessage()
