@@ -979,13 +979,15 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payment-links.check-all-status',
         'title' => ['actions.check_all_status', 'dashboard.payment-links']
     ]);
+    /*------------ end Of payment-links ----------*/
 
+    /*------------ start Of webhooks ----------*/
     # webhook for Paymennt
     Route::post('webhook/paymennt', [
         'uses' => 'WebhookController@handle',
         'as' => 'webhook.paymennt'
     ])->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
-    /*------------ end Of payment-links ----------*/
+    /*------------ end Of webhooks ----------*/
     /*------------ start Of warehouse_sales ----------*/
     Route::get('warehouse-sales', [
         'uses' => 'WarehousesalesController@index',
