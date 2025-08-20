@@ -238,6 +238,7 @@
                         <button id="downloadQrBtn" class="btn btn-success me-2">
                             <i class="fa fa-download"></i> {{ __('dashboard.download_qr_code') }}
                         </button>
+                     
                         <a href="#" id="qrLinkBtn" target="_blank" class="btn btn-primary">
                             <i class="fa fa-external-link"></i> {{ __('dashboard.open_payment_link') }}
                         </a>
@@ -248,68 +249,30 @@
     </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let currentPaymentUrl = '';
     let currentQrCodeDataURL = null;
 
-    // Show toast notification
-    function showToast(message, type = 'success') {
-        const existingToasts = document.querySelectorAll('.custom-toast');
-        existingToasts.forEach(toast => toast.remove());
-        
-        const toastId = 'toast_' + Date.now();
-        const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
-        const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-        
-        const toastElement = document.createElement('div');
-        toastElement.id = toastId;
-        toastElement.className = 'custom-toast';
-        toastElement.style.backgroundColor = bgColor;
-        toastElement.innerHTML = `
-            <i class="fa ${icon} me-2"></i>
-            <strong>${message}</strong>
-            <button type="button" class="btn-close btn-close-white ms-2" onclick="document.getElementById('${toastId}').remove()"></button>
-        `;
-        
-        document.body.appendChild(toastElement);
-        
-        setTimeout(function() {
-            const toast = document.getElementById(toastId);
-            if (toast) {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, 3000);
-    }
-
-    // Copy to clipboard function
-    async function copyToClipboard(text) {
+    // Fetch API helper - THIS WAS MISSING
+    async function fetchAPI(url, options = {}) {
         try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(text);
-                return true;
-            } else {
-                const tempInput = document.createElement('input');
-                tempInput.value = text;
-                tempInput.style.position = 'fixed';
-                tempInput.style.left = '-9999px';
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                tempInput.setSelectionRange(0, 99999);
-                const successful = document.execCommand('copy');
-                document.body.removeChild(tempInput);
-                return successful;
-            }
-        } catch (err) {
-            console.error('Copy failed:', err);
-            return false;
+            const response = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}',
+                    ...options.headers
+                },
+                ...options
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, message: 'Network error' };
         }
     }
 
-    // Generate QR Code
+    // Generate QR Code function - THIS WAS MISSING
     function generateQRCode(url, containerId) {
         try {
             const qr = qrcode(0, 'M');
@@ -351,182 +314,236 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         } catch (error) {
             console.error('QR Code generation error:', error);
-                            document.getElementById(containerId).innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
+            document.getElementById(containerId).innerHTML = '<p class="text-danger">QR Code creation error</p>';
             return false;
         }
     }
 
-    // Fetch API helper
-    async function fetchAPI(url, options = {}) {
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        const existingToasts = document.querySelectorAll('.custom-toast');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toastId = 'toast_' + Date.now();
+        const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
+        const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        
+        const toastElement = document.createElement('div');
+        toastElement.id = toastId;
+        toastElement.className = 'custom-toast';
+        toastElement.style.backgroundColor = bgColor;
+        toastElement.innerHTML = `
+            <i class="fa ${icon} me-2"></i>
+            <strong>${message}</strong>
+            <button type="button" class="btn-close btn-close-white ms-2" onclick="document.getElementById('${toastId}').remove()"></button>
+        `;
+        
+        document.body.appendChild(toastElement);
+        
+        setTimeout(function() {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 3000);
+    }
+
+    // Enhanced Copy to clipboard function specifically for iPhone Safari
+    async function copyToClipboard(text) {
+        console.log('Attempting to copy:', text);
+        
+        // Method 1: Try modern clipboard API first (but it often fails on iPhone)
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(text);
+                console.log('Clipboard API success');
+                return true;
+            } catch (err) {
+                console.log('Clipboard API failed:', err);
+                // Continue to fallback
+            }
+        }
+        
+        // Method 2: Enhanced fallback for iPhone Safari
+        return iPhoneSafariCopy(text);
+    }
+
+    // Specialized copy function for iPhone Safari
+    function iPhoneSafariCopy(text) {
         try {
-            const response = await fetch(url, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}',
-                    ...options.headers
-                },
-                ...options
-            });
-            return await response.json();
-        } catch (error) {
-            console.error('API Error:', error);
-            return { success: false, message: 'Network error' };
+            console.log('Using iPhone Safari copy method');
+            
+            // Create a textarea (works better than input on iOS)
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            
+            // Critical iOS Safari positioning and styling
+            textArea.style.position = 'absolute';
+            textArea.style.left = '-9999px';
+            textArea.style.top = '0';
+            textArea.style.opacity = '0';
+            textArea.style.pointerEvents = 'none';
+            textArea.style.userSelect = 'text';
+            textArea.style.webkitUserSelect = 'text';
+            textArea.style.MozUserSelect = 'text';
+            textArea.style.msUserSelect = 'text';
+            
+            // iOS specific attributes
+            textArea.setAttribute('readonly', false);
+            textArea.contentEditable = true;
+            textArea.readOnly = false;
+            
+            document.body.appendChild(textArea);
+            
+            // Focus and select - critical for iOS
+            textArea.focus();
+            textArea.select();
+            
+            // Try different selection methods for iOS compatibility
+            if (textArea.setSelectionRange) {
+                textArea.setSelectionRange(0, text.length);
+            }
+            
+            // Additional iOS selection method
+            const range = document.createRange();
+            range.selectNodeContents(textArea);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            // Execute copy command
+            let successful = false;
+            try {
+                successful = document.execCommand('copy');
+                console.log('execCommand result:', successful);
+            } catch (err) {
+                console.log('execCommand failed:', err);
+            }
+            
+            // Clean up
+            document.body.removeChild(textArea);
+            
+            return successful;
+        } catch (err) {
+            console.error('iPhone Safari copy failed:', err);
+            return false;
         }
     }
-    
-    // Handle preview icon clicks - show record details (client-side only)
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('preview-icon')) {
-            const icon = e.target;
-            
-            // Get data from data attributes
-            const data = {
-                customer_name: icon.getAttribute('data-customer-name'),
-                amount: icon.getAttribute('data-amount'),
-                order_id: icon.getAttribute('data-order-id'),
-                status: icon.getAttribute('data-status'),
-                created_at: icon.getAttribute('data-created-at'),
-                request_id: icon.getAttribute('data-request-id'),
-                checkout_id: icon.getAttribute('data-checkout-id'),
-                checkout_key: icon.getAttribute('data-checkout-key')
-            };
-            
-            // Show modal with the data
-            showDetailsModal(data);
-        }
-    });
 
-    // Handle QR button clicks
-    document.addEventListener('click', async function(e) {
-        if (e.target.closest('.qr-btn')) {
-            const button = e.target.closest('.qr-btn');
-            const id = button.getAttribute('data-id');
-            
-            button.disabled = true;
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-            
-            try {
-                const response = await fetchAPI(`/payment-links/${id}/qr-code`);
-                
-                if (response.success) {
-                    currentPaymentUrl = response.url;
-                    
-                    if (generateQRCode(response.url, 'qrCodeContainer')) {
-                        document.getElementById('qrLinkBtn').href = response.url;
-                        
-                        const modal = new bootstrap.Modal(document.getElementById('qrModal'));
-                        modal.show();
-                    }
-                } else {
-                    showToast(response.message || '{{ __("dashboard.qr_code_load_error") }}', 'error');
-                }
-            } catch (error) {
-                showToast('{{ __("dashboard.qr_code_load_error_general") }}', 'error');
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<i class="fa fa-qrcode"></i>';
-            }
-        }
-    });
+    // Detect if user is on iPhone
+    function isIPhone() {
+        return /iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
 
-    // Handle Copy button clicks
-    document.addEventListener('click', async function(e) {
-        if (e.target.closest('.copy-btn')) {
-            const button = e.target.closest('.copy-btn');
-            const id = button.getAttribute('data-id');
-            
-            try {
-                const response = await fetchAPI(`/payment-links/${id}/copy`);
-                
-                if (response.success) {
-                    const success = await copyToClipboard(response.url);
-                                            showToast(success ? '{{ __('dashboard.payment_link_copied') }}' : '{{ __('dashboard.copy_failed') }}', success ? 'success' : 'error');
-                } else {
-                                          showToast(response.message || '{{ __('dashboard.failed_to_get_link') }}', 'error');
-                }
-            } catch (error) {
-                showToast('{{ __("dashboard.link_copy_error") }}', 'error');
-            }
-        }
-    });
-
-    // Handle Resend Email button clicks
-    document.addEventListener('click', async function(e) {
-        if (e.target.closest('.resend-email-btn')) {
-            const button = e.target.closest('.resend-email-btn');
-            const id = button.getAttribute('data-id');
-            const customerName = button.getAttribute('data-customer-name');
-            
-            // Confirm before sending
-            if (!confirm('{{ __('dashboard.confirm_resend_email') }} ' + customerName + '?')) {
-                return;
-            }
-            
-            button.disabled = true;
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-            
-            try {
-                const response = await fetchAPI(`/payment-links/${id}/resend-email`, {
-                    method: 'POST'
-                });
-                
-                if (response.success) {
-                    showToast(response.message || '{{ __('dashboard.payment_link_email_resent_success') }}', 'success');
-                } else {
-                    showToast(response.message || '{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
-                }
-            } catch (error) {
-                showToast('{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<i class="fa fa-envelope"></i>';
-            }
-        }
-    });
-
-    // Download QR Code
-    document.getElementById('downloadQrBtn').addEventListener('click', function() {
-        const button = this;
-        const originalText = button.innerHTML;
+    // Show success state on button
+    function showSuccessState(button, originalText) {
+        button.classList.remove('btn-bg-light');
+        button.classList.add('btn-success');
+        button.innerHTML = '<i class="fa fa-check"></i>';
         
-        if (!currentQrCodeDataURL) {
-            showToast('{{ __("dashboard.qr_code_prepare_error") }}', 'error');
-            return;
-        }
-        
-        try {
-            button.disabled = true;
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.downloading") }}';
-            
-            const downloadLink = document.createElement('a');
-            downloadLink.href = currentQrCodeDataURL;
-            downloadLink.download = 'payment-qr-code.png';
-            
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            
+        setTimeout(function() {
             button.classList.remove('btn-success');
-            button.classList.add('btn-info');
-            button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.downloaded") }}';
-            
-            showToast('{{ __("dashboard.qr_code_download_success") }}', 'success');
-            
-            setTimeout(function() {
-                button.classList.remove('btn-info');
-                button.classList.add('btn-success');
-                button.disabled = false;
-                button.innerHTML = originalText;
-            }, 2000);
-            
-        } catch (error) {
-            console.error('Download failed:', error);
+            button.classList.add('btn-bg-light');
             button.disabled = false;
             button.innerHTML = originalText;
-            showToast('{{ __("dashboard.failed_to_download_qr") }}', 'error');
+        }, 2000);
+    }
+
+    // Reset button to original state
+    function resetButton(button, originalText) {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    }
+
+    // Show manual copy modal for iPhone when automatic copy fails
+    function showManualCopyModal(url) {
+        // Remove existing manual copy modal if any
+        const existingModal = document.getElementById('manualCopyModal');
+        if (existingModal) {
+            existingModal.remove();
         }
-    });
-    
+        
+        // Create manual copy modal
+        const modalHtml = `
+            <div class="modal fade" id="manualCopyModal" tabindex="-1" aria-labelledby="manualCopyModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="manualCopyModalLabel">{{ __('dashboard.copy_payment_link') }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-3">{{ __('dashboard.tap_and_hold_to_copy') }}</p>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="manualCopyInput" value="${url}" readonly>
+                                <button class="btn btn-primary" type="button" id="manualCopyBtn">
+                                    <i class="fa fa-copy"></i> {{ __('dashboard.copy') }}
+                                </button>
+                            </div>
+                            <small class="text-muted mt-2 d-block">{{ __('dashboard.or_tap_link_to_open') }}</small>
+                            <div class="mt-3">
+                                <a href="${url}" target="_blank" class="btn btn-outline-primary w-100">
+                                    <i class="fa fa-external-link"></i> {{ __('dashboard.open_payment_link') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('manualCopyModal'));
+        modal.show();
+        
+        // Handle manual copy button
+        document.getElementById('manualCopyBtn').addEventListener('click', async function() {
+            const input = document.getElementById('manualCopyInput');
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            // Select the text
+            input.focus();
+            input.select();
+            input.setSelectionRange(0, 99999);
+            
+            // Try to copy
+            const success = await copyToClipboard(url);
+            
+                         if (success) {
+                 button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.copy_success") }}';
+                 button.classList.remove('btn-primary');
+                 button.classList.add('btn-success');
+                 showToast('{{ __("dashboard.payment_link_copied") }}', 'success');
+                 
+                 setTimeout(() => {
+                     modal.hide();
+                 }, 1000);
+             } else {
+                 showToast('{{ __("dashboard.please_copy_manually") }}', 'info');
+             }
+        });
+        
+        // Auto-select text when modal is shown
+        modal._element.addEventListener('shown.bs.modal', function() {
+            const input = document.getElementById('manualCopyInput');
+            setTimeout(() => {
+                input.focus();
+                input.select();
+                input.setSelectionRange(0, 99999);
+            }, 100);
+        });
+        
+        // Clean up when modal is hidden
+        modal._element.addEventListener('hidden.bs.modal', function() {
+            document.getElementById('manualCopyModal').remove();
+        });
+    }
+
     // Show details in modal (client-side only)
     function showDetailsModal(data) {
         console.log('Showing modal with data:', data);
@@ -583,7 +600,194 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
         modal.show();
     }
-    
+
+    // Handle preview icon clicks - show record details (client-side only)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('preview-icon')) {
+            const icon = e.target;
+            
+            // Get data from data attributes
+            const data = {
+                customer_name: icon.getAttribute('data-customer-name'),
+                amount: icon.getAttribute('data-amount'),
+                order_id: icon.getAttribute('data-order-id'),
+                status: icon.getAttribute('data-status'),
+                created_at: icon.getAttribute('data-created-at'),
+                request_id: icon.getAttribute('data-request-id'),
+                checkout_id: icon.getAttribute('data-checkout-id'),
+                checkout_key: icon.getAttribute('data-checkout-key')
+            };
+            
+            // Show modal with the data
+            showDetailsModal(data);
+        }
+    });
+
+    // Handle QR button clicks
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.qr-btn')) {
+            const button = e.target.closest('.qr-btn');
+            const id = button.getAttribute('data-id');
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            
+            try {
+                const response = await fetchAPI(`/payment-links/${id}/qr-code`);
+                
+                if (response.success) {
+                    currentPaymentUrl = response.url;
+                    
+                    if (generateQRCode(response.url, 'qrCodeContainer')) {
+                        document.getElementById('qrLinkBtn').href = response.url;
+                        
+                        const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+                        modal.show();
+                    }
+                                 } else {
+                     showToast(response.message || '{{ __("dashboard.failed_to_load_qr") }}', 'error');
+                 }
+             } catch (error) {
+                 showToast('{{ __("dashboard.failed_to_load_qr") }}', 'error');
+             } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fa fa-qrcode"></i>';
+            }
+        }
+    });
+
+    // Updated Copy button event handler with iPhone-specific handling
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.copy-btn')) {
+            const button = e.target.closest('.copy-btn');
+            const id = button.getAttribute('data-id');
+            const originalText = button.innerHTML;
+            
+            // Change button state immediately
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            
+            try {
+                const response = await fetchAPI(`/payment-links/${id}/copy`);
+                
+                if (response.success) {
+                    const textToCopy = response.url;
+                    
+                    // Special handling for iPhone
+                    if (isIPhone()) {
+                        console.log('iPhone detected, using enhanced copy method');
+                        
+                        // For iPhone, we need to be more aggressive and provide fallback
+                        const copySuccess = await copyToClipboard(textToCopy);
+                        
+                        if (copySuccess) {
+                            showSuccessState(button, originalText);
+                           
+                        } else {
+                            // iPhone fallback: Show a modal with the link for manual copy
+                            showManualCopyModal(textToCopy);
+                            resetButton(button, originalText);
+                        }
+                    } else {
+                        // For other devices, use standard method
+                        const copySuccess = await copyToClipboard(textToCopy);
+                        
+                        if (copySuccess) {
+                            showSuccessState(button, originalText);
+                          
+                                                 } else {
+                             showToast('{{ __("dashboard.failed_to_copy") }}', 'error');
+                             resetButton(button, originalText);
+                         }
+                    }
+                } else {
+                                         showToast(response.message || '{{ __("dashboard.failed_to_get_payment_link") }}', 'error');
+                     resetButton(button, originalText);
+                 }
+             } catch (error) {
+                 console.error('Copy error:', error);
+                 showToast('{{ __("dashboard.failed_to_copy_link") }}', 'error');
+                 resetButton(button, originalText);
+             }
+        }
+    });
+
+    // Handle Resend Email button clicks
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.resend-email-btn')) {
+            const button = e.target.closest('.resend-email-btn');
+            const id = button.getAttribute('data-id');
+            const customerName = button.getAttribute('data-customer-name');
+            
+            // Confirm before sending
+            if (!confirm('{{ __('dashboard.confirm_resend_email') }} ' + customerName + '?')) {
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            
+            try {
+                const response = await fetchAPI(`/payment-links/${id}/resend-email`, {
+                    method: 'POST'
+                });
+                
+                                 if (response.success) {
+                     showToast(response.message || '{{ __("dashboard.email_sent_to_customer") }}', 'success');
+                 } else {
+                     showToast(response.message || '{{ __("dashboard.payment_link_email_resent_error") }}', 'error');
+                 }
+             } catch (error) {
+                 showToast('{{ __("dashboard.payment_link_email_resent_error") }}', 'error');
+             } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fa fa-envelope"></i>';
+            }
+        }
+    });
+
+    // Download QR Code
+    document.getElementById('downloadQrBtn').addEventListener('click', function() {
+        const button = this;
+        const originalText = button.innerHTML;
+        
+                 if (!currentQrCodeDataURL) {
+             showToast('{{ __("dashboard.qr_code_prepare_error") }}', 'error');
+             return;
+         }
+        
+        try {
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Downloading...';
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = currentQrCodeDataURL;
+            downloadLink.download = 'payment-qr-code.png';
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            button.classList.remove('btn-success');
+            button.classList.add('btn-info');
+                         button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.downloaded") }}';
+             
+             showToast('{{ __("dashboard.qr_code_downloaded_success") }}', 'success');
+            
+            setTimeout(function() {
+                button.classList.remove('btn-info');
+                button.classList.add('btn-success');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Download failed:', error);
+            button.disabled = false;
+            button.innerHTML = originalText;
+                         showToast('{{ __("dashboard.failed_to_download_qr") }}', 'error');
+        }
+    });
 });
 </script>
 

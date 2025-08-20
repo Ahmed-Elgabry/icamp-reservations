@@ -109,6 +109,8 @@ return [
     'take_picture' => 'التقاط صورة',
     'The_following_products_contain_less_than_6_of:' => 'المنتجات التالية تحتوي على كميات أقل من 6 : ',
     'open_camera_to_scan_qr' => 'افتح الكاميرا لمسح QR',
+    'copy_for_ios' => 'نسخ رابط الدفع',
+    'ios_copy_instructions' => 'اضغط مطولاً على النص أعلاه، ثم اختر "نسخ" من القائمة التي تظهر.',
 
 
     // v2
@@ -891,7 +893,7 @@ return [
     'view_and_copy' => 'عرض ونسخ',
     'payment_link_copied' => 'تم نسخ رابط الدفع بنجاح!',
     'view_details' => 'عرض التفاصيل',
-    
+
     // QR Code and Download related translations
     'scan_qr_code_to_pay' => 'امسح رمز QR للدفع',
     'qr_code_creation_error' => 'فشل في إنشاء رمز QR',
@@ -900,13 +902,24 @@ return [
     'downloaded' => 'تم التحميل!',
     'qr_code_downloaded_success' => 'تم تحميل رمز QR بنجاح',
     'failed_to_download_qr' => 'فشل في تحميل رمز QR',
-    
+
     // Copy functionality translations
     'copying' => 'جاري النسخ...',
     'copy_success' => 'تم النسخ!',
     'copy_failed_error' => 'فشل في النسخ إلى الحافظة',
     'copy_manually_prompt' => 'يرجى نسخ هذا النص يدوياً:',
     'click_to_copy_link' => 'انقر لنسخ رابط الدفع',
+    'copy_payment_link' => 'نسخ رابط الدفع',
+    'tap_and_hold_to_copy' => 'اضغط واستمر بالضغط على النص أدناه لنسخه:',
+    'copy' => 'نسخ',
+    'or_tap_link_to_open' => 'أو اضغط على الرابط أدناه لفتحه مباشرة:',
+    'open_payment_link' => 'فتح رابط الدفع',
+    'please_copy_manually' => 'يرجى نسخ الرابط يدوياً',
+    'failed_to_load_qr' => 'فشل في تحميل رمز QR',
+    'failed_to_copy' => 'فشل في النسخ إلى الحافظة',
+    'failed_to_get_payment_link' => 'فشل في الحصول على رابط الدفع',
+    'failed_to_copy_link' => 'فشل في نسخ الرابط',
+    'payment_link_copied' => 'تم نسخ رابط الدفع إلى الحافظة!',
 
     // Email-related translations
     'hello' => 'مرحباً',
