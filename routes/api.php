@@ -33,14 +33,13 @@ Route::group([
 
     Route::post('login', [AuthController::class, 'login']);
 
+    // Webhook for Paymennt
+    Route::post('webhook/paymennt', [App\Http\Controllers\WebhookController::class, 'handle']);
+
     Route::group(['middleware' => ['OptionalSanctumMiddleware']], function () {
 
         Route::get('home', [HomeController::class, 'index']);
-
     });
 
-    Route::group(['middleware' => ['auth:sanctum']], function () {
-
-    });
-
+    Route::group(['middleware' => ['auth:sanctum']], function () {});
 });
