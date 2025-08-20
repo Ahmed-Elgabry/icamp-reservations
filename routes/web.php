@@ -18,7 +18,6 @@ use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
-use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -985,16 +984,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     /*------------ start Of webhooks ----------*/
     # webhook for Paymennt
     Route::post('webhook/paymennt', [
-        'uses' => 'WebhookController@handle',
+        'uses' => 'WebhookController@handle',   
         'as' => 'webhook.paymennt'
     ])->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
 
-    # test webhook route
-    Route::get('webhook/test', function () {
-        return response()->json(['message' => 'Webhook route is working!']);
-    })->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
-    /*------------ end Of webhooks ----------*/
-    /*------------ start Of warehouse_sales ----------*/
+
     Route::get('warehouse-sales', [
         'uses' => 'WarehousesalesController@index',
         'as' => 'warehouse_sales.index',
