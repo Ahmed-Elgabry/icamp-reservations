@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\PaymentLink;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class WebhookController extends Controller
 {
@@ -16,7 +17,8 @@ class WebhookController extends Controller
     public function handle(Request $request)
     {
         try {
-            Log::info('Paymennt webhook received', $request->all());
+            $webhookData = $request->all();
+            Log::info('Paymennt webhook received', $webhookData);
 
             // Verify webhook signature (important for security)
             if (!$this->verifyWebhookSignature($request)) {
@@ -24,24 +26,47 @@ class WebhookController extends Controller
                 return response()->json(['error' => 'Invalid signature'], 400);
             }
 
-            $event = $request->input('event');
-            $data = $request->input('data');
+            // Paymennt sends data directly in the request body
+            $data = $webhookData;
+            $status = $data['status'] ?? null;
+            $checkoutId = $data['id'] ?? null;
 
-            switch ($event) {
-                case 'checkout.paid':
+            if (!$checkoutId) {
+                Log::warning('No checkout ID in webhook data', $data);
+                return response()->json(['error' => 'No checkout ID'], 400);
+            }
+
+            if (!$status) {
+                Log::warning('No status in webhook data', $data);
+                return response()->json(['error' => 'No status'], 400);
+            }
+
+            Log::info("Processing webhook for checkout {$checkoutId} with status {$status}");
+
+            switch ($status) {
+                case 'PAID':
                     $this->handlePaymentSuccess($data);
                     break;
 
-                case 'checkout.cancelled':
+                case 'PENDING':
+                    $this->handlePaymentPending($data);
+                    break;
+
+                case 'CANCELLED':
                     $this->handlePaymentCancelled($data);
                     break;
 
-                case 'checkout.expired':
+                case 'EXPIRED':
                     $this->handlePaymentExpired($data);
                     break;
 
+                case 'FAILED':
+                    // Treat failed payments as cancelled since 'failed' status is not supported in the database
+                    $this->handlePaymentCancelled($data);
+                    break;
+
                 default:
-                    Log::info("Unhandled webhook event: {$event}");
+                    Log::info("Unhandled webhook status: {$status}", $data);
             }
 
             return response()->json(['success' => true]);
@@ -78,13 +103,15 @@ class WebhookController extends Controller
             // Update payment status immediately
             $paymentLink->update([
                 'status' => 'paid',
-                'paid_at' => now(),
+                'paid_at' => $data['paidOn'] ? Carbon::parse($data['paidOn']) : now(),
                 'last_status_check' => now()
             ]);
 
             Log::info("Payment {$paymentLink->id} marked as PAID via webhook", [
                 'checkout_id' => $checkoutId,
-                'order_id' => $paymentLink->order_id
+                'order_id' => $paymentLink->order_id ?? 'N/A',
+                'amount' => $data['grandtotal'] ?? 'N/A',
+                'currency' => $data['currency'] ?? 'N/A'
             ]);
 
             // Here you can add additional logic:
@@ -111,7 +138,12 @@ class WebhookController extends Controller
                     'last_status_check' => now()
                 ]);
 
-                Log::info("Payment {$paymentLink->id} marked as CANCELLED via webhook");
+                Log::info("Payment {$paymentLink->id} marked as CANCELLED via webhook", [
+                    'checkout_id' => $checkoutId,
+                    'order_id' => $paymentLink->order_id ?? 'N/A'
+                ]);
+            } else {
+                Log::warning("Payment link not found for cancelled checkout: {$checkoutId}");
             }
         }
     }
@@ -132,7 +164,48 @@ class WebhookController extends Controller
                     'last_status_check' => now()
                 ]);
 
-                Log::info("Payment {$paymentLink->id} marked as EXPIRED via webhook");
+                Log::info("Payment {$paymentLink->id} marked as EXPIRED via webhook", [
+                    'checkout_id' => $checkoutId,
+                    'order_id' => $paymentLink->order_id ?? 'N/A'
+                ]);
+            } else {
+                Log::warning("Payment link not found for expired checkout: {$checkoutId}");
+            }
+        }
+    }
+
+
+
+    /**
+     * Handle pending payment
+     */
+    protected function handlePaymentPending($data)
+    {
+        $checkoutId = $data['id'] ?? null;
+
+        if ($checkoutId) {
+            $paymentLink = PaymentLink::where('checkout_id', $checkoutId)->first();
+
+            if ($paymentLink) {
+                $paymentLink->update([
+                    'status' => 'pending',
+                    'last_status_check' => now()
+                ]);
+
+                Log::info("Payment {$paymentLink->id} marked as PENDING via webhook", [
+                    'checkout_id' => $checkoutId,
+                    'order_id' => $paymentLink->order_id ?? 'N/A',
+                    'amount' => $data['grandtotal'] ?? 'N/A',
+                    'currency' => $data['currency'] ?? 'N/A',
+                    'customer_email' => $data['customerEmail'] ?? 'N/A',
+                    'customer_name' => ($data['customerFirstName'] ?? '') . ' ' . ($data['customerLastName'] ?? '')
+                ]);
+            } else {
+                Log::warning("Payment link not found for pending checkout: {$checkoutId}", [
+                    'checkout_id' => $checkoutId,
+                    'reference_id' => $data['referenceId'] ?? 'N/A',
+                    'order_id' => $data['orderId'] ?? 'N/A'
+                ]);
             }
         }
     }

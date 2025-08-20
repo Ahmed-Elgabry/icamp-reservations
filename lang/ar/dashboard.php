@@ -851,7 +851,7 @@ return [
     'payment_link_qr_code_placeholder' => 'سيتم إنشاء رمز QR هنا',
     'copy_link' => 'نسخ الرابط',
     'open_payment_link' => 'فتح رابط الدفع',
-    'back_to_order' => 'العودة للطلب',
+    'back_to_order' => 'العودة لبيانات الحجز',
     'back_to_list' => 'العودة للقائمة',
     'view' => 'عرض',
     'edit' => 'تعديل',
