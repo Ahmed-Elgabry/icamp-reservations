@@ -426,7 +426,7 @@ class PaymentLinkController extends Controller
         return response()->json([
             'success' => true,
             'url' => $paymentLink->payment_url,
-            'message' => __('dashboard.payment_link_copy_success')
+           
         ]);
     }
 
