@@ -16,7 +16,7 @@
                                 <a href="{{ route('home') }}">{{ __('dashboard.home') }}</a>
                             </li>
                             <li class="breadcrumb-item">
-                                <a href="{{ route('payment-links.index') }}">{{ __('dashboard.payment-links') }}</a>
+                                <a href="{{ route('payment-links.index', ['order_id' => $order->id]) }}">{{ __('dashboard.payment-links') }}</a>
                             </li>
                             <li class="breadcrumb-item active">{{ __('dashboard.payment_link_created') }}</li>
                         </ol>

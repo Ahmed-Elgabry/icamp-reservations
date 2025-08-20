@@ -27,7 +27,7 @@ return [
     'confiscation_note' => 'Confiscation Note',
     'confiscated_full' => 'Full Confiscation',
     'order_details' => 'Order Details',
-    'order_id' => 'Order ID',
+    'order_id' => 'Reservation Id',
     'order_date_rev' => 'Order Date',
     'confiscated_partial' => 'Partial Confiscation',
     'confiscation_details' => 'Confiscation Details',

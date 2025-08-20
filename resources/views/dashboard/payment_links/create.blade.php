@@ -15,9 +15,7 @@
                             <li class="breadcrumb-item">
                                 <a href="{{ route('home') }}">{{ __('dashboard.home') }}</a>
                             </li>
-                            <li class="breadcrumb-item">
-                                <a href="{{ route('payment-links.index') }}">{{ __('dashboard.payment-links') }}</a>
-                            </li>
+                         
                             <li class="breadcrumb-item active">{{ __('dashboard.create_payment_link') }}</li>
                         </ol>
                     </nav>

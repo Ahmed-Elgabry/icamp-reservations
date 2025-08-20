@@ -57,7 +57,7 @@ class PaymenntService
 
             $payload = [
                 'requestId' => $data['request_id'] ?? uniqid('PAY-'),
-                'orderId' => $data['order_id'] ?? uniqid('ORD-'),
+                'orderId' => 'funcamp_'.$data['order_id'] ?? uniqid('funcamp-'),
                 'description' => $data['description'] ?? 'Payment Link',
                 'currency' => $data['currency'] ?? 'AED',
                 'amount' => $data['amount'],
