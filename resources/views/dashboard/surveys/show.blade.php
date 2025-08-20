@@ -231,6 +231,189 @@
         </form>
     </div>
 </div>
+
+
+
+<!-- Add this script before the closing </body> tag in your HTML -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Get all required fields
+            const requiredFields = form.querySelectorAll('[required]');
+            let firstEmptyField = null;
+
+            // Check each required field
+            for (let field of requiredFields) {
+                let isEmpty = false;
+
+                // Check different input types
+                if (field.type === 'radio') {
+                    // For radio buttons, check if any option in the group is selected
+                    const radioGroup = form.querySelectorAll(`[name="${field.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!isChecked) {
+                        isEmpty = true;
+                        // For radio groups, we want to focus on the first radio button
+                        if (!firstEmptyField) {
+                            firstEmptyField = radioGroup[0];
+                        }
+                    }
+                } else if (field.type === 'checkbox') {
+                    // For checkboxes, check if at least one is selected (if it's a group)
+                    if (field.name.includes('[]')) {
+                        const checkboxGroup = form.querySelectorAll(`[name="${field.name}"]`);
+                        const isChecked = Array.from(checkboxGroup).some(checkbox => checkbox.checked);
+                        if (!isChecked) {
+                            isEmpty = true;
+                            if (!firstEmptyField) {
+                                firstEmptyField = checkboxGroup[0];
+                            }
+                        }
+                    } else {
+                        if (!field.checked) {
+                            isEmpty = true;
+                            if (!firstEmptyField) {
+                                firstEmptyField = field;
+                            }
+                        }
+                    }
+                } else {
+                    // For text inputs, textareas, selects, etc.
+                    if (!field.value.trim()) {
+                        isEmpty = true;
+                        if (!firstEmptyField) {
+                            firstEmptyField = field;
+                        }
+                    }
+                }
+
+                // Add visual feedback for empty required fields
+                if (isEmpty) {
+                    // Add red border to indicate missing required field
+                    field.style.borderColor = '#dc3545';
+                    field.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+
+                    // For radio and checkbox groups, highlight the container
+                    if (field.type === 'radio' || field.type === 'checkbox') {
+                        const container = field.closest('.rating-form-group');
+                        if (container) {
+                            container.style.borderLeft = '3px solid #dc3545';
+                            container.style.paddingLeft = '15px';
+                            container.style.backgroundColor = 'rgba(220, 53, 69, 0.05)';
+                        }
+                    }
+                } else {
+                    // Remove error styling if field is now valid
+                    field.style.borderColor = '';
+                    field.style.boxShadow = '';
+
+                    if (field.type === 'radio' || field.type === 'checkbox') {
+                        const container = field.closest('.rating-form-group');
+                        if (container) {
+                            container.style.borderLeft = '';
+                            container.style.paddingLeft = '';
+                            container.style.backgroundColor = '';
+                        }
+                    }
+                }
+            }
+
+            // If there's an empty required field, prevent submission and scroll to it
+            if (firstEmptyField) {
+                e.preventDefault(); // Prevent form submission
+
+                // Scroll to the first empty field with smooth animation
+                firstEmptyField.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                // Focus the field after scrolling
+                setTimeout(() => {
+                    firstEmptyField.focus();
+
+                    // Show a user-friendly message
+                    showValidationMessage('يرجى ملء جميع الحقول المطلوبة المميزة بـ *', 'error');
+                }, 500);
+
+                return false;
+            }
+        });
+
+        // Clear error styling when user starts typing/selecting
+        form.addEventListener('input', function(e) {
+            const field = e.target;
+            if (field.hasAttribute('required')) {
+                // Remove error styling
+                field.style.borderColor = '';
+                field.style.boxShadow = '';
+
+                if (field.type === 'radio' || field.type === 'checkbox') {
+                    const container = field.closest('.rating-form-group');
+                    if (container) {
+                        container.style.borderLeft = '';
+                        container.style.paddingLeft = '';
+                        container.style.backgroundColor = '';
+                    }
+                }
+            }
+        });
+
+        // Handle change events for radio buttons and checkboxes
+        form.addEventListener('change', function(e) {
+            const field = e.target;
+            if (field.hasAttribute('required')) {
+                // Remove error styling
+                field.style.borderColor = '';
+                field.style.boxShadow = '';
+
+                if (field.type === 'radio' || field.type === 'checkbox') {
+                    const container = field.closest('.rating-form-group');
+                    if (container) {
+                        container.style.borderLeft = '';
+                        container.style.paddingLeft = '';
+                        container.style.backgroundColor = '';
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Function to show validation messages
+function showValidationMessage(message, type = 'error') {
+    // Remove any existing message
+    const existingMessage = document.querySelector('.validation-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+
+    // Create new message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `alert validation-message ${type === 'error' ? 'alert-error' : 'alert-success'}`;
+    messageDiv.textContent = message;
+    messageDiv.style.position = 'fixed';
+    messageDiv.style.top = '20px';
+    messageDiv.style.left = '50%';
+    messageDiv.style.transform = 'translateX(-50%)';
+    messageDiv.style.zIndex = '9999';
+    messageDiv.style.minWidth = '300px';
+    messageDiv.style.textAlign = 'center';
+
+    // Add to page
+    document.body.appendChild(messageDiv);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        if (messageDiv) {
+            messageDiv.remove();
+        }
+    }, 3000);
+}
+</script>
 </body>
 </html>
 
