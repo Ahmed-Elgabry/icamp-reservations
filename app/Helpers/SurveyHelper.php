@@ -33,16 +33,15 @@ class SurveyHelper
         if (isset($question['hidden']) && $question['hidden']) {
             return '';
         }
-        $type = $question['question_type'];
-        // $label = $question['question_text'];
-        // $placeholder = $question['placeholder'];
-        $options = $question['options'];
-        $settings = $question['settings'];
+
         $type = $question['question_type'];
         $label = self::getLocalizedText($question['question_text']);
         $placeholder = self::getLocalizedText($question['placeholder']);
         $options = $question['options'];
         $settings = $question['settings'];
+        $required = isset($settings['required']) && $settings['required'] ? ' required' : '';
+        $requiredLabel = isset($settings['required']) && $settings['required'] ? ' *' : '';
+
         switch($type) {
             case "text":
             case "email":
@@ -50,13 +49,13 @@ class SurveyHelper
             case "url":
             case "number":
                 return '
-                    <label class="form-label">' . $label . '</label>
-                    <input type="' . $type . '" class="form-control" placeholder="' . $placeholder . '" disabled>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
+                    <input type="' . $type . '" class="form-control" placeholder="' . $placeholder . '" disabled ' . $required . '>
                 ';
             case "textarea":
                 return '
-                    <label class="form-label">' . $label . '</label>
-                    <textarea class="form-control" rows="3" placeholder="' . $placeholder . '" disabled></textarea>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
+                    <textarea class="form-control" rows="3" placeholder="' . $placeholder . '" disabled ' . $required . '></textarea>
                 ';
             case "select":
                 $selectOptions = '';
@@ -67,8 +66,8 @@ class SurveyHelper
                     }
                 }
                 return '
-                    <label class="form-label">' . $label . '</label>
-                    <select class="form-select" disabled>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
+                    <select class="form-select" disabled ' . $required . '>
                         <option value="">' . (App::getLocale() === 'ar' ? 'حدد خيارًا...' : 'Select an option...') . '</option>
                         ' . $selectOptions . '
                     </select>
@@ -78,9 +77,10 @@ class SurveyHelper
                 if ($options) {
                     foreach ($options as $index => $option) {
                         $optionLabel = self::getLocalizedText($option['label'] ?? $option);
+                        $isRequired = ($index === 0 && $required) ? ' required' : '';
                         $radioOptions .= '
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="field_' . $question['id'] . '" id="field_' . $question['id'] . '_' . $index . '" value="' . $option['value'] . '"  disabled>
+                                <input class="form-check-input" type="radio" name="field_' . $question['id'] . '" id="field_' . $question['id'] . '_' . $index . '" value="' . $option['value'] . '"  disabled ' . $isRequired . '>
                                 <label class="form-check-label" for="field_' . $question['id'] . '_' . $index . '">
                                     ' . $optionLabel . '
                                 </label>
@@ -89,7 +89,7 @@ class SurveyHelper
                     }
                 }
                 return '
-                    <label class="form-label">' . $label . '</label>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
                     <div class="' . (App::getLocale() == 'ar' ? 'rating-scale-ar' : '') . '">
                         ' . $radioOptions . '
                     </div>
@@ -110,34 +110,35 @@ class SurveyHelper
                     }
                 }
                 return '
-                    <label class="form-label">' . $label . '</label>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
                     <div class="' . (App::getLocale() == 'ar' ? 'rating-scale-ar' : '') . '">
                         ' . $checkboxOptions . '
                     </div>
                 ';
             case "date":
                 return '
-                    <label class="form-label">' . $label . '</label>
-                    <input type="date" class="form-control" disabled>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
+                    <input type="date" class="form-control" disabled ' . $required . '>
                 ';
             case "datetime":
                 return '
-                    <label class="form-label">' . $label . '</label>
-                    <input type="datetime-local" class="form-control" disabled>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
+                    <input type="datetime-local" class="form-control" disabled ' . $required . '>
                 ';
             case "stars":
                 $points = $settings['points'] ?? 5;
                 $stars = '';
                 // Generate stars in reverse order (5 to 1) for proper RTL display
                 for ($i = $points; $i >= 1; $i--) {
+                    $isRequired = ($i === $points && $required) ? ' required' : '';
                     $stars .= '
-                        <input type="radio" id="field_' . $question['id'] . '_' . $i . '" name="field_' . $question['id'] . '" value="' . $i . '" disabled>
+                        <input type="radio" id="field_' . $question['id'] . '_' . $i . '" name="field_' . $question['id'] . '" value="' . $i . '" disabled ' . $isRequired . '>
                         <label for="field_' . $question['id'] . '_' . $i . '">★</label>
                     ';
                 }
                 return '
                     <div class="rating-form-group">
-                        <label class="rating-form-label">' . $label . '</label>
+                        <label class="rating-form-label">' . $label . $requiredLabel . '</label>
                         <div class="rating-form-stars">
                             ' . $stars . '
                         </div>
@@ -147,9 +148,10 @@ class SurveyHelper
                 $points = $settings['points'] ?? 5;
                 $ratingOptions = '';
                 for ($i = 1; $i <= $points; $i++) {
+                    $isRequired = ($i === 1 && $required) ? ' required' : '';
                     $ratingOptions .= '
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="field_' . $question['id'] . '" id="field_' . $question['id'] . '_' . $i . '" value="' . $i . '"  disabled>
+                            <input class="form-check-input" type="radio" name="field_' . $question['id'] . '" id="field_' . $question['id'] . '_' . $i . '" value="' . $i . '"  disabled ' . $isRequired . '>
                             <label class="form-check-label" for="field_' . $question['id'] . '_' . $i . '">
                                 ' . $i . '
                             </label>
@@ -157,7 +159,7 @@ class SurveyHelper
                     ';
                 }
                 return '
-                    <label class="form-label">' . $label . '</label>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
                     <div class="rating-scale ' . (App::getLocale() == 'ar' ? 'rating-scale-ar' : '') . '">
                         <div class="row">
                             ' . $ratingOptions . '
@@ -166,8 +168,8 @@ class SurveyHelper
                 ';
             default:
                 return '
-                    <label class="form-label">' . $label . '</label>
-                    <input type="text" class="form-control" placeholder="' . $placeholder . '" disabled>
+                    <label class="form-label">' . $label . $requiredLabel . '</label>
+                    <input type="text" class="form-control" placeholder="' . $placeholder . '" disabled ' . $required . '>
                 ';
         }
     }
@@ -181,12 +183,13 @@ class SurveyHelper
     public static function generatePreviewHtml($question)
     {
         $type = $question['question_type'];
-        // $label = $question['question_text'];
-        // $placeholder = $question['placeholder'] ?? '';
-        $options = $question['options'] ?? [];
-        $settings = $question['settings'] ?? [];
         $label = self::getLocalizedText($question['question_text']);
         $placeholder = self::getLocalizedText($question['placeholder'] ?? '');
+        $options = $question['options'] ?? [];
+        $settings = $question['settings'] ?? [];
+        $required = isset($settings['required']) && $settings['required'] ? ' required' : '';
+        $requiredLabel = isset($settings['required']) && $settings['required'] ? ' *' : '';
+
         $html = '<div class="mb-4 ' . ($settings['width'] ?? 'col-12') . '">';
 
         switch($type) {
@@ -197,21 +200,19 @@ class SurveyHelper
             case "number":
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
-                    <input type="' . $type . '" class="rating-form-input" placeholder="' . $placeholder . '" name="question_' . $question['id'] . '" >
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
+                    <input type="' . $type . '" class="rating-form-input" placeholder="' . $placeholder . '" name="question_' . $question['id'] . '" ' . $required . '>
                 </div>
                     ';
                 break;
-
             case "textarea":
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
-                    <textarea class="rating-form-textarea" rows="3" placeholder="' . $placeholder . '" name="question_' . $question['id'] . '" ></textarea>
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
+                    <textarea class="rating-form-textarea" rows="3" placeholder="' . $placeholder . '" name="question_' . $question['id'] . '" ' . $required . '></textarea>
                 </div>
                 ';
                 break;
-
             case "select":
                 $selectOptions = '';
                 if ($options) {
@@ -222,23 +223,23 @@ class SurveyHelper
                 }
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
-                    <select class="form-select" name="question_' . $question['id'] . '" >
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
+                    <select class="form-select" name="question_' . $question['id'] . '" ' . $required . '>
                         <option value="">' . (App::getLocale() === 'ar' ? 'حدد خيارًا...' : 'Select an option...') . '</option>
                         ' . $selectOptions . '
                     </select>
                 </div>
                 ';
                 break;
-
             case "radio":
                 $radioOptions = '';
                 if ($options) {
                     foreach ($options as $index => $option) {
                         $optionLabel = self::getLocalizedText($option['label'] ?? $option);
+                        $isRequired = ($index === 0 && $required) ? ' required' : '';
                         $radioOptions .= '
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="question_' . $question['id'] . '" id="question_' . $question['id'] . '_' . $index . '" value="' . $option['value'] . '" >
+                                <input class="form-check-input" type="radio" name="question_' . $question['id'] . '" id="question_' . $question['id'] . '_' . $index . '" value="' . $option['value'] . '" ' . $isRequired . '>
                                 <label class="form-check-label" for="question_' . $question['id'] . '_' . $index . '">
                                     ' . $optionLabel . '
                                 </label>
@@ -248,14 +249,13 @@ class SurveyHelper
                 }
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
                     <div class="' . (App::getLocale() == 'ar' ? 'rating-scale-ar' : '') . '">
                         ' . $radioOptions . '
                     </div>
                 </div>
                 ';
                 break;
-
             case "checkbox":
                 $checkboxOptions = '';
                 if ($options) {
@@ -273,58 +273,57 @@ class SurveyHelper
                 }
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
                     <div class="' . (App::getLocale() == 'ar' ? 'rating-scale-ar' : '') . '">
                         ' . $checkboxOptions . '
                     </div>
                 </div>
                 ';
                 break;
-
             case "date":
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
-                    <input type="date" class="rating-form-input" name="question_' . $question['id'] . '" >
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
+                    <input type="date" class="rating-form-input" name="question_' . $question['id'] . '" ' . $required . '>
                 </div>
                 ';
                 break;
-
             case "datetime":
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
-                    <input type="datetime-local" class="rating-form-input" name="question_' . $question['id'] . '" >
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
+                    <input type="datetime-local" class="rating-form-input" name="question_' . $question['id'] . '" ' . $required . '>
                 </div>
                 ';
                 break;
-
             case "stars":
                 $points = $settings['points'] ?? 5;
                 $stars = '';
                 // Generate stars in reverse order (5 to 1) for proper RTL display
                 for ($i = $points; $i >= 1; $i--) {
+                    $isRequired = ($i === $points && $required) ? ' required' : '';
                     $stars .= '
-                        <input type="radio" id="field_' . $question['id'] . '_' . $i . '" name="field_' . $question['id'] . '" value="' . $i . '">
+                        <input type="radio" id="field_' . $question['id'] . '_' . $i . '" name="question_' . $question['id'] . '" value="' . $i . '" ' . $isRequired . '>
                         <label for="field_' . $question['id'] . '_' . $i . '">★</label>
                     ';
                 }
-                return '
+                $html .= '
                     <div class="rating-form-group">
-                        <label class="rating-form-label">' . $label . '</label>
+                        <label class="rating-form-label">' . $label . $requiredLabel . '</label>
                         <div class="rating-form-stars">
                             ' . $stars . '
                         </div>
                     </div>
                 ';
-
+                break;
             case "rating":
                 $points = $settings['points'] ?? 5;
                 $ratingOptions = '';
                 for ($i = 1; $i <= $points; $i++) {
+                    $isRequired = ($i === 1 && $required) ? ' required' : '';
                     $ratingOptions .= '
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="question_' . $question['id'] . '" id="question_' . $question['id'] . '_' . $i . '" value="' . $i . '" >
+                            <input class="form-check-input" type="radio" name="question_' . $question['id'] . '" id="question_' . $question['id'] . '_' . $i . '" value="' . $i . '" ' . $isRequired . '>
                             <label class="form-check-label" for="question_' . $question['id'] . '_' . $i . '">
                                 ' . $i . '
                             </label>
@@ -333,7 +332,7 @@ class SurveyHelper
                 }
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
                     <div class="rating-scale ' . (App::getLocale() == 'ar' ? 'rating-scale-ar' : '') . '">
                         <div class="row">
                             ' . $ratingOptions . '
@@ -342,12 +341,11 @@ class SurveyHelper
                 </div>
                 ';
                 break;
-
             default:
                 $html .= '
                 <div class="rating-form-group">
-                    <label class="rating-form-label">' . $label . '</label>
-                    <input type="text" class="form-control" placeholder="' . $placeholder . '" name="question_' . $question['id'] . '" >
+                    <label class="rating-form-label">' . $label . $requiredLabel . '</label>
+                    <input type="text" class="form-control" placeholder="' . $placeholder . '" name="question_' . $question['id'] . '" ' . $required . '>
                 </div>
                 ';
         }
@@ -355,6 +353,7 @@ class SurveyHelper
         $html .= '</div>';
         return $html;
     }
+
 
     /**
      * Get question type name in Arabic

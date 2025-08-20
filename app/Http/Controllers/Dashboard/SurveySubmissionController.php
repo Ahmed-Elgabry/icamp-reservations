@@ -21,7 +21,49 @@ class SurveySubmissionController extends Controller
     {
         // Validate required questions
         $rules = [];
-        $validated = $request->validate($rules);
+        $messages = [];
+
+        foreach ($survey->questions as $question) {
+            if (isset($question->settings['required']) && $question->settings['required']) {
+                $fieldName = "question_{$question->id}";
+
+                // Different validation rules based on question type
+                switch ($question->question_type) {
+                    case 'text':
+                    case 'textarea':
+                    case 'email':
+                    case 'tel':
+                    case 'url':
+                    case 'number':
+                    case 'date':
+                    case 'datetime':
+                        $rules[$fieldName] = 'required';
+                        $messages["{$fieldName}.required"] = 'This field is required.';
+                        break;
+
+                    case 'select':
+                    case 'radio':
+                    case 'stars':
+                    case 'rating':
+                        $rules[$fieldName] = 'required';
+                        $messages["{$fieldName}.required"] = 'Please select an option.';
+                        break;
+
+                    case 'checkbox':
+                        $rules["{$fieldName}.*"] = 'required';
+                        $messages["{$fieldName}.*.required"] = 'Please select at least one option.';
+                        break;
+                }
+            }
+        }
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         // Create survey response
         $response = SurveyResponse::create([

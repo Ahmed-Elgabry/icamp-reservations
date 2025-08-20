@@ -1387,6 +1387,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('surveys/statistics', [SurveyController::class, 'statistics'])->name('surveys.statistics')->middleware(['auth']);
     Route::get('surveys/settings', [SurveyController::class, 'settings'])->name('surveys.settings')->middleware(['auth']);
     Route::put('surveys/{survey}/settings', [SurveyController::class, 'updateSettings'])->name('surveys.settings.update')->middleware(['auth']);
+    Route::get('surveys/demo', [SurveyController::class, 'demo'])->name('surveys.demo');
 });
 
 // Public survey route

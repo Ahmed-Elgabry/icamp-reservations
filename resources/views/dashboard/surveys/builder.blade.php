@@ -151,6 +151,20 @@
             margin-bottom: 0.25rem;
         }
     </style>
+
+    @if (app()->getLocale() == 'ar')
+        <style>
+            .rating-form-stars {
+                direction: ltr;
+            }
+        </style>
+    @else
+        <style>
+            .rating-form-stars {
+                direction: rtl;
+            }
+        </style>
+    @endif
 </head>
 <body>
 
@@ -222,9 +236,9 @@
                     <input type="text" class="form-control form-control-lg border-0 fw-bold" id="surveyTitle" value="{{ $survey['title'] ?? 'استبيان جديد' }}">
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-secondary" id="previewBtn">
+                    <a href="{{ route('surveys.demo') }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                         <i class="mdi mdi-open-in-new me-1"></i> مشاهدة
-                    </button>
+                    </a>
                     <a href="{{ url('/') }}" class="btn btn-sm btn-outline-secondary">
                         <i class="mdi mdi-home-outline me-1"></i> الرئيسية
                     </a>
@@ -269,7 +283,7 @@
             </div>
         </div>
         <!-- Right Sidebar - Question Properties -->
-        <div class="col-md-3 p-3">
+        <div class="col-md-3 p-3" style="height: 100vh; overflow-y: auto;">
             <div class="properties-panel">
                 <div class="p-3 border-bottom">
                     <h5 class="mb-1">خصائص السؤال</h5>
@@ -315,6 +329,15 @@
                             </div>
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">هل الحقل مطلوب؟</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="fieldRequired">
+                            <label class="form-check-label" for="fieldRequired">
+                                مطلوب
+                            </label>
+                        </div>
+                    </div>
                     <!-- Options Editor (for select, radio, checkbox) -->
                     <div id="optionsEditor" class="mb-3" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -343,10 +366,7 @@
         </div>
     </div>
 </div>
-<!-- Preview Button -->
-<button class="btn btn-primary preview-btn" id="previewFormBtn">
-    <i class="mdi mdi-open-in-new mdi-24px"></i>
-</button>
+
 <!-- Hidden fields for survey data -->
 <input type="hidden" id="surveyId" value="{{ $survey['id'] ?? '' }}">
 <input type="hidden" id="surveyData" value='{!! isset($survey) ? json_encode($survey) : '{}' !!}'>
@@ -510,6 +530,8 @@ function renderField(fieldData) {
                 const { type, label, placeholder, options, settings } = fieldData;
                 const currentLocale = '{{ app()->getLocale() }}';
                 const currentLang = currentLocale === 'ar' ? 'ar' : 'en';
+                const required = settings.required ? ' required' : '';
+                const requiredLabel = settings.required ? ' *' : '';
 
                 switch(type) {
                     case "text":
@@ -518,36 +540,39 @@ function renderField(fieldData) {
                     case "url":
                     case "number":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <input type="${type}" class="form-control" placeholder="${placeholder[currentLang]}" disabled>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="${type}" class="form-control" placeholder="${placeholder[currentLang]}" disabled${required}>
                         `;
                     case "textarea":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <textarea class="form-control" rows="3" placeholder="${placeholder[currentLang]}" disabled></textarea>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
+                            <textarea class="form-control" rows="3" placeholder="${placeholder[currentLang]}" disabled${required}></textarea>
                         `;
                     case "select":
                         let selectOptions = options.map(opt =>
                             `<option value="${opt.value}">${opt.label[currentLang]}</option>`
                         ).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <select class="form-select" disabled>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
+                            <select class="form-select" disabled${required}>
                                 <option value="">${currentLang === 'ar' ? 'حدد خيارًا...' : 'Select an option...'}</option>
                                 ${selectOptions}
                             </select>
                         `;
                     case "radio":
-                        let radioOptions = options.map((opt, index) => `
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="${fieldData.id}" id="${fieldData.id}_${index}" value="${opt.value}" disabled>
-                                <label class="form-check-label" for="${fieldData.id}_${index}">
-                                    ${opt.label[currentLang]}
-                                </label>
-                            </div>
-                        `).join('');
+                        let radioOptions = options.map((opt, index) => {
+                            const isRequired = (index === 0 && required) ? ' required' : '';
+                            return `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="${fieldData.id}" id="${fieldData.id}_${index}" value="${opt.value}" disabled ${isRequired}>
+                                    <label class="form-check-label" for="${fieldData.id}_${index}">
+                                        ${opt.label[currentLang]}
+                                    </label>
+                                </div>
+                            `;
+                        }).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
                             <div>
                                 ${radioOptions}
                             </div>
@@ -562,48 +587,52 @@ function renderField(fieldData) {
                             </div>
                         `).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
                             <div>
                                 ${checkboxOptions}
                             </div>
                         `;
                     case "date":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <input type="date" class="form-control" disabled>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="date" class="form-control" disabled${required}>
                         `;
                     case "datetime":
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <input type="datetime-local" class="form-control" disabled>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="datetime-local" class="form-control" disabled${required}>
                         `;
                     case "stars":
                         const ratingPoints = settings.points || 5;
                         let ratingStars = '';
                         for (let i = ratingPoints; i >= 1; i--) {
+                            const isRequired = (i === ratingPoints && required) ? ' required' : '';
                             ratingStars += `
-                                <input type="radio" id="${fieldData.id}_${i}" name="${fieldData.id}" value="${i}" disabled>
+                                <input type="radio" id="${fieldData.id}_${i}" name="${fieldData.id}" value="${i}" disabled${isRequired}>
                                 <label for="${fieldData.id}_${i}">★</label>
                             `;
                         }
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
                             <div class="rating-form-stars">
                                 ${ratingStars}
                             </div>
                         `;
                     case "rating":
                         const ratingValues = Array.from({length: settings.points || 5}, (_, i) => i + 1);
-                        let ratingOptions = ratingValues.map(value => `
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="${fieldData.id}" id="${fieldData.id}_${value}" value="${value}" disabled>
-                                <label class="form-check-label" for="${fieldData.id}_${value}">
-                                    ${value}
-                                </label>
-                            </div>
-                        `).join('');
+                        let ratingOptions = ratingValues.map(value => {
+                            const isRequired = (value === 1 && required) ? ' required' : '';
+                            return `
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="${fieldData.id}" id="${fieldData.id}_${value}" value="${value}" disabled ${isRequired}>
+                                    <label class="form-check-label" for="${fieldData.id}_${value}">
+                                        ${value}
+                                    </label>
+                                </div>
+                            `;
+                        }).join('');
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
                             <div class="rating-scale {{ app()->getLocale() == "ar" ? "rating-scale-ar" : "" }}">
                                 <div class="row">
                                     ${ratingOptions}
@@ -612,8 +641,8 @@ function renderField(fieldData) {
                         `;
                     default:
                         return `
-                            <label class="form-label">${label[currentLang]} </label>
-                            <input type="text" class="form-control" placeholder="${placeholder[currentLang]}" disabled>
+                            <label class="form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="text" class="form-control" placeholder="${placeholder[currentLang]}" disabled${required}>
                         `;
                 }
             }
@@ -692,6 +721,7 @@ function renderField(fieldData) {
                 $("#fieldPlaceholderEn").val(fieldData.placeholder.en || "");
                 $("#fieldHelpTextAr").val(fieldData.helpText ? fieldData.helpText.ar || "" : "");
                 $("#fieldHelpTextEn").val(fieldData.helpText ? fieldData.helpText.en || "" : "");
+                $("#fieldRequired").prop('checked', fieldData.settings.required || false);
 
                 // Show/hide options editor based on field type
                 if (fieldData.type === 'select' || fieldData.type === 'radio' || fieldData.type === 'checkbox') {
@@ -830,6 +860,25 @@ function renderField(fieldData) {
                 if (!fieldData || !fieldData.settings) return;
 
                 fieldData.settings.points = parseInt($("#ratingPoints").val()) || 5;
+
+                // Update field HTML
+                $(`#${selectedField} .field-content`).html(generateFieldHtml(fieldData));
+
+                // Mark as unsaved
+                $(".unsaved-indicator").addClass("bg-warning").removeClass("bg-success");
+            });
+
+            $("#fieldRequired").on("change", function() {
+                if (!selectedField) return;
+                const fieldData = surveyData.fields.find(field => field.id === selectedField);
+                if (!fieldData) return;
+
+                // Initialize settings if it doesn't exist
+                if (!fieldData.settings) {
+                    fieldData.settings = {};
+                }
+
+                fieldData.settings.required = $(this).prop('checked');
 
                 // Update field HTML
                 $(`#${selectedField} .field-content`).html(generateFieldHtml(fieldData));
@@ -1045,6 +1094,7 @@ function renderField(fieldData) {
                 }).get());
                 console.log("================================");
             }
+
 function updateFieldOrder() {
     const fieldOrder = [];
     $("#formFields .form-field").each(function() {
@@ -1143,205 +1193,13 @@ function updateFieldOrder() {
                 });
             });
 
-            // Preview survey
-            $("#previewBtn, #previewFormBtn").on("click", function() {
-                // Generate preview HTML
-                let previewHtml = `
-                    <div class="container mt-4">
-                        <h2 class="mb-4">${surveyData.title}</h2>
-                        <form id="previewForm">
-                `;
-                surveyData.fields.forEach(field => {
-                    previewHtml += `
-                        <div class="mb-3 ${field.width}">
-                            ${generatePreviewFieldHtml(field)}
-                        </div>
-                    `;
-                });
-                previewHtml += `
-                            <button type="submit" class="btn btn-primary">إرسال</button>
-                        </form>
-                    </div>
-                `;
-
-                // Open preview in new window
-                const previewWindow = window.open("", "_blank");
-                previewWindow.document.open();
-                previewWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html lang="ar" dir="rtl">
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>معاينة الاستبيان</title>
-                            <link rel="preconnect" href="https://fonts.googleapis.com">
-                            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
-                            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-                            <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
-                            <style>
-                                body {
-                                    font-family: "Cairo", sans-serif;
-                                    background-color: #f2f2f2;
-                                    margin: 0;
-                                    padding: 0;
-                                }
-                                .rating-form-container {
-                                    max-width: 600px;
-                                    margin: 80px auto;
-                                    padding: 20px;
-                                    background-color: #ffffff;
-                                    border-radius: 8px;
-                                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                                }
-                                .order-details {
-                                    padding: 20px;
-                                    background-color: #f9f9f9;
-                                    border-radius: 8px;
-                                    margin-bottom: 20px;
-                                }
-                                .order-details h2 {
-                                    margin-top: 0;
-                                    color: #333;
-                                }
-                                .order-details p {
-                                    margin: 5px 0;
-                                    color: #666;
-                                }
-                                .rating-form-header {
-                                    background-color: #007bff;
-                                    color: #fff;
-                                    padding: 15px;
-                                    border-radius: 8px 8px 0 0;
-                                    text-align: center;
-                                    font-size: 24px;
-                                }
-                                .rating-form-body {
-                                    padding: 20px;
-                                }
-                                .rating-form-footer {
-                                    text-align: center;
-                                    padding: 10px;
-                                }
-                                .rating-form-group {
-                                    margin-bottom: 15px;
-                                }
-                                .rating-form-label {
-                                    display: block;
-                                    font-weight: bold;
-                                    margin-bottom: 5px;
-                                    font-size: 18px;
-                                }
-                                .rating-form-input,
-                                .rating-form-textarea {
-                                    width: 100%;
-                                    padding: 10px;
-                                    border: 1px solid #ced4da;
-                                    border-radius: 4px;
-                                    box-sizing: border-box;
-                                    font-size: 16px;
-                                }
-                                .rating-form-textarea {
-                                    height: 100px;
-                                    resize: vertical;
-                                }
-                                .rating-form-submit {
-                                    background-color: #28a745;
-                                    color: #fff;
-                                    border: none;
-                                    padding: 10px 20px;
-                                    border-radius: 4px;
-                                    cursor: pointer;
-                                    font-size: 16px;
-                                    transition: background-color 0.3s ease;
-                                }
-                                .rating-form-submit:hover {
-                                    background-color: #218838;
-                                }
-                                .rating-form-stars {
-                                    display: flex;
-                                    justify-content: space-between;
-                                    max-width: 200px;
-                                    margin: 0 auto 20px;
-                                }
-                                .rating-form-stars input {
-                                    display: none;
-                                }
-                                .rating-form-stars label {
-                                    font-size: 30px;
-                                    color: #ccc;
-                                    cursor: pointer;
-                                    transition: color 0.2s ease;
-                                }
-                                .rating-form-stars input:checked ~ label,
-                                .rating-form-stars input:hover ~ label,
-                                .rating-form-stars label:hover ~ label , .checked {
-                                    color: #f5c518  !important
-                                }
-                                .alert {
-                                    padding: 10px;
-                                    margin-bottom: 20px;
-                                    border-radius: 4px;
-                                    color: #fff;
-                                }
-                                .alert-success {
-                                    background-color: #28a745;
-                                }
-                                .alert-error {
-                                    background-color: #dc3545;
-                                }
-                                .rating-scale.rating-scale-ar input[type="radio"] {
-                                    float: right;
-                                    margin-left: 10px;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="rating-form-container">
-                                <!-- Switch lang to ar and en -->
-                                <div>
-                                    <a href="#">English</a>
-                                </div>
-                                <div class="order-details">
-                                    <h2>تفاصيل الطلب</h2>
-                                    <p>رقم الطلب: 12345</p>
-                                    <p>تاريخ الطلب: 2023-06-15</p>
-                                    <p>العميل: أحمد محمد</p>
-                                </div>
-                                <div class="rating-form-header">قيم الطلب</div>
-                                <div class="rating-form-body">
-                                    <form action="#" method="POST">
-                                        <input type="hidden" name="order_id" value="12345">
-                                        <div>
-                                            ${previewHtml}
-                                        </div>
-                                        <div class="rating-form-footer">
-                                            <button type="submit" class="rating-form-submit">إرسال التقييم ⭐</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"><\/script>
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    document.getElementById('previewForm').addEventListener('submit', function(e) {
-                                        e.preventDefault();
-                                        alert('تم إرسال الاستبيان بنجاح');
-                                    });
-                                });
-                            <\/script>
-                        </body>
-                    </html>
-                `);
-                previewWindow.document.close();
-
-            });
-
             // Generate preview field HTML (without disabled attribute)
             function generatePreviewFieldHtml(fieldData) {
                 const { type, label, placeholder, options, settings } = fieldData;
                 const currentLocale = '{{ app()->getLocale() }}';
                 const currentLang = currentLocale === 'ar' ? 'ar' : 'en';
+                const required = settings.required ? ' required' : '';
+                const requiredLabel = settings.required ? ' *' : '';
 
                 switch(type) {
                     case "text":
@@ -1351,19 +1209,17 @@ function updateFieldOrder() {
                     case "number":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="${type}" class="rating-form-input" placeholder="${placeholder[currentLang]}">
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="${type}" class="rating-form-input" placeholder="${placeholder[currentLang]}" name="question_${fieldData.id.replace('field_', '')}"${required}>
                         </div>
                         `;
-                        break;
                     case "textarea":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <textarea class="rating-form-textarea" rows="3" placeholder="${placeholder[currentLang]}"></textarea>
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
+                            <textarea class="rating-form-textarea" rows="3" placeholder="${placeholder[currentLang]}" name="question_${fieldData.id.replace('field_', '')}"${required}></textarea>
                         </div>
                         `;
-                        break;
                     case "select":
                         let selectOptions = '';
                         if (options) {
@@ -1373,21 +1229,21 @@ function updateFieldOrder() {
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <select class="form-select">
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
+                            <select class="form-select" name="question_${fieldData.id.replace('field_', '')}"${required}>
                                 <option value="">${currentLang === 'ar' ? 'حدد خيارًا...' : 'Select an option...'}</option>
                                 ${selectOptions}
                             </select>
                         </div>
                         `;
-                        break;
                     case "radio":
                         let radioOptions = '';
                         if (options) {
                             options.forEach((option, index) => {
+                                const isRequired = (index === 0 && required) ? ' required' : '';
                                 radioOptions += `
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" id="question_${index}" value="${option.value}">
+                                        <input class="form-check-input" type="radio" id="question_${index}" name="question_${fieldData.id.replace('field_', '')}" value="${option.value}" ${isRequired}>
                                         <label class="form-check-label" for="question_${index}">
                                             ${option.label[currentLang]}
                                         </label>
@@ -1397,20 +1253,19 @@ function updateFieldOrder() {
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
                             <div>
                                 ${radioOptions}
                             </div>
                         </div>
                         `;
-                        break;
                     case "checkbox":
                         let checkboxOptions = '';
                         if (options) {
                             options.forEach((option, index) => {
                                 checkboxOptions += `
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="question[]" id="question_${index}" value="${option.value}">
+                                        <input class="form-check-input" type="checkbox" name="question_${fieldData.id.replace('field_', '')}[]" id="question_${index}" value="${option.value}">
                                         <label class="form-check-label" for="question_${index}">
                                             ${option.label[currentLang]}
                                         </label>
@@ -1420,54 +1275,52 @@ function updateFieldOrder() {
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
                             <div>
                                 ${checkboxOptions}
                             </div>
                         </div>
                         `;
-                        break;
                     case "date":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="date" class="rating-form-input">
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="date" class="rating-form-input" name="question_${fieldData.id.replace('field_', '')}"${required}>
                         </div>
                         `;
-                        break;
                     case "datetime":
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="datetime-local" class="rating-form-input">
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="datetime-local" class="rating-form-input" name="question_${fieldData.id.replace('field_', '')}"${required}>
                         </div>
                         `;
-                        break;
                     case "stars":
                         const points = settings.points || 5;
                         let stars = '';
                         for (let i = points; i >= 1; i--) {
+                            const isRequired = (i === points && required) ? ' required' : '';
                             stars += `
-                                <input type="radio" id="${fieldData.id}_star${i}" value="${i}" name="${fieldData.id}">
+                                <input type="radio" id="${fieldData.id}_star${i}" value="${i}" name="question_${fieldData.id.replace('field_', '')}" ${isRequired}>
                                 <label for="${fieldData.id}_star${i}">★</label>
                             `;
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
                             <div class="rating-form-stars">
                                 ${stars}
                             </div>
                         </div>
                         `;
-                        break;
                     case "rating":
                         const ratingPoints = settings.points || 5;
                         let ratingOptions = '';
                         for (let i = 1; i <= ratingPoints; i++) {
+                            const isRequired = (i === 1 && required) ? ' required' : '';
                             ratingOptions += `
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="question_${i}" value="${i}">
+                                    <input class="form-check-input" type="radio" id="question_${i}" name="question_${fieldData.id.replace('field_', '')}" value="${i}" ${isRequired}>
                                     <label class="form-check-label" for="question_${i}">
                                         ${i}
                                     </label>
@@ -1476,7 +1329,7 @@ function updateFieldOrder() {
                         }
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
                             <div class="rating-scale {{ app()->getLocale() == "ar" ? "rating-scale-ar" : "" }}">
                                 <div class="row">
                                     ${ratingOptions}
@@ -1484,95 +1337,95 @@ function updateFieldOrder() {
                             </div>
                         </div>
                         `;
-                        break;
                     default:
                         return `
                         <div class="rating-form-group">
-                            <label class="rating-form-label">${label[currentLang]}</label>
-                            <input type="text" class="rating-form-input" placeholder="${placeholder[currentLang]}">
+                            <label class="rating-form-label">${label[currentLang]}${requiredLabel}</label>
+                            <input type="text" class="rating-form-input" placeholder="${placeholder[currentLang]}" name="question_${fieldData.id.replace('field_', '')}"${required}>
                         </div>
                         `;
                 }
             }
 
             // Initialize with existing survey data if available
-@if(isset($survey))
-    // Initialize survey data with consistent field IDs
-    surveyData = {
-        id: {{ $survey['id'] }},
-        title: "{{ $survey['title'] }}",
-        description: "{{ $survey['description'] }}",
-        fields: [
-            @foreach($survey['fields'] as $question)
-           {
-                id: "field_{{ $question['id'] }}", // Ensure this matches the DOM data-field-id
-                type: "{{ $question['question_type'] }}",
-                label: {!! json_encode(is_array($question['question_text']) ? $question['question_text'] : ['ar' => $question['question_text'], 'en' => $question['question_text']]) !!},
-                placeholder: {!! json_encode(is_array($question['placeholder']) ? $question['placeholder'] : ['ar' => $question['placeholder'], 'en' => $question['placeholder']]) !!},
-                helpText: {!! json_encode(is_array($question['help_text']) ? $question['help_text'] : ['ar' => $question['help_text'], 'en' => $question['help_text']]) !!},
-                width: "{{ $question['settings']['width'] ?? 'col-12' }}",
-                errorMessage: "{{ $question['error_message'] }}",
-                options: {!! $question['options'] ? json_encode($question['options']) : 'null' !!},
-                settings: {!! $question['settings'] ? json_encode($question['settings']) : '{}' !!}
+            @if(isset($survey))
+                // Initialize survey data with consistent field IDs
+                surveyData = {
+                    id: {{ $survey['id'] }},
+                    title: "{{ $survey['title'] }}",
+                    description: "{{ $survey['description'] }}",
+                    fields: [
+                        @foreach($survey['fields'] as $question)
+                    {
+                            id: "field_{{ $question['id'] }}", // Ensure this matches the DOM data-field-id
+                            type: "{{ $question['question_type'] }}",
+                            label: {!! json_encode(is_array($question['question_text']) ? $question['question_text'] : ['ar' => $question['question_text'], 'en' => $question['question_text']]) !!},
+                            placeholder: {!! json_encode(is_array($question['placeholder']) ? $question['placeholder'] : ['ar' => $question['placeholder'], 'en' => $question['placeholder']]) !!},
+                            helpText: {!! json_encode(is_array($question['help_text']) ? $question['help_text'] : ['ar' => $question['help_text'], 'en' => $question['help_text']]) !!},
+                            width: "{{ $question['settings']['width'] ?? 'col-12' }}",
+                            errorMessage: "{{ $question['error_message'] }}",
+                            options: {!! $question['options'] ? json_encode($question['options']) : 'null' !!},
+                            settings: {!! $question['settings'] ? json_encode($question['settings']) : '{}' !!}
+                        }
+                        @if(!$loop->last),@endif
+                        @endforeach
+                    ]
+                };
+
+                // Set survey title
+                $("#surveyTitle").val(surveyData.title);
+
+                // Remove empty state
+                $("#formFields .text-center.text-muted").remove();
+
+                // Ensure all existing DOM elements have consistent data-field-id attributes
+                $("#formFields .form-field").each(function() {
+                    const domId = $(this).attr('id');
+                    $(this).attr('data-field-id', domId);
+                });
+
+                surveyData.fields.forEach(function(field) {
+                    attachFieldEvents(field.id);
+                });
+            @endif
+
+            function checkFieldConsistency() {
+                console.log("=== FIELD CONSISTENCY CHECK ===");
+
+                const domFields = [];
+                $("#formFields .form-field").each(function() {
+                    domFields.push({
+                        id: $(this).attr('id'),
+                        dataFieldId: $(this).data('field-id')
+                    });
+                });
+
+                const dataFields = surveyData.fields.map(f => f.id);
+
+                console.log("DOM fields:", domFields);
+                console.log("Data fields:", dataFields);
+
+                // Check if all DOM fields have matching data
+                domFields.forEach(domField => {
+                    if (!dataFields.includes(domField.id)) {
+                        console.error(`DOM field ${domField.id} not found in data`);
+                    }
+                    if (domField.id !== domField.dataFieldId) {
+                        console.error(`Inconsistent field ID: DOM id=${domField.id}, data-field-id=${domField.dataFieldId}`);
+                    }
+                });
+
+                // Check if all data fields have matching DOM
+                dataFields.forEach(dataField => {
+                    if (!$(`#${dataField}`).length) {
+                        console.error(`Data field ${dataField} not found in DOM`);
+                    }
+                });
+
+                console.log("===============================");
             }
-            @if(!$loop->last),@endif
-            @endforeach
-        ]
-    };
-
-    // Set survey title
-    $("#surveyTitle").val(surveyData.title);
-
-    // Remove empty state
-    $("#formFields .text-center.text-muted").remove();
-
-    // Ensure all existing DOM elements have consistent data-field-id attributes
-    $("#formFields .form-field").each(function() {
-        const domId = $(this).attr('id');
-        $(this).attr('data-field-id', domId);
-    });
-
-    surveyData.fields.forEach(function(field) {
-        attachFieldEvents(field.id);
-    });
-@endif
-
-function checkFieldConsistency() {
-    console.log("=== FIELD CONSISTENCY CHECK ===");
-
-    const domFields = [];
-    $("#formFields .form-field").each(function() {
-        domFields.push({
-            id: $(this).attr('id'),
-            dataFieldId: $(this).data('field-id')
-        });
-    });
-
-    const dataFields = surveyData.fields.map(f => f.id);
-
-    console.log("DOM fields:", domFields);
-    console.log("Data fields:", dataFields);
-
-    // Check if all DOM fields have matching data
-    domFields.forEach(domField => {
-        if (!dataFields.includes(domField.id)) {
-            console.error(`DOM field ${domField.id} not found in data`);
-        }
-        if (domField.id !== domField.dataFieldId) {
-            console.error(`Inconsistent field ID: DOM id=${domField.id}, data-field-id=${domField.dataFieldId}`);
-        }
-    });
-
-    // Check if all data fields have matching DOM
-    dataFields.forEach(dataField => {
-        if (!$(`#${dataField}`).length) {
-            console.error(`Data field ${dataField} not found in DOM`);
-        }
-    });
-
-    console.log("===============================");
-}
 
         });
     </script>
-{{-- @endsection --}}
+</body>
+</html>

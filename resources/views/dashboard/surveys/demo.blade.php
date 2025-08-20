@@ -191,32 +191,15 @@
 
     <div class="order-details">
         <h2>{{ __('dashboard.order_details') }}</h2>
-        <p>{{ __('dashboard.order_id') }}: {{ $order->id }}</p>
-        <p>{{ __('dashboard.order_date_rev') }}: {{ $order->date }}</p>
-        <p>{{ __('dashboard.customer') }}: {{ $order->customer->name }}</p>
+        <p>{{ __('dashboard.order_id') }}: 12345</p>
+        <p>{{ __('dashboard.order_date_rev') }}: 2023-06-15</p>
+        <p>{{ __('dashboard.customer') }}: أحمد محمد</p>
     </div>
 
     <div class="rating-form-header">{{ __('dashboard.rate_order') }}</div>
     <div class="rating-form-body">
-        <form action="{{ route('surveys.submit', 1) }}" method="POST">
+        <form action="#" method="POST">
             @csrf
-            <input type="hidden" name="order_id" value="{{ $order->id }}">
-{{--
-            <div class="rating-form-group">
-                <label class="rating-form-label">{{ __('dashboard.Rate') }}</label>
-                <div class="rating-form-stars">
-                    @for($i = 5; $i >= 1;$i--)
-                    <input type="radio"
-                        id="star{{$i}}" name="rating" value="{{$i}}"><label  @if($order->rate)
-                                            {{$order->rate->rating >= $i ? "class=checked" : ''}}
-                                        @endif  for="star{{$i}}">★</label>
-                    @endfor
-                </div>
-            </div>
-            <div class="rating-form-group">
-                <label for="review" class="rating-form-label">{{ __('dashboard.review') }}</label>
-                <textarea id="review" name="review" class="rating-form-textarea" placeholder={{ __('dashboard.review_placeholder') }}> {{$order->rate ? $order->rate->review : ''}}</textarea>
-            </div> --}}
             <div>
                 @foreach($survey['fields'] as $question)
                     <div class="mb-4 {{ $question['settings']['width'] ?? 'col-12' }}">
