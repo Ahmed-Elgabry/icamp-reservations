@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
         Commands\crud::class,
         Commands\SendSurveyEmails::class,
         Commands\CheckPaymentStatus::class,
+        Commands\FastPaymentStatusCheck::class,
     ];
     /**
      * Define the application's command schedule.

@@ -89,23 +89,23 @@ class CheckPaymentStatusJob implements ShouldQueue
             Log::info("Checking {$paymentLinks->count()} payment links");
         }
 
-        foreach ($paymentLinks as $paymentLink) {
-            try {
-                $this->updatePaymentStatus($paymentLink, $paymenntService);
+        // Process in batches for better performance
+        $paymentLinks->chunk(10)->each(function ($chunk) use ($paymenntService) {
+            // Process 10 payments simultaneously
+            $chunk->each(function ($paymentLink) use ($paymenntService) {
+                try {
+                    $this->updatePaymentStatus($paymentLink, $paymenntService);
+                } catch (\Exception $e) {
+                    Log::error('Failed to check payment link', [
+                        'payment_link_id' => $paymentLink->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            });
 
-                // Small delay to avoid overwhelming the API
-                usleep(500000); // 0.5 seconds
-
-            } catch (\Exception $e) {
-                Log::error('Failed to check payment link', [
-                    'payment_link_id' => $paymentLink->id,
-                    'error' => $e->getMessage()
-                ]);
-
-                // Continue with next payment link
-                continue;
-            }
-        }
+            // Small delay between batches
+            usleep(100000); // 0.1 seconds instead of 0.5
+        });
     }
 
     /**
