@@ -969,6 +969,11 @@ return [
     'serial_number' => 'الرقم التسلسلي',
     'answers_count' => 'عدد الإجابات',
     'actions' => 'الإجراءات',
+    'generated_on' => 'أنشئت في',
+    'total_responses' => 'إجمالي الإجابات',
+    'generated_by_icamp_system' => 'أنشئت من قبل نظام icamp',
+
+
 
     // Survey Statistics Section
     'total_surveys' => 'إجمالي الاستبيانات',

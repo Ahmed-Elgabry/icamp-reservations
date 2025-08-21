@@ -76,7 +76,7 @@
         .mobile-toggle-btn {
             position: fixed;
             top: 20px;
-            right: 20px;
+            right: 4px;
             z-index: 1060;
             width: 50px;
             height: 50px;

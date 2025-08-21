@@ -222,7 +222,7 @@
 
                 <!--begin::Menu item-->
                 <div class="menu-item">
-                    <a href="{{route('surveys.statistics')}}" class="menu-link py-3 {{ isActiveRoute('surveys.statistics') }}">
+                    <a href="{{route('surveys.statistics',1)}}" class="menu-link py-3 {{ isActiveRoute('surveys.statistics') }}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
