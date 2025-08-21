@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Notice;
 use DB;
-use PDF;
 use Mpdf\Mpdf;
 use Carbon\Carbon;
 use App\Models\Addon;
@@ -16,14 +15,11 @@ use App\Models\OrderRate;
 use App\Models\OrderAddon;
 use App\Models\BankAccount;
 use App\Models\InvoiceLink;
-use App\Models\OrderReport;
 use App\Models\TermsSittng;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\PreLoginImage;
 use App\Models\ServiceReport;
 use App\Models\PreLogoutImage;
-use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\OrderItem;
@@ -31,7 +27,7 @@ use App\Repositories\IUserRepository;
 use App\Repositories\IOrderRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ICategoryRepository;
-use App\Requests\dashboard\CreateUpdateOrderRequest;
+use Illuminate\Support\Facades\DB as FacadesDB;
 
 class OrderController extends Controller
 {
@@ -50,7 +46,7 @@ class OrderController extends Controller
 
     public function index()
     {
-        $validStatuses = ['completed', 'rejected', 'canceled' , 'delayed'];
+        $validStatuses = ['completed', 'rejected', 'canceled', 'delayed'];
         $status = request()->query('status');
         $customerId = request()->query('customer_id');
 
@@ -66,9 +62,9 @@ class OrderController extends Controller
         if (in_array($status, $validStatuses)) {
             $query->where('status', $status);
         } elseif ($status == 'pending') {
-            $query->where(fn ($q) => $q->whereIn('status' , ['pending_and_show_price' , 'pending_and_Initial_reservation']));
+            $query->where(fn($q) => $q->whereIn('status', ['pending_and_show_price', 'pending_and_Initial_reservation']));
         } else if ($status == 'approved') {
-            $query->where(fn ($q) => $q->whereIn('status' , ['approved','delayed']));
+            $query->where(fn($q) => $q->whereIn('status', ['approved', 'delayed']));
         }
 
         if (!empty($customerId)) {
@@ -77,7 +73,7 @@ class OrderController extends Controller
 
         $orders = $query->filter($filters)
             ->orderBy('created_at', 'desc')
-            ->with(['payments' , 'addons'])
+            ->with(['payments', 'addons'])
             ->paginate(100);
 
         return view('dashboard.orders.index', compact('orders'));
@@ -115,13 +111,10 @@ class OrderController extends Controller
 
             $insuranceAmounts = $originalInsuranceAmount - $insuranceAmount;
             $price += $insuranceAmount;
-
         } elseif ($validatedData['insurance_status'] === 'confiscated_full') {
             $insuranceAmounts = 0;
-
         } elseif ($validatedData['insurance_status'] === 'returned') {
             $insuranceAmounts = 0;
-
         } else {
             $insuranceAmounts = $originalInsuranceAmount;
             $price = $originalInsuranceAmount;
@@ -260,11 +253,7 @@ class OrderController extends Controller
 
     public function update(Request $request, $id)
     {
-        // ابدأ بتحميل الطلب والخدمات المرتبطة به
         $order = Order::with('services.stocks')->findOrFail($id);
-        $currentServiceIds = $order->services->pluck('id')->toArray();
-
-        // تحقق من صحة البيانات المدخلة
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'service_ids' => 'required|array',
@@ -290,16 +279,12 @@ class OrderController extends Controller
 
         ]);
 
-        // تعيين قيمة سحب المخزون
         $validatedData['inventory_withdrawal'] = $request->has('inventory_withdrawal') ? '1' : '0';
-
-        // بدء المعاملة
         \DB::beginTransaction();
 
         try {
             unset($validatedData['service_ids']);
 
-            // تحديث بيانات الطلب
             $order->fill($validatedData);
 
             $totalPrice = 0;
@@ -325,10 +310,11 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order updated successfully']);
         } catch (\Exception $e) {
             \DB::rollBack();
-            \Log::error('Order update failed: ' . $e->getMessage()); // تسجيل الخطأ
+            \Log::error('Order update failed: ' . $e->getMessage());
             return redirect()->route('orders.edit', $order->id)->with('error', 'Error updating order');
         }
     }
+
 
     public function destroy($id)
     {
@@ -359,7 +345,10 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($id);
         $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())->get();
-        return view('dashboard.orders.reports', compact('order', 'reports'));
+
+        $service = Service::findOrFail($order->services->pluck('id')->first());
+        $stocks = Stock::all();
+        return view('dashboard.orders.reports', compact('order', 'reports', 'service', 'stocks'));
     }
 
     public function storeAddons(Request $request, $orderId)
@@ -436,32 +425,44 @@ class OrderController extends Controller
         $addons = Addon::all();
         $bankAccounts = BankAccount::all();
 
-        return view('dashboard.orders.addons', compact('order', 'addons' , 'bankAccounts'));
+        return view('dashboard.orders.addons', compact('order', 'addons', 'bankAccounts'));
     }
 
     public function updateReports(Request $request, $id)
     {
+        $this->updateStock($request->all());
         $order = Order::with('reports')->findOrFail($id);
-        // التحقق من صحة البيانات للتأكد من أن ordered_count.* رقمي وقابل للاختيار
-        $validatedData = $request->validate([
+        $data = $request->validate([
             'ordered_count.*' => 'nullable|numeric|min:1',
             'ordered_price.*' => 'nullable|numeric|min:1',
+            'count'   => 'required|array',
+            'count.*' => 'nullable|integer|min:0|max:100',
+            'not_completed_reason' => 'nullable|array',
+            'reports' => 'nullable|array',
         ]);
 
-        // التقاط البيانات من الطلب
+        foreach ($data['reports'] as $id => $status) {
+            $report = ServiceReport::find($id);
+            if ($report) {
+                $report->update([
+                    'is_completed' => ($status === 'completed') ? true : false,
+                    'not_completed_reason' => $data['not_completed_reason'][$id] ?? null,
+                    'count' => $data['count'][$id] ?? 0,
+                ]);
+            }
+        }
+
         $reports = $request->input('reports', []);
         $reportsNot = $request->input('reports_not', []);
         $notCompletedReasons = $request->input('not_completed_reason', []);
-        $orderedCounts = $request->input('ordered_count', []); // التقاط ordered_count
-        $ordered_price = $request->input('ordered_price', []); // التقاط ordered_count
+        $orderedCounts = $request->input('ordered_count', []);
+        $ordered_price = $request->input('ordered_price', []);
 
-        // معالجة التقارير المكتملة
         foreach ($reports as $reportId => $status) {
             $orderReport = $order->reports()->firstOrNew(['service_report_id' => $reportId]);
             $orderReport->is_completed = 'completed';
             $orderReport->not_completed_reason = null;
 
-            // تحديث ordered_count فقط إذا كانت موجودة في الطلب
             if (isset($orderedCounts[$reportId])) {
                 $orderReport->ordered_count = $orderedCounts[$reportId];
                 $orderReport->ordered_price = $ordered_price[$reportId];
@@ -470,13 +471,11 @@ class OrderController extends Controller
             $orderReport->save();
         }
 
-        // معالجة التقارير غير المكتملة
         foreach ($reportsNot as $reportId => $status) {
             $orderReport = $order->reports()->firstOrNew(['service_report_id' => $reportId]);
             $orderReport->is_completed = 'not_completed';
             $orderReport->not_completed_reason = $notCompletedReasons[$reportId] ?? null;
 
-            // تحديث ordered_count فقط إذا كانت موجودة في الطلب
             if (isset($orderedCounts[$reportId])) {
                 $orderReport->ordered_count = $orderedCounts[$reportId];
             }
@@ -484,14 +483,12 @@ class OrderController extends Controller
             $orderReport->save();
         }
 
-        // إذا لم يكن التقرير موجودًا في reports أو reportsNot، عيّن الحالة إلى no_action
         $existingReportIds = array_merge(array_keys($reports), array_keys($reportsNot));
         foreach ($order->reports as $report) {
             if (!in_array($report->service_report_id, $existingReportIds)) {
                 $report->is_completed = 'no_action';
                 $report->not_completed_reason = null;
 
-                // تحديث ordered_count فقط إذا كانت موجودة في الطلب
                 if (isset($orderedCounts[$report->service_report_id])) {
                     $report->ordered_count = $orderedCounts[$report->service_report_id];
                     $report->ordered_price = $ordered_price[$report->service_report_id];
@@ -501,7 +498,6 @@ class OrderController extends Controller
             }
         }
 
-        // تحديث نص التقرير
         $order->update([
             'report_text' => $request->report_text
         ]);
@@ -509,6 +505,65 @@ class OrderController extends Controller
         return back()->withSuccess(__('dashboard.success'));
     }
 
+    private function updateStock(array $data): void
+    {   
+        if (isset($data['stock'])) {
+            foreach ($data['stock'] as $stockId => $status) {
+                $pivot = FacadesDB::table('service_stock')->whereId($stockId);
+                $pivot->update([
+                    'is_completed' => ($status === 'completed') ? true : false,
+                    'not_completed_reason' => $data['not_completed_reason_stock'][$stockId] ?? null,
+                    'required_qty' => $data['required_qty_stock'][$stockId] ?? null,
+                    'count' => $data['count_stock'][$stockId] ?? null,
+                ]);
+            }
+        }
+    }
+
+    public function decrmentOrIncrementStock(Request $request)
+    {
+        $data = $request->validate([
+            'id'      => 'required|integer|exists:service_stock,id',
+            'stockId' => 'required|integer|exists:stocks,id',
+            'qty'     => 'required|integer|min:1',
+            'status'  => 'required|in:decrement,increment',
+        ]);
+
+        try {
+            $result = FacadesDB::transaction(function () use ($data) {
+                $affected = FacadesDB::table('service_stock')
+                    ->where('id', $data['id'])
+                    ->where('stock_id', $data['stockId'])
+                    ->update([
+                        'required_qty' => $data['qty'],
+                        'updated_at'   => now(),
+                    ]);
+
+                if ($affected === 0) abort(404, 'Pivot not found for this stock.');
+        
+                $stock = Stock::whereKey($data['stockId'])->lockForUpdate()->firstOrFail();
+                if ($data['status'] === 'increment') {
+                    $stock->increment('quantity' , $data['qty']);
+                } elseif ($data['status'] === 'decrement') {
+                    if ($data['qty'] > $stock->quantity) abort(422, __('dashboard.insufficient_stock'));
+                    $stock->decrement('quantity' , $data['qty']);
+                } else {
+                    abort(422, __('dashboard.not_found'));
+                }
+
+                return [
+                    'remaining' => (int) $stock->quantity,
+                    'decrement' => (int) $data['qty'],
+                    'stock_id'  => (int) $stock->id,
+                    'pivot_id'  => (int) $data['id'],
+                ];
+            });
+
+            return response()->json(['ok' => true, 'data' => $result], 200);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 
     public function invoice($order)
     {
@@ -542,7 +597,7 @@ class OrderController extends Controller
 
     public function quote($order)
     {
-        $order = Order::with(['payments' , 'addons'])->findOrFail($order);
+        $order = Order::with(['payments', 'addons'])->findOrFail($order);
         $html = view('dashboard.orders.quote', compact('order'))->render();
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
@@ -697,7 +752,7 @@ class OrderController extends Controller
 
         return response()->json([
             'hasNotices' => $notices->isNotEmpty(),
-            'notices' => $notices->map(function($notice) {
+            'notices' => $notices->map(function ($notice) {
                 return [
                     'content' => $notice->notice,
                     'created_at' => $notice->created_at->format('Y-m-d H:i'),
@@ -707,37 +762,41 @@ class OrderController extends Controller
         ]);
     }
 
-    public function updateVerified(int $id ,string $type )
+    public function updateVerified(int $id, string $type)
     {
         try {
             \DB::beginTransaction();
 
-            if ($type == 'addon') { $item = OrderAddon::findOrFail($id); }
-            elseif ($type == 'expense') { $item = Expense::findOrFail($id); }
-            elseif ($type == 'warehouse_sales') { $item = OrderItem::findOrFail($id); }
-            else { return redirect()->back()->with('error', __('dashboard.invalid_type')); }
+            if ($type == 'addon') {
+                $item = OrderAddon::findOrFail($id);
+            } elseif ($type == 'expense') {
+                $item = Expense::findOrFail($id);
+            } elseif ($type == 'warehouse_sales') {
+                $item = OrderItem::findOrFail($id);
+            } else {
+                return redirect()->back()->with('error', __('dashboard.invalid_type'));
+            }
 
             $item->verified = !$item->verified;
             $item->save();
 
             \DB::commit();
-            return redirect()->back()->with('success' , __('dashboard.success'));
+            return redirect()->back()->with('success', __('dashboard.success'));
         } catch (\Exception $e) {
             \DB::rollback();
-            return redirect()->back()->with('error' , $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
     }
 
     public function acceptTerms($id)
     {
-        return view('dashboard.orders.accept_terms', ['order' => Order::findOrFail($id) , 'termsSittng' => TermsSittng::firstOrFail()]);
+        return view('dashboard.orders.accept_terms', ['order' => Order::findOrFail($id), 'termsSittng' => TermsSittng::firstOrFail()]);
     }
 
     public function updateNotes(Request $request, Order $order)
     {
         $data = $request->validate([
-            'terms_notes' => ['nullable','string','max:20000'],
+            'terms_notes' => ['nullable', 'string', 'max:20000'],
         ]);
 
         $order->update($data);

@@ -115,6 +115,7 @@ class ServicesController extends Controller
 
     public function update(Request $request, $serviceId)
     {
+
         $service = Service::findOrFail($serviceId);
 
         $validated = $request->validate([
@@ -145,7 +146,7 @@ class ServicesController extends Controller
                 $carry[$stockId] = ($carry[$stockId] ?? 0) + $count;
                 return $carry;
             }, []);
-
+            // dd($request->all())
         try {
             \DB::beginTransaction();
             $existingPivot = $service->stocks()
@@ -345,7 +346,6 @@ class ServicesController extends Controller
             ], 200);
         });
     }
-
     private function normalizeOrderedCounts(Service $service): void
     {
         $rows = ServiceReport::where('service_id', $service->id)
@@ -364,4 +364,5 @@ class ServicesController extends Controller
             $i++;
         }
     }
+
 }

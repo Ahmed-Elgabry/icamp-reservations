@@ -19,6 +19,7 @@ use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderSignatureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -233,7 +234,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.index',
         'title' => 'dashboard.stocks',
         'type' => 'parent',
+<<<<<<< HEAD
+        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock' , 'stocks.destroyServiceReport', 'stock.decrement']
+=======
         'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock', 'stocks.destroyServiceReport']
+>>>>>>> 042bd40ba119025098073279d7f47d0131a7e99f
     ]);
 
     # stocks store
@@ -294,6 +299,12 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'uses' => 'StockController@destroyServiceReport',
         'as' => 'stocks.destroyServiceReport',
         'title' => ['actions.delete', 'dashboard.stocks']
+    ]);
+
+    Route::post('stock/decrement', [
+        'uses' => 'OrderController@decrmentOrIncrementStock',
+        'as' => 'stock.decrement',
+        'title' => ['actions.decrmentStock', 'dashboard.stocks']
     ]);
 
     /*------------ end Of stocks ----------*/
@@ -1159,7 +1170,6 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 use App\Http\Controllers\Dashboard\TermsSittngController;
 use App\Http\Controllers\Dashboard\ViolationController;
 use App\Http\Controllers\Dashboard\ViolationTypeController;
-use App\Http\Controllers\OrderSignatureController;
 use App\Http\Controllers\statisticsController;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
