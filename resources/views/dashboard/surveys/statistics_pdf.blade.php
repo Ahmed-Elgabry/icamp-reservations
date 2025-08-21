@@ -29,6 +29,7 @@
             margin-bottom: 20px;
         }
         .stat-box {
+            display: flex;
             width: 48%;
             border: 1px solid #ddd;
             padding: 15px;

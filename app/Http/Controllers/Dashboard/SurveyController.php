@@ -648,6 +648,43 @@ class SurveyController extends Controller
     }
 
     /**
+     * Export full survey statistics page to PDF.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Survey  $survey
+     * @return \Illuminate\Http\Response
+     */
+    public function exportFullStatisticsPdf(Request $request, Survey $survey)
+    {
+        // Get HTML content from the request
+        $html = $request->input('html_content');
+
+        // Clean up the HTML for PDF generation
+        $html = $this->cleanHtmlForPdf($html);
+
+        // Initialize mPDF
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P', // Portrait for full page
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        // Write HTML content
+        $mpdf->WriteHTML($html);
+
+        // Output the PDF
+        $fileName = date('Y-m-d') . "-full-survey-statistics.pdf";
+        return response($mpdf->Output($fileName, Destination::STRING_RETURN))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+
+    /**
      * Export survey answers to Excel.
      *
      * @param  int  $id

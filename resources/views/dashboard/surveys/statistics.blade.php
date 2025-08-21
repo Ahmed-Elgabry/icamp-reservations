@@ -1,5 +1,89 @@
 @section('pageTitle', __('dashboard.survey_statistics'))
 @extends('dashboard.layouts.app')
+
+@push('styles')
+<style>
+    /* PDF-specific styles */
+    .pdf-export {
+        font-family: Arial, sans-serif;
+        background: white;
+        color: black;
+    }
+    .pdf-export .card {
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        box-shadow: none;
+    }
+    .pdf-export .card-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #ddd;
+    }
+    .pdf-export .table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .pdf-export .table th,
+    .pdf-export .table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    .pdf-export .badge {
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-weight: bold;
+    }
+    .pdf-export .badge-light-info {
+        background: #e1f0ff;
+        color: #009ef7;
+    }
+    .pdf-export .badge-light-primary {
+        background: #e1e9ff;
+        color: #0052cc;
+    }
+    .pdf-export .badge-light-success {
+        background: #e8fff5;
+        color: #50cd89;
+    }
+    .pdf-export .badge-light-warning {
+        background: #fff8dd;
+        color: #ffc700;
+    }
+    .pdf-export .badge-light-danger {
+        background: #ffe2e5;
+        color: #f1416c;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+        font-size: 18px;
+    }
+    /* RTL support for Arabic */
+    .rtl {
+        direction: rtl;
+        text-align: right;
+    }
+    .rtl .table th,
+    .rtl .table td {
+        text-align: right;
+    }
+    .rtl .text-end {
+        text-align: left !important;
+    }
+</style>
+@endpush
+
 @section('content')
 <!--begin::Post-->
 <div class="post d-flex flex-column-fluid" id="kt_post">
@@ -83,47 +167,8 @@
                 <!--end::Statistics Widget 2-->
             </div>
             <!--end::Col-->
-            <!--begin::Col-->
-            {{-- <div class="col-xl-4">
-                <!--begin::Statistics Widget 3-->
-                <div class="card card-xl-stretch mb-xl-8">
-                    <!--begin::Body-->
-                    <div class="card-body">
-                        <!--begin::Statistics-->
-                        <div class="statistics d-flex align-items-center">
-                            <!--begin::Statistics-->
-                            <div class="statistics-info">
-                                <!--begin::Title-->
-                                <h5 class="text-gray-800 fw-bold">@lang('dashboard.average_rating')</h5>
-                                <!--end::Title-->
-                                <!--begin::Number-->
-                                <div class="fs-2 fw-bolder">{{ $averageRating }}</div>
-                                <!--end::Number-->
-                            </div>
-                            <!--end::Statistics-->
-                            <!--begin::Symbol-->
-                            <div class="symbol symbol-50px symbol-light ms-auto">
-                                <span class="symbol-label">
-                                    <span class="svg-icon svg-icon-2x svg-icon-warning">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                            <path opacity="0.3" d="M20 22H4C3.4 22 3 21.6 3 21V3C3 2.4 3.4 2 4 2H20C20.6 2 21 2.4 21 3V21C21 21.6 20.6 22 20 22Z" fill="currentColor"/>
-                                            <path d="M7 12C7 11.4 7.4 11 8 11H16C16.6 11 17 11.4 17 12C17 12.6 16.6 13 16 13H8C7.4 13 7 12.6 7 12ZM7 16C7 15.4 7.4 15 8 15H16C16.6 15 17 15.4 17 16C17 16.6 16.6 17 16 17H8C7.4 17 7 16.6 7 16ZM7 8C7 7.4 7.4 7 8 7H16C16.6 7 17 7.4 17 8C17 8.6 16.6 9 16 9H8C7.4 9 7 8.6 7 8Z" fill="currentColor"/>
-                                        </svg>
-                                    </span>
-                                </span>
-                            </div>
-                            <!--end::Symbol-->
-                        </div>
-                        <!--end::Statistics-->
-                    </div>
-                    <!--end::Body-->
-                </div>
-                <!--end::Statistics Widget 3-->
-            </div> --}}
-            <!--end::Col-->
         </div>
         <!--end::Statistics-->
-
         <!--begin::Charts Row 2-->
         <div class="row g-5 g-xl-8">
             <!--begin::Col-->
@@ -251,6 +296,13 @@
                                     </a>
                                 </div>
                                 <!--end::Menu item-->
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                    <a class="menu-link px-3" onclick="exportStatisticsAsPDF()">
+                                        @lang('dashboard.export_all_as_pdf')
+                                    </a>
+                                </div>
+                                <!--end::Menu item-->
                             </div>
                             <!--end::Menu-->
                             <!--end::Export-->
@@ -307,10 +359,13 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-{{-- @push('scripts') --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Set current locale for RTL support
+        window.currentLocale = '{{ app()->getLocale() }}';
+
         // Questions Types Chart
         const questionsCtx = document.getElementById('questionsChart').getContext('2d');
         const questionsChart = new Chart(questionsCtx, {
@@ -361,7 +416,12 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right'
+                        position: 'right',
+                        labels: {
+                            font: {
+                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
+                            }
+                        }
                     }
                 }
             }
@@ -401,7 +461,17 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            precision: 0
+                            precision: 0,
+                            font: {
+                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
+                            }
                         }
                     }
                 }
@@ -446,7 +516,8 @@
                         position: 'right',
                         labels: {
                             font: {
-                                size: 12
+                                size: 12,
+                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
                             },
                             padding: 15
                         }
@@ -458,14 +529,6 @@
                                 const value = context.raw || 0;
                                 const data = context.dataset.data;
                                 const total = data.reduce((a, b) => a + b, 0);
-
-                                console.log('Tooltip data:', {
-                                    label,
-                                    value,
-                                    total,
-                                    data
-                                });
-
                                 const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
                                 return `${label}: ${value} (${percentage}%)`;
                             }
@@ -506,450 +569,286 @@
         ];
 
         // Handle question selection change
-        // document.getElementById('questionSelect').addEventListener('change', function(e) {
-        //     const questionId = parseInt(e.target.value);
-        //     console.log('Selected question ID:', questionId);
-
-        //     if (!questionId) {
-        //         console.log('No question selected, resetting chart');
-        //         questionOptionsChart.data.labels = ['No data'];
-        //         questionOptionsChart.data.datasets[0].data = [1];
-        //         questionOptionsChart.update();
-        //         return;
-        //     }
-
-        //     const selectedQuestion = questionsWithOptions.find(q => q.id === questionId);
-        //     console.log('Selected question:', selectedQuestion);
-
-        //     if (!selectedQuestion) {
-        //         console.log('Question not found in questionsWithOptions');
-        //         questionOptionsChart.data.labels = ['Question not found'];
-        //         questionOptionsChart.data.datasets[0].data = [1];
-        //         questionOptionsChart.update();
-        //         return;
-        //     }
-
-        //     if (!selectedQuestion.options || selectedQuestion.options.length === 0) {
-        //         console.log('Question has no options');
-        //         questionOptionsChart.data.labels = ['No options'];
-        //         questionOptionsChart.data.datasets[0].data = [1];
-        //         questionOptionsChart.update();
-        //         return;
-        //     }
-
-        //     console.log('Question options:', selectedQuestion.options);
-
-        //     // Create a mapping from value to label
-        //     const valueToLabel = {};
-        //     const optionCounts = {};
-
-        //     // Create a mapping for different option formats
-        //     selectedQuestion.options.forEach((option, index) => {
-        //         let value, label;
-
-        //         if (typeof option === 'object' && option !== null) {
-        //             // If option is an object, get value and label separately
-        //             value = String(option.value || option.label || '');
-        //             label = option.label || option.value || '';
-        //         } else {
-        //             // If option is a simple value, use it as both value and label
-        //             value = String(option);
-        //             label = option;
-
-        //             // Also create potential mappings for different formats
-        //             // For example, map "الخيار 1" to "option1"
-        //             const optionNumber = index + 1;
-        //             const potentialValue = `option${optionNumber}`;
-        //             valueToLabel[potentialValue] = label;
-        //         }
-
-        //         valueToLabel[value] = label;
-        //         optionCounts[value] = 0;
-        //     });
-
-        //     console.log('Value to label mapping:', valueToLabel);
-        //     console.log('Initial option counts:', optionCounts);
-
-        //     // Log responses structure
-        //     console.log('Total responses:', responses.length);
-        //     console.log('First response sample:', responses[0]);
-
-        //     responses.forEach((response, responseIndex) => {
-        //         console.log(`Processing response ${responseIndex}:`, response);
-
-        //         const answer = response.answers.find(a => a.question_id === questionId);
-        //         console.log(`Answer for question ${questionId}:`, answer);
-
-        //         if (!answer) {
-        //             console.log(`No answer found for question ${questionId} in response ${responseIndex}`);
-        //             return;
-        //         }
-
-        //         if (selectedQuestion.type === 'checkbox') {
-        //             console.log('Processing checkbox answer:', answer.answer_option);
-
-        //             let options = [];
-        //             if (Array.isArray(answer.answer_option)) {
-        //                 options = answer.answer_option;
-        //                 console.log('Options is array:', options);
-        //             } else if (answer.answer_option) {
-        //                 try {
-        //                     options = JSON.parse(answer.answer_option);
-        //                     console.log('Parsed options from JSON:', options);
-        //                 } catch (e) {
-        //                     console.log('Failed to parse JSON, using as string:', answer.answer_option);
-        //                     options = [answer.answer_option];
-        //                 }
-        //             }
-
-        //             options.forEach(option => {
-        //                 const value = String(option);
-        //                 console.log(`Processing option value: ${value}`);
-
-        //                 // Try to find a matching key in our mapping
-        //                 let matchedKey = null;
-        //                 if (optionCounts.hasOwnProperty(value)) {
-        //                     matchedKey = value;
-        //                 } else if (valueToLabel.hasOwnProperty(value)) {
-        //                     // This value maps to a label, so we need to find the original key
-        //                     // This is a reverse mapping scenario
-        //                     for (const key in optionCounts) {
-        //                         if (valueToLabel[key] === valueToLabel[value]) {
-        //                             matchedKey = key;
-        //                             break;
-        //                         }
-        //                     }
-        //                 } else {
-        //                     // Try to extract a number from the value and match with index
-        //                     const match = value.match(/option(\d+)/i);
-        //                     if (match) {
-        //                         const optionNumber = parseInt(match[1]);
-        //                         const optionIndex = optionNumber - 1;
-        //                         if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
-        //                             // Find the key for this option
-        //                             for (const key in optionCounts) {
-        //                                 if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
-        //                                     matchedKey = key;
-        //                                     break;
-        //                                 }
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-
-        //                 if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
-        //                     optionCounts[matchedKey]++;
-        //                     console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
-        //                 } else {
-        //                     console.log(`Option value ${value} not found in question options`);
-        //                 }
-        //             });
-        //         } else {
-        //             console.log('Processing non-checkbox answer:', answer.answer_text);
-        //             const value = String(answer.answer_text || '');
-        //             console.log(`Processing value: ${value}`);
-
-        //             // Try to find a matching key in our mapping
-        //             let matchedKey = null;
-        //             if (optionCounts.hasOwnProperty(value)) {
-        //                 matchedKey = value;
-        //             } else if (valueToLabel.hasOwnProperty(value)) {
-        //                 // This value maps to a label, so we need to find the original key
-        //                 // This is a reverse mapping scenario
-        //                 for (const key in optionCounts) {
-        //                     if (valueToLabel[key] === valueToLabel[value]) {
-        //                         matchedKey = key;
-        //                         break;
-        //                     }
-        //                 }
-        //             } else {
-        //                 // Try to extract a number from the value and match with index
-        //                 const match = value.match(/option(\d+)/i);
-        //                 if (match) {
-        //                     const optionNumber = parseInt(match[1]);
-        //                     const optionIndex = optionNumber - 1;
-        //                     if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
-        //                         // Find the key for this option
-        //                         for (const key in optionCounts) {
-        //                             if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
-        //                                 matchedKey = key;
-        //                                 break;
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-
-        //             if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
-        //                 optionCounts[matchedKey]++;
-        //                 console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
-        //             } else {
-        //                 console.log(`Value ${value} not found in question options`);
-        //             }
-        //         }
-        //     });
-
-        //     console.log('Final option counts:', optionCounts);
-
-        //     // Convert value counts to label counts for display
-        //     const labels = [];
-        //     const data = [];
-
-        //     for (const value in optionCounts) {
-        //         labels.push(valueToLabel[value]);
-        //         data.push(optionCounts[value]);
-        //     }
-
-        //     const total = data.reduce((a, b) => a + b, 0);
-        //     console.log('Total responses for this question:', total);
-        //     console.log('Chart labels:', labels);
-        //     console.log('Chart data:', data);
-
-        //     if (total === 0) {
-        //         console.log('No responses found, showing fallback');
-        //         questionOptionsChart.data.labels = ['No responses'];
-        //         questionOptionsChart.data.datasets[0].data = [1];
-        //     } else {
-        //         questionOptionsChart.data.labels = labels;
-        //         questionOptionsChart.data.datasets[0].data = data;
-        //         console.log('Updating chart with actual data');
-        //     }
-
-        //     questionOptionsChart.update('none');
-        //     setTimeout(() => {
-        //         questionOptionsChart.resize();
-        //     }, 100);
-        // });
-document.getElementById('questionSelect').addEventListener('change', function(e) {
-    const questionId = parseInt(e.target.value);
-    console.log('Selected question ID:', questionId);
-
-    if (!questionId) {
-        console.log('No question selected, resetting chart');
-        questionOptionsChart.data.labels = ['No data'];
-        questionOptionsChart.data.datasets[0].data = [1];
-        questionOptionsChart.update();
-        return;
-    }
-
-    const selectedQuestion = questionsWithOptions.find(q => q.id === questionId);
-    console.log('Selected question:', selectedQuestion);
-
-    if (!selectedQuestion) {
-        console.log('Question not found in questionsWithOptions');
-        questionOptionsChart.data.labels = ['Question not found'];
-        questionOptionsChart.data.datasets[0].data = [1];
-        questionOptionsChart.update();
-        return;
-    }
-
-    if (!selectedQuestion.options || selectedQuestion.options.length === 0) {
-        console.log('Question has no options');
-        questionOptionsChart.data.labels = ['No options'];
-        questionOptionsChart.data.datasets[0].data = [1];
-        questionOptionsChart.update();
-        return;
-    }
-
-    console.log('Question options:', selectedQuestion.options);
-
-    // Create a mapping from value to label
-    const valueToLabel = {};
-    const optionCounts = {};
-
-    // Handle different option formats
-    selectedQuestion.options.forEach((option, index) => {
-        let value, label;
-
-        if (selectedQuestion.type === 'stars') {
-            // For stars, value is the number of stars (1, 2, 3, etc.)
-            value = String(index + 1);
-            label = option; // The formatted star string (★, ★★, etc.)
-        } else if (selectedQuestion.type === 'rating') {
-            // For rating, value is the rating number (1, 2, 3, etc.)
-            value = String(index + 1);
-            label = option; // The rating number as string
-        } else if (typeof option === 'object' && option !== null) {
-            // If option is an object, get value and label separately
-            value = String(option.value || option.label || '');
-            label = option.label || option.value || '';
-        } else {
-            // If option is a simple value, use it as both value and label
-            value = String(option);
-            label = option;
-
-            // Also create potential mappings for different formats
-            // For example, map "الخيار 1" to "option1"
-            const optionNumber = index + 1;
-            const potentialValue = `option${optionNumber}`;
-            valueToLabel[potentialValue] = label;
-        }
-
-        valueToLabel[value] = label;
-        optionCounts[value] = 0;
-    });
-
-    console.log('Value to label mapping:', valueToLabel);
-    console.log('Initial option counts:', optionCounts);
-
-    // Log responses structure
-    console.log('Total responses:', responses.length);
-    console.log('First response sample:', responses[0]);
-
-    responses.forEach((response, responseIndex) => {
-        console.log(`Processing response ${responseIndex}:`, response);
-
-        const answer = response.answers.find(a => a.question_id === questionId);
-        console.log(`Answer for question ${questionId}:`, answer);
-
-        if (!answer) {
-            console.log(`No answer found for question ${questionId} in response ${responseIndex}`);
-            return;
-        }
-
-        if (selectedQuestion.type === 'checkbox') {
-            console.log('Processing checkbox answer:', answer.answer_option);
-
-            let options = [];
-            if (Array.isArray(answer.answer_option)) {
-                options = answer.answer_option;
-                console.log('Options is array:', options);
-            } else if (answer.answer_option) {
-                try {
-                    options = JSON.parse(answer.answer_option);
-                    console.log('Parsed options from JSON:', options);
-                } catch (e) {
-                    console.log('Failed to parse JSON, using as string:', answer.answer_option);
-                    options = [answer.answer_option];
-                }
+        document.getElementById('questionSelect').addEventListener('change', function(e) {
+            const questionId = parseInt(e.target.value);
+            if (!questionId) {
+                questionOptionsChart.data.labels = ['No data'];
+                questionOptionsChart.data.datasets[0].data = [1];
+                questionOptionsChart.update();
+                return;
             }
 
-            options.forEach(option => {
-                const value = String(option);
-                console.log(`Processing option value: ${value}`);
+            const selectedQuestion = questionsWithOptions.find(q => q.id === questionId);
+            if (!selectedQuestion || !selectedQuestion.options || selectedQuestion.options.length === 0) {
+                questionOptionsChart.data.labels = ['No options'];
+                questionOptionsChart.data.datasets[0].data = [1];
+                questionOptionsChart.update();
+                return;
+            }
 
-                // Try to find a matching key in our mapping
-                let matchedKey = null;
-                if (optionCounts.hasOwnProperty(value)) {
-                    matchedKey = value;
-                } else if (valueToLabel.hasOwnProperty(value)) {
-                    // This value maps to a label, so we need to find the original key
-                    for (const key in optionCounts) {
-                        if (valueToLabel[key] === valueToLabel[value]) {
-                            matchedKey = key;
-                            break;
+            // Create a mapping from value to label
+            const valueToLabel = {};
+            const optionCounts = {};
+
+            // Handle different option formats
+            selectedQuestion.options.forEach((option, index) => {
+                let value, label;
+                if (selectedQuestion.type === 'stars') {
+                    // For stars, value is the number of stars (1, 2, 3, etc.)
+                    value = String(index + 1);
+                    label = option; // The formatted star string (★, ★★, etc.)
+                } else if (selectedQuestion.type === 'rating') {
+                    // For rating, value is the rating number (1, 2, 3, etc.)
+                    value = String(index + 1);
+                    label = option; // The rating number as string
+                } else if (typeof option === 'object' && option !== null) {
+                    // If option is an object, get value and label separately
+                    value = String(option.value || option.label || '');
+                    label = option.label || option.value || '';
+                } else {
+                    // If option is a simple value, use it as both value and label
+                    value = String(option);
+                    label = option;
+                    // Also create potential mappings for different formats
+                    const optionNumber = index + 1;
+                    const potentialValue = `option${optionNumber}`;
+                    valueToLabel[potentialValue] = label;
+                }
+                valueToLabel[value] = label;
+                optionCounts[value] = 0;
+            });
+
+            // Process responses
+            responses.forEach(response => {
+                const answer = response.answers.find(a => a.question_id === questionId);
+                if (!answer) return;
+
+                if (selectedQuestion.type === 'checkbox') {
+                    let options = [];
+                    if (Array.isArray(answer.answer_option)) {
+                        options = answer.answer_option;
+                    } else if (answer.answer_option) {
+                        try {
+                            options = JSON.parse(answer.answer_option);
+                        } catch (e) {
+                            options = [answer.answer_option];
                         }
                     }
-                } else {
-                    // Try to extract a number from the value and match with index
-                    const match = value.match(/option(\d+)/i);
-                    if (match) {
-                        const optionNumber = parseInt(match[1]);
-                        const optionIndex = optionNumber - 1;
-                        if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
-                            // Find the key for this option
+
+                    options.forEach(option => {
+                        const value = String(option);
+                        let matchedKey = null;
+
+                        if (optionCounts.hasOwnProperty(value)) {
+                            matchedKey = value;
+                        } else if (valueToLabel.hasOwnProperty(value)) {
                             for (const key in optionCounts) {
-                                if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+                                if (valueToLabel[key] === valueToLabel[value]) {
                                     matchedKey = key;
                                     break;
                                 }
                             }
+                        } else {
+                            const match = value.match(/option(\d+)/i);
+                            if (match) {
+                                const optionNumber = parseInt(match[1]);
+                                const optionIndex = optionNumber - 1;
+                                if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+                                    for (const key in optionCounts) {
+                                        if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+                                            matchedKey = key;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+                            optionCounts[matchedKey]++;
+                        }
+                    });
+                } else {
+                    const value = String(answer.answer_text || '');
+                    let processedValue = value;
+
+                    if (selectedQuestion.type === 'stars' || selectedQuestion.type === 'rating') {
+                        const numValue = parseInt(value);
+                        if (!isNaN(numValue)) {
+                            processedValue = String(Math.max(1, Math.min(5, numValue)));
                         }
                     }
-                }
 
-                if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
-                    optionCounts[matchedKey]++;
-                    console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
-                } else {
-                    console.log(`Option value ${value} not found in question options`);
-                }
-            });
-        } else {
-            console.log('Processing non-checkbox answer:', answer.answer_text);
-            const value = String(answer.answer_text || '');
-            console.log(`Processing value: ${value}`);
-
-            // For stars and rating, ensure the value is within 1-5 range
-            let processedValue = value;
-            if (selectedQuestion.type === 'stars' || selectedQuestion.type === 'rating') {
-                const numValue = parseInt(value);
-                if (!isNaN(numValue)) {
-                    // Ensure the value is between 1 and 5
-                    processedValue = String(Math.max(1, Math.min(5, numValue)));
-                }
-            }
-
-            // Try to find a matching key in our mapping
-            let matchedKey = null;
-            if (optionCounts.hasOwnProperty(processedValue)) {
-                matchedKey = processedValue;
-            } else if (valueToLabel.hasOwnProperty(processedValue)) {
-                // This value maps to a label, so we need to find the original key
-                for (const key in optionCounts) {
-                    if (valueToLabel[key] === valueToLabel[processedValue]) {
-                        matchedKey = key;
-                        break;
-                    }
-                }
-            } else {
-                // Try to extract a number from the value and match with index
-                const match = processedValue.match(/option(\d+)/i);
-                if (match) {
-                    const optionNumber = parseInt(match[1]);
-                    const optionIndex = optionNumber - 1;
-                    if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
-                        // Find the key for this option
+                    let matchedKey = null;
+                    if (optionCounts.hasOwnProperty(processedValue)) {
+                        matchedKey = processedValue;
+                    } else if (valueToLabel.hasOwnProperty(processedValue)) {
                         for (const key in optionCounts) {
-                            if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+                            if (valueToLabel[key] === valueToLabel[processedValue]) {
                                 matchedKey = key;
                                 break;
                             }
                         }
+                    } else {
+                        const match = processedValue.match(/option(\d+)/i);
+                        if (match) {
+                            const optionNumber = parseInt(match[1]);
+                            const optionIndex = optionNumber - 1;
+                            if (optionIndex >= 0 && optionIndex < selectedQuestion.options.length) {
+                                for (const key in optionCounts) {
+                                    if (valueToLabel[key] === selectedQuestion.options[optionIndex]) {
+                                        matchedKey = key;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
+                        optionCounts[matchedKey]++;
+                    }
+                }
+            });
+
+            // Convert value counts to label counts for display
+            const labels = [];
+            const data = [];
+            for (const value in optionCounts) {
+                labels.push(valueToLabel[value]);
+                data.push(optionCounts[value]);
+            }
+
+            const total = data.reduce((a, b) => a + b, 0);
+            if (total === 0) {
+                questionOptionsChart.data.labels = ['No responses'];
+                questionOptionsChart.data.datasets[0].data = [1];
+            } else {
+                questionOptionsChart.data.labels = labels;
+                questionOptionsChart.data.datasets[0].data = data;
+            }
+
+            questionOptionsChart.update('none');
+            setTimeout(() => {
+                questionOptionsChart.resize();
+            }, 100);
+        });
+
+        // Function to export all statistics as PDF
+
+    });
+         function exportStatisticsAsPDF() {
+            // Show loading overlay
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div>Generating PDF...</div>
+                </div>
+            `;
+            document.body.appendChild(loadingOverlay);
+
+            // Create a new div for PDF content
+            const pdfContent = document.createElement('div');
+            pdfContent.className = 'pdf-export';
+
+            // Add RTL class if needed
+            if (window.currentLocale === 'ar') {
+                pdfContent.classList.add('rtl');
+            }
+
+            // Add title and date
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'text-center mb-5';
+            titleDiv.innerHTML = `
+                <h1>Survey Statistics Report</h1>
+                <p>Generated on: ${new Date().toLocaleDateString()}</p>
+            `;
+            pdfContent.appendChild(titleDiv);
+
+            // Clone statistics cards
+            const statsCards = document.querySelector('.row.g-5.g-xl-8').cloneNode(true);
+            pdfContent.appendChild(statsCards);
+
+            // Clone charts row
+            const chartsRow = document.querySelectorAll('.row.g-5.g-xl-8')[1].cloneNode(true);
+            pdfContent.appendChild(chartsRow);
+
+            // Clone questions chart
+            const questionsChartRow = document.querySelectorAll('.row.g-5.g-xl-8')[2].cloneNode(true);
+            pdfContent.appendChild(questionsChartRow);
+
+            // Clone questions table
+            const tableRow = document.querySelector('.row.g-5.g-xl-8:last-child').cloneNode(true);
+            pdfContent.appendChild(tableRow);
+
+            // Remove export button and menu
+            const exportButton = pdfContent.querySelector('button[data-kt-menu-trigger="click"]');
+            if (exportButton) exportButton.remove();
+            const exportMenu = pdfContent.querySelector('.menu.menu-sub');
+            if (exportMenu) exportMenu.remove();
+
+            // Remove question select dropdown
+            const questionSelect = pdfContent.querySelector('#questionSelect');
+            if (questionSelect) questionSelect.remove();
+
+            // Replace canvas elements with images
+            function replaceCanvasWithImage(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                if (canvas) {
+                    const dataURL = canvas.toDataURL('image/png');
+                    const img = document.createElement('img');
+                    img.src = dataURL;
+                    img.style.width = '100%';
+                    img.style.height = canvas.style.height || '300px';
+
+                    // Find the corresponding canvas in the PDF content and replace it
+                    const pdfCanvas = pdfContent.querySelector(`#${canvasId}`);
+                    if (pdfCanvas) {
+                        pdfCanvas.parentNode.replaceChild(img.cloneNode(true), pdfCanvas);
                     }
                 }
             }
 
-            if (matchedKey !== null && optionCounts.hasOwnProperty(matchedKey)) {
-                optionCounts[matchedKey]++;
-                console.log(`Incremented count for ${matchedKey}: ${optionCounts[matchedKey]}`);
-            } else {
-                console.log(`Value ${processedValue} not found in question options`);
-            }
+            // Replace all charts with images
+            replaceCanvasWithImage('questionsChart');
+            replaceCanvasWithImage('timelineChart');
+            replaceCanvasWithImage('questionOptionsChart');
+
+            // Configure PDF options
+            const opt = {
+                margin: 10,
+                filename: 'survey-statistics.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0,
+                    backgroundColor: '#ffffff',
+                    letterRendering: true
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            // Generate PDF
+            html2pdf().set(opt).from(pdfContent).save().then(() => {
+                // Remove loading overlay
+                document.body.removeChild(loadingOverlay);
+            }).catch(err => {
+                console.error('PDF generation failed:', err);
+                alert('Failed to generate PDF. Please try again.');
+                document.body.removeChild(loadingOverlay);
+            });
         }
-    });
-
-    console.log('Final option counts:', optionCounts);
-
-    // Convert value counts to label counts for display
-    const labels = [];
-    const data = [];
-
-    for (const value in optionCounts) {
-        labels.push(valueToLabel[value]);
-        data.push(optionCounts[value]);
-    }
-
-    const total = data.reduce((a, b) => a + b, 0);
-    console.log('Total responses for this question:', total);
-    console.log('Chart labels:', labels);
-    console.log('Chart data:', data);
-
-    if (total === 0) {
-        console.log('No responses found, showing fallback');
-        questionOptionsChart.data.labels = ['No responses'];
-        questionOptionsChart.data.datasets[0].data = [1];
-    } else {
-        questionOptionsChart.data.labels = labels;
-        questionOptionsChart.data.datasets[0].data = data;
-        console.log('Updating chart with actual data');
-    }
-
-    questionOptionsChart.update('none');
-    setTimeout(() => {
-        questionOptionsChart.resize();
-    }, 100);
-});    });
 </script>
-{{-- @endpush --}}
 @endsection
