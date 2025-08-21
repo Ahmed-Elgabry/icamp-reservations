@@ -19,6 +19,7 @@ use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderSignatureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1169,7 +1170,6 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 use App\Http\Controllers\Dashboard\TermsSittngController;
 use App\Http\Controllers\Dashboard\ViolationController;
 use App\Http\Controllers\Dashboard\ViolationTypeController;
-use App\Http\Controllers\OrderSignatureController;
 use App\Http\Controllers\statisticsController;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
