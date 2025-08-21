@@ -165,7 +165,7 @@
                         <!--end::Table row-->
                     </thead>
                     <!--end::Table head-->
-                    
+
                     <!--begin::Table body-->
                     <tbody class="fw-bold text-gray-600">
                         @foreach ($orders as $order)
@@ -243,12 +243,12 @@
                                 @if (request('status') == 'delayed')
                                     <td class="text-nowrap">
                                         {{ $order->date . ' / '  . $order->expired_price_offer }}
-                                    </td>    
+                                    </td>
                                     <td>
                                         {{ Str::limit($order->delayed_reson , 50)}}
-                                    </td>    
+                                    </td>
                                 @endif
-                                
+
                                 <!--begin::Order Status-->
 
                                 <td>
@@ -265,7 +265,7 @@
 
                                 <!--begin::Rate Link-->
                                 <td>
-                                    <a href="{{route('rate', $order->id)}}"
+                                    <a href="{{route('surveys.public', $order->id)}}"
                                         class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
                                         Click Rate <i class="fa fa-link"></i>
                                     </a>
