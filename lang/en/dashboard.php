@@ -1015,7 +1015,7 @@ return [
     'survey_email_thanks' => 'Thank you for your feedback!',
     'all_rights_reserved' => 'All Rights Reserved',
     'thank_you' => 'Thank You',
-    "thankyou_title" => "Thank you!",
+    "thankyou_title" => "Thank you",
     "thankyou_message" => "Your responses for the survey have been submitted successfully.",
     "back_home" => "Back to Home",
     "builder" => "Builder",

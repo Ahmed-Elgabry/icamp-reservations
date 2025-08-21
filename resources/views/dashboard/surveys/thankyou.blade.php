@@ -14,7 +14,7 @@
             <p class="lead mb-4">
                 {{ __('dashboard.thankyou_message') }}
             </p>
-            <a href="{{ url('/') }}" class="btn btn-primary">
+            <a href="funcamp.ae" class="btn btn-success">
                 {{ __('dashboard.back_home') }}
             </a>
         </div>

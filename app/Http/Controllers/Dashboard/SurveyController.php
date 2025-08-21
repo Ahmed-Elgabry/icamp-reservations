@@ -7,9 +7,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Survey;
 use App\Models\SurveyQuestion;
+use App\Models\SurveyResponse;
+use App\Exports\SurveyResultsExport;
+use App\Exports\SurveyStatisticsExport;
+use App\Exports\SurveyAnswersExport;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Maatwebsite\Excel\Facades\Excel;
+use Mpdf\Mpdf;
+use Mpdf\Output\Destination;
 
 class SurveyController extends Controller
 {
@@ -307,7 +314,7 @@ class SurveyController extends Controller
             'survey.questions.*.options' => 'nullable|array',
             'survey.questions.*.settings' => 'nullable|array',
             'survey.questions.*.settings.required' => 'sometimes|in:true,false,1,0',
-            'survey.questions.*.settings.points' => 'required|numeric',
+            'survey.questions.*.settings.points' => 'sometimes|numeric',
         ]);
 
         // Update survey
@@ -495,6 +502,202 @@ class SurveyController extends Controller
 
     public function settings_update(Request $request) {
 
+    }
+
+    /**
+     * Export survey results to Excel.
+     *
+     * @param  \App\Models\Survey  $survey
+     * @return \Illuminate\Http\Response
+     */
+    public function exportResultsExcel(Survey $survey)
+    {
+        $fileName = date('Y-m-d') . "-survey-results";
+        return Excel::download(new SurveyResultsExport($survey), $fileName . '.xlsx');
+    }
+
+    /**
+     * Export survey results to PDF.
+     *
+     * @param  \App\Models\Survey  $survey
+     * @return \Illuminate\Http\Response
+     */
+    public function exportResultsPdf(Survey $survey)
+    {
+        $responses = $survey->responses()->with(['answers.question', 'order.customer'])->latest()->get();
+
+        // HTML content for PDF
+        $html = view('dashboard.surveys.results_pdf', compact('survey', 'responses'))->render();
+
+        // Initialize mPDF
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        // Write HTML content
+        $mpdf->WriteHTML($html);
+
+        // Output the PDF
+        $fileName = date('Y-m-d') . "-survey-results.pdf";
+        return response($mpdf->Output($fileName, Destination::STRING_RETURN))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+    /**
+     * Export survey statistics to Excel.
+     *
+     * @param  \App\Models\Survey  $survey
+     * @return \Illuminate\Http\Response
+     */
+    public function exportStatisticsExcel(Survey $survey)
+    {
+        $fileName = date('Y-m-d') . "-survey-statistics";
+        return Excel::download(new SurveyStatisticsExport($survey), $fileName . '.xlsx');
+    }
+
+    /**
+     * Export survey statistics to PDF.
+     *
+     * @param  \App\Models\Survey  $survey
+     * @return \Illuminate\Http\Response
+     */
+    public function exportStatisticsPdf(Survey $survey)
+    {
+        $survey = Survey::with('questions')->find($survey->id);
+        $responses = $survey->responses()->with('answers.question')->get();
+        $totalResponses = $responses->count();
+
+        // Get question types distribution
+        $questionTypes = [
+            'text' => 0,
+            'textarea' => 0,
+            'radio' => 0,
+            'checkbox' => 0,
+            'select' => 0,
+            'stars' => 0,
+            'rating' => 0
+        ];
+        foreach ($survey->questions as $question) {
+            if (isset($questionTypes[$question->question_type])) {
+                $questionTypes[$question->question_type]++;
+            }
+        }
+
+        // Get responses by date for the last 7 days
+        $timelineData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $dateStr = $date->format('Y-m-d');
+            $timelineData[$dateStr] = $responses->where('created_at', '>=', $date->startOfDay())
+                ->where('created_at', '<=', $date->endOfDay())
+                ->count();
+        }
+
+        // Get all questions with answer counts for the table
+        $allQuestions = $survey->questions()
+            ->withCount(['answers' => function($query) {
+                $query->whereNotNull('answer_text');
+            }])
+            ->orderBy('answers_count', 'desc')
+            ->get();
+
+        // Prepare the data for the table
+        $allQuestionsData = $allQuestions->map(function ($question) {
+            return [
+                'id' => $question->id,
+                'title' => SurveyHelper::getLocalizedText($question->question_text),
+                'type' => $question->question_type,
+                'answers_count' => $question->answers_count
+            ];
+        });
+
+        // HTML content for PDF
+        $html = view('dashboard.surveys.statistics_pdf', compact(
+            'survey',
+            'totalResponses',
+            'questionTypes',
+            'timelineData',
+            'allQuestionsData'
+        ))->render();
+
+        // Initialize mPDF
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'L', // Landscape for better table display
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        // Write HTML content
+        $mpdf->WriteHTML($html);
+
+        // Output the PDF
+        $fileName = date('Y-m-d') . "-survey-statistics.pdf";
+        return response($mpdf->Output($fileName, Destination::STRING_RETURN))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+    /**
+     * Export survey answers to Excel.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function exportAnswersExcel($id)
+    {
+        $survey = Survey::with(['questions' => function ($query) {
+            $query->where('hidden', 0); // only non-hidden questions
+        }])->find(1);
+        $response = $survey->responses()->with(['answers.question', 'order.customer'])->findOrFail($id);
+
+        $fileName = date('Y-m-d') . "-survey-answers-" . $id;
+        return Excel::download(new SurveyAnswersExport($response), $fileName . '.xlsx');
+    }
+
+    /**
+     * Export survey answers to PDF.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function exportAnswersPdf($id)
+    {
+        $survey = Survey::with(['questions' => function ($query) {
+            $query->where('hidden', 0); // only non-hidden questions
+        }])->find(1);
+        $response = $survey->responses()->with(['answers.question', 'order.customer'])->findOrFail($id);
+
+        // HTML content for PDF
+        $html = view('dashboard.surveys.answer_pdf', compact('survey', 'response'))->render();
+
+        // Initialize mPDF
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        // Write HTML content
+        $mpdf->WriteHTML($html);
+
+        // Output the PDF
+        $fileName = date('Y-m-d') . "-survey-answers-" . $id . ".pdf";
+        return response($mpdf->Output($fileName, Destination::STRING_RETURN))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
 
 }

@@ -1384,10 +1384,18 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('survey/{response_id}/answer', [SurveyController::class, 'answer'])->name('surveys.answer')->middleware(['auth']);
     Route::put('surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update')->middleware(['auth']);
     Route::get('surveys/{survey}/results', [SurveyController::class, 'results'])->name('surveys.results')->middleware(['auth']);
-    Route::get('surveys/statistics', [SurveyController::class, 'statistics'])->name('surveys.statistics')->middleware(['auth']);
+    Route::get('surveys/{survey}/statistics', [SurveyController::class, 'statistics'])->name('surveys.statistics')->middleware(['auth']);
     Route::get('surveys/settings', [SurveyController::class, 'settings'])->name('surveys.settings')->middleware(['auth']);
     Route::put('surveys/{survey}/settings', [SurveyController::class, 'updateSettings'])->name('surveys.settings.update')->middleware(['auth']);
     Route::get('surveys/demo', [SurveyController::class, 'demo'])->name('surveys.demo');
+
+    // Export routes
+    Route::get('surveys/{survey}/results/export-excel', [SurveyController::class, 'exportResultsExcel'])->name('surveys.results.export.excel')->middleware(['auth']);
+    Route::get('surveys/{survey}/results/export-pdf', [SurveyController::class, 'exportResultsPdf'])->name('surveys.results.export.pdf')->middleware(['auth']);
+    Route::get('surveys/{survey}/statistics/export-excel', [SurveyController::class, 'exportStatisticsExcel'])->name('surveys.statistics.export.excel')->middleware(['auth']);
+    Route::get('surveys/{survey}/statistics/export-pdf', [SurveyController::class, 'exportStatisticsPdf'])->name('surveys.statistics.export.pdf')->middleware(['auth']);
+    Route::get('surveys/{survey}/answers/export-excel', [SurveyController::class, 'exportAnswersExcel'])->name('surveys.answers.export.excel')->middleware(['auth']);
+    Route::get('surveys/{survey}/answers/export-pdf', [SurveyController::class, 'exportAnswersPdf'])->name('surveys.answers.export.pdf')->middleware(['auth']);
 });
 
 // Public survey route
