@@ -188,12 +188,23 @@ class SurveyController extends Controller
         });
 
         // Get all questions with answer counts for the table
-        $allQuestions = $survey->questions()
-            ->withCount(['answers' => function($query) {
-                $query->whereNotNull('answer_text');
-            }])
-            ->orderBy('answers_count', 'desc')
-            ->get();
+        $allQuestions = $survey->questions->map(function ($question) {
+            // الأسئلة اللي تعتمد على خيارات
+            if (in_array($question->question_type, ['radio', 'checkbox', 'select', 'stars', 'rating'])) {
+                $question->answers_count = $question->answers()
+                    ->where(function($query) {
+                        $query->whereNotNull('answer_text')
+                            ->orWhereNotNull('answer_option');
+                    })
+                    ->count();
+            } else {
+                // الأسئلة النصية فقط
+                $question->answers_count = $question->answers()
+                    ->whereNotNull('answer_text')
+                    ->count();
+            }
+            return $question;
+        })->sortByDesc('answers_count');
 
         // Prepare the data for the table
         $allQuestionsData = $allQuestions->map(function ($question) {
@@ -601,9 +612,20 @@ class SurveyController extends Controller
 
         // Get all questions with answer counts for the table
         $allQuestions = $survey->questions->map(function ($question) {
-            $question->answers_count = $question->answers()
-                ->whereNotNull('answer_text')
-                ->count();
+            // الأسئلة اللي تعتمد على خيارات
+            if (in_array($question->question_type, ['radio', 'checkbox', 'select', 'stars', 'rating'])) {
+                $question->answers_count = $question->answers()
+                    ->where(function($query) {
+                        $query->whereNotNull('answer_text')
+                            ->orWhereNotNull('answer_option');
+                    })
+                    ->count();
+            } else {
+                // الأسئلة النصية فقط
+                $question->answers_count = $question->answers()
+                    ->whereNotNull('answer_text')
+                    ->count();
+            }
             return $question;
         })->sortByDesc('answers_count');
 
