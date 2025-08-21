@@ -9,52 +9,64 @@
         background: white;
         color: black;
     }
+
     .pdf-export .card {
         border: 1px solid #ddd;
         margin-bottom: 20px;
         box-shadow: none;
     }
+
     .pdf-export .card-header {
         background: #f8f9fa;
         border-bottom: 1px solid #ddd;
     }
+
     .pdf-export .table {
         border-collapse: collapse;
         width: 100%;
     }
+
     .pdf-export .table th,
     .pdf-export .table td {
         border: 1px solid #ddd;
         padding: 8px;
     }
+
     .pdf-export .badge {
         padding: 4px 8px;
         border-radius: 3px;
         font-weight: bold;
     }
+
     .pdf-export .badge-light-info {
         background: #e1f0ff;
         color: #009ef7;
     }
+
     .pdf-export .badge-light-primary {
         background: #e1e9ff;
         color: #0052cc;
     }
+
     .pdf-export .badge-light-success {
         background: #e8fff5;
         color: #50cd89;
     }
+
     .pdf-export .badge-light-warning {
         background: #fff8dd;
         color: #ffc700;
     }
+
     .pdf-export .badge-light-danger {
         background: #ffe2e5;
         color: #f1416c;
     }
+
     .no-print {
         display: none !important;
     }
+
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -68,18 +80,6 @@
         z-index: 9999;
         color: white;
         font-size: 18px;
-    }
-    /* RTL support for Arabic */
-    .rtl {
-        direction: rtl;
-        text-align: right;
-    }
-    .rtl .table th,
-    .rtl .table td {
-        text-align: right;
-    }
-    .rtl .text-end {
-        text-align: left !important;
     }
 </style>
 @endpush
@@ -296,13 +296,6 @@
                                     </a>
                                 </div>
                                 <!--end::Menu item-->
-                                <!--begin::Menu item-->
-                                <div class="menu-item px-3">
-                                    <a class="menu-link px-3" onclick="exportStatisticsAsPDF()">
-                                        @lang('dashboard.export_all_as_pdf')
-                                    </a>
-                                </div>
-                                <!--end::Menu item-->
                             </div>
                             <!--end::Menu-->
                             <!--end::Export-->
@@ -359,13 +352,11 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Set current locale for RTL support
-        window.currentLocale = '{{ app()->getLocale() }}';
-
         // Questions Types Chart
         const questionsCtx = document.getElementById('questionsChart').getContext('2d');
         const questionsChart = new Chart(questionsCtx, {
@@ -416,12 +407,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right',
-                        labels: {
-                            font: {
-                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
-                            }
-                        }
+                        position: 'right'
                     }
                 }
             }
@@ -461,17 +447,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            precision: 0,
-                            font: {
-                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
-                            }
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            font: {
-                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
-                            }
+                            precision: 0
                         }
                     }
                 }
@@ -516,8 +492,7 @@
                         position: 'right',
                         labels: {
                             font: {
-                                size: 12,
-                                family: window.currentLocale === 'ar' ? 'Tahoma, Arial' : 'inherit'
+                                size: 12
                             },
                             padding: 15
                         }
@@ -735,9 +710,7 @@
         });
 
         // Function to export all statistics as PDF
-
-    });
-         function exportStatisticsAsPDF() {
+        function exportStatisticsAsPDF() {
             // Show loading overlay
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading-overlay';
@@ -751,14 +724,21 @@
             `;
             document.body.appendChild(loadingOverlay);
 
-            // Create a new div for PDF content
-            const pdfContent = document.createElement('div');
-            pdfContent.className = 'pdf-export';
+            // Clone the content container
+            const contentContainer = document.getElementById('kt_content_container').cloneNode(true);
 
-            // Add RTL class if needed
-            if (window.currentLocale === 'ar') {
-                pdfContent.classList.add('rtl');
-            }
+            // Add PDF-specific class
+            contentContainer.classList.add('pdf-export');
+
+            // Remove export button and menu
+            const exportButton = contentContainer.querySelector('button[data-kt-menu-trigger="click"]');
+            if (exportButton) exportButton.remove();
+            const exportMenu = contentContainer.querySelector('.menu.menu-sub');
+            if (exportMenu) exportMenu.remove();
+
+            // Remove question select dropdown
+            const questionSelect = contentContainer.querySelector('#questionSelect');
+            if (questionSelect) questionSelect.remove();
 
             // Add title and date
             const titleDiv = document.createElement('div');
@@ -767,56 +747,7 @@
                 <h1>Survey Statistics Report</h1>
                 <p>Generated on: ${new Date().toLocaleDateString()}</p>
             `;
-            pdfContent.appendChild(titleDiv);
-
-            // Clone statistics cards
-            const statsCards = document.querySelector('.row.g-5.g-xl-8').cloneNode(true);
-            pdfContent.appendChild(statsCards);
-
-            // Clone charts row
-            const chartsRow = document.querySelectorAll('.row.g-5.g-xl-8')[1].cloneNode(true);
-            pdfContent.appendChild(chartsRow);
-
-            // Clone questions chart
-            const questionsChartRow = document.querySelectorAll('.row.g-5.g-xl-8')[2].cloneNode(true);
-            pdfContent.appendChild(questionsChartRow);
-
-            // Clone questions table
-            const tableRow = document.querySelector('.row.g-5.g-xl-8:last-child').cloneNode(true);
-            pdfContent.appendChild(tableRow);
-
-            // Remove export button and menu
-            const exportButton = pdfContent.querySelector('button[data-kt-menu-trigger="click"]');
-            if (exportButton) exportButton.remove();
-            const exportMenu = pdfContent.querySelector('.menu.menu-sub');
-            if (exportMenu) exportMenu.remove();
-
-            // Remove question select dropdown
-            const questionSelect = pdfContent.querySelector('#questionSelect');
-            if (questionSelect) questionSelect.remove();
-
-            // Replace canvas elements with images
-            function replaceCanvasWithImage(canvasId) {
-                const canvas = document.getElementById(canvasId);
-                if (canvas) {
-                    const dataURL = canvas.toDataURL('image/png');
-                    const img = document.createElement('img');
-                    img.src = dataURL;
-                    img.style.width = '100%';
-                    img.style.height = canvas.style.height || '300px';
-
-                    // Find the corresponding canvas in the PDF content and replace it
-                    const pdfCanvas = pdfContent.querySelector(`#${canvasId}`);
-                    if (pdfCanvas) {
-                        pdfCanvas.parentNode.replaceChild(img.cloneNode(true), pdfCanvas);
-                    }
-                }
-            }
-
-            // Replace all charts with images
-            replaceCanvasWithImage('questionsChart');
-            replaceCanvasWithImage('timelineChart');
-            replaceCanvasWithImage('questionOptionsChart');
+            contentContainer.insertBefore(titleDiv, contentContainer.firstChild);
 
             // Configure PDF options
             const opt = {
@@ -829,8 +760,7 @@
                     logging: false,
                     scrollX: 0,
                     scrollY: 0,
-                    backgroundColor: '#ffffff',
-                    letterRendering: true
+                    backgroundColor: '#ffffff'
                 },
                 jsPDF: {
                     unit: 'mm',
@@ -841,7 +771,7 @@
             };
 
             // Generate PDF
-            html2pdf().set(opt).from(pdfContent).save().then(() => {
+            html2pdf().set(opt).from(contentContainer).save().then(() => {
                 // Remove loading overlay
                 document.body.removeChild(loadingOverlay);
             }).catch(err => {
@@ -850,5 +780,6 @@
                 document.body.removeChild(loadingOverlay);
             });
         }
+    });
 </script>
 @endsection

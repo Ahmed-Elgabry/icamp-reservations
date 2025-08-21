@@ -39,4 +39,17 @@ class SurveyQuestion extends Model
     {
         return $this->hasMany(SurveyAnswer::class);
     }
+
+
+        public function getAnswersCountAttribute()
+    {
+        // If loaded via withCount(), use that (no extra query)
+        if (array_key_exists('answers_count', $this->attributes)) {
+            return $this->attributes['answers_count'];
+        }
+
+        // Otherwise, calculate dynamically
+        return $this->answers()->count();
+    }
+
 }

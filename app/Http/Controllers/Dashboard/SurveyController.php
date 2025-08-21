@@ -600,12 +600,12 @@ class SurveyController extends Controller
         }
 
         // Get all questions with answer counts for the table
-        $allQuestions = $survey->questions()
-            ->withCount(['answers' => function($query) {
-                $query->whereNotNull('answer_text');
-            }])
-            ->orderBy('answers_count', 'desc')
-            ->get();
+        $allQuestions = $survey->questions->map(function ($question) {
+            $question->answers_count = $question->answers()
+                ->whereNotNull('answer_text')
+                ->count();
+            return $question;
+        })->sortByDesc('answers_count');
 
         // Prepare the data for the table
         $allQuestionsData = $allQuestions->map(function ($question) {
@@ -617,13 +617,62 @@ class SurveyController extends Controller
             ];
         });
 
+        // Get questions with options for the select dropdown - ADD THIS SECTION
+        $questionsWithOptions = $survey->questions()
+            ->whereIn('question_type', ['radio', 'checkbox', 'select', 'stars', 'rating'])
+            ->get()
+            ->map(function ($question) {
+                $formattedOptions = [];
+                if (in_array($question->question_type, ['stars', 'rating'])) {
+                    // For stars and rating, always generate options from 1 to 5
+                    for ($i = 1; $i <= $question->settings['points'] ?? 5; $i++) {
+                        if ($question->question_type === 'stars') {
+                            $formattedOptions[] = str_repeat('★', $i); // ★, ★★, ★★★, etc.
+                        } else {
+                            $formattedOptions[] = (string)$i; // 1, 2, 3, etc.
+                        }
+                    }
+                } elseif (is_array($question->options)) {
+                    foreach ($question->options as $key => $option) {
+                        // Handle different option formats
+                        if (is_array($option)) {
+                            // If option is an array, try to get the label
+                            if (isset($option['label'])) {
+                                $formattedOptions[] = SurveyHelper::getLocalizedText($option['label']);
+                            } else {
+                                $formattedOptions[] = is_string($key) ? $key : json_encode($option);
+                            }
+                        } elseif (is_object($option)) {
+                            // If option is an object, convert to array and handle
+                            $optionArray = (array)$option;
+                            if (isset($optionArray['label'])) {
+                                $formattedOptions[] = SurveyHelper::getLocalizedText($optionArray['label']);
+                            } else {
+                                $formattedOptions[] = is_string($key) ? $key : json_encode($optionArray);
+                            }
+                        } else {
+                            // If option is a simple value, use it directly
+                            $formattedOptions[] = (string)$option;
+                        }
+                    }
+                }
+                return [
+                    'id' => $question->id,
+                    'title' => SurveyHelper::getLocalizedText($question->question_text),
+                    'type' => $question->question_type,
+                    'options' => $formattedOptions
+                ];
+            });
+
         // HTML content for PDF
         $html = view('dashboard.surveys.statistics_pdf', compact(
             'survey',
             'totalResponses',
             'questionTypes',
             'timelineData',
-            'allQuestionsData'
+            'allQuestionsData',
+            'questionsWithOptions', // ADD THIS VARIABLE
+            'responses' // ADD THIS VARIABLE
         ))->render();
 
         // Initialize mPDF
