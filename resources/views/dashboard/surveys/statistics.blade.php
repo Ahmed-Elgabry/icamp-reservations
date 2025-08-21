@@ -102,7 +102,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Statistics Widget 1-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Body-->
                     <div class="card-body">
                         <!--begin::Statistics-->
@@ -140,7 +140,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Statistics Widget 2-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Body-->
                     <div class="card-body">
                         <!--begin::Statistics-->
@@ -182,7 +182,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Chart Widget 3-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Header-->
                     <div class="card-header border-0 pt-5">
                         <h3 class="card-title align-items-start flex-column">
@@ -207,7 +207,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Chart Widget 4-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Header-->
                     <div class="card-header border-0 pt-5 d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
@@ -246,7 +246,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Chart Widget 1-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Header-->
                     <div class="card-header border-0 pt-5">
                         <h3 class="card-title align-items-start flex-column">
