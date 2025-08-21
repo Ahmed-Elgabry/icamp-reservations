@@ -29,7 +29,7 @@ class CheckRoleMiddleware
     $permissions->push('logout');
     $permissions = $permissions->toArray();
     // some exception
-    $excpetions = ['edit-profile', 'home', 'logout', 'payments.print', 'orders.quote', 'orders.invoice', 'addons.print', 'warehouse_sales.show', 'warehouse_sales.store', 'warehouse_sales.destroy', 'warehouse_sales.update', 'stocks.destroyServiceStock', 'order.verified', 'payment-links.*' , 'payment-links.create' , 'payment-links.index'];
+    $excpetions = ['edit-profile', 'home', 'logout', 'payments.print', 'orders.quote', 'orders.invoice', 'addons.print', 'warehouse_sales.show', 'warehouse_sales.store', 'warehouse_sales.destroy', 'warehouse_sales.update', 'stocks.destroyServiceStock', 'order.verified', 'payment-links.*' , 'payment-links.create' , 'payment-links.index', 'stock.decrement'];
 
     $currunt_route = Route::currentRouteName();
     $route = Route::current();

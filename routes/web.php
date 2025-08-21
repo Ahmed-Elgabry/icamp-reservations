@@ -232,7 +232,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.index',
         'title' => 'dashboard.stocks',
         'type' => 'parent',
-        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock' , 'stocks.destroyServiceReport']
+        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock' , 'stocks.destroyServiceReport', 'stock.decrement']
     ]);
 
     # stocks store
@@ -293,6 +293,12 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'uses' => 'StockController@destroyServiceReport',
         'as' => 'stocks.destroyServiceReport',
         'title' => ['actions.delete', 'dashboard.stocks']
+    ]);
+
+    Route::post('stock/decrement', [
+        'uses' => 'OrderController@decrmentOrIncrementStock',
+        'as' => 'stock.decrement',
+        'title' => ['actions.decrmentStock', 'dashboard.stocks']
     ]);
 
     /*------------ end Of stocks ----------*/

@@ -54,7 +54,7 @@ class Order extends Model
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'order_stock')
-            ->withPivot('quantity', 'stock_id', 'service_id', 'image');
+            ->withPivot('quantity', 'stock_id', 'service_id');
     }
 
     public function preLoginImages()
