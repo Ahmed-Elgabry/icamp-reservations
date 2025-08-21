@@ -216,11 +216,45 @@
             <div class="col-xl-12">
                 <div class="card card-xl-stretch mb-5 mb-xl-8">
                     <!--begin::Header-->
-                    <div class="card-header border-0 pt-5">
-                        <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold fs-3 mb-1">@lang('dashboard.all_questions')</span>
-                            <span class="text-muted fw-semibold fs-7">@lang('dashboard.all_questions_desc')</span>
-                        </h3>
+                    <div class="card-header border-0 pt-5 d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold fs-3 mb-1">@lang('dashboard.all_questions')</span>
+                                <span class="text-muted fw-semibold fs-7">@lang('dashboard.all_questions_desc')</span>
+                            </h3>
+                        </div>
+                        <div>
+                            <!--begin::Export-->
+                            <button type="button" class="btn btn-flex btn-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                <span class="svg-icon svg-icon-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <rect opacity="0.3" x="12.75" y="4.25" width="12" height="2" rx="1" transform="rotate(90 12.75 4.25)" fill="currentColor" />
+                                        <path d="M12.0573 6.11875L13.5203 7.87435C13.9121 8.34457 14.6232 8.37683 15.056 7.94401C15.4457 7.5543 15.4641 6.92836 15.0979 6.51643L12.4974 3.59084C12.0996 3.14332 11.4004 3.14332 11.0026 3.59084L8.40206 6.51643C8.0359 6.92836 8.0543 7.5543 8.44401 7.94401C8.87683 8.37683 9.58785 8.34458 9.9797 7.87435L11.4427 6.11875C11.6026 5.92684 11.8974 5.92684 12.0573 6.11875Z" fill="currentColor" />
+                                        <path d="M18.75 8.25H17.25C16.8358 8.25 16.5 8.58579 16.5 9C16.5 9.41421 16.8358 9.75 17.25 9.75H18C18.4142 9.75 18.75 10.0858 18.75 10.5V16.5C18.75 16.9142 18.4142 17.25 18 17.25H6C5.58579 17.25 5.25 16.9142 5.25 16.5V10.5C5.25 10.0858 5.58579 9.75 6 9.75H6.75C7.16421 9.75 7.5 9.41421 7.5 9C7.5 8.58579 7.16421 8.25 6.75 8.25H5.25C4.42157 8.25 3.75 8.92157 3.75 9.75V17.25C3.75 18.0784 4.42157 18.75 5.25 18.75H18.75C19.5784 18.75 20.25 18.0784 20.25 17.25V9.75C20.25 8.92157 19.5784 8.25 18.75 8.25Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                @lang('dashboard.export')
+                            </button>
+                            <!--begin::Menu-->
+                            <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-200px py-4" data-kt-menu="true">
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                    <a href="{{ route('surveys.statistics.export.excel', $survey->id) }}" class="menu-link px-3">
+                                        @lang('dashboard.export_as_excel')
+                                    </a>
+                                </div>
+                                <!--end::Menu item-->
+                                <!--begin::Menu item-->
+                                <div class="menu-item px-3">
+                                    <a href="{{ route('surveys.statistics.export.pdf', $survey->id) }}" class="menu-link px-3">
+                                        @lang('dashboard.export_as_pdf')
+                                    </a>
+                                </div>
+                                <!--end::Menu item-->
+                            </div>
+                            <!--end::Menu-->
+                            <!--end::Export-->
+                        </div>
                     </div>
                     <!--end::Header-->
                     <!--begin::Body-->

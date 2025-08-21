@@ -107,24 +107,6 @@
         </tbody>
     </table>
 
-    <h2>{{ __('dashboard.surveys_by_date') }}</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>{{ __('dashboard.date') }}</th>
-                <th>{{ __('dashboard.responses_count') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($timelineData as $date => $count)
-                <tr>
-                    <td>{{ $date }}</td>
-                    <td>{{ $count }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
     <h2>{{ __('dashboard.question_types') }}</h2>
     <table>
         <thead>
