@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('request_id')->nullable(); // Paymennt Request ID
             $table->string('order_id_paymennt')->nullable(); // Paymennt Order ID
             $table->timestamps();
-            
+
             $table->index(['status', 'created_at']);
             $table->index(['customer_id', 'status']);
         });

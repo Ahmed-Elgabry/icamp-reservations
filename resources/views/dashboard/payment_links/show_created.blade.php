@@ -16,7 +16,7 @@
                                 <a href="{{ route('home') }}">{{ __('dashboard.home') }}</a>
                             </li>
                             <li class="breadcrumb-item">
-                                <a href="{{ route('payment-links.index') }}">{{ __('dashboard.payment-links') }}</a>
+                                <a href="{{ route('payment-links.index', ['order_id' => $order->id]) }}">{{ __('dashboard.payment-links') }}</a>
                             </li>
                             <li class="breadcrumb-item active">{{ __('dashboard.payment_link_created') }}</li>
                         </ol>
@@ -39,6 +39,12 @@
                     <div>
                         <h4 class="alert-heading">{{ __('dashboard.payment_link_creation_success') }}</h4>
                         <p class="mb-0">{{ __('dashboard.payment_link_has_been_created') }}</p>
+                        @if(request('email_sent'))
+                            <div class="mt-2">
+                                <i class="fa fa-envelope text-success me-2"></i>
+                                <small class="text-success">{{ __('dashboard.email_sent_to_customer') }}</small>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -75,7 +81,7 @@
                     <div class="text-center mt-4">
                         <div id="qrcode" class="d-inline-block"></div>
                         <p class="mt-2 text-muted">{{ __('dashboard.scan_qr_code_to_pay') }}</p>
-                        <button id="downloadQrBtn" class="btn btn-outline-secondary mt-2">
+                        <button id="downloadQrBtn" class="btn btn-outline-secondary mt-2" disabled>
                             <i class="fa fa-download"></i> {{ __('dashboard.download_qr_code') }}
                         </button>
                     </div>
@@ -90,9 +96,17 @@
                 <a href="{{ route('payment-links.index', ['order_id' => $order->id]) }}" class="btn btn-outline-primary me-2">
                     <i class="fa fa-list"></i> {{ __('dashboard.view_payment_links') }}
                 </a>
-                <a href="{{ route('payment-links.create', ['order_id' => $order->id]) }}" class="btn btn-success">
+                <a href="{{ route('payment-links.create', ['order_id' => $order->id]) }}" class="btn btn-success me-2">
                     <i class="fa fa-plus"></i> {{ __('dashboard.create_new_payment_link') }}
                 </a>
+                
+                @if($order->customer && $order->customer->email)
+                    <button class="btn btn-warning resend-email-btn" 
+                            data-id="{{ $paymentLink->id }}"
+                            data-customer-name="{{ $order->customer->name ?? __('dashboard.not_specified') }}">
+                        <i class="fa fa-envelope"></i> {{ __('dashboard.resend_email') }}
+                    </button>
+                @endif
             </div>
         </div>
     </div>
@@ -100,6 +114,7 @@
 
 <!-- Include QR Code Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -119,15 +134,51 @@ document.addEventListener('DOMContentLoaded', function() {
         generateQRCodeCanvas("{{ $payment_url }}");
         
         console.log('QR Code generated successfully!');
+        console.log('Payment URL:', "{{ $payment_url }}");
     } catch (error) {
         console.error('QR Code generation error:', error);
-        document.getElementById('qrcode').innerHTML = '<p class="text-danger">خطأ في إنشاء رمز QR</p>';
-        document.getElementById('downloadQrBtn').style.display = 'none';
+        console.log('Trying fallback QR code generation...');
+        
+        // Try fallback method using QRCode.js
+        try {
+            if (typeof QRCode !== 'undefined') {
+                const qrcodeElement = document.getElementById('qrcode');
+                qrcodeElement.innerHTML = '';
+                
+                QRCode.toCanvas(qrcodeElement, "{{ $payment_url }}", {
+                    width: 200,
+                    margin: 2,
+                    color: {
+                        dark: '#000000',
+                        light: '#FFFFFF'
+                    }
+                }, function (error, canvas) {
+                    if (error) {
+                        console.error('Fallback QR code generation failed:', error);
+                        qrcodeElement.innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
+                        document.getElementById('downloadQrBtn').style.display = 'none';
+                    } else {
+                        console.log('Fallback QR code generated successfully');
+                        // Store canvas for download
+                        qrCodeDataURL = canvas.toDataURL('image/png');
+                        document.getElementById('downloadQrBtn').disabled = false;
+                    }
+                });
+            } else {
+                throw new Error('Fallback library not available');
+            }
+        } catch (fallbackError) {
+            console.error('Fallback QR code generation also failed:', fallbackError);
+            document.getElementById('qrcode').innerHTML = '<p class="text-danger">{{ __("dashboard.qr_code_creation_error") }}</p>';
+            document.getElementById('downloadQrBtn').style.display = 'none';
+        }
     }
 
     // Generate QR Code canvas for download
     function generateQRCodeCanvas(url) {
         try {
+            console.log('Generating QR code canvas for URL:', url);
+            
             const qr = qrcode(0, 'M');
             qr.addData(url);
             qr.make();
@@ -138,6 +189,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const cellSize = 8;
             const margin = 32;
             const size = modules * cellSize + (margin * 2);
+            
+            console.log('Canvas size:', size, 'Modules:', modules);
             
             canvas.width = size;
             canvas.height = size;
@@ -163,10 +216,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Store the data URL for download
             qrCodeDataURL = canvas.toDataURL('image/png');
+            console.log('QR Code canvas generated successfully. Data URL length:', qrCodeDataURL.length);
+            
+            // Enable download button
+            document.getElementById('downloadQrBtn').disabled = false;
             
         } catch (error) {
             console.error('Canvas QR Code generation error:', error);
             document.getElementById('downloadQrBtn').style.display = 'none';
+            qrCodeDataURL = null;
         }
     }
 
@@ -179,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Change button appearance while copying
         button.disabled = true;
-        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري النسخ...';
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.copying") }}';
         
         // Select the text in the input field
         input.select();
@@ -193,32 +251,41 @@ document.addEventListener('DOMContentLoaded', function() {
             navigator.clipboard.writeText(textToCopy).then(function() {
                 copySuccess = true;
                 showSuccessState(button, originalText);
-                showToast('تم نسخ رابط الدفع بنجاح', 'success');
+                showToast('{{ __("dashboard.payment_link_copied_success") }}', 'success');
             }).catch(function(err) {
                 console.error('Clipboard API failed: ', err);
                 // Try fallback method
                 tryFallbackCopy(textToCopy, button, originalText);
             });
+        } else {
+            // Method 2: execCommand fallback
+            tryFallbackCopy(textToCopy, button, originalText);
+        }
+    });
     
     // Download QR Code functionality
     document.getElementById('downloadQrBtn').addEventListener('click', function() {
         const button = this;
         const originalText = button.innerHTML;
         
+        console.log('Download button clicked. QR Code data URL available:', !!qrCodeDataURL);
+        
         if (!qrCodeDataURL) {
-            showToast('فشل في تحضير رمز QR للتحميل', 'error');
+            showToast('{{ __("dashboard.failed_to_prepare_qr_download") }}', 'error');
+            console.error('No QR code data URL available for download');
             return;
         }
         
         try {
             // Change button state
             button.disabled = true;
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري التحميل...';
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __("dashboard.downloading") }}';
             
             // Create download link
             const downloadLink = document.createElement('a');
             downloadLink.href = qrCodeDataURL;
             downloadLink.download = 'payment-qr-code.png';
+            downloadLink.style.display = 'none';
             
             // Trigger download
             document.body.appendChild(downloadLink);
@@ -228,9 +295,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show success state
             button.classList.remove('btn-outline-secondary');
             button.classList.add('btn-success');
-            button.innerHTML = '<i class="fa fa-check"></i> تم التحميل!';
+            button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.downloaded") }}';
             
-            showToast('تم تحميل رمز QR بنجاح', 'success');
+            showToast('{{ __("dashboard.qr_code_downloaded_success") }}', 'success');
+            console.log('QR code download initiated successfully');
             
             // Reset button after 2 seconds
             setTimeout(function() {
@@ -244,12 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Download failed:', error);
             button.disabled = false;
             button.innerHTML = originalText;
-            showToast('فشل في تحميل رمز QR', 'error');
-        }
-    });
-        } else {
-            // Method 2: execCommand fallback
-            tryFallbackCopy(textToCopy, button, originalText);
+            showToast('{{ __("dashboard.failed_to_download_qr") }}', 'error');
         }
     });
     
@@ -273,17 +336,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (successful) {
                 showSuccessState(button, originalText);
-                showToast('تم نسخ رابط الدفع بنجاح', 'success');
+                showToast('{{ __("dashboard.payment_link_copied_success") }}', 'success');
             } else {
                 throw new Error('Copy command failed');
             }
         } catch (err) {
             console.error('All copy methods failed: ', err);
             resetButton(button, originalText);
-            showToast('فشل في نسخ الرابط', 'error');
+            showToast('{{ __("dashboard.copy_failed_error") }}', 'error');
             
             // Last resort: prompt user to copy manually
-            prompt('انسخ الرابط يدوياً:', text);
+            prompt('{{ __("dashboard.copy_manually_prompt") }}', text);
         }
     }
 
@@ -291,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSuccessState(button, originalText) {
         button.classList.remove('btn-success');
         button.classList.add('btn-info');
-        button.innerHTML = '<i class="fa fa-check"></i> تم النسخ بنجاح!';
+        button.innerHTML = '<i class="fa fa-check"></i> {{ __("dashboard.copy_success") }}';
         
         // Reset button after 2 seconds
         setTimeout(function() {
@@ -357,10 +420,87 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Optional: Add click to copy functionality on the QR code
     qrcodeElement.style.cursor = 'pointer';
-    qrcodeElement.title = 'انقر لنسخ الرابط';
+    qrcodeElement.title = '{{ __("dashboard.click_to_copy_link") }}';
     qrcodeElement.addEventListener('click', function() {
         document.getElementById('copyLinkBtn').click();
     });
+
+    // Handle Resend Email button clicks
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.resend-email-btn')) {
+            const button = e.target.closest('.resend-email-btn');
+            const id = button.getAttribute('data-id');
+            const customerName = button.getAttribute('data-customer-name');
+            
+            console.log('Resend email button clicked:', { id, customerName });
+            
+            // Confirm before sending
+            if (!confirm('{{ __('dashboard.confirm_resend_email') }} ' + customerName + '?')) {
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __('dashboard.sending') }}...';
+            
+            try {
+                console.log('Sending request to:', `/payment-links/${id}/resend-email`);
+                const response = await fetch(`/payment-links/${id}/resend-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response result:', result);
+                
+                if (result.success) {
+                    showToast(result.message || '{{ __('dashboard.payment_link_email_resent_success') }}', 'success');
+                } else {
+                    showToast(result.message || '{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
+                }
+            } catch (error) {
+                console.error('Error in resend email:', error);
+                showToast('{{ __('dashboard.payment_link_email_resent_error') }}', 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fa fa-envelope"></i> {{ __('dashboard.resend_email') }}';
+            }
+        }
+    });
+
+    // Show toast notification function
+    function showToast(message, type = 'success') {
+        const existingToasts = document.querySelectorAll('.custom-toast');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toastId = 'toast_' + Date.now();
+        const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
+        const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        
+        const toastElement = document.createElement('div');
+        toastElement.id = toastId;
+        toastElement.className = 'custom-toast';
+        toastElement.style.backgroundColor = bgColor;
+        toastElement.innerHTML = `
+            <i class="fa ${icon} me-2"></i>
+            <strong>${message}</strong>
+            <button type="button" class="btn-close btn-close-white ms-2" onclick="document.getElementById('${toastId}').remove()"></button>
+        `;
+        
+        document.body.appendChild(toastElement);
+        
+        setTimeout(function() {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 3000);
+    }
 });
 </script>
 
@@ -435,13 +575,20 @@ document.addEventListener('DOMContentLoaded', function() {
         border-radius: 8px;
         min-width: 150px;
     }
-    
-    #downloadQrBtn:hover {
+     
+    #downloadQrBtn:hover:not(:disabled) {
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     
     #downloadQrBtn:disabled {
+        transform: none;
+        box-shadow: none;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    #downloadQrBtn:disabled:hover {
         transform: none;
         box-shadow: none;
     }

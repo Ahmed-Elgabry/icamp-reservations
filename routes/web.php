@@ -1,23 +1,24 @@
 <?php
 
 
-use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
-use Spatie\Permission\Models\Permission;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\statisticsController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\OrderSignatureController;
-use App\Http\Controllers\Dashboard\AdminController;
-use App\Http\Controllers\Dashboard\OrderController;
-use App\Http\Controllers\Dashboard\StockController;
-use App\Http\Controllers\Dashboard\MeetingController;
-use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Dashboard\ViolationController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Dashboard\AdminController;
+use App\Http\Controllers\Dashboard\DailyReportController;
+use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
+use App\Http\Controllers\Dashboard\GeneralPaymentsController;
+use App\Http\Controllers\Dashboard\MeetingController;
+use App\Http\Controllers\Dashboard\MeetingLocationController;
+use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\OrderController as DashboardOrderController;
+use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
+use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\QuestionController;
+use App\Http\Controllers\Dashboard\StockController;
+use App\Http\Controllers\Dashboard\SurveyController;
+use App\Http\Controllers\Dashboard\SurveySubmissionController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -232,7 +233,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.index',
         'title' => 'dashboard.stocks',
         'type' => 'parent',
+<<<<<<< HEAD
         'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock' , 'stocks.destroyServiceReport', 'stock.decrement']
+=======
+        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock', 'stocks.destroyServiceReport']
+>>>>>>> 042bd40ba119025098073279d7f47d0131a7e99f
     ]);
 
     # stocks store
@@ -427,7 +432,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'services.index',
         'title' => 'dashboard.services',
         'type' => 'parent',
-        'child' => ['services.store', 'services.show', 'services.edit', 'services.update', 'services.destroy' , 'services.reports.move']
+        'child' => ['services.store', 'services.show', 'services.edit', 'services.update', 'services.destroy', 'services.reports.move']
     ]);
 
     # services store
@@ -497,7 +502,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'orders.index',
         'title' => 'dashboard.orders',
         'type' => 'parent',
-        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll' , 'order.verified' , 'orders.accept_terms', 'orders.updateNotes']
+        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes']
     ]);
 
     # orders store
@@ -879,6 +884,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.add', 'dashboard.payment-links']
     ]);
 
+    # payment-links show created
+    Route::get('payment-links/created', [
+        'uses' => 'PaymentLinkController@showCreated',
+        'as' => 'payment-links.show-created',
+        'title' => ['actions.show', 'dashboard.payment_link_created']
+    ]);
+
     # payment-links test-connection
     Route::post('payment-links/test-connection', [
         'uses' => 'PaymentLinkController@testConnection',
@@ -922,6 +934,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.resend', 'dashboard.payment-links']
     ]);
 
+    # payment-links resend email
+    Route::post('payment-links/{paymentLink}/resend-email', [
+        'uses' => 'PaymentLinkController@resendEmail',
+        'as' => 'payment-links.resend-email',
+        'title' => ['actions.resend_email', 'dashboard.payment-links']
+    ]);
+
     # payment-links cancel
     Route::post('payment-links/{paymentLink}/cancel', [
         'uses' => 'PaymentLinkController@cancel',
@@ -956,8 +975,35 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payment-links.update-status',
         'title' => ['actions.update-status', 'dashboard.payment-links']
     ]);
+
+    # payment-links test email
+    Route::get('payment-links/test-email', [
+        'uses' => 'PaymentLinkController@testEmail',
+        'as' => 'payment-links.test-email',
+        'title' => ['actions.test_email', 'dashboard.payment-links']
+    ]);
+
+    # payment-links check-all-status
+    Route::post('payment-links/check-all-status', [
+        'uses' => 'PaymentLinkController@checkAllStatus',
+        'as' => 'payment-links.check-all-status',
+        'title' => ['actions.check_all_status', 'dashboard.payment-links']
+    ]);
     /*------------ end Of payment-links ----------*/
-    /*------------ start Of warehouse_sales ----------*/
+
+    /*------------ start Of webhooks ----------*/
+    # webhook for Paymennt
+    Route::post('webhooks/paymennt', [
+        'uses' => 'WebhookController@handle',
+        'as' => 'webhook.paymennt'
+    ])->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
+
+    # test webhook route
+    Route::get('webhook/test', function () {
+        return response()->json(['message' => 'Webhook route is working!']);
+    })->withoutMiddleware(['auth', 'admin-lang', 'web', 'check-role']);
+    /*------------ end Of webhooks ----------*/
+
     Route::get('warehouse-sales', [
         'uses' => 'WarehousesalesController@index',
         'as' => 'warehouse_sales.index',
@@ -1120,15 +1166,18 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 
 /*** update route if i added new routes  */
 
-use App\Http\Controllers\Dashboard\DailyReportController;
 use App\Http\Controllers\Dashboard\TermsSittngController;
-use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\ViolationController;
 use App\Http\Controllers\Dashboard\ViolationTypeController;
-use App\Http\Controllers\Dashboard\GeneralPaymentsController;
-use App\Http\Controllers\Dashboard\MeetingLocationController;
-use App\Http\Controllers\Dashboard\EquipmentDirectoryController;
-use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
-use App\Http\Controllers\Dashboard\OrderController as DashboardOrderController;
+use App\Http\Controllers\OrderSignatureController;
+use App\Http\Controllers\statisticsController;
+use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+
 
 Route::get('update-routes', function () {
     $routes_data = [];
@@ -1274,13 +1323,17 @@ Route::get('orders/check-customer-notices/{customerId}', [
     'as' => 'orders.check-customer-notices'
 ])->middleware(['auth']);
 
-// Paymennt Webhook Route
-Route::post('webhooks/paymennt', [App\Http\Controllers\PaymentWebhookController::class, 'handle'])
-    ->name('webhooks.paymennt');
+
 
 // Payment Callback Route
 Route::get('payment/callback', [App\Http\Controllers\PaymentWebhookController::class, 'callback'])
     ->name('payment.callback');
+
+// Test email route (public access)
+Route::get('test-email', [
+    'uses' => 'App\Http\Controllers\Dashboard\PaymentLinkController@testEmail',
+    'as' => 'test.email'
+]);
 
 Route::group(['middleware' => ['auth']], function () {
     Route::resource('daily-reports', 'Dashboard\DailyReportController');
@@ -1334,3 +1387,28 @@ Route::resource('violation-types', ViolationTypeController::class)
 
 Route::resource('violations', ViolationController::class)
     ->middleware(['auth']);
+
+
+Route::group(['middleware' => ['auth', 'admin']], function () {
+    Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);
+    Route::get('survey/{response_id}/answer', [SurveyController::class, 'answer'])->name('surveys.answer')->middleware(['auth']);
+    Route::put('surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update')->middleware(['auth']);
+    Route::get('surveys/{survey}/results', [SurveyController::class, 'results'])->name('surveys.results')->middleware(['auth']);
+    Route::get('surveys/{survey}/statistics', [SurveyController::class, 'statistics'])->name('surveys.statistics')->middleware(['auth']);
+    Route::get('surveys/settings', [SurveyController::class, 'settings'])->name('surveys.settings')->middleware(['auth']);
+    Route::put('surveys/{survey}/settings', [SurveyController::class, 'updateSettings'])->name('surveys.settings.update')->middleware(['auth']);
+    Route::get('surveys/demo', [SurveyController::class, 'demo'])->name('surveys.demo');
+
+    // Export routes
+    Route::get('surveys/{survey}/results/export-excel', [SurveyController::class, 'exportResultsExcel'])->name('surveys.results.export.excel')->middleware(['auth']);
+    Route::get('surveys/{survey}/results/export-pdf', [SurveyController::class, 'exportResultsPdf'])->name('surveys.results.export.pdf')->middleware(['auth']);
+    Route::get('surveys/{survey}/statistics/export-excel', [SurveyController::class, 'exportStatisticsExcel'])->name('surveys.statistics.export.excel')->middleware(['auth']);
+    Route::get('surveys/{survey}/statistics/export-pdf', [SurveyController::class, 'exportStatisticsPdf'])->name('surveys.statistics.export.pdf')->middleware(['auth']);
+    Route::get('surveys/{survey}/answers/export-excel', [SurveyController::class, 'exportAnswersExcel'])->name('surveys.answers.export.excel')->middleware(['auth']);
+    Route::get('surveys/{survey}/answers/export-pdf', [SurveyController::class, 'exportAnswersPdf'])->name('surveys.answers.export.pdf')->middleware(['auth']);
+});
+
+// Public survey route
+Route::get('survey/{survey}/thankyou', [SurveySubmissionController::class, 'thankyou'])->name('surveys.thankyou');
+Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submit'])->name('surveys.submit');
+Route::get('survey/{order}', [SurveyController::class, 'show'])->name('surveys.public');

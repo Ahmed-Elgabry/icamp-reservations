@@ -69,12 +69,13 @@ class ExpensesController extends Controller
             $query->where('created_at', '<=', $endDate);
         }
 
-        $expenses = $query->where( fn($q) =>
+        $expenses = $query->where(
+            fn($q) =>
             $q->where('verified', true)
-               ->orWhereNull('verified')
+                ->orWhereNull('verified')
         )
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return view('dashboard.expenses.index', [
             'expenses' => $expenses,
@@ -108,6 +109,7 @@ class ExpensesController extends Controller
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
+            'payment_method' => 'nullable|string',
             'image' => 'nullable|image',
             'date' => 'nullable|date',
             'order_id' => 'nullable|exists:orders,id',
@@ -123,11 +125,12 @@ class ExpensesController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('expenses', 'public');
         }
-        
+
         Expense::create([
             'expense_item_id' => $request->expense_item_id,
             'account_id' => $request->account_id,
             'price' => $request->price,
+            'payment_method' => $request->payment_method,
             'date' => $date,
             'notes' => $request->notes,
             'image' => $path ?? null,
@@ -166,6 +169,7 @@ class ExpensesController extends Controller
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
+            'payment_method' => 'nullable|string',
             'date' => 'nullable|date',
             'image' => 'nullable|image',
             'notes' => 'nullable|string',
@@ -209,6 +213,4 @@ class ExpensesController extends Controller
         $expense->delete();
         return response()->json();
     }
-
-
 }

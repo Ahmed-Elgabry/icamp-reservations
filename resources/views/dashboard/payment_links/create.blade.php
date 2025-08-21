@@ -15,9 +15,7 @@
                             <li class="breadcrumb-item">
                                 <a href="{{ route('home') }}">{{ __('dashboard.home') }}</a>
                             </li>
-                            <li class="breadcrumb-item">
-                                <a href="{{ route('payment-links.index') }}">{{ __('dashboard.payment-links') }}</a>
-                            </li>
+                         
                             <li class="breadcrumb-item active">{{ __('dashboard.create_payment_link') }}</li>
                         </ol>
                     </nav>
@@ -136,11 +134,26 @@
                     </div>
                 </div>
 
-                <!-- Toggle Additional Fields Button -->
-                <div class="text-center mt-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="toggleFields">
-                        <i class="fa fa-cog"></i> {{ __('dashboard.additional_options') }}
-                    </button>
+           
+
+                <!-- Email Notification Option -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   id="send_email" 
+                                   name="send_email" 
+                                   value="1" 
+                                   {{ old('send_email', true) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="send_email">
+                                <i class="fa fa-envelope me-2"></i> {{ __('dashboard.send_email_to_customer') }}
+                            </label>
+                            <small class="form-text text-muted d-block mt-1">
+                                {{ __('dashboard.send_email_to_customer_help') }}
+                            </small>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

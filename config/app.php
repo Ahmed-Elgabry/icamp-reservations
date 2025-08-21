@@ -69,7 +69,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Dubai',
 
     /*
     |--------------------------------------------------------------------------
@@ -219,6 +219,7 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
+        'SurveyHelper' => App\Helpers\SurveyHelper::class,
     ])->toArray(),
 
 ];

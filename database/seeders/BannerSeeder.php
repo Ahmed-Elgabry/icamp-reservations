@@ -15,13 +15,16 @@ class BannerSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('banners')->insert([
-            [
-                'name' => json_encode(['ar' => 'بانر تجريبي' , 'en' => 'test banner']) ,
-                'desc' => json_encode(['ar' => 'بانر تجريبي' , 'en' => 'test banner']) ,
-                'image' => 'dashboard/assets/media/avatars/300-1.jpg' ,
-                'is_active' => 1
-            ]
-            ]);
+        $banner = [
+            'name' => json_encode(['ar' => 'بانر تجريبي', 'en' => 'test banner']),
+            'desc' => json_encode(['ar' => 'بانر تجريبي', 'en' => 'test banner']),
+            'image' => 'dashboard/assets/media/avatars/300-1.jpg',
+            'is_active' => 1
+        ];
+
+        DB::table('banners')->updateOrInsert(
+            ['name' => $banner['name']],
+            $banner
+        );
     }
 }
