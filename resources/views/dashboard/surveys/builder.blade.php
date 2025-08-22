@@ -353,6 +353,10 @@
                 padding: 0.75rem;
             }
 
+            .field-content {
+                    margin-top: 40px;
+
+            }
             .field-actions .btn {
                 font-size: 0.75rem;
                 padding: 0.25rem 0.5rem;

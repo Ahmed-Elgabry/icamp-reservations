@@ -188,12 +188,23 @@ class SurveyController extends Controller
         });
 
         // Get all questions with answer counts for the table
-        $allQuestions = $survey->questions()
-            ->withCount(['answers' => function($query) {
-                $query->whereNotNull('answer_text');
-            }])
-            ->orderBy('answers_count', 'desc')
-            ->get();
+        $allQuestions = $survey->questions->map(function ($question) {
+            // الأسئلة اللي تعتمد على خيارات
+            if (in_array($question->question_type, ['radio', 'checkbox', 'select', 'stars', 'rating'])) {
+                $question->answers_count = $question->answers()
+                    ->where(function($query) {
+                        $query->whereNotNull('answer_text')
+                            ->orWhereNotNull('answer_option');
+                    })
+                    ->count();
+            } else {
+                // الأسئلة النصية فقط
+                $question->answers_count = $question->answers()
+                    ->whereNotNull('answer_text')
+                    ->count();
+            }
+            return $question;
+        })->sortByDesc('answers_count');
 
         // Prepare the data for the table
         $allQuestionsData = $allQuestions->map(function ($question) {
@@ -600,12 +611,23 @@ class SurveyController extends Controller
         }
 
         // Get all questions with answer counts for the table
-        $allQuestions = $survey->questions()
-            ->withCount(['answers' => function($query) {
-                $query->whereNotNull('answer_text');
-            }])
-            ->orderBy('answers_count', 'desc')
-            ->get();
+        $allQuestions = $survey->questions->map(function ($question) {
+            // الأسئلة اللي تعتمد على خيارات
+            if (in_array($question->question_type, ['radio', 'checkbox', 'select', 'stars', 'rating'])) {
+                $question->answers_count = $question->answers()
+                    ->where(function($query) {
+                        $query->whereNotNull('answer_text')
+                            ->orWhereNotNull('answer_option');
+                    })
+                    ->count();
+            } else {
+                // الأسئلة النصية فقط
+                $question->answers_count = $question->answers()
+                    ->whereNotNull('answer_text')
+                    ->count();
+            }
+            return $question;
+        })->sortByDesc('answers_count');
 
         // Prepare the data for the table
         $allQuestionsData = $allQuestions->map(function ($question) {
@@ -617,13 +639,62 @@ class SurveyController extends Controller
             ];
         });
 
+        // Get questions with options for the select dropdown - ADD THIS SECTION
+        $questionsWithOptions = $survey->questions()
+            ->whereIn('question_type', ['radio', 'checkbox', 'select', 'stars', 'rating'])
+            ->get()
+            ->map(function ($question) {
+                $formattedOptions = [];
+                if (in_array($question->question_type, ['stars', 'rating'])) {
+                    // For stars and rating, always generate options from 1 to 5
+                    for ($i = 1; $i <= $question->settings['points'] ?? 5; $i++) {
+                        if ($question->question_type === 'stars') {
+                            $formattedOptions[] = str_repeat('★', $i); // ★, ★★, ★★★, etc.
+                        } else {
+                            $formattedOptions[] = (string)$i; // 1, 2, 3, etc.
+                        }
+                    }
+                } elseif (is_array($question->options)) {
+                    foreach ($question->options as $key => $option) {
+                        // Handle different option formats
+                        if (is_array($option)) {
+                            // If option is an array, try to get the label
+                            if (isset($option['label'])) {
+                                $formattedOptions[] = SurveyHelper::getLocalizedText($option['label']);
+                            } else {
+                                $formattedOptions[] = is_string($key) ? $key : json_encode($option);
+                            }
+                        } elseif (is_object($option)) {
+                            // If option is an object, convert to array and handle
+                            $optionArray = (array)$option;
+                            if (isset($optionArray['label'])) {
+                                $formattedOptions[] = SurveyHelper::getLocalizedText($optionArray['label']);
+                            } else {
+                                $formattedOptions[] = is_string($key) ? $key : json_encode($optionArray);
+                            }
+                        } else {
+                            // If option is a simple value, use it directly
+                            $formattedOptions[] = (string)$option;
+                        }
+                    }
+                }
+                return [
+                    'id' => $question->id,
+                    'title' => SurveyHelper::getLocalizedText($question->question_text),
+                    'type' => $question->question_type,
+                    'options' => $formattedOptions
+                ];
+            });
+
         // HTML content for PDF
         $html = view('dashboard.surveys.statistics_pdf', compact(
             'survey',
             'totalResponses',
             'questionTypes',
             'timelineData',
-            'allQuestionsData'
+            'allQuestionsData',
+            'questionsWithOptions', // ADD THIS VARIABLE
+            'responses' // ADD THIS VARIABLE
         ))->render();
 
         // Initialize mPDF
@@ -646,6 +717,43 @@ class SurveyController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
+
+    /**
+     * Export full survey statistics page to PDF.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Survey  $survey
+     * @return \Illuminate\Http\Response
+     */
+    public function exportFullStatisticsPdf(Request $request, Survey $survey)
+    {
+        // Get HTML content from the request
+        $html = $request->input('html_content');
+
+        // Clean up the HTML for PDF generation
+        $html = $this->cleanHtmlForPdf($html);
+
+        // Initialize mPDF
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P', // Portrait for full page
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        // Write HTML content
+        $mpdf->WriteHTML($html);
+
+        // Output the PDF
+        $fileName = date('Y-m-d') . "-full-survey-statistics.pdf";
+        return response($mpdf->Output($fileName, Destination::STRING_RETURN))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
 
     /**
      * Export survey answers to Excel.

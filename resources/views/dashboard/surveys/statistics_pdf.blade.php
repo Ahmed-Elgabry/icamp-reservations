@@ -29,7 +29,8 @@
             margin-bottom: 20px;
         }
         .stat-box {
-            width: 48%;
+            display: flex;
+            width: 100%;
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 5px;
@@ -60,6 +61,16 @@
             background-color: #f2f2f2;
             font-weight: bold;
         }
+        .question-section {
+            margin-bottom: 30px;
+        }
+        .question-title {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
         .footer {
             text-align: center;
             margin-top: 30px;
@@ -73,18 +84,12 @@
         <h1>{{ __('dashboard.survey_statistics') }}</h1>
         <p>{{ __('dashboard.generated_on') }}: {{ now()->format('Y-m-d H:i:s') }}</p>
     </div>
-
     <div class="stats-container">
-        <div class="stat-box">
-            <h3>{{ __('dashboard.total_surveys') }}</h3>
-            <div class="number">1</div>
-        </div>
         <div class="stat-box">
             <h3>{{ __('dashboard.total_answers') }}</h3>
             <div class="number">{{ $totalResponses }}</div>
         </div>
     </div>
-
     <h2>{{ __('dashboard.all_questions') }}</h2>
     <table>
         <thead>
@@ -106,7 +111,6 @@
             @endforeach
         </tbody>
     </table>
-
     <h2>{{ __('dashboard.question_types') }}</h2>
     <table>
         <thead>
@@ -146,6 +150,208 @@
             </tr>
         </tbody>
     </table>
+
+    <h2>{{ __('dashboard.question_options_breakdown') }}</h2>
+
+    @foreach($questionsWithOptions as $question)
+        <div class="question-section">
+            <div class="question-title">
+                {{ $question['title'] }}
+                <span style="font-size: 0.8em; color: #666;">({{ $question['type'] }})</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ __('dashboard.option') }}</th>
+                        <th>{{ __('dashboard.count') }}</th>
+                        <th>{{ __('dashboard.percentage') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @php
+                    // Initialize option counts
+                    $optionCounts = [];
+                    $totalAnswers = 0;
+
+                    // Initialize counts for each option
+                    foreach($question['options'] as $option) {
+                        if (is_array($option)) {
+                            $key = $option['value'] ?? $option['label'] ?? '';
+                            $label = $option['label'] ?? $option['value'] ?? '';
+                        } else {
+                            $key = $option;
+                            $label = $option;
+                        }
+                        $optionCounts[$key] = [
+                            'label' => $label,
+                            'count' => 0
+                        ];
+                    }
+
+                    // Count the answers for this question
+                    foreach($responses as $response) {
+                        $answer = $response->answers->firstWhere('survey_question_id', $question['id']);
+                        if ($answer) {
+                            if ($question['type'] == 'checkbox') {
+                                // For checkbox, answer_option is an array or JSON string of selected options
+                                $selectedOptions = is_array($answer->answer_option) ? $answer->answer_option : json_decode($answer->answer_option, true);
+                                if (is_array($selectedOptions)) {
+                                    foreach($selectedOptions as $selectedOption) {
+                                        if (isset($optionCounts[$selectedOption])) {
+                                            $optionCounts[$selectedOption]['count']++;
+                                            $totalAnswers++;
+                                        }
+                                    }
+                                }
+                            } elseif ($question['type'] == 'stars') {
+                                // For stars type, handle different answer formats
+                                $value = null;
+
+                                // Check answer_text first
+                                if (!empty($answer->answer_text)) {
+                                    $value = $answer->answer_text;
+                                }
+                                // If empty, check answer_option
+                                elseif (!empty($answer->answer_option)) {
+                                    if (is_array($answer->answer_option)) {
+                                        $value = $answer->answer_option[0] ?? null;
+                                    } else {
+                                        $value = $answer->answer_option;
+                                    }
+                                }
+
+                                // Convert value to stars
+                                if ($value !== null) {
+                                    $starCount = (int)$value;
+                                    if ($starCount > 0) {
+                                        $stars = str_repeat('★', $starCount);
+                                        if (isset($optionCounts[$stars])) {
+                                            $optionCounts[$stars]['count']++;
+                                            $totalAnswers++;
+                                        }
+                                    }
+                                }
+                            } elseif ($question['type'] == 'rating') {
+                                // For rating type, handle numeric values
+                                $value = null;
+
+                                // Check answer_text first
+                                if (!empty($answer->answer_text)) {
+                                    $value = $answer->answer_text;
+                                }
+                                // If empty, check answer_option
+                                elseif (!empty($answer->answer_option)) {
+                                    if (is_array($answer->answer_option)) {
+                                        $value = $answer->answer_option[0] ?? null;
+                                    } else {
+                                        $value = $answer->answer_option;
+                                    }
+                                }
+
+                                // Convert value to numeric rating
+                                if ($value !== null) {
+                                    $rating = (int)$value;
+                                    if ($rating > 0) {
+                                        if (isset($optionCounts[(string)$rating])) {
+                                            $optionCounts[(string)$rating]['count']++;
+                                            $totalAnswers++;
+                                        }
+                                    }
+                                }
+                            } elseif ($question['type'] == 'select' || $question['type'] == 'radio') {
+                                // For select and radio types
+                                $value = null;
+
+                                // Check answer_text first
+                                if (!empty($answer->answer_text)) {
+                                    $value = $answer->answer_text;
+                                }
+                                // If empty, check answer_option
+                                elseif (!empty($answer->answer_option)) {
+                                    if (is_array($answer->answer_option)) {
+                                        $value = $answer->answer_option['value'] ?? $answer->answer_option[0] ?? null;
+                                    } else {
+                                        $value = $answer->answer_option;
+                                    }
+                                }
+
+                                // Try to match the value with option values or labels
+                                if ($value !== null) {
+                                    $matched = false;
+
+                                    // 1. First try to match with option values directly
+                                    if (isset($optionCounts[$value])) {
+                                        $optionCounts[$value]['count']++;
+                                        $totalAnswers++;
+                                        $matched = true;
+                                    }
+
+                                    // 2. Try to match with option labels
+                                    if (!$matched) {
+                                        foreach ($optionCounts as $key => $option) {
+                                            if ($key == $value) {
+                                                $optionCounts[$key]['count']++;
+                                                $totalAnswers++;
+                                                $matched = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    // 3. If still not matched, try to decode JSON
+                                    if (!$matched) {
+                                        $decodedValue = json_decode($value, true);
+                                        if (is_array($decodedValue)) {
+                                            $valueToCheck = $decodedValue['value'] ?? $decodedValue[0] ?? $value;
+                                            if (isset($optionCounts[$valueToCheck])) {
+                                                $optionCounts[$valueToCheck]['count']++;
+                                                $totalAnswers++;
+                                                $matched = true;
+                                            }
+                                        }
+                                    }
+
+                                    // 4. Extra: map "option1", "option2", ... to actual labels
+                                    if (!$matched && preg_match('/option(\d+)/i', $value, $matches)) {
+                                        $optionNumber = (int)$matches[1];
+                                        $optionIndex = $optionNumber - 1; // zero-based index
+                                        if ($optionIndex >= 0 && $optionIndex < count($question['options'])) {
+                                            $mappedLabel = $question['options'][$optionIndex];
+                                            foreach ($optionCounts as $key => $opt) {
+                                                if ($opt['label'] == $mappedLabel) {
+                                                    $optionCounts[$key]['count']++;
+                                                    $totalAnswers++;
+                                                    $matched = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                @endphp
+
+                    @foreach($optionCounts as $option)
+                        <tr>
+                            <td>{{ $option['label'] }}</td>
+                            <td>{{ $option['count'] }}</td>
+                            <td>
+                                @if($totalAnswers > 0)
+                                    {{ round(($option['count'] / $totalAnswers) * 100, 1) }}%
+                                @else
+                                    0%
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endforeach
 
     <div class="footer">
         <p>{{ __('dashboard.generated_by_icamp_system') }}</p>

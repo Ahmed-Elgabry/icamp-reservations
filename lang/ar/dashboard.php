@@ -966,7 +966,8 @@ return [
     'notice_type' => 'نوع الملاحظة',
     'select_notice_type' => 'اختر نوع الملاحظة',
     'task_status' => 'حاله المهمة',
-
+    'option' => 'خيار',
+    'question_options_breakdown' => 'تفکیک خيارات السؤال',
     // Survey Section
     'surveys' => 'الاستبيانات',
     'create_survey' => 'البناء',
