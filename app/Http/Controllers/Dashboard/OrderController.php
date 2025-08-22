@@ -155,16 +155,13 @@ class OrderController extends Controller
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
             'delayed_time' => 'nullable',
+            'people_count' => 'required|integer|min:1',
+            'client_notes' => 'nullable|string'
         ]);
 
         $validatedData['inventory_withdrawal'] = isset($request->inventory_withdrawal) ? '1' : '0';
         unset($validatedData['service_ids']);
-
         $validatedData['price'] = $request->price;
-
-        // Check if the customer has any services on the same day
-        // ->where('customer_id', $request->customer_id)
-
         $existingOrders = Order::where('date', $request->date)
             ->whereHas('services', function ($query) use ($request) {
                 $query->whereIn('service_id', $request->service_ids);
@@ -276,7 +273,8 @@ class OrderController extends Controller
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
             'delayed_time' => 'nullable',
-
+            'people_count' => 'required|integer|min:1',
+            'client_notes' => 'nullable|string'
         ]);
 
         $validatedData['inventory_withdrawal'] = $request->has('inventory_withdrawal') ? '1' : '0';
@@ -506,7 +504,7 @@ class OrderController extends Controller
     }
 
     private function updateStock(array $data): void
-    {   
+    {
         if (isset($data['stock'])) {
             foreach ($data['stock'] as $stockId => $status) {
                 $pivot = FacadesDB::table('service_stock')->whereId($stockId);
@@ -540,7 +538,7 @@ class OrderController extends Controller
                     ]);
 
                 if ($affected === 0) abort(404, 'Pivot not found for this stock.');
-        
+
                 $stock = Stock::whereKey($data['stockId'])->lockForUpdate()->firstOrFail();
                 if ($data['status'] === 'increment') {
                     $stock->increment('quantity' , $data['qty']);

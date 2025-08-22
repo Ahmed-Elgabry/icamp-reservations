@@ -46,11 +46,11 @@ class SurveyEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject('تقييم الخدمة - Service Evaluation')
-                    ->view('emails.survey')
-                    ->with([
-                        'order' => $this->order,
-                        'surveyUrl' => $this->surveyUrl,
-                    ]);
+        return $this->subject('تقييم نوع المخيم - Service Evaluation')
+            ->view('emails.survey')
+            ->with([
+                'order' => $this->order,
+                'surveyUrl' => $this->surveyUrl,
+            ]);
     }
 }
