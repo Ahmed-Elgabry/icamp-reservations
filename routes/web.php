@@ -18,6 +18,7 @@ use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
+use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderSignatureController;
 
@@ -1384,6 +1385,40 @@ Route::resource('violation-types', ViolationTypeController::class)
 Route::resource('violations', ViolationController::class)
     ->middleware(['auth']);
 
+Route::get('orders/{id}/client-pdf', [
+    'uses' => 'Dashboard\OrderController@generateClientPDF',
+    'as' => 'orders.client-pdf',
+    'title' => ['client-pdf', 'dashboard.orders']
+]);
+
+// Temporary route to generate order numbers for existing orders
+Route::get('/generate-order-numbers', function () {
+    // Check if we're in local environment for safety
+    if (!app()->environment('local')) {
+        return response()->json(['error' => 'This route is only available in local environment'], 403);
+    }
+
+    $orders = Order::whereNull('order_number')->get();
+    $updatedCount = 0;
+    $errors = [];
+
+    foreach ($orders as $order) {
+        try {
+            $order->order_number = App\Models\Order::generateOrderNumber();
+            $order->save();
+            $updatedCount++;
+        } catch (\Exception $e) {
+            $errors[] = "Failed to update order ID {$order->id}: " . $e->getMessage();
+        }
+    }
+
+    return response()->json([
+        'message' => "Successfully generated order numbers for {$updatedCount} orders",
+        'errors' => $errors,
+        'total_updated' => $updatedCount,
+        'total_errors' => count($errors)
+    ]);
+});
 
 Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);

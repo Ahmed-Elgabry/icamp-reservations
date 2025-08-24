@@ -966,6 +966,16 @@ return [
     'select_notice_type' => 'Select Notice Type',
     'task_status' => 'Task Status',
 
+    'options' => 'select where these notes will appear',
+    'show_price' => 'Show Price',
+    'order_data' => 'Order Data',
+    'additional_notes_saved' => 'Additional notes saved successfully!',
+    'client_pdf' => 'reservation details',
+    'show_price_notes' => 'Quotation Notes',
+    'order_data_notes' => 'Order Data Notes',
+    'invoice_notes' => 'Invoice Notes',
+    'receipt_notes' => 'Receipt Notes',
+
     // Survey Section
     'surveys' => 'Surveys',
     'create_survey' => 'Create Survey',
@@ -1056,4 +1066,5 @@ return [
     'save_changes' => 'Save Changes',
     'settings_updated_successfully' => 'Settings updated successfully.',
     'none' => 'None',
+
 ];
