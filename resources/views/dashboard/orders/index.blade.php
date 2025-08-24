@@ -183,7 +183,7 @@
 
                                 <!--begin::Rate Link-->
                                 <td>
-                                    <a href="{{route('rate', $order->id)}}"
+                                    <a href="{{route('surveys.public', $order->id)}}" target="_blank"
                                         class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
                                         Click Rate <i class="fa fa-link"></i>
                                     </a>

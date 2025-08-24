@@ -1,8 +1,16 @@
 @section('pageTitle', __('dashboard.survey_statistics'))
 @extends('dashboard.layouts.app')
 
-@push('styles')
+@section('content')
+
 <style>
+    .card-body canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+}
+
     /* PDF-specific styles */
     .pdf-export {
         font-family: Arial, sans-serif;
@@ -82,9 +90,9 @@
         font-size: 18px;
     }
 </style>
-@endpush
 
-@section('content')
+
+
 <!--begin::Post-->
 <div class="post d-flex flex-column-fluid" id="kt_post">
     <!--begin::Container-->
@@ -94,7 +102,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Statistics Widget 1-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Body-->
                     <div class="card-body">
                         <!--begin::Statistics-->
@@ -132,7 +140,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Statistics Widget 2-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Body-->
                     <div class="card-body">
                         <!--begin::Statistics-->
@@ -174,7 +182,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Chart Widget 3-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Header-->
                     <div class="card-header border-0 pt-5">
                         <h3 class="card-title align-items-start flex-column">
@@ -185,9 +193,11 @@
                     <!--end::Header-->
                     <!--begin::Body-->
                     <div class="card-body">
-                        <!--begin::Chart-->
-                        <canvas id="timelineChart" style="height: 300px;"></canvas>
-                        <!--end::Chart-->
+                        <div style="height: 300px;">
+                            <!--begin::Chart-->
+                            <canvas id="timelineChart"></canvas>
+                            <!--end::Chart-->
+                        </div>
                     </div>
                     <!--end::Body-->
                 </div>
@@ -197,7 +207,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Chart Widget 4-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Header-->
                     <div class="card-header border-0 pt-5 d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
@@ -218,9 +228,11 @@
                     <!--end::Header-->
                     <!--begin::Body-->
                     <div class="card-body">
-                        <!--begin::Chart-->
-                        <canvas id="questionOptionsChart" style="height: 300px;"></canvas>
-                        <!--end::Chart-->
+                        <div style="height: 300px;">
+                            <!--begin::Chart-->
+                            <canvas id="questionOptionsChart" ></canvas>
+                            <!--end::Chart-->
+                        </div>
                     </div>
                     <!--end::Body-->
                 </div>
@@ -234,7 +246,7 @@
             <!--begin::Col-->
             <div class="col-xl-6">
                 <!--begin::Chart Widget 1-->
-                <div class="card card-xl-stretch mb-xl-8">
+                <div class="card card-xl-stretch mb-xl-8 mb-3">
                     <!--begin::Header-->
                     <div class="card-header border-0 pt-5">
                         <h3 class="card-title align-items-start flex-column">
@@ -245,9 +257,11 @@
                     <!--end::Header-->
                     <!--begin::Body-->
                     <div class="card-body">
-                        <!--begin::Chart-->
-                        <canvas id="questionsChart" style="height: 300px;"></canvas>
-                        <!--end::Chart-->
+                        <div style="height: 300px;">
+                            <!--begin::Chart-->
+                            <canvas id="questionsChart" ></canvas>
+                            <!--end::Chart-->
+                        </div>
                     </div>
                     <!--end::Body-->
                 </div>

@@ -47,20 +47,20 @@ class SendSurveyEmails extends Command
         // Get survey settings
         $survey = Survey::find(1);
         $settings = $survey->settings ?? [];
-        
+
         // Check if survey emails are enabled
         if (!isset($settings['enabled']) || !$settings['enabled']) {
             $this->info('Survey emails are disabled in settings.');
             return 0;
         }
-        
+
         // Get days after completion and send time from settings
         $daysAfterCompletion = $settings['days_after_completion'] ?? 1;
         $sendTime = $settings['send_time'] ?? '15:00';
-        
+
         // Calculate completedAt based on settings
         $completedAt = Carbon::now()->subDays($daysAfterCompletion);
-        
+
         // Check if current time matches the send time
         $currentTime = Carbon::now()->format('H:i');
         if ($currentTime !== $sendTime) {
@@ -86,7 +86,7 @@ class SendSurveyEmails extends Command
 
             // Prepare email data
             $emailData = [
-                'title' => 'تقييم الخدمة - Service Evaluation',
+                'title' => 'تقييم نوع المخيم - Service Evaluation',
                 'body' => 'شكراً لاستخدامك خدماتنا. نرجو منك تقييم تجربتك من خلال الاستبيان التالي:
                          <br><br>
                          Thank you for using our services. Please evaluate your experience through the following survey:

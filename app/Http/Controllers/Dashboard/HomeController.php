@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Dashboard;
+
 use DB;
 use App\Models\Order;
 use App\Models\Expense;
@@ -51,20 +52,20 @@ class HomeController extends Controller
 
     public function reprots()
     {
-        // الحصول على أكثر الخدمات مبيعًا
-        $topServices = Service::whereHas('orders', function($query) {
+        // الحصول على أكثر نوع المخيم مبيعًا
+        $topServices = Service::whereHas('orders', function ($query) {
             $query->where('status', 'completed');
         })
-        ->with(['orders' => function($query) {
-            $query->where('status', 'completed');
-        }])
-        ->withCount(['orders' => function($query) {
-            $query->where('status', 'completed');
-        }])
-        ->orderBy('orders_count', 'desc')
-        ->take(10)
-        ->get();
-    
+            ->with(['orders' => function ($query) {
+                $query->where('status', 'completed');
+            }])
+            ->withCount(['orders' => function ($query) {
+                $query->where('status', 'completed');
+            }])
+            ->orderBy('orders_count', 'desc')
+            ->take(10)
+            ->get();
+
         // الحصول على الحسابات البنكية
         $bankAccounts = BankAccount::all();
 
@@ -83,8 +84,6 @@ class HomeController extends Controller
             ->groupBy('month')
             ->get();
 
-        return view('dashboard.reports', compact('topServices', 'totalPayments','bankAccounts', 'expenses', 'monthlyPayments'));
+        return view('dashboard.reports', compact('topServices', 'totalPayments', 'bankAccounts', 'expenses', 'monthlyPayments'));
     }
-
-
 }

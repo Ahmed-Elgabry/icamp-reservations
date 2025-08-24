@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقييم الخدمة | Service Evaluation</title>
+    <title>تقييم نوع المخيم | Service Evaluation</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -12,6 +13,7 @@
             padding: 0;
             line-height: 1.6;
         }
+
         .container {
             max-width: 600px;
             margin: 20px auto;
@@ -20,25 +22,30 @@
             overflow: hidden;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         .header {
             background-color: #007bff;
             color: white;
             padding: 20px;
             text-align: center;
         }
+
         .header h1 {
             margin: 0;
             font-size: 22px;
         }
+
         .content {
             padding: 20px;
         }
+
         .order-info {
             background-color: #f9f9f9;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .btn {
             display: inline-block;
             background-color: #28a745;
@@ -49,6 +56,7 @@
             font-weight: bold;
             margin: 20px 0;
         }
+
         .footer {
             background-color: #f2f2f2;
             padding: 15px;
@@ -56,17 +64,19 @@
             font-size: 12px;
             color: #777;
         }
+
         .section-title {
             font-weight: bold;
             margin-top: 15px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>تقييم الخدمة | Service Evaluation</h1>
+            <h1>تقييم نوع المخيم | Service Evaluation</h1>
         </div>
 
         <!-- Body -->
@@ -106,4 +116,5 @@
         </div>
     </div>
 </body>
+
 </html>

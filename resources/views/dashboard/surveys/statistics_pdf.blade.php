@@ -280,17 +280,17 @@
                                 if ($value !== null) {
                                     $matched = false;
 
-                                    // First try to match with option values
+                                    // 1. First try to match with option values directly
                                     if (isset($optionCounts[$value])) {
                                         $optionCounts[$value]['count']++;
                                         $totalAnswers++;
                                         $matched = true;
                                     }
 
-                                    // If not matched, try to match with option labels
+                                    // 2. Try to match with option labels
                                     if (!$matched) {
                                         foreach ($optionCounts as $key => $option) {
-                                            if ($option['label'] == $value) {
+                                            if ($key == $value) {
                                                 $optionCounts[$key]['count']++;
                                                 $totalAnswers++;
                                                 $matched = true;
@@ -299,7 +299,7 @@
                                         }
                                     }
 
-                                    // If still not matched, try to decode JSON if value is a JSON string
+                                    // 3. If still not matched, try to decode JSON
                                     if (!$matched) {
                                         $decodedValue = json_decode($value, true);
                                         if (is_array($decodedValue)) {
@@ -311,7 +311,25 @@
                                             }
                                         }
                                     }
+
+                                    // 4. Extra: map "option1", "option2", ... to actual labels
+                                    if (!$matched && preg_match('/option(\d+)/i', $value, $matches)) {
+                                        $optionNumber = (int)$matches[1];
+                                        $optionIndex = $optionNumber - 1; // zero-based index
+                                        if ($optionIndex >= 0 && $optionIndex < count($question['options'])) {
+                                            $mappedLabel = $question['options'][$optionIndex];
+                                            foreach ($optionCounts as $key => $opt) {
+                                                if ($opt['label'] == $mappedLabel) {
+                                                    $optionCounts[$key]['count']++;
+                                                    $totalAnswers++;
+                                                    $matched = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
+
                             }
                         }
                     }

@@ -160,16 +160,21 @@ class OrderController extends Controller
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
             'delayed_time' => 'nullable',
+
             'show_price_notes' => 'nullable|string',
             'order_data_notes' => 'nullable|string',
             'invoice_notes' => 'nullable|string',
             'receipt_notes' => 'nullable|string',
+
+            'people_count' => 'required|integer|min:1',
+            'client_notes' => 'nullable|string'
+
         ]);
 
         $validatedData['inventory_withdrawal'] = isset($request->inventory_withdrawal) ? '1' : '0';
         unset($validatedData['service_ids']);
-
         $validatedData['price'] = $request->price;
+
 
         $validatedData['show_price_notes'] = $request->show_price_notes;
         $validatedData['order_data_notes'] = $request->order_data_notes;
@@ -301,7 +306,8 @@ class OrderController extends Controller
             'order_data_notes' => 'nullable|string',
             'invoice_notes' => 'nullable|string',
             'receipt_notes' => 'nullable|string',
-
+            'people_count' => 'required|integer|min:1',
+            'client_notes' => 'nullable|string'
         ]);
 
         $validatedData['inventory_withdrawal'] = $request->has('inventory_withdrawal') ? '1' : '0';

@@ -36,7 +36,7 @@ class SurveySeeder extends Seeder
         //         'order' => 2,
         //     ],
         //     [
-        //         'question_text' => 'ما هي الخدمة التي استخدمتها؟',
+        //         'question_text' => 'ما هي نوع المخيم التي استخدمتها؟',
         //         'question_type' => 'select',
         //         'options' => [
         //             ['label' => 'الدعم الفني', 'value' => 'technical_support'],

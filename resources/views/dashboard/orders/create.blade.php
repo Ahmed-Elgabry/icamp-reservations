@@ -38,7 +38,7 @@
                         <div class="card-body border-top p-9">
                             <!-- Customer Select -->
                             <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.customer')</label>
+                                <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.customer_first_and_last_name')</label>
                                 <div class="col-lg-8">
                                     <select name="customer_id"
                                             class="form-select form-select-lg form-select-solid select2-hidden-accessible"
@@ -52,6 +52,19 @@
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="row mb-6">
+                                <label class="col-lg-4 col-form-label fw-bold fs-6 required">
+                                    @lang('dashboard.people_count')
+                                </label>
+                                <div class="col-lg-8">
+                                    <input type="number" name="people_count" id="people_count"
+                                           class="form-control form-control-lg form-control-solid"
+                                           value="{{ isset($order) ? $order->people_count : old('people_count') }}"
+                                           required>
+                                </div>
+                            </div>
+
                             <input type="hidden" name="created_by" value="{{ Auth::id() }}">
 
                             <!-- Service Select -->
@@ -199,6 +212,17 @@
                                            id="expired_price_offer"
                                            class="form-control form-control-lg form-control-solid"
                                            value="{{ isset($order) ? $order->expired_price_offer : old('expired_price_offer') }}">
+                                </div>
+                            </div>
+
+                            <div class='row mb-6'>
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">
+                                    @lang('dashboard.client_notes')
+                                </label>
+                                <div class="col-lg-8">
+                                    <textarea name="client_notes" class="form-control">
+                                           {{ isset($order) ? $order->client_notes : old('client_notes') }}
+                                    </textarea>
                                 </div>
                             </div>
 
