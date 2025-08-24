@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Notice;
 use DB;
+use Endroid\QrCode\Color\Color;
+use Illuminate\Support\Facades\Log;
 use Mpdf\Mpdf;
 use Carbon\Carbon;
 use App\Models\Addon;
@@ -28,6 +30,9 @@ use App\Repositories\IOrderRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ICategoryRepository;
 use Illuminate\Support\Facades\DB as FacadesDB;
+//use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class OrderController extends Controller
 {
@@ -155,12 +160,21 @@ class OrderController extends Controller
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
             'delayed_time' => 'nullable',
+            'show_price_notes' => 'nullable|string',
+            'order_data_notes' => 'nullable|string',
+            'invoice_notes' => 'nullable|string',
+            'receipt_notes' => 'nullable|string',
         ]);
 
         $validatedData['inventory_withdrawal'] = isset($request->inventory_withdrawal) ? '1' : '0';
         unset($validatedData['service_ids']);
 
         $validatedData['price'] = $request->price;
+
+        $validatedData['show_price_notes'] = $request->show_price_notes;
+        $validatedData['order_data_notes'] = $request->order_data_notes;
+        $validatedData['invoice_notes'] = $request->invoice_notes;
+        $validatedData['receipt_notes'] = $request->receipt_notes;
 
         // Check if the customer has any services on the same day
         // ->where('customer_id', $request->customer_id)
@@ -242,7 +256,14 @@ class OrderController extends Controller
         $services = Service::select('id', 'name', 'price')->get();
         $addonsPrice = OrderAddon::where('order_id', $order->id)->sum('price');
 
-        return view('dashboard.orders.create', compact('order', 'customers', 'services', 'addonsPrice'));
+        $additionalNotesData = [
+            'notes' => $order->additional_notes,
+            'show_price' => $order->show_price,
+            'order_data' => $order->order_data,
+            'invoice' => $order->invoice,
+            'receipt' => $order->receipt
+        ];
+        return view('dashboard.orders.create', compact('order', 'customers', 'services', 'addonsPrice','additionalNotesData'));
     }
 
     public function insurance($id)
@@ -276,6 +297,10 @@ class OrderController extends Controller
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
             'delayed_time' => 'nullable',
+            'show_price_notes' => 'nullable|string',
+            'order_data_notes' => 'nullable|string',
+            'invoice_notes' => 'nullable|string',
+            'receipt_notes' => 'nullable|string',
 
         ]);
 
@@ -284,6 +309,11 @@ class OrderController extends Controller
 
         try {
             unset($validatedData['service_ids']);
+
+            $validatedData['show_price_notes'] = $request->show_price_notes;
+            $validatedData['order_data_notes'] = $request->order_data_notes;
+            $validatedData['invoice_notes'] = $request->invoice_notes;
+            $validatedData['receipt_notes'] = $request->receipt_notes;
 
             $order->fill($validatedData);
 
@@ -506,7 +536,7 @@ class OrderController extends Controller
     }
 
     private function updateStock(array $data): void
-    {   
+    {
         if (isset($data['stock'])) {
             foreach ($data['stock'] as $stockId => $status) {
                 $pivot = FacadesDB::table('service_stock')->whereId($stockId);
@@ -540,7 +570,7 @@ class OrderController extends Controller
                     ]);
 
                 if ($affected === 0) abort(404, 'Pivot not found for this stock.');
-        
+
                 $stock = Stock::whereKey($data['stockId'])->lockForUpdate()->firstOrFail();
                 if ($data['status'] === 'increment') {
                     $stock->increment('quantity' , $data['qty']);
@@ -565,25 +595,6 @@ class OrderController extends Controller
         }
     }
 
-    public function invoice($order)
-    {
-        $order = Order::with(['payments'])->findOrFail($order);
-        $html = view('dashboard.orders.invoice', compact('order'))->render();
-
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
-        $mpdf->WriteHTML($html);
-        $mpdf->Output('invoice.pdf', 'I');
-    }
-    public function receipt($order)
-    {
-        $order = Order::with('payments')->findOrFail($order);
-        $html = view('dashboard.orders.receipt', compact('order'))->render();
-
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
-        $mpdf->WriteHTML($html);
-        $mpdf->Output('receipt.pdf', 'I');
-    }
-
     public function getInvoiceByLink($link)
     {
         $invoiceLink = InvoiceLink::where('link', $link)->firstOrFail();
@@ -593,15 +604,6 @@ class OrderController extends Controller
         $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
         $mpdf->Output('terms.pdf', 'I');
-    }
-
-    public function quote($order)
-    {
-        $order = Order::with(['payments', 'addons'])->findOrFail($order);
-        $html = view('dashboard.orders.quote', compact('order'))->render();
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
-        $mpdf->WriteHTML($html);
-        $mpdf->Output('invoice.pdf', 'I');
     }
 
     public function signin($id)
@@ -802,5 +804,88 @@ class OrderController extends Controller
         $order->update($data);
 
         return back()->with('success', __('dashboard.success'));
+    }
+
+    public function generateClientPDF($id)
+    {
+        $order = Order::with(['customer', 'services'])->findOrFail($id);
+        $termsSittng = TermsSittng::firstOrFail();
+
+//        dd($termsSittng);
+        // Generate QR code with link to edit page
+        $editUrl = route('orders.edit', $id);
+
+        // Generate QR code using Endroid QR Code library
+        try {
+            $qrCode = QrCode::create($editUrl)
+                ->setSize(100)
+                ->setMargin(0)->setBackgroundColor(new Color(255, 255, 255)) // خلفية بيضاء نقية
+            ;
+
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+
+            // Save QR code to temporary file
+            $qrCodePath = 'qrcodes/order_' . $id . '.png';
+            Storage::disk('public')->put($qrCodePath, $result->getString());
+            $qrCodeFullPath = Storage::disk('public')->path($qrCodePath);
+
+        } catch (\Exception $e) {
+            \Log::error('QR code generation failed: ' . $e->getMessage());
+            $qrCodeFullPath = null;
+        }
+
+        $html = view('dashboard.orders.pdf.reservation', compact('order', 'termsSittng', 'qrCodeFullPath', 'editUrl'))->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'xbriyaz',
+            'directionality' => 'rtl'
+        ]);
+
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->WriteHTML($html);
+
+        // Clean up QR code file if created
+        if (isset($qrCodePath) && Storage::disk('public')->exists($qrCodePath)) {
+            Storage::disk('public')->delete($qrCodePath);
+        }
+
+        $filename = 'reservation_' . $id . '.pdf';
+        $mpdf->Output($filename, 'I');
+    }
+
+    public function quote($order)
+    {
+        $order = Order::with(['payments', 'addons', 'services','customer'])->findOrFail($order);
+        $termsSittng = TermsSittng::firstOrFail();
+
+        $html = view('dashboard.orders.pdf.quote', compact('order','termsSittng'))->render();
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('invoice.pdf', 'I');
+    }
+
+    public function invoice($order)
+    {
+        $order = Order::with(['payments', 'addons', 'services','customer'])->findOrFail($order);
+        $termsSittng = TermsSittng::firstOrFail();
+
+        $html = view('dashboard.orders.pdf.invoice', compact('order','termsSittng'))->render();
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('invoice.pdf', 'I');
+    }
+
+    public function receipt($order)
+    {
+        $order = Order::with('payments')->findOrFail($order);
+        $termsSittng = TermsSittng::firstOrFail();
+
+        $html = view('dashboard.orders.pdf.receipt', compact('order','termsSittng'))->render();
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('receipt.pdf', 'I');
     }
 }

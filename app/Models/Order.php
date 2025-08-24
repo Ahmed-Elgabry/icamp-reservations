@@ -43,6 +43,36 @@ class Order extends Model
         return null; // Return null if one of the time fields is null
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            if (empty($order->order_number)) {
+                $order->order_number = static::generateOrderNumber();
+            }
+        });
+    }
+
+    public static function generateOrderNumber()
+    {
+        $year = substr(date('Y'), -2);
+        $month = date('m');
+
+        // Get the latest order number for this year/month
+        $latestOrder = static::where('order_number', 'like',  $year . $month . '%')
+            ->orderBy('order_number', 'desc')
+            ->first();
+
+        if ($latestOrder) {
+            $lastNumber = (int) substr($latestOrder->order_number, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+
+        return  $year . $month . $nextNumber;
+    }
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
