@@ -296,10 +296,34 @@
                             <div class="d-flex justify-content-end">
                                 <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
                                     <span class="indicator-label">@lang('dashboard.save_changes')</span>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
+                                    <span class="indicator-label">@lang('dashboard.save_changes')</span>
                                     <span class="indicator-progress">@lang('dashboard.please_wait')
                                         <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
                                     </span>
                                 </button>
+                            <!-- Hidden fields for additional notes and options -->
+                            <input type="hidden" name="show_price_notes" id="show_price_notes" value="{{ isset($order) ? $order->show_price_notes : '' }}">
+                            <input type="hidden" name="order_data_notes" id="order_data_notes" value="{{ isset($order) ? $order->order_data_notes : '' }}">
+                            <input type="hidden" name="invoice_notes" id="invoice_notes" value="{{ isset($order) ? $order->invoice_notes : '' }}">
+                            <input type="hidden" name="receipt_notes" id="receipt_notes" value="{{ isset($order) ? $order->receipt_notes : '' }}">
+
+                            <!-- Submit Button -->
+                            <div class="d-flex justify-content-end gap-2">
+                                <!--begin::Additional Notes Button-->
+                                <button type="button" id="additional-notes-btn" class="btn btn-secondary">
+                                    <span class="indicator-label">@lang('dashboard.additional_notes')</span>
+                                </button>
+                                <!--end::Additional Notes Button-->
+
+                                <!--begin::Submit Button-->
+                                <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
+                                    <span class="indicator-label">@lang('dashboard.save_changes')</span>
+                                    <span class="indicator-progress">@lang('dashboard.please_wait')
+                                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                </button>
+                                <!--end::Submit Button-->
                             </div>
                         </div>
                     </form>
@@ -307,6 +331,60 @@
 
             </div>
         </div>
+        <!--begin::Modal - Additional Notes-->
+        <div class="modal fade" id="additionalNotesModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered mw-900px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="fw-bolder">@lang('dashboard.additional_notes')</h2>
+                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                            <span class="svg-icon svg-icon-2x"></span>
+                        </div>
+                    </div>
+                    <div class="modal-body py-10 px-lg-15">
+                        <form id="additionalNotesForm" class="form">
+                            <!-- Show Price Notes -->
+                            <label class="col-form-label fw-bold fs-6">@lang('dashboard.show_price_notes')</label>
+                            <div class="row mb-8">
+                                <div class="">
+                                    <textarea id="showPriceEditor" class="form-control notes-editor" rows="6"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Order Data Notes -->
+                            <label class="col-form-label fw-bold fs-6">@lang('dashboard.order_data_notes')</label>
+                            <div class="row mb-8">
+                                <div class="">
+                                    <textarea id="orderDataEditor" class="form-control notes-editor" rows="6"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Invoice Notes -->
+                            <label class="col-form-label fw-bold fs-6">@lang('dashboard.invoice_notes')</label>
+                            <div class="row mb-8">
+                                <div class="">
+                                    <textarea id="invoiceEditor" class="form-control notes-editor" rows="6"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Receipt Notes -->
+                            <label class="col-form-label fw-bold fs-6">@lang('dashboard.receipt_notes')</label>
+                            <div class="row mb-8">
+                                <div class="">
+                                    <textarea id="receiptEditor" class="form-control notes-editor" rows="6"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">@lang('dashboard.cancel')</button>
+                        <button type="button" id="saveAdditionalNotes" class="btn btn-primary">@lang('dashboard.save')</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end::Modal - Additional Notes-->
+        <!--end::Container-->
     </div>
 
     <div class="modal fade" id="retrieveRfModal" tabindex="-1" aria-hidden="true">
@@ -336,20 +414,77 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.tiny.cloud/1/m181ycw0urzvmmzinvpzqn3nv10wxttgo7gvv77hf6ce6z89/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize TinyMCE
+            const editorConfig = {
+                plugins: 'link lists code',
+                toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link',
+                menubar: false,
+                height: '50vh',
+                skin: 'oxide',
+                content_css: 'default',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            };
 
-<script>
-    (function() {
-        const isEdit = @json(isset($order));
-        if (isEdit) return;
+            // Initialize editors
+            tinymce.init({ ...editorConfig, selector: '#showPriceEditor' });
+            tinymce.init({ ...editorConfig, selector: '#orderDataEditor' });
+            tinymce.init({ ...editorConfig, selector: '#invoiceEditor' });
+            tinymce.init({ ...editorConfig, selector: '#receiptEditor' });
 
-        const url = new URL(window.location.href);
-        const hasPrefill =
-            url.searchParams.has('rf_id') ||
-            url.searchParams.has('people_count') ||
-            url.searchParams.has('service_ids') ||
-            url.searchParams.has('date') ||
-            url.searchParams.has('time_from') ||
-            url.searchParams.has('time_to') ||
+            // Additional notes modal functionality
+            const additionalNotesModal = new bootstrap.Modal(document.getElementById('additionalNotesModal'));
+
+            let additionalNotesData = {
+                notes: '',
+                show_price: false,
+                order_data: false,
+                invoice: false,
+                receipt: false
+            };
+
+            // Load existing data if any
+            function loadExistingData() {
+                tinymce.get('showPriceEditor').setContent($('#show_price_notes').val() || '');
+                tinymce.get('orderDataEditor').setContent($('#order_data_notes').val() || '');
+                tinymce.get('invoiceEditor').setContent($('#invoice_notes').val() || '');
+                tinymce.get('receiptEditor').setContent($('#receipt_notes').val() || '');
+            }
+
+            // Open modal
+            $('#additional-notes-btn').click(function() {
+                loadExistingData();
+                additionalNotesModal.show();
+            });
+
+            // Save additional notes
+            $('#saveAdditionalNotes').click(function() {
+                // Update hidden fields with editor content
+                $('#show_price_notes').val(tinymce.get('showPriceEditor').getContent());
+                $('#order_data_notes').val(tinymce.get('orderDataEditor').getContent());
+                $('#invoice_notes').val(tinymce.get('invoiceEditor').getContent());
+                $('#receipt_notes').val(tinymce.get('receiptEditor').getContent());
+
+                additionalNotesModal.hide();
+
+                // Show success message
+                Swal.fire({
+                    text: "{{ __('dashboard.additional_notes_saved') }}",
+                    icon: "success",
+                    buttonsStyling: false,
+                    confirmButtonText: "{{ __('dashboard.ok') }}",
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
+            });
+rl.searchParams.has('time_to') ||
             url.searchParams.has('notes') ||
             url.searchParams.has('prefill_mobile') ||
             url.searchParams.has('prefill_email');
@@ -376,12 +511,12 @@
                         $cust.append(opt);
                     }
 
-                    $cust.val(String(c.customer.id)).trigger('change');
+       customer     $cust.val(String(c.customer.id)).trigger('change');
                 }
             });
         }
 
-        $('#service_id').trigger('change');
+        $('#servi.customerrigger('change');
 
         const rfId = url.searchParams.get('rf_id');
         const isRTL = "{{ app()->getLocale() }}" === "ar";

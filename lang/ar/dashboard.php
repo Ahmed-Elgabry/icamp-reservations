@@ -1004,6 +1004,17 @@ return [
     'task_status' => 'حاله المهمة',
     'option' => 'خيار',
     'question_options_breakdown' => 'تفکیک خيارات السؤال',
+
+    'options' => 'اختر اماكن عرض هذه الملاحظات',
+    'show_price' => ' عرض السعر',
+    'order_data' => ' بيانات الحجز',
+    'additional_notes_saved' => 'تم حفظ الملاحظات الاضافيه بنجاح!',
+    'client_pdf' => 'بيانات الحجز',
+    'show_price_notes' => 'ملاحظات عرض السعر',
+    'order_data_notes' => 'ملاحظات بيانات الحجز',
+    'invoice_notes' => 'ملاحظات الفاتورة',
+    'receipt_notes' => 'ملاحظات إيصال القبض',
+
     // Survey Section
     'surveys' => 'الاستبيانات',
     'create_survey' => 'البناء',

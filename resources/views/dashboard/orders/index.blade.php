@@ -25,95 +25,13 @@
 
                     </div>
                     <!--end::Search-->
-                    <!-- QR Scanner -->
 
-                    <button class="btn btn-light-primary m-2"
-                        id="startCamera">@lang('dashboard.open_camera_to_scan_qr')</button>
-                    <button class="btn btn-light-info m-2" id="takePhoto"
-                        style="display: none;">@lang('dashboard.take_picture')</button>
-                    <button class="btn btn-light-danger m-2" id="stopCamera"
-                        style="display: none;">@lang('dashboard.stop_cqamera')</button>
-
-                    <div id="reader" style="width: 500px; height: 300px; display: none;"></div>
-                    <canvas id="canvas" style="display:none;"></canvas>
-
-                    <script>
-                        let html5QrCode;
-
-                        // بدء تشغيل الكاميرا
-                        document.getElementById('startCamera').addEventListener('click', function () {
-                            const readerDiv = document.getElementById('reader');
-                            readerDiv.style.display = 'block'; // عرض الكاميرا
-
-                            // إظهار أزرار الإيقاف والتقاط الصورة
-                            document.getElementById('stopCamera').style.display = 'inline-block';
-                            document.getElementById('takePhoto').style.display = 'inline-block';
-
-                            html5QrCode = new Html5Qrcode("reader");
-
-                            Html5Qrcode.getCameras().then(devices => {
-                                if (devices && devices.length) {
-                                    let cameraId = devices[0].id;
-
-                                    html5QrCode.start(
-                                        cameraId, {
-                                        fps: 10,
-                                        qrbox: {
-                                            width: 250,
-                                            height: 250
-                                        }
-                                    },
-                                        qrCodeMessage => {
-                                            alert(`تم مسح QR Code: ${qrCodeMessage}`);
-                                        },
-                                        errorMessage => {
-                                            console.log(`لم يتم التعرف على QR Code: ${errorMessage}`);
-                                        }
-                                    ).catch(err => {
-                                        console.error(`خطأ في بدء الكاميرا: ${err}`);
-                                    });
-                                } else {
-                                    alert("لم يتم العثور على كاميرا.");
-                                }
-                            }).catch(err => {
-                                console.error(`خطأ في الحصول على الكاميرات: ${err}`);
-                            });
-                        });
-
-                        // إيقاف تشغيل الكاميرا
-                        document.getElementById('stopCamera').addEventListener('click', function () {
-                            html5QrCode.stop().then(() => {
-                                document.getElementById('reader').style.display = 'none'; // إخفاء الكاميرا
-                                document.getElementById('stopCamera').style.display = 'none';
-                                document.getElementById('takePhoto').style.display = 'none';
-                            }).catch(err => {
-                                console.error(`خطأ في إيقاف الكاميرا: ${err}`);
-                            });
-                        });
-
-                        // التقاط صورة من الفيديو
-                        document.getElementById('takePhoto').addEventListener('click', function () {
-                            const videoElement = document.querySelector("#reader video");
-                            if (videoElement) {
-                                const canvas = document.getElementById('canvas');
-                                canvas.style.display = 'block';
-                                const context = canvas.getContext('2d');
-                                canvas.width = videoElement.videoWidth;
-                                canvas.height = videoElement.videoHeight;
-
-                                // نسخ إطار الفيديو إلى الـcanvas
-                                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-                                // تحويل الـcanvas إلى صورة
-                                const imageData = canvas.toDataURL('image/png');
-                                const link = document.createElement('a');
-                                link.href = imageData;
-                                link.download = 'photo.png'; // اسم الصورة
-                                link.click(); // تحميل الصورة
-                            }
-                        });
-                    </script>
-                    <!-- QR Scanner End -->
+                    <!--QR Scanner:Start-->
+                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal"
+                            data-bs-target="#qrScannerModal">
+                        <i class="fas fa-qrcode me-2"></i>@lang('dashboard.scan_qr')
+                    </button>
+                    <!--QR Scanner:End-->
                 </div>
                 <!--end::Card title-->
                 <!--begin::Card toolbar-->
@@ -345,5 +263,154 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-
+<!-- QR Scanner Modal -->
+<div class="modal fade" id="qrScannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@lang('dashboard.scan_qr_code')</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <div id="qr-scanner-container" class="mb-3">
+                        <video id="qr-video" width="100%" style="border-radius: 8px;"></video>
+                    </div>
+                    <div id="qr-result" class="alert alert-info d-none"></div>
+                    <button id="start-scan-btn" class="btn btn-primary">
+                        <i class="fas fa-camera me-2"></i>@lang('dashboard.start_scanning')
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-secondary d-none">
+                        <i class="fas fa-stop me-2"></i>@lang('dashboard.stop_scanning')
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push('scripts')
+    <!-- Include the QR scanning library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const scannerModal = document.getElementById('qrScannerModal');
+            const video = document.getElementById('qr-video');
+            const startScanBtn = document.getElementById('start-scan-btn');
+            const stopScanBtn = document.getElementById('stop-scan-btn');
+            const resultContainer = document.getElementById('qr-result');
+            let scanning = false;
+            let stream = null;
+
+            // Function to start scanning
+            function startScanning() {
+                resultContainer.classList.add('d-none');
+                startScanBtn.classList.add('d-none');
+                stopScanBtn.classList.remove('d-none');
+
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then(function(s) {
+                        stream = s;
+                        video.srcObject = stream;
+                        video.setAttribute("playsinline", true);
+                        video.play();
+                        scanning = true;
+                        requestAnimationFrame(tick);
+                    })
+                    .catch(function(err) {
+                        console.error("Error accessing camera: ", err);
+                        alert("@lang('dashboard.camera_access_error')");
+                        resetScanner();
+                    });
+            }
+
+            // Function to stop scanning
+            function stopScanning() {
+                scanning = false;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+                resetScanner();
+            }
+
+            // Function to reset scanner UI
+            function resetScanner() {
+                startScanBtn.classList.remove('d-none');
+                stopScanBtn.classList.add('d-none');
+                video.srcObject = null;
+            }
+
+            // Function to process each video frame
+            function tick() {
+                if (!scanning) return;
+
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "dontInvert",
+                    });
+
+                    if (code) {
+                        // QR code detected!
+                        stopScanning();
+                        resultContainer.textContent = "@lang('dashboard.qr_detected_redirecting')";
+                        resultContainer.classList.remove('d-none');
+
+                        // Check if the URL is a valid order edit URL
+                        if (code.data.includes('orders.edit')) {
+                            setTimeout(() => {
+                                window.location.href = code.data;
+                            }, 1500);
+                        } else {
+                            resultContainer.textContent = "@lang('dashboard.invalid_qr_code')";
+                            resultContainer.classList.remove('alert-info');
+                            resultContainer.classList.add('alert-warning');
+
+                            // Show the start button again after a delay
+                            setTimeout(() => {
+                                resetScanner();
+                            }, 3000);
+                        }
+                    }
+                }
+
+                if (scanning) {
+                    requestAnimationFrame(tick);
+                }
+            }
+
+            // Event listeners
+            startScanBtn.addEventListener('click', startScanning);
+            stopScanBtn.addEventListener('click', stopScanning);
+
+            // Reset scanner when modal is closed
+            scannerModal.addEventListener('hidden.bs.modal', function() {
+                stopScanning();
+            });
+        });
+    </script>
+@endpush
+
+@push('css')
+    <style>
+        #qr-scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        #qr-video {
+            background-color: #000;
+        }
+    </style>
+@endpush
