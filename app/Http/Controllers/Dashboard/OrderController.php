@@ -133,7 +133,7 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
+            'customer_id' => 'required',
             'service_ids' => 'required|array',
             'service_ids.*' => 'exists:services,id',
             'price' => 'required',

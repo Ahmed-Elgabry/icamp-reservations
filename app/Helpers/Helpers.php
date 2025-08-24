@@ -105,6 +105,16 @@ function isActivePanelSegment($pageSlug, $segment, $output = "show"){
 }
 
 
+function settings($key) : string|null
+{
+    $setting = Setting::where('key' , $key)->first();
+    if($setting){
+        return $setting->value ;
+    }else{
+        return null ;
+    }
+}
+
 // invoices
 // settings
 

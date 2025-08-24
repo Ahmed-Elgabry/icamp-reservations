@@ -181,6 +181,7 @@
         </div>
         <!--end::Menu item-->
     @endcan
+
     @can('surveys.create')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['surveys.create', 'surveys.answer', 'surveys.settings', 'surveys.results', 'surveys.statistics'])}}" data-kt-menu-trigger="click">
@@ -246,6 +247,7 @@
         </div>
         <!--end::Menu item-->
     @endcan
+
     @can('stocks.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['stocks.index', 'stocks.show', 'stocks.create', 'stocks.edit', 'stock-quantities.show'])}}"
@@ -292,6 +294,7 @@
         </div>
         <!--end::Menu item-->
     @endcan
+
     @can('addons.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['addons.index', 'addons.show', 'addons.create', 'addons.edit', 'stock-quantities.show'])}}"
@@ -387,7 +390,7 @@
     @endcan
     @can('orders.index')
         <!--begin::Menu item-->
-        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['orders.index', 'orders.reports', 'payments.show', 'expenses.show', 'orders.orders-by-status', 'orders.create', 'orders.edit', 'orders.show'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['orders.index', 'orders.reports', 'payments.show', 'expenses.show', 'orders.orders-by-status', 'orders.create', 'orders.edit', 'orders.show' , 'orders.registeration-forms'])}}"
             data-kt-menu-trigger="click">
             <!--begin::Menu link-->
             <a href="#" class="menu-link py-3 {{areActiveRoutes(['orders.index', 'orders.orders-by-status'])}}">
@@ -409,6 +412,15 @@
                         </span>
                         <span
                             class="menu-title">@lang('dashboard.all_title', ['page_title' => __('dashboard.orders')])</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a href="{{route('orders.registeration-forms')}}" class="menu-link py-3 {{isActiveRoute('orders.registeration-forms')}}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span
+                            class="menu-title">@lang('dashboard.registration_forms')</span>
                     </a>
                 </div>
                 @can('orders.create')
