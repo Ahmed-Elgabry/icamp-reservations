@@ -309,7 +309,7 @@
                 </div>
 
                 <div class="col-12 form-check mt-2">
-                    <input class="form-check-input @error('terms_accepted') is-invalid @enderror" type="checkbox" id="terms" name="terms_accepted" value="1" {{ old('terms_accepted') ? 'checked' : '' }} required>
+                    <input class=" @error('terms_accepted') is-invalid @enderror" type="checkbox" id="terms" name="terms_accepted" value="1" {{ old('terms_accepted') ? 'checked' : '' }} required>
                     <label class="form-check-label" for="terms">{{ __('booking.terms_label') }}</label>
                     <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="ms-2">{{ __('booking.view_terms') }}</a>
                     @error('terms_accepted') <div class="invalid-feedback">{{ $message }}</div> @enderror
