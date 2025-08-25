@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Mail\OrderDocumentsMail;
 use App\Models\Notice;
+use App\Models\Payment;
 use DB;
 use Endroid\QrCode\Color\Color;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Mpdf\Mpdf;
 use Carbon\Carbon;
 use App\Models\Addon;
@@ -877,6 +880,7 @@ class OrderController extends Controller
     {
         $order = Order::with(['payments', 'addons', 'services','customer'])->findOrFail($order);
         $termsSittng = TermsSittng::firstOrFail();
+//        dd($order->items);
 
         $html = view('dashboard.orders.pdf.invoice', compact('order','termsSittng'))->render();
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
@@ -884,14 +888,284 @@ class OrderController extends Controller
         $mpdf->Output('invoice.pdf', 'I');
     }
 
-    public function receipt($order)
+    public function addonReceipt($orderId, $addonOrderId)
     {
-        $order = Order::with('payments')->findOrFail($order);
+        $order = Order::with(['payments', 'addons', 'services', 'customer', 'items'])
+            ->findOrFail($orderId);
+
+        // Get the specific addon for this receipt
+        $addon = $order->addons->where('pivot.id', $addonOrderId)->first();
+
+        if (!$addon) {
+            abort(404, 'Addon not found for this order');
+        }
+
         $termsSittng = TermsSittng::firstOrFail();
 
-        $html = view('dashboard.orders.pdf.receipt', compact('order','termsSittng'))->render();
+        $html = view('dashboard.orders.pdf.addon_receipt', compact('order', 'addon', 'termsSittng'))->render();
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
-        $mpdf->Output('receipt.pdf', 'I');
+        $mpdf->Output('addon_receipt.pdf', 'I');
+    }
+
+    public function paymentReceipt($orderId, $paymentId)
+    {
+        $order = Order::findOrFail($orderId);
+        $payment = Payment::with(['account'])->findOrFail($paymentId);
+
+        // Verify the payment belongs to the order
+        if ($payment->order_id != $order->id) {
+            abort(404, 'Payment not found for this order');
+        }
+//dd($payment);
+        $termsSittng = TermsSittng::firstOrFail();
+
+        $html = view('dashboard.orders.pdf.payment_receipt', compact('order', 'payment', 'termsSittng'))->render();
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('payment_receipt.pdf', 'I');
+    }
+
+    public function warehouseReceipt($orderId, $warehouseId)
+    {
+        $order = Order::findOrFail($orderId);
+        $warehouseItem = \App\Models\OrderItem::with(['stock', 'order'])->findOrFail($warehouseId);
+
+        // Verify the warehouse item belongs to the order
+        if ($warehouseItem->order_id != $order->id) {
+            abort(404, 'Warehouse item not found for this order');
+        }
+
+        $termsSittng = TermsSittng::firstOrFail();
+
+        $html = view('dashboard.orders.pdf.warehouse_receipt', compact('order', 'warehouseItem', 'termsSittng'))->render();
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('warehouse_receipt.pdf', 'I');
+    }
+
+    // Update the generateTempPdf method in OrderController
+    private function generateTempPdf($order, $type)
+    {
+        $termsSittng = TermsSittng::firstOrFail();
+        $view = '';
+        $qrCodeFullPath = null;
+
+        switch($type) {
+            case 'show_price':
+                $view = 'dashboard.orders.pdf.quote';
+                break;
+            case 'reservation_data':
+                $view = 'dashboard.orders.pdf.reservation';
+                // Generate QR code for reservation data like in generateClientPDF
+                try {
+                    $editUrl = route('orders.edit', $order->id);
+                    $qrCode = QrCode::create($editUrl)
+                        ->setSize(100)
+                        ->setMargin(0)
+                        ->setBackgroundColor(new Color(255, 255, 255));
+
+                    $writer = new PngWriter();
+                    $result = $writer->write($qrCode);
+
+                    $qrCodePath = 'qrcodes/order_' . $order->id . '.png';
+                    Storage::disk('public')->put($qrCodePath, $result->getString());
+                    $qrCodeFullPath = Storage::disk('public')->path($qrCodePath);
+
+                } catch (\Exception $e) {
+                    \Log::error('QR code generation failed: ' . $e->getMessage());
+                    $qrCodeFullPath = null;
+                }
+                break;
+            case 'invoice':
+                $view = 'dashboard.orders.pdf.invoice';
+                break;
+            case 'receipt':
+                $view = 'dashboard.orders.pdf.receipt';
+                break;
+            default:
+                return false;
+        }
+
+        // Render the view with appropriate variables
+        if ($type === 'reservation_data') {
+            $html = view($view, compact('order', 'termsSittng', 'qrCodeFullPath', 'editUrl'))->render();
+        } else {
+            $html = view($view, compact('order', 'termsSittng'))->render();
+        }
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'xbriyaz',
+            'directionality' => 'rtl'
+        ]);
+
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->WriteHTML($html);
+
+        $tempPath = storage_path('app/temp/' . $type . '_' . $order->id . '.pdf');
+        $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
+
+        // Clean up QR code file if created
+        if ($type === 'reservation_data' && isset($qrCodePath) && Storage::disk('public')->exists($qrCodePath)) {
+            Storage::disk('public')->delete($qrCodePath);
+        }
+
+        return $tempPath;
+    }
+    // Add this method to send email
+    public function sendEmail(Request $request, $id)
+    {
+        $request->validate([
+            'documents' => 'sometimes|array',
+            'documents.*' => 'in:show_price,reservation_data,invoice,receipt',
+            'receipts' => 'sometimes|array'
+        ]);
+
+        $order = Order::with(['customer', 'addons', 'payments', 'items.stock'])->findOrFail($id);
+        $documentsToSend = [];
+
+        // Generate main documents
+        if ($request->has('documents')) {
+            foreach ($request->documents as $document) {
+                $tempPath = $this->generateTempPdf($order, $document);
+                if ($tempPath) {
+                    $documentsToSend[] = $document;
+                }
+            }
+        }
+
+        // Generate receipt documents
+        if ($request->has('receipts')) {
+            foreach ($request->receipts as $type => $ids) {
+                foreach ($ids as $itemId) {
+                    switch($type) {
+                        case 'addon':
+                            $addon = $order->addons->where('pivot.id', $itemId)->first();
+                            if ($addon) {
+                                $tempPath = $this->generateAddonReceiptPdf($order->id, $itemId);
+                                if ($tempPath) {
+                                    $documentsToSend[] = "addon_receipt_{$itemId}";
+                                }
+                            }
+                            break;
+                        case 'payment':
+                            $payment = $order->payments->find($itemId);
+                            if ($payment) {
+                                $tempPath = $this->generatePaymentReceiptPdf($order->id, $itemId);
+                                if ($tempPath) {
+                                    $documentsToSend[] = "payment_receipt_{$itemId}";
+                                }
+                            }
+                            break;
+                        case 'warehouse':
+                            $item = $order->items->find($itemId);
+                            if ($item) {
+                                $tempPath = $this->generateWarehouseReceiptPdf($order->id, $itemId);
+                                if ($tempPath) {
+                                    $documentsToSend[] = "warehouse_receipt_{$itemId}";
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        if (empty($documentsToSend)) {
+            return response()->json(['success' => false, 'message' => 'Please select at least one document to send'], 400);
+        }
+
+        try {
+            Mail::to($order->customer->email)
+                ->send(new OrderDocumentsMail($order, $documentsToSend));
+
+            // Clean up temporary files
+            $this->cleanupTempFiles($order->id, $documentsToSend);
+
+            return response()->json(['success' => true, 'message' => 'تم إرسال البريد الإلكتروني بنجاح']);
+        } catch (\Exception $e) {
+            $this->cleanupTempFiles($order->id, $documentsToSend);
+            return response()->json(['success' => false, 'message' => 'فشل في إرسال البريد الإلكتروني: ' . $e->getMessage()], 500);
+        }
+    }
+
+    private function generateAddonReceiptPdf($orderId, $addonId)
+    {
+        $order = Order::with(['payments', 'addons', 'services', 'customer', 'items'])
+            ->findOrFail($orderId);
+
+        $addon = $order->addons->where('pivot.id', $addonId)->first();
+        if (!$addon) abort(404, 'Addon not found');
+
+        $termsSittng = TermsSittng::firstOrFail();
+        $html = view('dashboard.orders.pdf.addon_receipt', compact('order', 'addon', 'termsSittng'))->render();
+
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+
+        $tempPath = storage_path('app/temp/addon_receipt_' . $addonId . '.pdf');
+        $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
+
+        return $tempPath;
+    }
+
+    private function generatePaymentReceiptPdf($orderId, $paymentId)
+    {
+        $order = Order::findOrFail($orderId);
+        $payment = Payment::with(['account'])->findOrFail($paymentId);
+        if ($payment->order_id != $order->id) abort(404, 'Payment not found');
+
+        $termsSittng = TermsSittng::firstOrFail();
+        $html = view('dashboard.orders.pdf.payment_receipt', compact('order', 'payment', 'termsSittng'))->render();
+
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+
+        $tempPath = storage_path('app/temp/payment_receipt_' . $paymentId . '.pdf');
+        $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
+
+        return $tempPath;
+    }
+
+    private function generateWarehouseReceiptPdf($orderId, $itemId)
+    {
+        $order = Order::findOrFail($orderId);
+        $warehouseItem = \App\Models\OrderItem::with(['stock'])->findOrFail($itemId);
+        if ($warehouseItem->order_id != $order->id) abort(404, 'Item not found');
+
+        $termsSittng = TermsSittng::firstOrFail();
+        $html = view('dashboard.orders.pdf.warehouse_receipt', compact('order', 'warehouseItem', 'termsSittng'))->render();
+
+        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf->WriteHTML($html);
+
+        $tempPath = storage_path('app/temp/warehouse_receipt_' . $itemId . '.pdf');
+        $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
+
+        return $tempPath;
+    }
+
+    private function cleanupTempFiles($orderId, $documents)
+    {
+        foreach ($documents as $document) {
+            if (str_starts_with($document, 'addon_receipt_')) {
+                $addonId = str_replace('addon_receipt_', '', $document);
+                $tempPath = storage_path('app/temp/addon_receipt_' . $addonId . '.pdf');
+            } elseif (str_starts_with($document, 'payment_receipt_')) {
+                $paymentId = str_replace('payment_receipt_', '', $document);
+                $tempPath = storage_path('app/temp/payment_receipt_' . $paymentId . '.pdf');
+            } elseif (str_starts_with($document, 'warehouse_receipt_')) {
+                $itemId = str_replace('warehouse_receipt_', '', $document);
+                $tempPath = storage_path('app/temp/warehouse_receipt_' . $itemId . '.pdf');
+            } else {
+                $tempPath = storage_path('app/temp/' . $document . '_' . $orderId . '.pdf');
+            }
+
+            if (file_exists($tempPath)) {
+                unlink($tempPath);
+            }
+        }
     }
 }

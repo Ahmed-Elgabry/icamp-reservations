@@ -290,7 +290,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@push('js')
     <!-- Include the QR scanning library -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
@@ -366,20 +366,20 @@
                         resultContainer.classList.remove('d-none');
 
                         // Check if the URL is a valid order edit URL
-                        if (code.data.includes('orders.edit')) {
+                        // if (code.data.includes('orders.edit')) {
                             setTimeout(() => {
                                 window.location.href = code.data;
                             }, 1500);
-                        } else {
-                            resultContainer.textContent = "@lang('dashboard.invalid_qr_code')";
-                            resultContainer.classList.remove('alert-info');
-                            resultContainer.classList.add('alert-warning');
+                        {{--} else {--}}
+                        {{--    resultContainer.textContent = "@lang('dashboard.invalid_qr_code')";--}}
+                        {{--    resultContainer.classList.remove('alert-info');--}}
+                        {{--    resultContainer.classList.add('alert-warning');--}}
 
-                            // Show the start button again after a delay
-                            setTimeout(() => {
-                                resetScanner();
-                            }, 3000);
-                        }
+                        {{--    // Show the start button again after a delay--}}
+                        {{--    setTimeout(() => {--}}
+                        {{--        resetScanner();--}}
+                        {{--    }, 3000);--}}
+                        {{--}--}}
                     }
                 }
 
@@ -410,7 +410,7 @@
         }
 
         #qr-video {
-            background-color: #000;
+            background: linear-gradient(135deg, #B98220 0%, #6A3D1C 100%);
         }
     </style>
 @endpush

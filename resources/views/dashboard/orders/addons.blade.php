@@ -91,9 +91,12 @@
                                     <!--begin::Menu-->
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
                                         <div class="menu-item px-3">
-                                            <div class="menu-item px-3">
-                                                <a href="{{ route('addons.print', $orderAddon->pivot->id) }}"  class="menu-link px-3">{{ __('dashboard.receipt') }}</a>
-                                            </div>
+                                            <a href="#"
+                                               class="menu-link px-3 receipt-link"
+                                               data-verified="{{ $orderAddon->pivot->verified == 1 ? '1' : '0' }}"
+                                               data-url="{{ route('addons.receipt', ['order' => $order->id, 'addon' => $orderAddon->pivot->id]) }}">
+                                                {{ __('dashboard.receipt') }}
+                                            </a>
                                         </div>
                                         <div class="menu-item px-3">
                                            <form action="{{ route('orders.removeAddon', $orderAddon->pivot->id) }}" method="POST" class="d-inline">
@@ -143,7 +146,7 @@
                                                 </div>
                                                 <div class="form-group mt-3">
                                                     <label for="edit_service_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.service_price') }}</label>
-                                                    <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->price }}" readonly>
+                                                    <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->price }}" readonly>
                                                 </div>
                                                 <div class="mb-5 fv-row col-md-12">
                                                     <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
@@ -308,6 +311,21 @@
                 let servicePrice = parseFloat($('#edit_service_price_' + addonId).val()); // Get the service price from the new field
                 let totalPrice = (count * servicePrice).toFixed(2);
                 $('#edit_price_' + addonId).val(totalPrice); // Update the total price logic
+            }
+        });
+
+        $(document).on('click', '.receipt-link', function(e) {
+            e.preventDefault();
+
+            if ($(this).data('verified') == '1') {
+                window.open($(this).data('url'), '_blank');
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '{{ __("dashboard.error") }}',
+                    text: '{{ __("dashboard.addon_not_verified_receipt_error") }}',
+                    confirmButtonText: '{{ __("dashboard.ok") }}'
+                });
             }
         });
     </script>
