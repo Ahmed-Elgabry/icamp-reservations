@@ -484,7 +484,7 @@
                     }
                 });
             });
-rl.searchParams.has('time_to') ||
+            url.searchParams.has('time_to') ||
             url.searchParams.has('notes') ||
             url.searchParams.has('prefill_mobile') ||
             url.searchParams.has('prefill_email');
@@ -511,12 +511,10 @@ rl.searchParams.has('time_to') ||
                         $cust.append(opt);
                     }
 
-       customer     $cust.val(String(c.customer.id)).trigger('change');
+                     $cust.val(String(c.customer.id)).trigger('change');
                 }
             });
         }
-
-        $('#servi.customerrigger('change');
 
         const rfId = url.searchParams.get('rf_id');
         const isRTL = "{{ app()->getLocale() }}" === "ar";
