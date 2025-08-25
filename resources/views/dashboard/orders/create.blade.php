@@ -47,6 +47,7 @@
                         class="js-select2 form-select form-select-lg form-select-solid"
                         required>
                   @foreach ($customers as $customer)
+                    <option value="" @unless ($customer) selected @endunless>{{ __('dashboard.choose') }}</option>
                     <option value="{{ $customer->id }}"
                             data-phone="{{ $customer->mobile_phone ?? '' }}"
                             data-email="{{ $customer->email ?? '' }}"
