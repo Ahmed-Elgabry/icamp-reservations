@@ -522,7 +522,7 @@
 
     <script type="text/javascript">
         (function(){
-
+            const isRTL = "{{ app()->getLocale() }}" === "ar";
             $('.js-select2').each(function(){
                 $(this).select2({
                     width: '100%',
@@ -592,7 +592,7 @@
                         : alert(@json(__('dashboard.select_required')));
                 }
 
-                const ask = () => $.get(@json(route('orders.registeration-forms.fetch', ['id' => '___ID___'])).replace('___ID___', id)
+                const ask = () => $.get(@json(route('orders.registeration-forms.fetch', ['id' => '___ID___'])).replace('___ID___', id))
                     .done(fillFormFromPayload)
                     .fail((xhr)=>{
                         window.Swal
@@ -745,7 +745,6 @@
                     $.get('/orders/check-customer-notices/' + customerId, function(response) {
                         if (response.hasNotices) {
                             // Detect current language direction
-                            const isRTL = "{{ app()->getLocale() }}" === "ar";
                             const textAlign = isRTL ? 'right' : 'left';
 
                             let noticeContent = `<div style="text-align: ${textAlign}; font-size: 14px; line-height: 1.6;">`;
