@@ -332,7 +332,7 @@ public function accountsStore(Request $request)
      * Display the specified resource.
      *
      * @param  \App\Models\Payment  $payment
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function show($order)
     {

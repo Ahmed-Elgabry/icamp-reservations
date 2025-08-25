@@ -131,7 +131,12 @@
                             <!--begin::Menu-->
                             <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
                                 <div class="menu-item px-3">
-                                    <a href="{{ route('payments.print',$payment->id) }}"  class="menu-link px-3">{{ __('dashboard.receipt') }}</a>
+                                    <a href="#"
+                                       class="menu-link px-3 payment-receipt-link"
+                                       data-verified="{{ $payment->verified ? '1' : '0' }}"
+                                       data-url="{{ route('payments.receipt', ['order' => $order->id, 'payment' => $payment->id]) }}">
+                                        {{ __('dashboard.receipt') }}
+                                    </a>
                                 </div>
                                 @can('payments.edit')
                                 <div class="menu-item px-3">
@@ -183,7 +188,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                
+
                                 <!--begin::Card body-->
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>
@@ -291,5 +296,22 @@
 </div>
 <!--end::Post-->
 
-
 @endsection
+@push('js')
+    <script>
+        $(document).on('click', '.payment-receipt-link', function(e) {
+            e.preventDefault();
+
+            if ($(this).data('verified') == '1') {
+                window.open($(this).data('url'), '_blank');
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: '{{ __("dashboard.error") }}',
+                    text: '{{ __("dashboard.payment_not_verified_receipt_error") }}',
+                    confirmButtonText: '{{ __("dashboard.ok") }}'
+                });
+            }
+        });
+    </script>
+@endpush

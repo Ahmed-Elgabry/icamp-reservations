@@ -311,6 +311,14 @@
 
                             <!-- Submit Button -->
                             <div class="d-flex justify-content-end gap-2">
+                                @if(isset($order))
+                                    <!--begin::Email Button-->
+                                    <button type="button" id="send-email-btn" class="btn btn-secondary d-flex align-items-center gap-2">
+                                        <img src="{{ asset('imgs/gmail.png') }}" alt="Email Icon" width="20" height="20">
+                                        <span class="indicator-label">@lang('dashboard.send_email')</span>
+                                    </button>
+                                    <!--end::Email Button-->
+                                @endif
                                 <!--begin::Additional Notes Button-->
                                 <button type="button" id="additional-notes-btn" class="btn btn-secondary">
                                     <span class="indicator-label">@lang('dashboard.additional_notes')</span>
@@ -331,6 +339,98 @@
 
             </div>
         </div>
+        <!--begin::Modal - Send Email-->
+        <div class="modal fade" id="sendEmailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered mw-650px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="fw-bolder">@lang('dashboard.send_email_to_customer')</h2>
+                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                            <span class="svg-icon svg-icon-2x"></span>
+                        </div>
+                    </div>
+                    <div class="modal-body py-10 px-lg-15">
+                        <form id="sendEmailForm" class="form">
+                            @csrf
+                            <input type="hidden" name="order_id" value="{{ isset($order) ? $order->id : '' }}">
+                            <div class="row mb-8">
+                                <label class="col-form-label fw-bold fs-6">@lang('dashboard.select_documents_to_send')</label>
+                                <div class="checkbox-list">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="documents[]" value="show_price">
+                                        <span></span>
+                                        @lang('dashboard.show_price_pdf')
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="documents[]" value="reservation_data">
+                                        <span></span>
+                                        @lang('dashboard.reservation_data_pdf')
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="documents[]" value="invoice">
+                                        <span></span>
+                                        @lang('dashboard.invoice_pdf')
+                                    </label>
+
+                                    <!-- Addon Receipts -->
+                                    @if(isset($order) && $order->addons->where('pivot.verified', true)->count() > 0)
+                                        <div class="mt-3">
+                                            <h6 class="fw-bolder">@lang('dashboard.addon_receipts')</h6>
+                                            @foreach($order->addons->where('pivot.verified', true) as $addon)
+                                                <label class="checkbox">
+                                                    <input type="checkbox" name="receipts[addon][]" value="{{ $addon->pivot->id }}">
+                                                    <span></span>
+                                                    @lang('dashboard.addon_receipt'): {{ $addon->name }}
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    <!-- Payment Receipts -->
+                                    @if(isset($order) && $order->payments->where('verified', true)->count() > 0)
+                                        <div class="mt-3">
+                                            <h6 class="fw-bolder">@lang('dashboard.payment_receipts')</h6>
+                                            @foreach($order->payments->where('verified', true) as $payment)
+                                                <label class="checkbox">
+                                                    <input type="checkbox" name="receipts[payment][]" value="{{ $payment->id }}">
+                                                    <span></span>
+                                                    @lang('dashboard.payment_receipt'): {{ $payment->price }} - {{ __('dashboard.'.$payment->payment_method) }}
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    <!-- Warehouse Receipts -->
+                                    @if(isset($order) && $order->items->where('verified', true)->count() > 0)
+                                        <div class="mt-3">
+                                            <h6 class="fw-bolder">@lang('dashboard.warehouse_receipts')</h6>
+                                            @foreach($order->items->where('verified', true) as $item)
+                                                <label class="checkbox">
+                                                    <input type="checkbox" name="receipts[warehouse][]" value="{{ $item->id }}">
+                                                    <span></span>
+                                                    @lang('dashboard.warehouse_receipt'): {{ $item->stock->name }}
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="row mb-8">
+                                <label class="col-form-label fw-bold fs-6">@lang('dashboard.customer_email')</label>
+                                <div class="">
+                                    <input type="email" class="form-control" value="{{ isset($order) && $order->customer ? $order->customer->email : '' }}" readonly>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">@lang('dashboard.cancel')</button>
+                        <button type="button" id="sendEmailSubmit" class="btn btn-primary">@lang('dashboard.send')</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end::Modal - Send Email-->
         <!--begin::Modal - Additional Notes-->
         <div class="modal fade" id="additionalNotesModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered mw-900px">
@@ -538,6 +638,108 @@
                 width: '100%',
                 dir: isRTL ? 'rtl' : 'ltr',
                 dropdownAutoWidth: true
+            });
+
+            // Add this to your $(document).ready function
+
+            // Email modal functionality
+            const sendEmailModal = new bootstrap.Modal(document.getElementById('sendEmailModal'));
+
+            // Open email modal
+            $('#send-email-btn').click(function() {
+                sendEmailModal.show();
+            });
+
+            // Send email
+            // Send email
+            $('#sendEmailSubmit').click(function() {
+                const formData = new FormData();
+                const documents = [];
+                const receipts = [];
+
+                // Get main documents
+                $('input[name="documents[]"]:checked').each(function() {
+                    documents.push($(this).val());
+                    formData.append('documents[]', $(this).val());
+                });
+
+                // Get addon receipts
+                $('input[name="receipts[addon][]"]:checked').each(function() {
+                    receipts.push({type: 'addon', id: $(this).val()});
+                    formData.append('receipts[addon][]', $(this).val());
+                });
+
+                // Get payment receipts
+                $('input[name="receipts[payment][]"]:checked').each(function() {
+                    receipts.push({type: 'payment', id: $(this).val()});
+                    formData.append('receipts[payment][]', $(this).val());
+                });
+
+                // Get warehouse receipts
+                $('input[name="receipts[warehouse][]"]:checked').each(function() {
+                    receipts.push({type: 'warehouse', id: $(this).val()});
+                    formData.append('receipts[warehouse][]', $(this).val());
+                });
+
+                // Check if at least one document is selected
+                if (documents.length === 0 && receipts.length === 0) {
+                    Swal.fire({
+                        text: "{{ __('dashboard.please_select_at_least_one_document') }}",
+                        icon: "warning",
+                        buttonsStyling: false,
+                        confirmButtonText: "{{ __('dashboard.ok') }}",
+                        customClass: {
+                            confirmButton: "btn btn-primary"
+                        }
+                    });
+                    return;
+                }
+
+                const orderId = $('input[name="order_id"]').val();
+                formData.append('_token', $('input[name="_token"]').val());
+
+                // Show loading indicator
+                $('#sendEmailSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __("dashboard.sending") }}');
+
+                $.ajax({
+                    url: "{{ route('orders.sendEmail', isset($order) ? $order->id : '') }}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        sendEmailModal.hide();
+                        $('#sendEmailSubmit').prop('disabled', false).html('{{ __("dashboard.send") }}');
+
+                        Swal.fire({
+                            text: response.message,
+                            icon: response.success ? "success" : "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "{{ __('dashboard.ok') }}",
+                            customClass: {
+                                confirmButton: "btn btn-primary"
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        $('#sendEmailSubmit').prop('disabled', false).html('{{ __("dashboard.send") }}');
+
+                        let message = "{{ __('dashboard.something_went_wrong') }}";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            text: message,
+                            icon: "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "{{ __('dashboard.ok') }}",
+                            customClass: {
+                                confirmButton: "btn btn-primary"
+                            }
+                        });
+                    }
+                });
             });
         });
 

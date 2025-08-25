@@ -2,7 +2,7 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>فاتورة ضريبية</title>
+    <title>فاتورة</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -252,7 +252,7 @@
 
         <div class="logo">
             <img class="seal" src="{{ public_path('imgs/funcamp_remove.png') }}" alt="Funcamp Logo">
-            <P style="font-size: 20px;margin: 0"><b>فاتورة ضريبية</b></P>
+            <P style="font-size: 20px;margin: 0"><b>فاتورة</b></P>
         </div>
 
         <div class="show_price_info">
@@ -287,7 +287,7 @@
             </tbody>
         </table>
     </div>
-
+    @php $totalPrice = 0 @endphp
     @if(!empty($order->services))
         <div class="section">
             <!-- Table for reservation details -->
@@ -301,7 +301,6 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @php $totalPrice = 0 @endphp
                     @foreach ($order->services as $index => $service)
                         @php $totalPrice += $service->price; @endphp
                         <tr>
@@ -315,7 +314,7 @@
             </table>
         </div>
     @endif
-    @if(!empty($order->addons))
+    @if($order->addons->filter(fn($addon) => $addon->pivot->verified == 1)->isNotEmpty())
         <div class="section">
             <!-- Table for reservation details -->
             <table class="details-table">
@@ -330,14 +329,16 @@
                 </thead>
                 <tbody>
                 @foreach ($order->addons as $index => $addon)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $addon->name }}</td>
-                        <td>{{ $addon->price }}</td>
-                        <td>{{ $addon->pivot->count }}</td>
-                        <td>{{ $addon->price * $addon->pivot->count}} درهم</td>
-                    </tr>
-                    @php $totalPrice += $addon->price * $addon->pivot->count; @endphp
+                    @if($addon->pivot->verified == 1)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $addon->name }}</td>
+                            <td>{{ $addon->pivot->price }}</td>
+                            <td>{{ $addon->pivot->count }}</td>
+                            <td>{{ $addon->pivot->price * $addon->pivot->count }} درهم</td>
+                        </tr>
+                        @php $totalPrice += $addon->pivot->price * $addon->pivot->count; @endphp
+                    @endif
                 @endforeach
                 </tbody>
             </table>
@@ -350,10 +351,10 @@
                 <thead>
                     <tr>
                         @if(!empty($order->deposit))
-                            <th>التامين</th>
+                            <th>العربون</th>
                         @endif
                         @if(!empty($order->insurance_amount))
-                            <th>العربون</th>
+                            <th>التامين</th>
                         @endif
                     </tr>
                 </thead>
@@ -364,6 +365,7 @@
                         @endif
                         @if(!empty($order->insurance_amount))
                             <td>{{ $order->insurance_amount }}</td>
+                            @php $totalPrice += $order->insurance_amount @endphp
                         @endif
                     </tr>
                 </tbody>
@@ -382,15 +384,17 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ $totalPrice }} درهم شامل الضريبة</td>
+                    <td>{{ $totalPrice }} درهم </td>
                     @php $totalPaid = 0; @endphp
                     @if(!empty($order->payments))
                         @foreach($order->payments as $payment)
-                            @php $totalPaid += $payment->price @endphp
+                            @if($payment->verified == 1)
+                                @php $totalPaid += $payment->price @endphp
+                            @endif
                         @endforeach
                     @endif
-                    <td>{{ $totalPaid }} درهم شامل الضريبة</td>
-                    <td>{{ $totalPrice - $totalPaid }} درهم شامل الضريبة</td>
+                    <td>{{ $totalPaid }} درهم </td>
+                    <td>{{ $totalPrice - $totalPaid }} درهم </td>
                 </tr>
             </tbody>
         </table>

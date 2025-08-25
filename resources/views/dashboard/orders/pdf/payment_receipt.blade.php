@@ -2,7 +2,7 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>إيصال قيض</title>
+    <title>إيصال قبض</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -53,9 +53,9 @@
         }
 
         .section {
-            /*margin-bottom: 25px;*/
-            padding-left: 20px;
-            padding-right: 20px;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            /*padding-right: 20px;*/
             border-radius: 8px;
             background-color: #f8f9fa;
             border-left: 5px solid #65391B;
@@ -80,13 +80,13 @@
         .details-table th {
             background-color: #65391B;
             color: white;
-            padding: 5px;
+            padding: 10px;
             text-align: center;
             border: 1px solid #65391B;
         }
 
         .details-table td {
-            padding: 10px;
+            padding: 15px;
             text-align: center;
             border: 1px solid #ddd;
             background-color: white;
@@ -252,7 +252,7 @@
 
         <div class="logo">
             <img class="seal" src="{{ public_path('imgs/funcamp_remove.png') }}" alt="Funcamp Logo">
-            <P style="font-size: 20px;margin: 0"><b>إيصال قيض</b></P>
+            <P style="font-size: 20px;margin: 0"><b>إيصال قبض</b></P>
         </div>
 
         <div class="show_price_info">
@@ -300,20 +300,38 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ $service->name }}</td>
-                    <td>1</td>
-                    <td>{{ $service->price }} درهم</td>
+                    <td>{{ $payment->price }}</td>
+                    <td>{{ $payment->updated_at }}</td>
+                    <td>@lang('dashboard.' . $payment->payment_method)</td>
                 </tr>
             </tbody>
         </table>
     </div>
+    @php $totalPrice = 0 @endphp
+    @foreach ($order->services as $service)
+        @php $totalPrice += $service->price; @endphp
+    @endforeach
+    @foreach ($order->addons as $addon)
+        @if($addon->pivot->verified == 1)
+            @php $totalPrice += $addon->pivot->price * $addon->pivot->count; @endphp
+        @endif
+    @endforeach
+    @php $totalPrice += $order->insurance_amount @endphp
+
+    @php $totalPaid = 0; @endphp
+    @if(!empty($order->payments))
+        @foreach($order->payments as $payment)
+            @if($payment->verified == 1)
+                @php $totalPaid += $payment->price @endphp
+            @endif
+        @endforeach
+    @endif
 
     <div class="section">
         <!-- Table for reservation details -->
         <table class="details-table">
             <thead>
             <tr>
-                <th>م</th>
                 <th>رقم الفاتورة</th>
                 <th>تاريخ الفاتورة</th>
                 <th>مبلغ الفاتورة</th>
@@ -322,15 +340,13 @@
             </tr>
             </thead>
             <tbody>
-            @foreach ($order->addons as $index => $addon)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $addon->name }}</td>
-                    <td>{{ $addon->pivot->count }}</td>
-                    <td>{{ $addon->price }} درهم</td>
-                    <td>{{ $addon->price }} درهم</td>
+                    <td>{{'INV-'. $order->order_number}}</td>
+                    <td>{{ $order->date }}</td>
+                    <td>{{ $totalPrice }} درهم </td>
+                    <td>{{ $totalPaid }} درهم </td>
+                    <td>{{ $totalPrice - $totalPaid }} درهم </td>
                 </tr>
-            @endforeach
             </tbody>
         </table>
     </div>
