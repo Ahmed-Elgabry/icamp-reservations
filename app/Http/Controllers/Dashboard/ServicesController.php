@@ -52,7 +52,8 @@ class ServicesController extends Controller
             ]);
 
             \DB::beginTransaction();
-            $serviceData = $request->only(['name', 'description', 'price', 'hours', 'hour_from', 'hour_to']);
+            $request['registeration_forms'] = $request['registeration_forms'] == 'on' ? 1 : 0;
+            $serviceData = $request->only(['name', 'description', 'price', 'hours', 'hour_from', 'hour_to','registeration_forms']);
             $service = Service::create($serviceData);
 
             if (isset($request->stocks) && isset($request->counts)) {
@@ -124,6 +125,7 @@ class ServicesController extends Controller
             'price'          => 'required|numeric',
             'hours'          => 'required|integer',
             'hour_from'      => 'required',
+            'registeration_forms' => 'nullable',
             'hour_to'        => 'required',
             'stocks'         => 'nullable|array',
             'stocks.*'       => 'nullable|distinct|exists:stocks,id',
@@ -205,6 +207,7 @@ class ServicesController extends Controller
                 'description' => $validated['description'] ?? null,
                 'price'       => $validated['price'],
                 'hours'       => $validated['hours'],
+                'registeration_forms' => $validated['registeration_forms'] == 'on' ? 1 : 0,
                 'hour_from'   => $validated['hour_from'],
                 'hour_to'     => $validated['hour_to'],
             ]);

@@ -34,6 +34,12 @@
                                            value="{{ isset($service) ? $service->name : old('name') }}">
                                 </div>
                             </div>
+                                <div class="row mb-6">
+                                <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.registeration_forms_service')</label>
+                                <div class="col-lg-8">
+                                    <input type="checkbox" name="registeration_forms" class="" id="registeration_forms" {{ isset($service) && $service->registeration_forms ? 'checked' : '' }} >
+                                </div>
+                            </div>
 
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6 required">@lang('dashboard.price')</label>
@@ -179,6 +185,7 @@
                                                         @endforeach
                                                     </select>
                                                 </div>
+
                                                 <div class="col-4">
                                                     <input type="number" name="counts[]" min="1"
                                                            class="form-control form-control-lg form-control-solid"

@@ -11,16 +11,17 @@ use App\Http\Controllers\Dashboard\GeneralPaymentsController;
 use App\Http\Controllers\Dashboard\MeetingController;
 use App\Http\Controllers\Dashboard\MeetingLocationController;
 use App\Http\Controllers\Dashboard\NotificationController;
-use App\Http\Controllers\Dashboard\OrderController as DashboardOrderController;
 use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
 use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\QuestionController;
-use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\OrderSignatureController;
+use App\Http\Controllers\{
+    OrderSignatureController,
+    RegistrationformController
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,7 @@ use App\Http\Controllers\OrderSignatureController;
  */
 
 
+Route::resource('registrationforms', RegistrationformController::class)->except(['index','edit', 'update', 'destroy']);
 
 Route::get('order-rate/{order}', "VisitorsController@rate")->name('rate');
 //  Route::post('order-rate', "VisitorsController@rateStore")->name('rate.save');
@@ -47,6 +49,8 @@ Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
 
 Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
     ->name('signature.store');
+
+
 
 // Auth::routes();
 Route::group(['middleware' => ['web']], function () {
@@ -500,7 +504,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'orders.index',
         'title' => 'dashboard.orders',
         'type' => 'parent',
-        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes']
+        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes' , 'orders.registeration-forms' , 'orders.registeration-forms.edit','orders.registeration-forms.destroy','orders.registeration-forms.fetch' , 'orders.registeration-forms.fetch','orders.customers.check']
     ]);
 
     # orders store
@@ -508,6 +512,56 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'uses' => 'OrderController@signin',
         'as' => 'orders.signin',
         'title' => ['actions.add', 'dashboard.signin']
+    ]);
+
+    # orders registeration-forms
+    Route::get('orders/registeration-forms/search', [
+        'uses' => 'RegistrationformController@search',
+        'as'   => 'orders.registeration-forms.search',
+        'title' => ['actions.add', 'dashboard.orders']
+    ]);
+
+    # orders registeration-forms
+    Route::get('orders/registeration-forms/{id}/fetch', [
+        'uses' => 'RegistrationformController@fetch',
+        'as'   => 'orders.registeration-forms.fetch',
+        'title' => ['actions.add', 'dashboard.orders']
+    ]);
+
+    # orders Customer fetch
+    Route::get('orders/customer-forms', [
+        'uses' => 'RegistrationformController@customer',
+        'as'   => 'orders.customers.check',
+        'title' => ['actions.add', 'dashboard.orders']
+    ]);
+
+    # orders registeration-forms
+    Route::get('orders/registeration-forms', [
+        'uses' => 'RegistrationformController@index',
+        'as' => 'orders.registeration-forms',
+        'title' => ['actions.index', 'dashboard.registeration-forms']
+    ]);
+
+    # orders registeration-forms
+    Route::post('orders/registeration-forms/update/{id}', [
+        'uses' => 'RegistrationformController@update',
+        'as' => 'orders.registeration-forms.update',
+        'title' => ['actions.index', 'dashboard.registeration-forms']
+    ]);
+
+
+    # orders edit registeration-forms
+    Route::get('orders/registeration-forms/{id}', [
+        'uses' => 'RegistrationformController@edit',
+        'as' => 'orders.registeration-forms.edit',
+        'title' => ['actions.index', 'dashboard.registeration-forms']
+    ]);
+
+    # orders edit registeration-forms
+    Route::delete('orders/registeration-forms/{id}/destroy', [
+        'uses' => 'RegistrationformController@destroy',
+        'as' => 'orders.registeration-forms.destroy',
+        'title' => ['actions.delete', 'dashboard.registeration-forms']
     ]);
 
     # order items Verified

@@ -29,5 +29,10 @@ class Service extends Model
         return $this->hasMany(ServiceReport::class);
     }
 
+    public function registrationforms()
+    {
+        return $this->hasMany(Registrationform::class, 'service_id');
+    }
+
 
 }

@@ -93,10 +93,10 @@
                                                 <div class="mb-0 ms-2 text-end">
                                                     <a href="{{ $data['url'] ?? '#' }}"
                                                        class="text-gray-800 text-hover-primary fw-bold"
-                                                       onclick="event.preventDefault(); markNotificationAsRead('{{ $notification->id }}', '{{ $data['url'] }}')">
-                                                        {{ trim($data['title']) }}
+                                                       onclick="event.preventDefault(); markNotificationAsRead('{{ $notification->id }}', '{{ isset($data['url']) ? $data['url'] : '' }}')">
+                                                        {{ isset($data['title']) ? trim($data['title']) : '' }}
                                                     </a>
-                                                    <div class="text-gray-500 fs-7">{{ $data['message'] }}</div>
+                                                    <div class="text-gray-500 fs-7">{{ isset($data['message']) ? $data['message'] : ''}}</div>
                                                 </div>
                                                 <!--end::Title-->
                                             </div>
