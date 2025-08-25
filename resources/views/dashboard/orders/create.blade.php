@@ -3,7 +3,6 @@
 @section('pageTitle', __('dashboard.orders'))
 
 @section('content')
-
     <div class="post d-flex flex-column-fluid" id="kt_post">
         <div id="kt_content_container" class="container-xxl">
 
@@ -430,20 +429,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">@lang('dashboard.cancel')</button>
                     <button type="button" id="sendEmailSubmit" class="btn btn-primary">@lang('dashboard.send')</button>
-
                 </div>
-              </div>
-            @endif
-
-            <div class="row mb-6">
-              <label class="col-lg-4 col-form-label fw-bold fs-6 required">@lang('dashboard.deposit')</label>
-              <div class="col-lg-8">
-                <input type="number" name="deposit" id="deposit"
-                       class="form-control form-control-lg form-control-solid"
-                       value="{{ isset($order) ? $order->deposit : old('deposit') }}" required>
-              </div>
             </div>
-
         </div>
     </div>
     <!--end::Modal - Send Email-->
@@ -495,23 +482,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">@lang('dashboard.cancel')</button>
                     <button type="button" id="saveAdditionalNotes" class="btn btn-primary">@lang('dashboard.save')</button>
-
                 </div>
-              </div>
-            @endisset
-
-            <div class="d-flex justify-content-end gap-2">
-              <button type="button" id="additional-notes-btn" class="btn btn-secondary">
-                @lang('dashboard.additional_notes')
-              </button>
-              <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
-                <span class="indicator-label">@lang('dashboard.save_changes')</span>
-                <span class="indicator-progress">@lang('dashboard.please_wait')
-                  <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
-                </span>
-              </button>
             </div>
-
         </div>
     </div>
     <!--end::Modal - Additional Notes-->
@@ -698,44 +670,70 @@
             /////////////// Start:samuel work ///////////////
             // Initialize TinyMCE
             const editorConfig = {
-            plugins: 'link lists code',
-            toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link | code',
-            menubar: false,
-            height: 300,
-            directionality: isRTL ? 'rtl' : 'ltr',
-            setup: (ed)=> ed.on('change', ()=>ed.save())
+                plugins: 'link lists code',
+                toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link',
+                menubar: false,
+                height: '50vh',
+                skin: 'oxide',
+                content_css: 'default',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
             };
-            const initEditors = () => {
+
+            // Initialize editors
             tinymce.init({ ...editorConfig, selector: '#showPriceEditor' });
             tinymce.init({ ...editorConfig, selector: '#orderDataEditor' });
             tinymce.init({ ...editorConfig, selector: '#invoiceEditor' });
             tinymce.init({ ...editorConfig, selector: '#receiptEditor' });
-            };
-            initEditors();
 
+            // Additional notes modal functionality
             const additionalNotesModal = new bootstrap.Modal(document.getElementById('additionalNotesModal'));
 
-            function loadExistingNotesIntoEditors() {
-            tinymce.get('showPriceEditor')?.setContent(document.getElementById('show_price_notes').value || '');
-            tinymce.get('orderDataEditor')?.setContent(document.getElementById('order_data_notes').value || '');
-            tinymce.get('invoiceEditor')?.setContent(document.getElementById('invoice_notes').value || '');
-            tinymce.get('receiptEditor')?.setContent(document.getElementById('receipt_notes').value || '');
+            let additionalNotesData = {
+                notes: '',
+                show_price: false,
+                order_data: false,
+                invoice: false,
+                receipt: false
+            };
+
+            // Load existing data if any
+            function loadExistingData() {
+                tinymce.get('showPriceEditor').setContent($('#show_price_notes').val() || '');
+                tinymce.get('orderDataEditor').setContent($('#order_data_notes').val() || '');
+                tinymce.get('invoiceEditor').setContent($('#invoice_notes').val() || '');
+                tinymce.get('receiptEditor').setContent($('#receipt_notes').val() || '');
             }
 
-            document.getElementById('additional-notes-btn').addEventListener('click', ()=>{
-            loadExistingNotesIntoEditors();
-            additionalNotesModal.show();
+            // Open modal
+            $('#additional-notes-btn').click(function() {
+                loadExistingData();
+                additionalNotesModal.show();
             });
 
-            document.getElementById('saveAdditionalNotes').addEventListener('click', ()=>{
-            document.getElementById('show_price_notes').value = tinymce.get('showPriceEditor').getContent();
-            document.getElementById('order_data_notes').value = tinymce.get('orderDataEditor').getContent();
-            document.getElementById('invoice_notes').value = tinymce.get('invoiceEditor').getContent();
-            document.getElementById('receipt_notes').value = tinymce.get('receiptEditor').getContent();
-            additionalNotesModal.hide();
-            if (window.Swal) {
-                Swal.fire({ text: "{{ __('dashboard.additional_notes_saved') }}", icon: "success", confirmButtonText: "{{ __('dashboard.ok') }}" });
-            }
+            // Save additional notes
+            $('#saveAdditionalNotes').click(function() {
+                // Update hidden fields with editor content
+                $('#show_price_notes').val(tinymce.get('showPriceEditor').getContent());
+                $('#order_data_notes').val(tinymce.get('orderDataEditor').getContent());
+                $('#invoice_notes').val(tinymce.get('invoiceEditor').getContent());
+                $('#receipt_notes').val(tinymce.get('receiptEditor').getContent());
+
+                additionalNotesModal.hide();
+
+                // Show success message
+                Swal.fire({
+                    text: "{{ __('dashboard.additional_notes_saved') }}",
+                    icon: "success",
+                    buttonsStyling: false,
+                    confirmButtonText: "{{ __('dashboard.ok') }}",
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
             });
 
             // Customer change event to check for notices
@@ -798,93 +796,82 @@
                     formData.append('documents[]', $(this).val());
                 });
 
-            const ask = () => $.get(@json(route('orders.registeration-forms.fetch', ['id' => '___ID___'])).replace('___ID___', id))
-                .done(fillFormFromPayload)
-                .fail((xhr)=>{
-                window.Swal
-                    ? Swal.fire({ icon:'error', title:'Error', text: (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to fetch data.' })
-                    : alert('Failed to fetch data.');
+                // Get addon receipts
+                $('input[name="receipts[addon][]"]:checked').each(function() {
+                    receipts.push({type: 'addon', id: $(this).val()});
+                    formData.append('receipts[addon][]', $(this).val());
                 });
 
-            if (window.Swal) {
-                Swal.fire({
-                title: @json(__('dashboard.retrieve_confirm_title')),
-                text:  @json(__('dashboard.retrieve_confirm_body')),
-                icon:  'question',
-                showCancelButton: true,
-                confirmButtonText: @json(__('dashboard.retrieve')),
-                cancelButtonText:  @json(__('dashboard.cancel'))
-                }).then((res)=>{ if(res.isConfirmed){ ask(); } });
-            } else {
-                if (confirm(@json(__('dashboard.retrieve_confirm_body')))) ask();
-            }
-            });
+                // Get payment receipts
+                $('input[name="receipts[payment][]"]:checked').each(function() {
+                    receipts.push({type: 'payment', id: $(this).val()});
+                    formData.append('receipts[payment][]', $(this).val());
+                });
 
-            function fillFormFromPayload(payload){
-            $('#rf_id').val(payload.rf_id || '');
-            $('input[name="people_count"]').val(payload.people_count || '');
+                // Get warehouse receipts
+                $('input[name="receipts[warehouse][]"]:checked').each(function() {
+                    receipts.push({type: 'warehouse', id: $(this).val()});
+                    formData.append('receipts[warehouse][]', $(this).val());
+                });
 
-            if (Array.isArray(payload.service_ids)) {
-                $('#service_id').val(payload.service_ids.map(String)).trigger('change');
-            }
-
-            if (payload.date)      $('input[name="date"]').val(payload.date);
-            if (payload.time_from) $('input[name="time_from"]').val(payload.time_from);
-            if (payload.time_to)   $('input[name="time_to"]').val(payload.time_to);
-            if (payload.notes)     $('textarea[name="notes"]').val(payload.notes);
-
-            const $cust = $('select[name="customer_id"]');
-            const c = payload.customer;
-            if (c && c.id) {
-                const exists = $cust.find('option[value="'+c.id+'"]').length > 0;
-                if (!exists) {
-                const opt = new Option(c.name || (c.email || c.phone || ('#'+c.id)), c.id, true, true);
-                $(opt).attr('data-phone', c.phone || '').attr('data-email', c.email || '');
-                $cust.append(opt);
+                // Check if at least one document is selected
+                if (documents.length === 0 && receipts.length === 0) {
+                    Swal.fire({
+                        text: "{{ __('dashboard.please_select_at_least_one_document') }}",
+                        icon: "warning",
+                        buttonsStyling: false,
+                        confirmButtonText: "{{ __('dashboard.ok') }}",
+                        customClass: {
+                            confirmButton: "btn btn-primary"
+                        }
+                    });
+                    return;
                 }
-                $cust.val(String(c.id)).trigger('change');
-            }
 
-            $('#service_id').trigger('change');
+                const orderId = $('input[name="order_id"]').val();
+                formData.append('_token', $('input[name="_token"]').val());
 
-            if (window.Swal) Swal.fire({ icon:'success', title: @json(__('dashboard.loaded_ok')) });
-            const m = bootstrap.Modal.getInstance(document.getElementById('retrieveRfModal'));
-            m && m.hide();
-            }
+                // Show loading indicator
+                $('#sendEmailSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __("dashboard.sending") }}');
 
-            (function linkPrefill(){
-            const url = new URL(window.location.href);
-            const hasPrefill =
-                url.searchParams.has('rf_id') ||
-                url.searchParams.has('people_count') ||
-                url.searchParams.has('service_ids') ||
-                url.searchParams.has('date') ||
-                url.searchParams.has('time_from') ||
-                url.searchParams.has('time_to') ||
-                url.searchParams.has('notes') ||
-                url.searchParams.has('prefill_mobile') ||
-                url.searchParams.has('prefill_email');
-
-            const isEdit = @json(isset($order));
-            if (!hasPrefill || isEdit) return;
-
-            if (url.searchParams.has('rf_id') && "{{ Route::has('orders.customers.check') ? '1' : '0' }}" === "1") {
                 $.ajax({
-                url: "{{ route('orders.customers.check') }}",
-                method: "GET",
-                dataType: "json",
-                data: { id: url.searchParams.get('rf_id') }
-                }).done(function (c) {
-                    if (!c || !c.customer || !c.customer.id) return;
-                    const $cust = $('select[name="customer_id"]');
-                    const exists = $cust.find('option[value="'+c.customer.id+'"]').length > 0;
-                    if (!exists) {
-                        const opt = new Option(c.customer.name || (c.customer.email || c.customer.phone || ('#'+c.customer.id)),
-                                            c.customer.id, true, true);
-                        $(opt).attr('data-phone', c.customer.phone || '').attr('data-email', c.customer.email || '');
-                        $cust.append(opt);
+                    url: "{{ route('orders.sendEmail', isset($order) ? $order->id : '') }}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        sendEmailModal.hide();
+                        $('#sendEmailSubmit').prop('disabled', false).html('{{ __("dashboard.send") }}');
+
+                        Swal.fire({
+                            text: response.message,
+                            icon: response.success ? "success" : "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "{{ __('dashboard.ok') }}",
+                            customClass: {
+                                confirmButton: "btn btn-primary"
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        $('#sendEmailSubmit').prop('disabled', false).html('{{ __("dashboard.send") }}');
+
+                        let message = "{{ __('dashboard.something_went_wrong') }}";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            text: message,
+                            icon: "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "{{ __('dashboard.ok') }}",
+                            customClass: {
+                                confirmButton: "btn btn-primary"
+                            }
+                        });
                     }
-                    $cust.val(String(c.customer.id)).trigger('change');
                 });
             });
             /////////////// End:samuel work ///////////////
