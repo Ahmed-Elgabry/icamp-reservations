@@ -71,7 +71,15 @@
 
                 <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600
                             menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
-                  <div class="menu-item px-3">
+                    <div class="menu-item px-3">
+                        <a href="#"
+                           class="menu-link px-3 warehouse-receipt-link"
+                           data-verified="{{ $item->verified ? '1' : '0' }}"
+                           data-url="{{ route('warehouse.receipt', ['order' => $order->id, 'warehouse' => $item->id]) }}">
+                            {{ __('dashboard.receipt') }}
+                        </a>
+                    </div>
+                    <div class="menu-item px-3">
                     <a href="#" class="menu-link px-3" data-kt-menu-dismiss="true"
                        data-bs-toggle="modal" data-bs-target="#editCount-{{ $item->id }}">
                       {{ __('actions.edit') }}
@@ -281,6 +289,21 @@
       $total.val(totalVal);
     }
 
+  });
+
+  $(document).on('click', '.warehouse-receipt-link', function(e) {
+      e.preventDefault();
+
+      if ($(this).data('verified') == '1') {
+          window.open($(this).data('url'), '_blank');
+      } else {
+          Swal.fire({
+              icon: 'error',
+              title: '{{ __("dashboard.error") }}',
+              text: '{{ __("dashboard.warehouse_not_verified_receipt_error") }}',
+              confirmButtonText: '{{ __("dashboard.ok") }}'
+          });
+      }
   });
 </script>
  @endpush

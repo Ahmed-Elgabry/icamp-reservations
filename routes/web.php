@@ -1284,9 +1284,6 @@ Route::get('/clear', function () {
 
 Route::resource('general_payments', GeneralPaymentsController::class);
 
-// orders/receipt
-Route::get('orders/{id}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
-
 Route::resource('terms_sittngs', TermsSittngController::class);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);
@@ -1445,6 +1442,15 @@ Route::get('orders/{id}/client-pdf', [
     'title' => ['client-pdf', 'dashboard.orders']
 ]);
 
+// Addon receipt route
+Route::get('orders/{order}/addons/{addon}/receipt', [OrderController::class, 'addonReceipt'])->name('addons.receipt');
+
+// Payment receipt route
+Route::get('orders/{order}/payments/{payment}/receipt', [OrderController::class, 'paymentReceipt'])->name('payments.receipt');
+
+// Warehouse receipt route
+Route::get('orders/{order}/warehouse/{warehouse}/receipt', [OrderController::class, 'warehouseReceipt'])->name('warehouse.receipt');
+
 // Temporary route to generate order numbers for existing orders
 Route::get('/generate-order-numbers', function () {
     // Check if we're in local environment for safety
@@ -1473,7 +1479,7 @@ Route::get('/generate-order-numbers', function () {
         'total_errors' => count($errors)
     ]);
 });
-
+Route::post('orders/{id}/send-email', [OrderController::class, 'sendEmail'])->name('orders.sendEmail');
 Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);
     Route::get('survey/{response_id}/answer', [SurveyController::class, 'answer'])->name('surveys.answer')->middleware(['auth']);

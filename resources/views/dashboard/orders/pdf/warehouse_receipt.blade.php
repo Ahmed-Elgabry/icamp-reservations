@@ -2,7 +2,7 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title> عرض السعر</title>
+    <title>إيصال قبض</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -53,9 +53,9 @@
         }
 
         .section {
-            /*margin-bottom: 25px;*/
-            padding-left: 20px;
-            padding-right: 20px;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            /*padding-right: 20px;*/
             border-radius: 8px;
             background-color: #f8f9fa;
             border-left: 5px solid #65391B;
@@ -80,13 +80,13 @@
         .details-table th {
             background-color: #65391B;
             color: white;
-            padding: 5px;
+            padding: 10px;
             text-align: center;
             border: 1px solid #65391B;
         }
 
         .details-table td {
-            padding: 10px;
+            padding: 15px;
             text-align: center;
             border: 1px solid #ddd;
             background-color: white;
@@ -252,14 +252,14 @@
 
         <div class="logo">
             <img class="seal" src="{{ public_path('imgs/funcamp_remove.png') }}" alt="Funcamp Logo">
-            <P style="font-size: 20px;margin: 0"><b> عرض السعر</b></P>
+            <P style="font-size: 20px;margin: 0"><b>إيصال قبض</b></P>
         </div>
 
         <div class="show_price_info">
-            <strong>عرض سعر رقم:</strong><br>
-            {{ 'QUO-' . $order->order_number }}<br>
-            <strong>تاريخ انتهاء عرض السعر:</strong><br>
-            {{ $order->expired_price_offer ?? date('Y/m/d', strtotime('+1 day')) }}
+            <strong> إيصال رقم:</strong><br>
+            {{ 'REC-' . $order->order_number }}<br>
+            <strong>تاريخ ووقت الإصدار:</strong><br>
+            {{ now()->format('Y-m-d H:i') }}
         </div>
     </div>
 
@@ -269,6 +269,8 @@
         <table class="details-table">
             <thead>
             <tr>
+                <th>رقم الحجز</th>
+                <th>تاريخ الحجز</th>
                 <th>اسم العميل</th>
                 <th>رقم الهاتف</th>
                 <th>البريد الاكتروني</th>
@@ -276,6 +278,8 @@
             </thead>
             <tbody>
             <tr>
+                <td>{{ $order->id }}</td>
+                <td>{{ $order->date ? \Carbon\Carbon::parse($order->date)->format('Y-m-d') : 'غير محدد' }}</td>
                 <td>{{ $order->customer->name ?? 'غير محدد' }}</td>
                 <td>{{ $order->customer->phone ?? 'غير محدد' }}</td>
                 <td>{{ $order->customer->email ?? 'غير محدد' }}</td>
@@ -283,107 +287,75 @@
             </tbody>
         </table>
     </div>
-    @php $totalPrice = 0 @endphp
-    @if(!empty($order->services))
-        <div class="section">
-            <!-- Table for reservation details -->
-            <table class="details-table">
-                <thead>
-                <tr>
-                    <th>م</th>
-                    <th>الخدمة</th>
-                    <th>العدد</th>
-                    <th>المبلغ / درهم</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach ($order->services as $index => $service)
-                    @php $totalPrice += $service->price; @endphp
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $service->name }}</td>
-                        <td>1</td>
-                        <td>{{ $service->price }} درهم</td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endif
-    @if($order->addons->filter(fn($addon) => $addon->pivot->verified == 1)->isNotEmpty())
-        <div class="section">
-            <!-- Table for reservation details -->
-            <table class="details-table">
-                <thead>
-                <tr>
-                    <th>م</th>
-                    <th>الاضافات</th>
-                    <th>السعر</th>
-                    <th>العدد</th>
-                    <th>الإجمالى / درهم</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach ($order->addons as $index => $addon)
-                    @if($addon->pivot->verified == 1)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $addon->name }}</td>
-                            <td>{{ $addon->pivot->price }}</td>
-                            <td>{{ $addon->pivot->count }}</td>
-                            <td>{{ $addon->pivot->price * $addon->pivot->count }} درهم</td>
-                        </tr>
-                        @php $totalPrice += $addon->pivot->price * $addon->pivot->count; @endphp
-                    @endif
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endif
-    @if(!empty($order->deposit) || !empty($order->insurance_amount))
-        <div class="section">
-            <!-- Table for reservation details -->
-            <table class="details-table">
-                <thead>
-                <tr>
-                    @if(!empty($order->deposit))
-                        <th>العربون</th>
-                    @endif
-                    @if(!empty($order->insurance_amount))
-                        <th>التامين</th>
-                    @endif
-                    <th>المجموع الكلي</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    @if(!empty($order->deposit))
-                        <td>{{ $order->deposit }}</td>
-                    @endif
-                    @if(!empty($order->insurance_amount))
-                        <td>{{ $order->insurance_amount }}</td>
-                        @php $totalPrice += $order->insurance_amount @endphp
-                    @endif
-                    <td>{{ $totalPrice }} درهم</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    @endif
+
     <div class="section">
-        <div class="section-title">ملاحظات</div>
-        <ul>
-            <li>يتم دفع عربون وقدره (500 درهم) لضمان تأكيد الحجز ويعتبر جزء من قيمة مبلغ المخيم.</li>
-            <li>يتم دفع مبلغ التأمين عند استلام المخيم، ويتم رده خلال 24 ساعة.</li>
-            <li>تطبق الشروط والأحكام.</li>
-        </ul>
+        <!-- Table for reservation details -->
+        <table class="details-table">
+            <thead>
+            <tr>
+                <th>المبلغ المستلم</th>
+                <th>تاريخ السداد</th>
+                <th>طريقة السداد</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ $warehouseItem->total_price }}</td>
+                    <td>{{ $warehouseItem->updated_at }}</td>
+                    <td>@lang('dashboard.' . $warehouseItem->payment_method)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    @php $totalPrice = 0 @endphp
+    @foreach ($order->services as $service)
+        @php $totalPrice += $service->price; @endphp
+    @endforeach
+    @foreach ($order->addons as $addon)
+        @if($addon->pivot->verified == 1)
+            @php $totalPrice += $addon->pivot->price * $addon->pivot->count; @endphp
+        @endif
+    @endforeach
+    @php $totalPrice += $order->insurance_amount @endphp
+
+    @php $totalPaid = 0; @endphp
+    @if(!empty($order->payments))
+        @foreach($order->payments as $payment)
+            @if($payment->verified == 1)
+                @php $totalPaid += $payment->price @endphp
+            @endif
+        @endforeach
+    @endif
+
+    <div class="section">
+        <!-- Table for reservation details -->
+        <table class="details-table">
+            <thead>
+            <tr>
+                <th>رقم الفاتورة</th>
+                <th>تاريخ الفاتورة</th>
+                <th>مبلغ الفاتورة</th>
+                <th>المبلغ المدفوع</th>
+                <th>المبلغ المتبقى</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{'INV-'. $order->order_number}}</td>
+                    <td>{{ $order->date }}</td>
+                    <td>{{ $totalPrice }} درهم </td>
+                    <td>{{ $totalPaid }} درهم </td>
+                    <td>{{ $totalPrice - $totalPaid }} درهم </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- Additional Notes -->
-    @if(!empty($order->show_price_notes))
+    @if(!empty($order->receipt_notes))
         <div class="section">
             <div class="section-title">ملاحظات إضافية</div>
-            <div>{!! $order->show_price_notes !!}</div>
+            <div>{!! $order->receipt_notes !!}</div>
         </div>
     @endif
 
