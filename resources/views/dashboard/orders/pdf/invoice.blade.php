@@ -234,8 +234,8 @@
         }
 
         .seal {
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: auto
         }
     </style>
 </head>
@@ -245,8 +245,8 @@
     <div class="header clearfix">
         <div class="company-info">
             <div>{{ $termsSittng->company_name }}</div>
-            <div>E.A.U Dubai</div>
-            <div>056674766</div>
+            <div>U.A.E Dubai</div>
+            <div>0566674766</div>
             <div>www.funcamp.ae</div>
         </div>
 
@@ -259,7 +259,7 @@
             <strong> فاتورة رقم:</strong><br>
             {{ 'INV-' . $order->order_number }}<br>
             <strong>تاريخ ووقت الإصدار:</strong><br>
-            {{ now()->format('Y-m-d H:i') }}
+            {{ now()->format('d-m-Y H:i') }}
         </div>
     </div>
 
@@ -422,10 +422,10 @@
     </div>
 
     <!-- Footer -->
-    <div class="footer" style="display: block; padding: 10px 20px; border-radius: 10px; margin-top: 20px; overflow: hidden;">
+    <div class="footer" style="display: block; padding: 20px; border-radius: 10px; margin-top: 30px; overflow: hidden;">
         <div style="text-align: left; float: left; width: 30%;">
             <span style="font-size: 14px; vertical-align: middle; display: inline-block;">
-                056674766
+                0566674766
             </span>
             <img src="{{ public_path('imgs/whatsapp.png') }}"
                  alt="WhatsApp"
@@ -435,9 +435,9 @@
 
         <div style="text-align: center; float: left; width: 40%;">
             <div>
-                <img src="{{ public_path('imgs/funcamp_seal.jpg') }}" alt="Company Seal" style="width: 60px; height: 50px;">
+                <img src="{{ public_path('imgs/funcamp_seal.jpg') }}" alt="Company Seal" style="width: 120px; height: auto;">
             </div>
-            <div>
+            <div style="margin-bottom: 10px;">
                 {{ now()->format('Y-m-d H:i') }}
             </div>
         </div>
