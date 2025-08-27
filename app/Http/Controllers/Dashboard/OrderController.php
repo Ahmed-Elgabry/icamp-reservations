@@ -805,7 +805,7 @@ class OrderController extends Controller
             Storage::disk('public')->delete($qrCodePath);
         }
 
-        $filename = 'reservation_' . $id . '.pdf';
+        $filename = 'RES-' . $order->order_number . '.pdf';
         $mpdf->Output($filename, 'I');
     }
 
@@ -817,7 +817,9 @@ class OrderController extends Controller
         $html = view('dashboard.orders.pdf.quote', compact('order','termsSittng'))->render();
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
-        $mpdf->Output('invoice.pdf', 'I');
+
+        $filename = 'QUO-' . $order->order_number . '.pdf';
+        $mpdf->Output($filename, 'I');
     }
 
     public function invoice($order)
@@ -827,9 +829,16 @@ class OrderController extends Controller
 //        dd($order->items);
 
         $html = view('dashboard.orders.pdf.invoice', compact('order','termsSittng'))->render();
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_top' => 5,
+            'margin_bottom' => 5,
+        ]);
         $mpdf->WriteHTML($html);
-        $mpdf->Output('invoice.pdf', 'I');
+
+        $filename = 'INV-' . $order->order_number . '.pdf';
+        $mpdf->Output($filename, 'I');
     }
 
     public function addonReceipt($orderId, $addonOrderId)
@@ -847,9 +856,16 @@ class OrderController extends Controller
         $termsSittng = TermsSittng::firstOrFail();
 
         $html = view('dashboard.orders.pdf.addon_receipt', compact('order', 'addon', 'termsSittng'))->render();
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_top' => 5,
+            'margin_bottom' => 5,
+        ]);
         $mpdf->WriteHTML($html);
-        $mpdf->Output('addon_receipt.pdf', 'I');
+
+        $filename = 'REC-' . $order->order_number . '.pdf';
+        $mpdf->Output($filename, 'I');
     }
 
     public function paymentReceipt($orderId, $paymentId)
@@ -865,9 +881,16 @@ class OrderController extends Controller
         $termsSittng = TermsSittng::firstOrFail();
 
         $html = view('dashboard.orders.pdf.payment_receipt', compact('order', 'payment', 'termsSittng'))->render();
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_top' => 5,
+            'margin_bottom' => 5,
+        ]);
         $mpdf->WriteHTML($html);
-        $mpdf->Output('payment_receipt.pdf', 'I');
+
+        $filename = 'REC-' . $order->order_number . '.pdf';
+        $mpdf->Output($filename, 'I');
     }
 
     public function warehouseReceipt($orderId, $warehouseId)
@@ -881,11 +904,18 @@ class OrderController extends Controller
         }
 
         $termsSittng = TermsSittng::firstOrFail();
-
+//dd($warehouseItem);
         $html = view('dashboard.orders.pdf.warehouse_receipt', compact('order', 'warehouseItem', 'termsSittng'))->render();
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_top' => 5,
+            'margin_bottom' => 5,
+        ]);
         $mpdf->WriteHTML($html);
-        $mpdf->Output('warehouse_receipt.pdf', 'I');
+
+        $filename = 'REC-' . $order->order_number . '.pdf';
+        $mpdf->Output($filename, 'I');
     }
 
     // Update the generateTempPdf method in OrderController

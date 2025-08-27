@@ -104,14 +104,14 @@
 
             <li class="nav-item">
                 <a href="{{ route('orders.quote',$order->id) }}"
-                class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.quote') }}">
+                class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.quote') }}" target="_blank">
                     {{__('dashboard.Offer Price')}}
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('orders.invoice',$order->id) }}"
-                class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.invoice') }}">
+                class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.invoice') }}" target="_blank">
                     {{__('dashboard.invoice')}}
                 </a>
             </li>
