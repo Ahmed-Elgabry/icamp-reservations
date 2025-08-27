@@ -82,6 +82,9 @@ class OrderController extends Controller
         $orders = $query->filter($filters)
             ->orderBy('created_at', 'desc')
             ->with(['payments', 'addons'])
+            ->withSum(['payments as verified_payments_sum' => function ($q) {
+                $q->verified();
+            }], 'price')
             ->paginate(100);
 
         return view('dashboard.orders.index', compact('orders'));
@@ -140,6 +143,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+
         $validatedData = $request->validate([
             'customer_id' => 'required',
             'service_ids' => 'required|array',
@@ -163,12 +167,10 @@ class OrderController extends Controller
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
             'delayed_time' => 'nullable',
-
             'show_price_notes' => 'nullable|string',
             'order_data_notes' => 'nullable|string',
             'invoice_notes' => 'nullable|string',
             'receipt_notes' => 'nullable|string',
-
             'people_count' => 'required|integer|min:1',
             'client_notes' => 'nullable|string'
 
@@ -183,9 +185,6 @@ class OrderController extends Controller
         $validatedData['order_data_notes'] = $request->order_data_notes;
         $validatedData['invoice_notes'] = $request->invoice_notes;
         $validatedData['receipt_notes'] = $request->receipt_notes;
-
-        // Check if the customer has any services on the same day
-        // ->where('customer_id', $request->customer_id)
 
         $existingOrders = Order::where('date', $request->date)
             ->whereHas('services', function ($query) use ($request) {
@@ -216,10 +215,7 @@ class OrderController extends Controller
             $servicesData[$serviceId] = ['price' => Service::findOrFail($serviceId)->price];
         }
 
-        // Attach services to the order with their prices
         $order->services()->attach($servicesData);
-
-        // Handle inventory withdrawal if selected
         if ($order->inventory_withdrawal == '1') {
             $this->handleInventoryWithdrawal($order);
         }
@@ -227,7 +223,6 @@ class OrderController extends Controller
         return response()->json();
     }
 
-    //  Calculates the number of hours between the start and end times.
     public function addHoursCount()
     {
         // Check if both time_from and time_to are set
@@ -470,77 +465,29 @@ class OrderController extends Controller
     public function updateReports(Request $request, $id)
     {
         $this->updateStock($request->all());
-        $order = Order::with('reports')->findOrFail($id);
         $data = $request->validate([
             'ordered_count.*' => 'nullable|numeric|min:1',
             'ordered_price.*' => 'nullable|numeric|min:1',
-            'count'   => 'required|array',
-            'count.*' => 'nullable|integer|min:0|max:100',
+            'set_qty'   => 'required|array',
+            'set_qty.*' => 'nullable|integer|min:0|max:100',
             'not_completed_reason' => 'nullable|array',
             'reports' => 'nullable|array',
+            'report_text' => 'nullable|string'
         ]);
-
-        foreach ($data['reports'] as $id => $status) {
-            $report = ServiceReport::find($id);
-            if ($report) {
-                $report->update([
-                    'is_completed' => ($status === 'completed') ? true : false,
-                    'not_completed_reason' => $data['not_completed_reason'][$id] ?? null,
-                    'count' => $data['count'][$id] ?? 0,
-                ]);
-            }
-        }
-
-        $reports = $request->input('reports', []);
-        $reportsNot = $request->input('reports_not', []);
-        $notCompletedReasons = $request->input('not_completed_reason', []);
-        $orderedCounts = $request->input('ordered_count', []);
-        $ordered_price = $request->input('ordered_price', []);
-
-        foreach ($reports as $reportId => $status) {
-            $orderReport = $order->reports()->firstOrNew(['service_report_id' => $reportId]);
-            $orderReport->is_completed = 'completed';
-            $orderReport->not_completed_reason = null;
-
-            if (isset($orderedCounts[$reportId])) {
-                $orderReport->ordered_count = $orderedCounts[$reportId];
-                $orderReport->ordered_price = $ordered_price[$reportId];
-            }
-
-            $orderReport->save();
-        }
-
-        foreach ($reportsNot as $reportId => $status) {
-            $orderReport = $order->reports()->firstOrNew(['service_report_id' => $reportId]);
-            $orderReport->is_completed = 'not_completed';
-            $orderReport->not_completed_reason = $notCompletedReasons[$reportId] ?? null;
-
-            if (isset($orderedCounts[$reportId])) {
-                $orderReport->ordered_count = $orderedCounts[$reportId];
-            }
-
-            $orderReport->save();
-        }
-
-        $existingReportIds = array_merge(array_keys($reports), array_keys($reportsNot));
-        foreach ($order->reports as $report) {
-            if (!in_array($report->service_report_id, $existingReportIds)) {
-                $report->is_completed = 'no_action';
-                $report->not_completed_reason = null;
-
-                if (isset($orderedCounts[$report->service_report_id])) {
-                    $report->ordered_count = $orderedCounts[$report->service_report_id];
-                    $report->ordered_price = $ordered_price[$report->service_report_id];
+        FacadesDB::transaction(function () use ($data) {
+            foreach ($data['reports'] as $id => $status) {
+                $report = ServiceReport::firstOrNew(['id' => $id]);
+                if ($report) {
+                    $report->update([
+                        'is_completed' => ($status === 'completed') ? true : false,
+                        'not_completed_reason' => $data['not_completed_reason'][$id] ?? null,
+                        'set_qty' => $data['set_qty'][$id] ?? 0,
+                    ]);
                 }
-
-                $report->save();
             }
-        }
-
-        $order->update([
-            'report_text' => $request->report_text
-        ]);
-
+        });
+        $order = Order::with('reports')->findOrFail($id);
+        if (isset($data['report_text'])) $order->update(['report_text' => $data['report_text']]);
         return back()->withSuccess(__('dashboard.success'));
     }
 
@@ -567,7 +514,6 @@ class OrderController extends Controller
             'qty'     => 'required|integer|min:1',
             'status'  => 'required|in:decrement,increment',
         ]);
-
         try {
             $result = FacadesDB::transaction(function () use ($data) {
                 $affected = FacadesDB::table('service_stock')
@@ -576,20 +522,18 @@ class OrderController extends Controller
                     ->update([
                         'required_qty' => $data['qty'],
                         'updated_at'   => now(),
+                        'latest_activity' => $data['status']
                     ]);
+                abort_if($affected === 0 ,404 ,'Pivot not found for this stock.');
 
-                if ($affected === 0) abort(404, 'Pivot not found for this stock.');
-
-                $stock = Stock::whereKey($data['stockId'])->lockForUpdate()->firstOrFail();
-                if ($data['status'] === 'increment') {
-                    $stock->increment('quantity' , $data['qty']);
-                } elseif ($data['status'] === 'decrement') {
-                    if ($data['qty'] > $stock->quantity) abort(422, __('dashboard.insufficient_stock'));
-                    $stock->decrement('quantity' , $data['qty']);
-                } else {
-                    abort(422, __('dashboard.not_found'));
-                }
-
+                $stock = Stock::whereKey($data['stockId'])
+                                ->lockForUpdate()
+                                ->firstOrFail();
+                match ($data['status']) {
+                    'increment' => $stock->increment('quantity', $data['qty']),
+                    'decrement' => $data['qty'] > $stock->quantity ? abort(422, __('dashboard.insufficient_stock')) : $stock->decrement('quantity', $data['qty']),
+                    default => abort(422, __('dashboard.not_found')),
+                };
                 return [
                     'remaining' => (int) $stock->quantity,
                     'decrement' => (int) $data['qty'],

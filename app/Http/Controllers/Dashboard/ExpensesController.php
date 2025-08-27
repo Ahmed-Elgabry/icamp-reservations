@@ -204,12 +204,6 @@ class ExpensesController extends Controller
     public function destroy($expense)
     {
         $expense = Expense::findOrFail($expense);
-        // check account to take money of
-        $bankAccount = BankAccount::find($expense->account_id);
-        $bankAccount->update([
-            'balance' => $bankAccount->balance + $expense->price
-        ]);
-
         $expense->delete();
         return response()->json();
     }

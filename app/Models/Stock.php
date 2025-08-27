@@ -30,7 +30,7 @@ class Stock extends Model
         return $value ? asset('storage/' . $value) : null;
     }
 
-    // دالة لحفظ الملفات  
+    // دالة لحفظ الملفات
     protected function StoreFile($directory, $file)
     {
         try {
@@ -55,7 +55,7 @@ class Stock extends Model
     {
         return $this->hasMany(StockActivity::class);
     }
-    // في نموذج Stock
+
     public function scopeFilter(Builder $builder, $filters)
     {
         $builder->when(isset($filters['quantity_min']) && $filters['quantity_min'] !== '', function ($builder, $value) {

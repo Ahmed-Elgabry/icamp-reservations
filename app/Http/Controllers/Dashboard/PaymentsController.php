@@ -32,18 +32,17 @@ class PaymentsController extends Controller
         $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             return $query->whereBetween('date', [$startDate, $endDate]);
         })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        ->orderBy('created_at', 'desc')
+        ->get();
+
         $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             $query->whereBetween('date', [$startDate, $endDate]);
-        })->whereNotNull('account_id') // تأكد من وجود account_id إذا كان ذلك مطلوبًا
-
+        })->whereNotNull('account_id') 
             ->whereHas('account', function ($query) {
-                // يتحقق من وجود معرف الحساب
                 $query->whereNotNull('id');
             })
-            ->whereNotNull('order_id') // يتحقق من وجود order_id
-            ->whereNotNull('account_id') // يتحقق من وجود account_id
+            ->whereNotNull('order_id') 
+            ->whereNotNull('account_id')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -51,16 +50,17 @@ class PaymentsController extends Controller
         $expenses = Expense::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             return $query->whereBetween('date', [$startDate, $endDate]);
         })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        ->verified()
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         $payments = Payment::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             return $query->whereBetween('created_at', [$startDate, $endDate]);
         })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        ->verified()
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        // Convert transactions and expenses to a unified collection
         $merged = collect();
 
         foreach ($transactions as $transaction) {
@@ -78,7 +78,6 @@ class PaymentsController extends Controller
                 'created_at' => $transaction->created_at,
             ]);
         }
-
         foreach ($expenses as $expense) {
             $merged->push((object) [
                 'account' => $expense->account,
@@ -112,24 +111,10 @@ class PaymentsController extends Controller
         }
 
 
-        // Sort the merged collection by created_at
         $merged = $merged->sortByDesc('created_at');
 
-        // Manually paginate the merged collection
-        $currentPage = Paginator::resolveCurrentPage();
-        $perPage = 10; // Set your desired items per page
-        $currentResults = $merged->slice(($currentPage - 1) * $perPage, $perPage)->all();
-        $paginatedResults = new LengthAwarePaginator($currentResults, $merged->count(), $perPage, $currentPage, [
-            'path' => Paginator::resolveCurrentPath(),
-            'pageName' => 'page',
-        ]);
-
-        // Append query parameters to pagination links
-        $paginatedResults->appends(request()->all());
-
-
         return view('dashboard.banks.transactions', [
-            'transactions' => $paginatedResults
+            'transactions' => $merged
         ]);
     }
 
@@ -316,16 +301,12 @@ public function accountsStore(Request $request)
             'statement' => 'required',
             'notes' => 'nullable|string',
         ]);
-
         $bankAccount = BankAccount::findOrFail($request->account_id);
         $payment = Payment::create($validatedData);
-
         $bankAccount->update([
             'balance' => $bankAccount->balance + $request->price
         ]);
-
         return back()->withSuccess(__('dashboard.success'));
-
     }
 
     /**
@@ -359,13 +340,11 @@ public function accountsStore(Request $request)
         ]);
 
         $oldBankAccount = BankAccount::find($payment->account_id);
-        //  return money back
         $oldBankAccount->update([
             'balance' => $oldBankAccount->balance - $payment->price
         ]);
 
         $payment->update($validatedData);
-
 
         $bankAccount = BankAccount::findOrFail($request->account_id);
         $bankAccount->update([

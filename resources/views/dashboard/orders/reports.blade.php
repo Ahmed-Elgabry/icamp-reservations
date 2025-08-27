@@ -39,31 +39,28 @@
                         <div class="row mt-10 d-none d-md-flex">
                             <div class="col-md-6">
                                 <div class="row">
-                                    <div class="col-1 small-text">{{ __('dashboard.serial') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.image') }}</div>
-                                    <div class="col-1 small-text">{{ __('dashboard.item') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.requested_qty') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.placed_qty') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.completion_status') }}</div>
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.normal_items') }}</div>
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="row">
-                                    <div class="col-1 small-text">{{ __('dashboard.serial') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.image') }}</div>
-                                    <div class="col-1 small-text">{{ __('dashboard.item') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.requested_qty') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.placed_qty') }}</div>
-                                    <div class="col-2 small-text">{{ __('dashboard.completion_status') }}</div>
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.normal_items') }}</div>
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row report-item">
                             @foreach ($reports as $index => $report)
-                                @php
-                                    $orderReport = $order->reports->firstWhere('service_report_id', $report->id);
-                                @endphp
                                 <div class="col-md-6 mt-2">
                                     <div class="single-item">
                                         <div class="row">
@@ -89,18 +86,20 @@
                                             <div class="col-2 col-md-2">
                                                 <input type="number"  name="ordered_count[{{ $report->id }}]" min="0"
                                                     max="{{ $report->count }}" class="form-control text-muted"
-                                                    value="{{ $orderReport->ordered_count ?? '' }}">
+                                                    value="{{ $report->count }}"
+                                                    @readonly(true)>
                                             </div>
 
                                             <div class="col-2 col-md-2">
-                                                <input type="number" value="{{ $report->count }}" min="0" max="100"
-                                                    name="count[{{ $report->id }}]" class="form-control">
+                                                <input type="number"
+                                                    min="0" max="{{ $report->count }}"
+                                                    name="set_qty[{{ $report->id }}]"
+                                                    class="form-control"
+                                                    value="{{ ($report->set_qty == 0) ? $report->count : $report->set_qty }}">
                                             </div>
+
                                             <div class="col-12 col-md-4 mb-3">
                                                 <div class="card p-3 shadow-sm border">
-                                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <span class="fw-bold">{{ $report->title ?? 'Report' }}</span>
-                                                    </div>
 
                                                     <div class="btn-group w-100" role="group" aria-label="Report Status">
                                                         <input type="radio" class="btn-check reports-check"
@@ -142,6 +141,29 @@
                             @endforeach
                         </div>
 
+                        <div class="row mt-10 d-none d-md-flex">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.items_from_stocks') }}</div>
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.items_from_stocks') }}</div>
+                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
+                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row report-item">
                             @foreach ($service->stocks as $index => $stock)
                                 <div class="col-md-6 mt-2">
@@ -150,7 +172,7 @@
                                             <div class="col-1 col-md-1">
                                                 {{ $index + 1 }}
                                             </div>
-                                            <div class="col-1 col-md-1">
+                                            <div class="col-2 col-md-2">
                                                 @if ($latest = $stock->image)
                                                     <a href="{{ asset($stock->image) }}" target="_blank">
                                                         <img src="{{ asset($latest) }}" alt="{{ $stock->name }}"
@@ -162,39 +184,47 @@
                                                 @endif
                                             </div>
 
-                                            <div class="col-2 col-md-2">
+                                            <div class="col-1 col-md-1 text-center">
                                                 <label>{{ $stock->name }}</label>
                                             </div>
                                             <div class="col-2 col-md-2">
-                                                    <input type="number"  name="count_stock[{{ $stock->pivot->id }}]"
-                                                        min="0"
-                                                        class="form-control text-muted"
-                                                        value="{{ $stock->pivot->count ?? '' }}">
-                                                </div>
+                                                <input type="number"  name="count_stock[{{ $stock->pivot->id }}]"
+                                                    min="0"
+                                                    class="form-control text-muted"
+                                                    value="{{ $stock->pivot->count ?? '' }}">
+                                            </div>
 
-                                                <div class="col-2 col-md-2">
-                                                    <input type="number"
-                                                        value="{{ $stock->pivot->required_qty }}"
-                                                        name="required_qty_stock[{{ $stock->pivot->id }}]"
-                                                        class="form-control">
-                                                        <button type="button"
-                                                                class="btn btn-danger btn-decrement mt-2"
-                                                                data-pivot-id="{{ $stock->pivot->id }}"
-                                                                data-stock-id="{{ $stock->id }}"
-                                                                data-stock-name="{{ $stock->name }}"
-                                                                data-status="decrement">
-                                                            <i class="fa fa-minus"></i>
-                                                        </button>
-                                                        <button type="button"
-                                                                class="btn btn-success btn-decrement mt-2"
-                                                                data-pivot-id="{{ $stock->pivot->id }}"
-                                                                data-stock-id="{{ $stock->id }}"
-                                                                data-stock-name="{{ $stock->name }}"
-                                                                data-status="increment">
-                                                                <i class="fa fa-plus"></i>
-                                                        </button>    
-                                                </div>
-   
+                                            <div class="col-2 col-md-2 m-auto">
+                                                <input type="number"
+                                                    value="{{ $stock->pivot->required_qty }}"
+                                                    name="required_qty_stock[{{ $stock->pivot->id }}]"
+                                                    class="form-control">
+                                                    <button type="button"
+                                                            class="btn btn-danger btn-decrement mt-2"
+                                                            data-pivot-id="{{ $stock->pivot->id }}"
+                                                            data-stock-id="{{ $stock->id }}"
+                                                            data-stock-name="{{ $stock->name }}"
+                                                            data-status="decrement">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                    @if ($stock->pivot->latest_activity)
+                                                        <small class="d-block mt-2">
+                                                            <span class="badge rounded-pill {{ $stock->pivot->latest_activity === 'increment' ? 'bg-success' : ($stock->pivot->latest_activity === 'decrement' ? 'bg-danger' : 'bg-secondary') }}">
+                                                                {{ $stock->pivot->latest_activity ? __('dashboard.'.$stock->pivot->latest_activity) : '—' }}
+                                                            </span>
+                                                        </small>
+                                                    @endif
+                                                    <button type="button"
+                                                            class="btn btn-success btn-decrement mt-2"
+                                                            data-pivot-id="{{ $stock->pivot->id }}"
+                                                            data-stock-id="{{ $stock->id }}"
+                                                            data-stock-name="{{ $stock->name }}"
+                                                            data-status="increment">
+                                                            <i class="fa fa-plus"></i>
+                                                    </button>
+
+                                            </div>
+
                                             <div class="col-12 col-md-4 mb-3">
                                                 <div class="card p-3 shadow-sm border">
                                                     <div class="btn-group w-100" role="group" aria-label="stock Status">
@@ -217,7 +247,7 @@
                                                         <label class="btn btn-outline-danger" for="not-completed-stock-{{ $stock->pivot->id }}">
                                                             <i class="fa fa-times me-1"></i> @lang('dashboard.not_completed')
                                                         </label>
-                                                       
+
                                                     </div>
 
                                                     <div class="incomplete-reason mt-3 col-12"
@@ -231,7 +261,6 @@
 
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -243,26 +272,6 @@
                                 class="form-control form-control-lg form-control-solid">{{ $order->report_text }}</textarea>
                         </div>
 
-                        @if (isset($order))
-                                <!--begin::Input group-->
-                                <div class="row mb-0 mt-5">
-                                    <!--begin::Label-->
-                                    <label class="col-lg-4 col-form-label fw-bold fs-6">
-                                        {{ __('dashboard.Inventory withdrawal') }}
-                                    </label>
-                                    <!--begin::Label-->
-                                    <div class="col-lg-8 d-flex align-items-center">
-                                        <div class="form-check form-check-solid form-switch fv-row">
-                                            <input class="form-check-input w-45px h-30px" type="checkbox"
-                                                {{ $order->inventory_withdrawal == '1' ? 'checked="checked"' : '' }}
-                                                id="inventory_withdrawal" name="inventory_withdrawal">
-                                            <label class="form-check-label" for="inventory_withdrawal"></label>
-                                        </div>
-                                    </div>
-                                    <!--begin::Label-->
-                                </div>
-                                <!--end::Input group-->
-                        @endif
                         <div class="form-group mt-5">
                             <button type="submit" class="btn btn-primary">@lang('dashboard.save_changes')</button>
                         </div>
@@ -348,7 +357,7 @@
                 return;
             }
             var warn = '';
-                 
+
             var html =
                 "@lang('dashboard.confirm')";
 

@@ -83,6 +83,7 @@ class Order extends Model
         return $this->belongsToMany(Service::class, 'order_service')->withPivot('price');
     }
 
+
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'order_stock')

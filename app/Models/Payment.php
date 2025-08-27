@@ -19,4 +19,9 @@ class Payment extends Model
     {
         return $this->belongsTo(BankAccount::class, 'account_id');
     }
+
+    public function scopeVerified()
+    {
+        return $this->where('verified', true);
+    }
 }

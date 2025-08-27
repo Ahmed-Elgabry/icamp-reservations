@@ -182,6 +182,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('dashboard.close') }}"></button>
               </div>
+
               <div class="modal-body">
                 <form action="{{ route('warehouse_sales.store') }}" id="saveCountDetails" method="POST">
                   @csrf
@@ -285,8 +286,8 @@
       const qtyVal   = parseFloat($qty.val()) || 0;
       const priceVal = parseFloat($stock.find(':selected').data('price')) || 0;
       const totalVal = (qtyVal * priceVal).toFixed(2);
-
       $total.val(totalVal);
+      
     }
 
   });

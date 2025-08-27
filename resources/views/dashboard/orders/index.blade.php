@@ -128,8 +128,7 @@
                                 <!--end::Order Hours-->
 
                                 <!--begin::Time From-->
-                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}
-                                </td>
+                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
                                 <!--end::Time From-->
 
                                 <!--begin::Payments-->
@@ -137,7 +136,7 @@
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format($order->payments->sum('price')) }}
+                                        {{ number_format($order->verified_payments_sum) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
                                     {{ number_format($totalPrice) }}
@@ -151,7 +150,6 @@
                                         @endif
                                     </span>
                                 </td>
-
                                 <!--end::Payments-->
 
                                 <!--begin::Order Status-->

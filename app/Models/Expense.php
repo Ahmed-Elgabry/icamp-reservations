@@ -24,4 +24,9 @@ class Expense extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function scopeVerified()
+    {
+        return $this->where('verified', true);
+    }
 }

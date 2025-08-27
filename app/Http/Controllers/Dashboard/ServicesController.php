@@ -148,8 +148,8 @@ class ServicesController extends Controller
                 $carry[$stockId] = ($carry[$stockId] ?? 0) + $count;
                 return $carry;
             }, []);
-            // dd($request->all())
-        try {
+
+       try {
             \DB::beginTransaction();
             $existingPivot = $service->stocks()
                 ->get()
@@ -201,13 +201,12 @@ class ServicesController extends Controller
                 $syncPayload[$stockId] = ['count' => $count];
             }
             $service->stocks()->sync($syncPayload);
-
             $service->update([
                 'name'        => $validated['name'],
                 'description' => $validated['description'] ?? null,
                 'price'       => $validated['price'],
                 'hours'       => $validated['hours'],
-                'registeration_forms' => $validated['registeration_forms'] == 'on' ? 1 : 0,
+                'registeration_forms' => isset($validated['registeration_forms']) ? ($validated['registeration_forms'] == 'on' ? 1 : 0) : 0,
                 'hour_from'   => $validated['hour_from'],
                 'hour_to'     => $validated['hour_to'],
             ]);
