@@ -378,7 +378,9 @@ class OrderController extends Controller
     public function reports($id)
     {
         $order = Order::findOrFail($id);
-        $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())->get();
+        $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())
+                                    ->orderBy('ordered_count')
+                                    ->get();
 
         $service = Service::findOrFail($order->services->pluck('id')->first());
         $stocks = Stock::all();

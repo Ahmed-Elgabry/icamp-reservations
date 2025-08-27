@@ -176,26 +176,6 @@ class ServicesController extends Controller
                 }
             }
 
-            foreach ($requestedCounts as $stockId => $newCount) {
-                $stock = $stockModels[$stockId];
-                $old   = $existingPivot[$stockId] ?? 0;
-                $delta = $newCount - $old;
-
-                if ($delta > 0) {
-                    $stock->decrement('quantity', $delta);
-                } elseif ($delta < 0) {
-                    $stock->increment('quantity', -$delta);
-                }
-
-                unset($existingPivot[$stockId]);
-            }
-
-            foreach ($existingPivot as $stockId => $oldCount) {
-                if (isset($stockModels[$stockId]) && $oldCount > 0) {
-                    $stockModels[$stockId]->increment('quantity', $oldCount);
-                }
-            }
-
             $syncPayload = [];
             foreach ($requestedCounts as $stockId => $count) {
                 $syncPayload[$stockId] = ['count' => $count];
@@ -218,7 +198,6 @@ class ServicesController extends Controller
                 foreach ($request->reports as $index => $reportName) {
                     $count    = (int) ($request->reports_counts[$index] ?? 0);
                     $reportId = $request->report_ids[$index] ?? null;
-
                     $reportData = [
                         'name'       => $reportName,
                         'count'      => $count,

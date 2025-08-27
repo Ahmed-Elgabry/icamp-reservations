@@ -34,7 +34,8 @@
                                            value="{{ isset($service) ? $service->name : old('name') }}">
                                 </div>
                             </div>
-                                <div class="row mb-6">
+
+                            <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.registeration_forms_service')</label>
                                 <div class="col-lg-8">
                                     <input type="checkbox" name="registeration_forms" class="" id="registeration_forms" {{ isset($service) && $service->registeration_forms ? 'checked' : '' }} >
@@ -90,130 +91,157 @@
                             </div>
 
                             <div class="row mt-4">
-                                <div class="col-lg-12">
-                                    <button type="button" class="btn btn-primary btn-sm" id="add-stock-item">
-                                        <i class="fa fa-plus"></i> @lang('dashboard.add_stock_item')
-                                    </button>
-                                </div>
+                                <button type="button" class="btn btn-primary btn-sm col-2" id="add-stock-item">
+                                    <i class="fa fa-plus"></i> @lang('dashboard.add_stock_item')
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm col-2" style="margin-right: 5px;" id="add-report-item">
+                                    <i class="fa fa-plus"></i> @lang('dashboard.add_report_item')
+                                </button>
                             </div>
 
                             <hr>
                             <h3>@lang('dashboard.report')</h3>
 
                             <div id="reports-section">
-                                @if (isset($service))
-                                    @foreach ($reports as $index => $report)
-                                        <div class="row align-reports-center reports-item-row mb-2" data-index="{{ $index }}">
-                                            <div class="col-1">
+                                    <div class="row align-reports-center reports-item-row mb-2">
+                                        <div class="col-1 text-center">
+                                            {{ __('dashboard.sequence') }}
+                                        </div>
+
+                                        <div class="col-1">
+                                            {{ __('dashboard.image') }}
+                                        </div>
+
+                                        <div class="col-4">
+                                            {{ __('dashboard.item_name') }}
+                                        </div>
+
+                                        <div class="col-2">
+                                            {{ __('dashboard.required_qty') }}
+                                        </div>
+
+                                        <div class="col-2">
+                                            {{ __('dashboard.upload_image') }}
+                                        </div>
+
+                                        <div class="col-1">
+                                            {{ __('dashboard.edit_sort') }}
+                                        </div>
+
+                                        <div class="col-1">
+                                            {{ __('dashboard.controll') }}
+                                        </div>
+
+                                    </div>
+                                @foreach ($reports as $index => $report)
+                                    <div class="row align-reports-center reports-item-row mb-2" data-index="{{ $index }}">
+                                        <div class="col-1 text-center"><span class="row-number">{{ $index + 1 }}</span></div>
+
+                                        <div class="col-1">
                                             @if ($report->image)
                                                 <img src="{{ asset($report->image) }}" class="preview-image" style="width:50px;height:50px;">
                                             @else
-                                                <img src="{{ asset('images/logo.png') }}" class="preview-image" style="width:50px;height:50px;display:none;">
+                                                <img src="{{ asset('images/logo.png') }}" class="preview-image" style="width:50px;height:50px;">
                                             @endif
+                                        </div>
+
+                                        <div class="col-4">
+                                            <input type="text" name="reports[]" class="form-control form-control-lg form-control-solid"
+                                                value="{{ $report->name }}" placeholder="@lang('dashboard.name')" required>
+                                        </div>
+
+                                        <div class="col-2">
+                                        <input type="number" name="reports_counts[]" min="1" class="form-control form-control-lg form-control-solid"
+                                                value="{{ $report->count }}" placeholder="@lang('dashboard.count')" required>
+                                        </div>
+
+                                        <div class="col-2">
+                                        <input type="file" name="reports_images[{{ $index }}]" accept="image/*"
+                                                class="form-control form-control-lg form-control-solid image-upload">
+                                        <div class="progress mt-2 d-none">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                                style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                        </div>
+                                        </div>
+
+                                        <div class="col-2">
+                                        <button type="button"
+                                                class="btn btn-sm btn-light-primary js-report-move"
+                                                data-direction="up"
+                                                data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
+                                                {{ $index == 0 ? 'disabled' : '' }}>
+                                            <i class="fa fa-arrow-up"></i>
+                                        </button>
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-light-primary js-report-move"
+                                                data-direction="down"
+                                                data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
+                                                {{ $index == count($reports) - 1 ? 'disabled' : '' }}>
+                                            <i class="fa fa-arrow-down"></i>
+                                        </button>
+
+                                        <a href="#"
+                                            class="btn btn-danger btn-sm js-delete-stock"
+                                            data-url="{{ route('stocks.destroyServiceReport', ['report' => $report->id]) }}">
+                                            @lang('dashboard.delete')
+                                        </a>
+                                        </div>
+
+                                        <input type="hidden" name="report_orders[]" value="{{ $report->order ?? ($index + 1) }}">
+                                        <input type="hidden" name="report_ids[]" value="{{ $report->id }}">
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <hr>
+
+                            @if (isset($service))
+                                <div id="stocks-section">
+                                    @foreach ($service->stocks as $index => $serviceStock)
+                                        <div class="row align-items-center stock-item-row mb-2">
+                                            <div class="col-1">
+                                                @if ($serviceStock->image)
+                                                    <img src="{{ asset($serviceStock->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
+                                                @else
+                                                    <img src="{{ asset('images/logo.png') }}" alt="" class="preview-image" style="width:50px;height:50px;display:none;">
+                                                @endif
                                             </div>
 
-                                            <div class="col-1"><span class="row-number">{{ $index + 1 }}</span></div>
+                                            <div class="col-1">
+                                                <span class="row-number">{{ $index + 1 }} (المخزن)</span>
+                                            </div>
 
                                             <div class="col-4">
-                                            <input type="text" name="reports[]" class="form-control form-control-lg form-control-solid"
-                                                    value="{{ $report->name }}" placeholder="@lang('dashboard.name')" required>
+                                                <select name="stocks[]" class="form-select-stock select2-custome col-12 form-select-lg form-select-solid" required>
+                                                    @foreach ($stocks as $stock)
+                                                        <option value="{{ $stock->id }}" {{ $serviceStock->id == $stock->id ? 'selected' : '' }}>
+                                                            {{ $stock->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <input type="number" name="counts[]" min="1"
+                                                        class="form-control form-control-lg form-control-solid"
+                                                        placeholder="@lang('dashboard.count')"
+                                                        value="{{ $serviceStock->pivot->count }}" required>
                                             </div>
 
                                             <div class="col-2">
-                                            <input type="number" name="reports_counts[]" min="1" class="form-control form-control-lg form-control-solid"
-                                                    value="{{ $report->count }}" placeholder="@lang('dashboard.count')" required>
+                                                <a href="#"
+                                                    class="menu-link px-3 js-delete-stock"
+                                                    data-url="{{ route('stocks.destroyServiceStock', ['service' => $service->id, 'stock' => $serviceStock->id]) }}">
+                                                    @lang('dashboard.delete')
+                                                </a>
                                             </div>
-
-                                            <div class="col-2">
-                                            <input type="file" name="reports_images[{{ $index }}]" accept="image/*"
-                                                    class="form-control form-control-lg form-control-solid image-upload">
-                                            <div class="progress mt-2 d-none">
-                                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                                    style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                                            </div>
-                                            </div>
-
-                                            <div class="col-2">
-                                            <button type="button"
-                                                    class="btn btn-sm btn-light-primary js-report-move"
-                                                    data-direction="up"
-                                                    data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
-                                                    {{ $index == 0 ? 'disabled' : '' }}>
-                                                <i class="fa fa-arrow-up"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-sm btn-light-primary js-report-move"
-                                                    data-direction="down"
-                                                    data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
-                                                    {{ $index == count($reports) - 1 ? 'disabled' : '' }}>
-                                                <i class="fa fa-arrow-down"></i>
-                                            </button>
-
-                                            <a href="#"
-                                                class="btn btn-danger btn-sm js-delete-report"
-                                                data-url="{{ route('stocks.destroyServiceReport', ['report' => $report->id]) }}">
-                                                @lang('dashboard.delete')
-                                            </a>
-                                            </div>
-
-                                            <input type="hidden" name="report_orders[]" value="{{ $report->order ?? ($index + 1) }}">
-                                            <input type="hidden" name="report_ids[]" value="{{ $report->id }}">
                                         </div>
                                     @endforeach
-
-                                    <div id="stocks-section">
-                                        @foreach ($service->stocks as $index => $serviceStock)
-                                            <div class="row align-items-center stock-item-row mb-2">
-                                                <div class="col-1">
-                                                    @if ($serviceStock->image)
-                                                        <img src="{{ asset($serviceStock->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
-                                                    @else
-                                                        <img src="{{ asset('images/logo.png') }}" alt="" class="preview-image" style="width:50px;height:50px;display:none;">
-                                                    @endif
-                                                </div>
-
-                                                <div class="col-1">
-                                                    <span class="row-number">{{ $index + 1 }} (المخزن)</span>
-                                                </div>
-                                                <div class="col-4">
-                                                    <select name="stocks[]" class="form-select-stock select2 col-12 form-select-lg form-select-solid" required>
-                                                        @foreach ($stocks as $stock)
-                                                            <option value="{{ $stock->id }}" {{ $serviceStock->id == $stock->id ? 'selected' : '' }}>
-                                                                {{ $stock->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-
-                                                <div class="col-4">
-                                                    <input type="number" name="counts[]" min="1"
-                                                           class="form-control form-control-lg form-control-solid"
-                                                           placeholder="@lang('dashboard.count')"
-                                                           value="{{ $serviceStock->pivot->count }}" required>
-                                                </div>
-                                                <div class="col-2">
-                                                    <a href="#"
-                                                       class="menu-link px-3 js-delete-stock"
-                                                       data-url="{{ route('stocks.destroyServiceStock', ['service' => $service->id, 'stock' => $serviceStock->id]) }}">
-                                                        @lang('dashboard.delete')
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div id="stocks-section"></div>
-                                @endif
-                            </div>
-
-                            <div class="row mt-4">
-                                <div class="col-lg-12">
-                                    <button type="button" class="btn btn-primary btn-sm" id="add-report-item">
-                                        <i class="fa fa-plus"></i> @lang('dashboard.add_report_item')
-                                    </button>
                                 </div>
-                            </div>
+                            @else
+                                <div id="stocks-section"></div>
+                            @endif
 
                             <div class="d-flex justify-content-end mt-4">
                                 <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
@@ -233,16 +261,11 @@
 @section('scripts')
 <script>
     function initSelect2(scope) {
+
         const $scope = scope ? $(scope) : $(document);
-        $scope.find('.select2').each(function () {
+        $scope.find('.select2-custome').each(function () {
             const $el = $(this);
-            if ($el.data('select2')) $el.select2('destroy');
-            $el.select2({
-                placeholder: "{{ __('dashboard.select') }}",
-                width: '100%',
-                allowClear: true,
-                dropdownParent: $(document.body)
-            });
+            $el.select2();
         });
     }
 
@@ -324,7 +347,8 @@
                     <span class="row-number">${newIndex} (المخزن)</span>
                 </div>
                 <div class="col-4">
-                    <select name="stocks[]" class="form-select-stock select2 col-12 form-select-lg form-select-solid" required>
+                    <select name="stocks[]" class="form-select-stock select2-custome col-12 form-select-lg form-select-solid" required>
+                        <option value="" selected disabled>{{ __('dashboard.select') }}</option>
                         @foreach ($stocks as $stock)
                             <option value="{{ $stock->id }}">{{ $stock->name }}</option>
                         @endforeach
@@ -547,11 +571,7 @@
 @push('css')
 <style>
     .form-select-solid,
-    .select2-container--bootstrap5.select2-container--open .form-select-solid {
-        background-color: #eef3f7;
-    }
     .progress { height: 10px; }
     .preview-image { object-fit: cover; border-radius: 5px; }
-    .select2-container .select2-dropdown { z-index: 2055; }
 </style>
 @endpush

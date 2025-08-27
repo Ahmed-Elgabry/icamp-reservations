@@ -156,7 +156,7 @@
 </div>
 <!--end::Post-->
 @endsection
-@push('js')zk
+@push('js')
     <script>
         $("#customer_id").select2();
     </script>
