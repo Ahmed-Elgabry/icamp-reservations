@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.app')
-@section('pageTitle', __('dashboard.create_violation'))
+@section('pageTitle', isset($violation) ? __('dashboard.edit_violation') : __('dashboard.create_violation'))
 
 @section('content')
     <div class="card card-flush shadow-sm">
@@ -17,7 +17,7 @@
         </div>
 
         <div class="card-body pt-0">
-            <form action="{{ route('violations.store') }}" method="POST">
+            <form action="{{ route('violations.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="mb-10">
@@ -43,6 +43,47 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-5 mt-3">
+                        <div class="col-md-4">
+                            <label class="form-label required">@lang('dashboard.violation_date')</label>
+                            <input type="date" name="violation_date" class="form-control form-control-solid"
+                                   value="{{ old('violation_date', date('Y-m-d')) }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label required">@lang('dashboard.violation_time')</label>
+                            <input type="time" name="violation_time" class="form-control form-control-solid"
+                                   value="{{ old('violation_time', date('H:i')) }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label required">@lang('dashboard.violation_place')</label>
+                            <input type="text" name="violation_place" class="form-control form-control-solid"
+                                   value="{{ old('violation_place') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label">@lang('dashboard.violation_photo')</label>
+                            <div class="media-upload-container" data-type="photo">
+                                <div class="preview-image-container mb-2" style="display: none;">
+                                    <img src="" class="preview-image img-thumbnail" style="max-width: 200px;">
+                                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
+                                        <i class="fas fa-trash"></i> @lang('dashboard.remove')
+                                    </button>
+                                </div>
+                                <div class="btn-group w-100 mb-3">
+                                    <button type="button" class="btn btn-primary capture-media" data-media-type="photo">
+                                        <i class="fas fa-camera"></i> @lang('dashboard.capture_photo')
+                                    </button>
+                                    <button type="button" class="btn btn-secondary upload-media">
+                                        <i class="fas fa-upload"></i> @lang('dashboard.upload_photo')
+                                    </button>
+                                </div>
+                                <input type="file" name="photo" class="media-input d-none" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -93,6 +134,7 @@
 @push('js')
     <script>
         $(document).ready(function() {
+            // Action taken dropdown handler
             $('#action-taken').change(function() {
                 if ($(this).val() === 'deduction') {
                     $('#deduction-amount-container').html(`
@@ -104,12 +146,58 @@
                     $('#deduction-amount-container').empty().hide();
                 }
             });
+
+            // Media upload handlers
+            const mediaContainer = $('.media-upload-container');
+            const input = mediaContainer.find('.media-input');
+            const previewContainer = mediaContainer.find('.preview-image-container');
+            const preview = mediaContainer.find('.preview-image');
+            const captureBtn = mediaContainer.find('.capture-media');
+            const uploadBtn = mediaContainer.find('.upload-media');
+            const removeBtn = mediaContainer.find('.remove-media');
+
+            // Upload button click
+            uploadBtn.click(function() {
+                input.click();
+            });
+
+            // Capture button click
+            captureBtn.click(function() {
+                input.click();
+            });
+
+            // File selection handler
+            input.change(function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.attr('src', e.target.result);
+                    previewContainer.show();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Remove media handler
+            removeBtn.click(function() {
+                previewContainer.hide();
+                input.val('');
+                preview.attr('src', '');
+            });
         });
     </script>
 @endpush
 
 @push('css')
     <style>
+        .media-upload-container {
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -118,6 +206,10 @@
 
         input[type=number] {
             -moz-appearance: textfield;
+        }
+
+        .remove-media {
+            width: 100%;
         }
     </style>
 @endpush

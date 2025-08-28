@@ -18,10 +18,7 @@ use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    OrderSignatureController,
-    RegistrationformController
-};
+use App\Http\Controllers\{Dashboard\CampReportController, OrderSignatureController, RegistrationformController};
 
 /*
 |--------------------------------------------------------------------------
@@ -1296,6 +1293,9 @@ Route::get('answers/user/{userId}', [QuestionController::class, 'showUserAnswers
 
 // Admin reports
 Route::group(['middleware' => ['auth', 'admin']], function () {
+    // Task Types
+    Route::resource('task-types', 'Dashboard\TaskTypeController');
+    
     Route::resource('tasks', 'Dashboard\TaskController')->except('show');
 
     Route::get('tasks/reports', 'Dashboard\TaskController@reports')
@@ -1424,11 +1424,13 @@ Route::get('equipment-directories/{equipmentDirectory}/items/export', [Equipment
 Route::resource('camp-reports', 'Dashboard\CampReportController')->except(['show'])->middleware(['auth']);
 Route::get('camp-reports/{campReport}', 'Dashboard\CampReportController@show')
     ->name('camp-reports.show')->middleware(['auth']);
+Route::get('camp-reports/export/pdf', [CampReportController::class, 'exportPdf'])->name('camp-reports.export');
 
 Route::resource('meetings', MeetingController::class)
     ->middleware(['auth']);
 Route::resource('meeting-locations', MeetingLocationController::class)
     ->middleware(['auth']);
+Route::get('/meetings/export/pdf', [MeetingController::class, 'exportPdf'])->name('meetings.export');
 
 Route::resource('violation-types', ViolationTypeController::class)
     ->middleware(['auth']);

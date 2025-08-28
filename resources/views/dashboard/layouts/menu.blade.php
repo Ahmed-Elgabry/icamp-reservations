@@ -703,10 +703,10 @@
 
 {{--    @can('tasks.index')--}}
         <!--begin::Menu item-->
-        <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports','employee.tasks'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports','employee.tasks', 'task-types.index', 'task-types.create', 'task-types.edit', 'task-types.show'])}}"
              data-kt-menu-trigger="click">
             <!--begin::Menu link-->
-            <a href="#" class="menu-link py-3 {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports'])}}">
+            <a href="#" class="menu-link py-3 {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports', 'task-types.index', 'task-types.create', 'task-types.edit', 'task-types.show'])}}">
             <span class="menu-icon">
                 <img src="{{ asset('images/tasks.png') }}" style="width:25px;height:25px">
             </span>
@@ -753,6 +753,18 @@
                     </div>
                     <!--end::Menu item-->
 {{--                @endcan--}}
+
+                    <!-- Task Types -->
+                    <div class="menu-item">
+                        <a href="{{ route('task-types.index') }}" class="menu-link py-3 {{ isActiveRoute('task-types.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">@lang('dashboard.task_types')</span>
+                        </a>
+                    </div>
+                    <!--end::Menu item-->
+
 {{--                @can('tasks.view')--}}
                     <!-- Employee Tasks -->
                     <div class="menu-item">

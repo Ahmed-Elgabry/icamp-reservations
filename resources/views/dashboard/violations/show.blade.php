@@ -29,8 +29,23 @@
                         <div class="fs-5 fw-bold">{{ $violation->type->name }}</div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-muted fs-7 mb-1">@lang('dashboard.date')</div>
-                        <div class="fs-5 fw-bold">{{ $violation->created_at->format('Y-m-d H:i') }}</div>
+                        <div class="text-muted fs-7 mb-1">@lang('dashboard.recorded_by')</div>
+                        <div class="fs-5 fw-bold">{{ $violation->creator->name }}</div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="text-muted fs-7 mb-1">@lang('dashboard.violation_date')</div>
+                        <div class="fs-5 fw-bold">{{ $violation->violation_date ? $violation->violation_date->format('Y-m-d') : __('dashboard.not_specified') }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted fs-7 mb-1">@lang('dashboard.violation_time')</div>
+                        <div class="fs-5 fw-bold">{{ $violation->violation_time ? $violation->violation_time : __('dashboard.not_specified') }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted fs-7 mb-1">@lang('dashboard.violation_place')</div>
+                        <div class="fs-5 fw-bold">{{ $violation->violation_place ?? __('dashboard.not_specified') }}</div>
                     </div>
                 </div>
 
@@ -50,10 +65,26 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-muted fs-7 mb-1">@lang('dashboard.recorded_by')</div>
-                        <div class="fs-5 fw-bold">{{ $violation->creator->name }}</div>
+                        <div class="text-muted fs-7 mb-1">@lang('dashboard.created_at')</div>
+                        <div class="fs-5 fw-bold">{{ $violation->created_at->format('Y-m-d H:i') }}</div>
                     </div>
                 </div>
+
+                @if($violation->photo_path)
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="text-muted fs-7 mb-1">@lang('dashboard.violation_photo')</div>
+                            <div class="card card-bordered bg-light-primary rounded">
+                                <div class="card-body text-center">
+                                    <img src="{{ Storage::url($violation->photo_path) }}"
+                                         class="img-thumbnail"
+                                         style="max-width: 300px; max-height: 300px;"
+                                         alt="@lang('dashboard.violation_photo')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <div class="row mb-4">
                     <div class="col-12">
@@ -77,18 +108,6 @@
                     </div>
                 </div>
             </div>
-
-{{--            <div class="d-flex justify-content-end">--}}
-{{--                <a href="{{ route('violations.edit', $violation) }}" class="btn btn-warning me-2">--}}
-{{--                    <i class="fas fa-edit me-2"></i>@lang('dashboard.edit')--}}
-{{--                </a>--}}
-{{--                <form action="{{ route('violations.destroy', $violation) }}" method="POST">--}}
-{{--                    @csrf @method('DELETE')--}}
-{{--                    <button type="submit" class="btn btn-danger">--}}
-{{--                        <i class="fas fa-trash me-2"></i>@lang('dashboard.delete')--}}
-{{--                    </button>--}}
-{{--                </form>--}}
-{{--            </div>--}}
         </div>
     </div>
 @endsection

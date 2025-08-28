@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html dir="@lang('dashboard.direction')" lang="{{ app()->getLocale() }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>إيصال قبض</title>
+    <title>@lang('dashboard.receipt')</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -55,7 +55,6 @@
         .section {
             margin-bottom: 20px;
             padding: 15px 20px;
-            /*padding-right: 20px;*/
             border-radius: 8px;
             background-color: #f8f9fa;
             border-left: 5px solid #65391B;
@@ -99,19 +98,14 @@
         .footer {
             position: relative;
             text-align: center;
-            /*margin-top: 30px;*/
-            /*padding: 20px;*/
-            border-top: 2px dashed #ddd;
             display: block;
             overflow: hidden;
-            /*min-height: 100px;*/
         }
 
         .thank-you {
             font-size: 18px;
             color: #fff;
             font-weight: bold;
-            /*margin: 20px 0;*/
             text-align: center;
             padding: 5px 15px;
             background: linear-gradient(135deg, #B98220 0%, #6A3D1C 100%);
@@ -167,7 +161,6 @@
         .export-date {
             text-align: center;
             color: #777;
-            /*margin-bottom: 10px;*/
         }
 
         .seal-container {
@@ -226,7 +219,6 @@
         .export-date {
             text-align: center;
             color: #392d2d;
-            /*margin-bottom: 10px;*/
         }
 
         .seal-container {
@@ -236,6 +228,17 @@
         .seal {
             width: 120px;
             height: auto;
+        }
+
+        /* RTL/LTR direction support */
+        .rtl-text {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .ltr-text {
+            direction: ltr;
+            text-align: left;
         }
     </style>
 </head>
@@ -252,60 +255,60 @@
 
         <div class="logo">
             <img class="seal" src="{{ public_path('imgs/funcamp_remove.png') }}" alt="Funcamp Logo">
-            <P style="font-size: 20px;margin: 0"><b>إيصال قبض</b></P>
+            <P style="font-size: 20px;margin: 0"><b>@lang('dashboard.receipt')</b></P>
         </div>
 
         <div class="show_price_info">
-            <strong> إيصال رقم:</strong><br>
+            <strong> @lang('dashboard.receipt') @lang('dashboard.order_number'):</strong><br>
             {{ 'REC-' . $order->order_number }}<br>
-            <strong>تاريخ ووقت الإصدار:</strong><br>
+            <strong>@lang('dashboard.Receipt_Date'):</strong><br>
             {{ now()->format('d-m-Y H:i') }}
         </div>
     </div>
 
     <!-- Reservation Details -->
-    <div class="section">
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
         <!-- Table for reservation details -->
         <table class="details-table">
             <thead>
             <tr>
-                <th>رقم الحجز</th>
-                <th>تاريخ الحجز</th>
-                <th>اسم العميل</th>
-                <th>رقم الهاتف</th>
-                <th>البريد الاكتروني</th>
+                <th>@lang('dashboard.reservation_number')</th>
+                <th>@lang('dashboard.order_date')</th>
+                <th>@lang('dashboard.Customer_Name')</th>
+                <th>@lang('dashboard.phone')</th>
+                <th>@lang('dashboard.email')</th>
             </tr>
             </thead>
             <tbody>
             <tr>
                 <td>{{ $order->id }}</td>
-                <td>{{ $order->date ? \Carbon\Carbon::parse($order->date)->format('Y-m-d') : 'غير محدد' }}</td>
-                <td>{{ $order->customer->name ?? 'غير محدد' }}</td>
-                <td>{{ $order->customer->phone ?? 'غير محدد' }}</td>
-                <td>{{ $order->customer->email ?? 'غير محدد' }}</td>
+                <td>{{ $order->date ? \Carbon\Carbon::parse($order->date)->format('Y-m-d') : __('dashboard.not_available') }}</td>
+                <td>{{ $order->customer->name ?? __('dashboard.not_available') }}</td>
+                <td>{{ $order->customer->phone ?? __('dashboard.not_available') }}</td>
+                <td>{{ $order->customer->email ?? __('dashboard.not_available') }}</td>
             </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="section">
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
         <!-- Table for reservation details -->
         <table class="details-table">
             <thead>
             <tr>
-                <th>الأسم</th>
-                <th>المبلغ المستلم</th>
-                <th>تاريخ السداد</th>
-                <th>طريقة السداد</th>
+                <th>@lang('dashboard.name')</th>
+                <th>@lang('dashboard.Amount_Received')</th>
+                <th>@lang('dashboard.Payment_Date')</th>
+                <th>@lang('dashboard.Payment_Made')</th>
             </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td> @lang('dashboard.' . $payment->statement) </td>
-                    <td>{{ $payment->price }}</td>
-                    <td>{{ $payment->updated_at }}</td>
-                    <td>@lang('dashboard.' . $payment->payment_method)</td>
-                </tr>
+            <tr>
+                <td> @lang('dashboard.' . $payment->statement) </td>
+                <td>{{ $payment->price }}</td>
+                <td>{{ $payment->updated_at }}</td>
+                <td>@lang('dashboard.' . $payment->payment_method)</td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -329,41 +332,41 @@
         @endforeach
     @endif
 
-    <div class="section">
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
         <!-- Table for reservation details -->
         <table class="details-table">
             <thead>
             <tr>
-                <th>رقم الفاتورة</th>
-                <th>تاريخ الفاتورة</th>
-                <th>مبلغ الفاتورة</th>
-                <th>المبلغ المدفوع</th>
-                <th>المبلغ المتبقى</th>
+                <th>@lang('dashboard.Reference_Number')</th>
+                <th>@lang('dashboard.order_date')</th>
+                <th>@lang('dashboard.total_amount')</th>
+                <th>@lang('dashboard.Amount_Received')</th>
+                <th>@lang('dashboard.Balance_Due')</th>
             </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>{{'INV-'. $order->order_number}}</td>
-                    <td>{{ $order->date }}</td>
-                    <td>{{ $totalPrice }} درهم </td>
-                    <td>{{ $totalPaid }} درهم </td>
-                    <td>{{ $totalPrice - $totalPaid }} درهم </td>
-                </tr>
+            <tr>
+                <td>{{'INV-'. $order->order_number}}</td>
+                <td>{{ $order->date }}</td>
+                <td>{{ $totalPrice }} @lang('dashboard.RS') </td>
+                <td>{{ $totalPaid }} @lang('dashboard.RS') </td>
+                <td>{{ $totalPrice - $totalPaid }} @lang('dashboard.RS') </td>
+            </tr>
             </tbody>
         </table>
     </div>
 
     <!-- Additional Notes -->
     @if(!empty($order->receipt_notes))
-        <div class="section">
-            <div class="section-title">ملاحظات إضافية</div>
+        <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
+            <div class="section-title">@lang('dashboard.additional_notes')</div>
             <div>{!! $order->receipt_notes !!}</div>
         </div>
     @endif
 
     <!-- Thank You Message -->
     <div class="thank-you">
-        شكرًا لاختياركم لنا ونتمنى استقبالكُم مجددًا
+        @lang('dashboard.thanks')
     </div>
 
     <!-- Footer -->

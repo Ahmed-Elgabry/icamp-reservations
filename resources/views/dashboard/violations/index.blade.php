@@ -63,7 +63,9 @@
                 <tr>
                     <th>@lang('dashboard.employee')</th>
                     <th>@lang('dashboard.violation_type')</th>
-                    <th>@lang('dashboard.date')</th>
+                    <th>@lang('dashboard.violation_date')</th>
+                    <th>@lang('dashboard.violation_time')</th>
+                    <th>@lang('dashboard.violation_place')</th>
                     <th>@lang('dashboard.action_taken')</th>
                     <th>@lang('dashboard.actions')</th>
                 </tr>
@@ -73,7 +75,9 @@
                     <tr>
                         <td>{{ $violation->employee->name }}</td>
                         <td>{{ $violation->type->name }}</td>
-                        <td>{{ $violation->created_at->format('Y-m-d H:i') }}</td>
+                        <td>{{ $violation->violation_date ? $violation->violation_date->format('Y-m-d') : '-' }}</td>
+                        <td>{{ $violation->violation_time ?? '-' }}</td>
+                        <td>{{ Str::limit($violation->violation_place, 30) ?? '-' }}</td>
                         <td>
                             <span class="badge badge-light-{{
                                 $violation->action_taken === 'warning' ? 'warning' :
@@ -94,7 +98,7 @@
                             </a>
                             <form action="{{ route('violations.destroy', $violation) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                     @lang('dashboard.delete')
                                 </button>
                             </form>

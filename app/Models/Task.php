@@ -21,7 +21,8 @@ class Task extends Model
         'failure_reason',
         'photo_attachment',
         'video_attachment',
-        'audio_attachment'
+        'audio_attachment',
+        'task_type_id'
     ];
 
     protected $casts = [
@@ -36,6 +37,11 @@ class Task extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function taskType()
+    {
+        return $this->belongsTo(TaskType::class);
     }
 
     public function notifications()

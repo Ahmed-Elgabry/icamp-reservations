@@ -7,6 +7,7 @@ use App\Models\CampReport;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Mpdf\Mpdf;
 
 class CampReportController extends Controller
 {
@@ -191,5 +192,54 @@ class CampReportController extends Controller
                 $item->update(["{$type}_path" => null]);
             }
         }
+    }
+
+    public function exportPdf()
+    {
+        $reports = CampReport::with(['service', 'creator', 'items'])
+            ->latest()
+            ->get();
+
+        // Convert images to base64 for PDF embedding
+        foreach ($reports as $report) {
+            foreach ($report->items as $item) {
+                if ($item->photo_path && Storage::exists($item->photo_path)) {
+                    try {
+                        // Get the file contents and convert to base64
+                        $imageData = Storage::get($item->photo_path);
+                        $item->photo_base64 = base64_encode($imageData);
+                    } catch (\Exception $e) {
+                        // If image can't be read, skip it
+                        $item->photo_base64 = null;
+                    }
+                }
+            }
+        }
+
+        $html = view('dashboard.camp_reports.export', compact('reports'))->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 16,
+            'margin_bottom' => 16,
+            'margin_header' => 9,
+            'margin_footer' => 9,
+            // Add RTL support for Arabic
+            'dir' => app()->getLocale() === 'ar' ? 'rtl' : 'ltr',
+            // Use fonts that support Arabic characters
+            'default_font' => app()->getLocale() === 'ar' ? 'DejaVuSans' : 'DejaVuSans'
+        ]);
+
+        // Enable image processing
+        $mpdf->showImageErrors = true;
+
+        $mpdf->WriteHTML($html);
+
+        $filename = __('dashboard.camp_reports') . "-" . date('Y-m-d') . ".pdf";
+        return $mpdf->Output($filename, 'D');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Exports\TasksExport;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Models\TaskType;
 use App\Models\User;
 use App\Notifications\TaskAssignedNotification;
 use App\Repositories\IUserRepository;
@@ -26,14 +27,15 @@ class TaskController extends Controller
 
     public function index()
     {
-        $tasks = Task::with(['assignedUser', 'creator'])->latest()->get();
+        $tasks = Task::with(['assignedUser', 'creator', 'taskType'])->latest()->get();
         return view('dashboard.tasks.index', compact('tasks'));
     }
 
     public function create()
     {
         $users = $this->userRepository->getAll();
-        return view('dashboard.tasks.create', compact('users'));
+        $taskTypes = TaskType::active()->get();
+        return view('dashboard.tasks.create', compact('users', 'taskTypes'));
     }
 
     public function store(Request $request)
@@ -44,6 +46,7 @@ class TaskController extends Controller
             'assigned_to' => 'required|exists:users,id',
             'due_date' => 'required|date|after_or_equal:today',
             'priority' => 'required|in:low,medium,high',
+            'task_type_id' => 'nullable|exists:task_types,id',
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -60,7 +63,8 @@ class TaskController extends Controller
     public function edit(Task $task)
     {
         $users = $this->userRepository->getAll();
-        return view('dashboard.tasks.create', compact('task', 'users'));
+        $taskTypes = TaskType::active()->get();
+        return view('dashboard.tasks.create', compact('task', 'users', 'taskTypes'));
     }
 
     public function update(Request $request, Task $task)
@@ -76,6 +80,7 @@ class TaskController extends Controller
             'due_date' => 'required|date|after_or_equal:today',
             'priority' => 'required|in:low,medium,high',
             'status' => 'required|in:pending,in_progress,completed,failed',
+            'task_type_id' => 'nullable|exists:task_types,id',
         ];
 
         // Conditional validation
@@ -141,7 +146,7 @@ class TaskController extends Controller
     public function myTasks()
     {
         $tasks = Task::where('assigned_to', auth()->id())
-            ->with('creator','notifications')
+            ->with('creator','notifications', 'taskType')
             ->latest()
             ->get();
 
@@ -207,7 +212,7 @@ class TaskController extends Controller
             'date_to' => request('date_to')
         ];
 
-        $query = Task::query()->with(['assignedUser', 'creator']);
+        $query = Task::query()->with(['assignedUser', 'creator', 'taskType']);
 
         if ($filters['status']) {
             $query->where('status', $filters['status']);
