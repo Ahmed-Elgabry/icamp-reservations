@@ -14,6 +14,7 @@ use App\Models\OrderRate;
 use App\Notifications\TaskAssignedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Mpdf\Mpdf;
 
 class MeetingController extends Controller
 {
@@ -49,6 +50,7 @@ class MeetingController extends Controller
             'topics.*.discussion' => 'required|string',
             'topics.*.action_items' => 'nullable|string',
             'topics.*.assigned_to' => 'nullable|exists:users,id',
+            'topics.*.due_date' => 'nullable|date|after_or_equal:today',
         ]);
 
         $meeting = Meeting::create([
@@ -79,6 +81,7 @@ class MeetingController extends Controller
                     'discussion' => $topic['discussion'],
                     'action_items' => $topic['action_items'] ?? null,
                     'assigned_to' => $topic['assigned_to'] ?? null,
+                    'due_date' => $topic['due_date'] ?? null,
                 ]);
 
                 if ($topic['assigned_to']) {
@@ -86,7 +89,7 @@ class MeetingController extends Controller
                         'title' => $topic['topic'],
                         'description' => $topic['discussion'],
                         'assigned_to' => $topic['assigned_to'],
-                        'due_date' => $meeting->date,
+                        'due_date' => $topic['due_date'] ?? $meeting->date,
                         'priority' => 'medium',
                         'created_by' => auth()->id(),
                     ]);
@@ -131,6 +134,7 @@ class MeetingController extends Controller
             'topics.*.discussion' => 'required|string',
             'topics.*.action_items' => 'nullable|string',
             'topics.*.assigned_to' => 'nullable|exists:users,id',
+            'topics.*.due_date' => 'nullable|date|after_or_equal:today',
         ]);
 
         // Update meeting data
@@ -171,6 +175,7 @@ class MeetingController extends Controller
                     'discussion' => $topic['discussion'],
                     'action_items' => $topic['action_items'] ?? null,
                     'assigned_to' => $topic['assigned_to'] ?? null,
+                    'due_date' => $topic['due_date'] ?? null,
                 ]);
 
                 if (!empty($topic['assigned_to'])) {
@@ -178,7 +183,7 @@ class MeetingController extends Controller
                         'title' => $topic['topic'],
                         'description' => $topic['discussion'],
                         'assigned_to' => $topic['assigned_to'],
-                        'due_date' => $meeting->date,
+                        'due_date' => $topic['due_date'] ?? $meeting->date,
                         'priority' => 'medium',
                         'created_by' => auth()->id(),
                     ]);
@@ -201,4 +206,37 @@ class MeetingController extends Controller
         return redirect()->route('meetings.index')
             ->with('success', 'Meeting deleted successfully');
     }
+
+    public function exportPdf()
+    {
+        $meetings = Meeting::with(['creator', 'attendees.user', 'topics.assignee', 'location'])
+            ->latest()
+            ->get();
+
+        $html = view('dashboard.meetings.export', compact('meetings'))->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 16,
+            'margin_bottom' => 16,
+            'margin_header' => 9,
+            'margin_footer' => 9,
+            // Add RTL support for Arabic
+            'dir' => app()->getLocale() === 'ar' ? 'rtl' : 'ltr',
+            'default_font' => 'DejaVuSans'
+        ]);
+
+        // Enable image processing
+        $mpdf->showImageErrors = true;
+
+        $mpdf->WriteHTML($html);
+
+        $filename = __('dashboard.meetings') . "-" . date('Y-m-d') . ".pdf";
+        return $mpdf->Output($filename, 'D');
+    }
+
 }

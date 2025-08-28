@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html dir="@lang('dashboard.direction')" lang="{{ app()->getLocale() }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title> عرض السعر</title>
+    <title>@lang('dashboard.show_price_pdf')</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -53,7 +53,6 @@
         }
 
         .section {
-            /*margin-bottom: 25px;*/
             padding-left: 20px;
             padding-right: 20px;
             border-radius: 8px;
@@ -99,19 +98,14 @@
         .footer {
             position: relative;
             text-align: center;
-            /*margin-top: 30px;*/
-            /*padding: 20px;*/
-            border-top: 2px dashed #ddd;
             display: block;
             overflow: hidden;
-            /*min-height: 100px;*/
         }
 
         .thank-you {
             font-size: 18px;
             color: #fff;
             font-weight: bold;
-            /*margin: 20px 0;*/
             text-align: center;
             padding: 5px 15px;
             background: linear-gradient(135deg, #B98220 0%, #6A3D1C 100%);
@@ -167,7 +161,6 @@
         .export-date {
             text-align: center;
             color: #777;
-            /*margin-bottom: 10px;*/
         }
 
         .seal-container {
@@ -226,7 +219,6 @@
         .export-date {
             text-align: center;
             color: #392d2d;
-            /*margin-bottom: 10px;*/
         }
 
         .seal-container {
@@ -236,6 +228,25 @@
         .seal {
             width: 120px;
             height: auto;
+        }
+
+        /* RTL/LTR direction support */
+        .rtl-text {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .ltr-text {
+            direction: ltr;
+            text-align: left;
+        }
+
+        .notes-list {
+            padding-right: 20px;
+        }
+
+        .notes-list li {
+            margin-bottom: 8px;
         }
     </style>
 </head>
@@ -252,48 +263,48 @@
 
         <div class="logo">
             <img class="seal" src="{{ public_path('imgs/funcamp_remove.png') }}" alt="Funcamp Logo">
-            <P style="font-size: 20px;margin: 0"><b> عرض السعر</b></P>
+            <P style="font-size: 20px;margin: 0"><b> @lang('dashboard.show_price_pdf')</b></P>
         </div>
 
         <div class="show_price_info">
-            <strong>عرض سعر رقم:</strong><br>
+            <strong>@lang('dashboard.show_price_pdf') @lang('dashboard.order_number'):</strong><br>
             {{ 'QUO-' . $order->order_number }}<br>
-            <strong>تاريخ انتهاء عرض السعر:</strong><br>
+            <strong>@lang('dashboard.expired_price_offer'):</strong><br>
             {{ \Carbon\Carbon::parse($order->expired_price_offer)->format('d-m-Y') ?? date('Y/m/d', strtotime('+1 day')) }}
         </div>
     </div>
 
     <!-- Reservation Details -->
-    <div class="section">
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
         <!-- Table for reservation details -->
         <table class="details-table">
             <thead>
             <tr>
-                <th>اسم العميل</th>
-                <th>رقم الهاتف</th>
-                <th>البريد الاكتروني</th>
+                <th>@lang('dashboard.Customer_Name')</th>
+                <th>@lang('dashboard.phone')</th>
+                <th>@lang('dashboard.email')</th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td>{{ $order->customer->name ?? 'غير محدد' }}</td>
-                <td>{{ $order->customer->phone ?? 'غير محدد' }}</td>
-                <td>{{ $order->customer->email ?? 'غير محدد' }}</td>
+                <td>{{ $order->customer->name ?? __('dashboard.not_available') }}</td>
+                <td>{{ $order->customer->phone ?? __('dashboard.not_available') }}</td>
+                <td>{{ $order->customer->email ?? __('dashboard.not_available') }}</td>
             </tr>
             </tbody>
         </table>
     </div>
     @php $totalPrice = 0 @endphp
     @if(!empty($order->services))
-        <div class="section">
+        <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
             <!-- Table for reservation details -->
             <table class="details-table">
                 <thead>
                 <tr>
-                    <th>م</th>
-                    <th>الخدمة</th>
-                    <th>العدد</th>
-                    <th>المبلغ / درهم</th>
+                    <th>@lang('dashboard.serial')</th>
+                    <th>@lang('dashboard.service')</th>
+                    <th>@lang('dashboard.Qty')</th>
+                    <th>@lang('dashboard.Amount') / @lang('dashboard.RS')</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -303,7 +314,7 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $service->name }}</td>
                         <td>1</td>
-                        <td>{{ $service->price }} درهم</td>
+                        <td>{{ $service->price }} @lang('dashboard.RS')</td>
                     </tr>
                 @endforeach
                 </tbody>
@@ -311,16 +322,16 @@
         </div>
     @endif
     @if($order->addons->filter(fn($addon) => $addon->pivot->verified == 1)->isNotEmpty())
-        <div class="section">
+        <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
             <!-- Table for reservation details -->
             <table class="details-table">
                 <thead>
                 <tr>
-                    <th>م</th>
-                    <th>الاضافات</th>
-                    <th>السعر</th>
-                    <th>العدد</th>
-                    <th>الإجمالى / درهم</th>
+                    <th>@lang('dashboard.serial')</th>
+                    <th>@lang('dashboard.addons')</th>
+                    <th>@lang('dashboard.Rate')</th>
+                    <th>@lang('dashboard.Qty')</th>
+                    <th>@lang('dashboard.Total') / @lang('dashboard.RS')</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -331,7 +342,7 @@
                             <td>{{ $addon->name }}</td>
                             <td>{{ $addon->pivot->price }}</td>
                             <td>{{ $addon->pivot->count }}</td>
-                            <td>{{ $addon->pivot->price * $addon->pivot->count }} درهم</td>
+                            <td>{{ $addon->pivot->price * $addon->pivot->count }} @lang('dashboard.RS')</td>
                         </tr>
                         @php $totalPrice += $addon->pivot->price * $addon->pivot->count; @endphp
                     @endif
@@ -341,18 +352,18 @@
         </div>
     @endif
     @if(!empty($order->deposit) || !empty($order->insurance_amount))
-        <div class="section">
+        <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
             <!-- Table for reservation details -->
             <table class="details-table">
                 <thead>
                 <tr>
                     @if(!empty($order->deposit))
-                        <th>العربون</th>
+                        <th>@lang('dashboard.deposit')</th>
                     @endif
                     @if(!empty($order->insurance_amount))
-                        <th>التامين</th>
+                        <th>@lang('dashboard.insurance')</th>
                     @endif
-                    <th>المجموع الكلي</th>
+                    <th>@lang('dashboard.total_amount')</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -364,33 +375,33 @@
                         <td>{{ $order->insurance_amount }}</td>
                         @php $totalPrice += $order->insurance_amount @endphp
                     @endif
-                    <td>{{ $totalPrice }} درهم</td>
+                    <td>{{ $totalPrice }} @lang('dashboard.RS')</td>
                 </tr>
                 </tbody>
             </table>
         </div>
     @endif
-    <div class="section">
-        <div class="section-title">ملاحظات</div>
-        <ul>
-            <li>لضمان تأكيد الحجز،يتم دفع العربون المتفق عليه في عرض السعر،ويعتبر جزء من قيمة مبلغ المخيم.</li>
-            <li>يتم استكمال سداد باقي الخدمة عند استلام المخيم.</li>
-            <li>بتم دفع مبلغ التأمين المتفق عليه في عرض السعر عند استلام المخيم،ويتم رده خلال ٢٤ ساعة،بعد التأكد من سلامة مستلزمات المخيم.</li>
-            <li>تطبق الشروط والأحكام.</li>
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
+        <div class="section-title">@lang('dashboard.notes')</div>
+        <ul class="notes-list">
+            <li>@lang('dashboard.quote_note_1')</li>
+            <li>@lang('dashboard.quote_note_2')</li>
+            <li>@lang('dashboard.quote_note_3')</li>
+            <li>@lang('dashboard.quote_note_4')</li>
         </ul>
     </div>
 
     <!-- Additional Notes -->
     @if(!empty($order->show_price_notes))
-        <div class="section">
-            <div class="section-title">ملاحظات إضافية</div>
+        <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
+            <div class="section-title">@lang('dashboard.additional_notes')</div>
             <div>{!! $order->show_price_notes !!}</div>
         </div>
     @endif
 
     <!-- Thank You Message -->
     <div class="thank-you">
-        شكرًا لاختياركم لنا ونتمنى استقبالكُم مجددًا
+        @lang('dashboard.thanks')
     </div>
 
     <!-- Footer -->
