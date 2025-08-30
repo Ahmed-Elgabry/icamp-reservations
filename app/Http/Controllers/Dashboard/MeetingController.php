@@ -20,6 +20,8 @@ class MeetingController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Meeting::class);
+
         $meetings = Meeting::with(['creator', 'attendees', 'topics'])
             ->latest()
             ->get();
@@ -29,6 +31,8 @@ class MeetingController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Meeting::class);
+
         $users = User::all();
         $topics = OrderRate::pluck('review', 'id');
         $locations = MeetingLocation::where('is_active', true)->get();
@@ -37,6 +41,8 @@ class MeetingController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Meeting::class);
+
         $validated = $request->validate([
             'date' => 'required|date',
             'start_time' => 'required',
@@ -108,11 +114,15 @@ class MeetingController extends Controller
 
     public function show(Meeting $meeting)
     {
+        $this->authorize('view', $meeting);
+
         return view('dashboard.meetings.show', compact('meeting'));
     }
 
     public function edit(Meeting $meeting)
     {
+        $this->authorize('update', $meeting);
+
         $users = User::all();
         $topics = OrderRate::pluck('review', 'id');
         $locations = MeetingLocation::where('is_active', true)->get();
@@ -121,6 +131,8 @@ class MeetingController extends Controller
 
     public function update(Request $request, Meeting $meeting)
     {
+        $this->authorize('update', $meeting);
+
         $validated = $request->validate([
             'date' => 'required|date',
             'start_time' => 'required',
@@ -202,6 +214,8 @@ class MeetingController extends Controller
 
     public function destroy(Meeting $meeting)
     {
+        $this->authorize('delete', $meeting);
+
         $meeting->delete();
         return redirect()->route('meetings.index')
             ->with('success', 'Meeting deleted successfully');

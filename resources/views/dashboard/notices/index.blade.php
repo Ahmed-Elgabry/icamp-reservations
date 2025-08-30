@@ -15,11 +15,11 @@
                         </div>
                     </div>
                     <div class="card-toolbar">
-{{--                        @can('notices.create')--}}
+                        @can('notices.store')
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEditModal" data-mode="create">
                                 @lang('dashboard.add_notice')
                             </button>
-{{--                        @endcan--}}
+                        @endcan
                     </div>
                 </div>
                 <div class="card-body pt-0">
@@ -58,21 +58,21 @@
                                                 title="@lang('dashboard.show')">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        {{--                                    @can('notices.edit')--}}
+                                        @can('notices.edit')
                                         <button class="btn btn-sm btn-light btn-edit-notice"
                                                 data-notice-id="{{ $notice->id }}"
                                                 data-mode="edit"
                                                 title="@lang('dashboard.edit')">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        {{--                                    @endcan--}}
-                                        {{--                                    @can('notices.destroy')--}}
+                                        @endcan
+                                        @can('notices.destroy')
                                         <button class="btn btn-sm btn-danger btn-delete-notice"
                                                 data-notice-id="{{ $notice->id }}"
                                                 title="@lang('dashboard.delete')">
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                        {{--                                    @endcan--}}
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforeach

@@ -32,16 +32,16 @@ class PaymentsController extends Controller
         $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             return $query->whereBetween('date', [$startDate, $endDate]);
         })
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             $query->whereBetween('date', [$startDate, $endDate]);
-        })->whereNotNull('account_id') 
+        })->whereNotNull('account_id')
             ->whereHas('account', function ($query) {
                 $query->whereNotNull('id');
             })
-            ->whereNotNull('order_id') 
+            ->whereNotNull('order_id')
             ->whereNotNull('account_id')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -50,16 +50,16 @@ class PaymentsController extends Controller
         $expenses = Expense::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             return $query->whereBetween('date', [$startDate, $endDate]);
         })
-        ->verified()
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->verified()
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $payments = Payment::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
             return $query->whereBetween('created_at', [$startDate, $endDate]);
         })
-        ->verified()
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->verified()
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $merged = collect();
 
@@ -143,7 +143,10 @@ class PaymentsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Payment::with(['order.customer' , 'order.addons' , 'order.items' , 'order.expenses'])->where(fn ($q) =>
+        $this->authorize('viewAny', Payment::class);
+
+        $query = Payment::with(['order.customer', 'order.addons', 'order.items', 'order.expenses'])->where(
+            fn($q) =>
             $q->where('verified', '1')
                 ->whereNot('statement', 'the_insurance')
         );
@@ -166,13 +169,15 @@ class PaymentsController extends Controller
 
         $payments = $query->get();
 
-        $orders = Order::whereNot('insurance_status' , 'returned')->get();
+        $orders = Order::whereNot('insurance_status', 'returned')->get();
         $customers = Customer::all();
         return view('dashboard.payments.index', compact('payments', 'customers', 'orders'));
     }
 
     public function create()
     {
+        $this->authorize('create', Payment::class);
+
         $bankAccounts = BankAccount::all();
         return view('dashboard.payments.create', [
             'bankAccounts' => $bankAccounts
@@ -190,33 +195,33 @@ class PaymentsController extends Controller
         ]);
     }
 
-public function accountsStore(Request $request)
-{
-    $validatedData = $request->validate([
-        'amount' => 'required|numeric|min:0',
-        'receiver_id' => 'nullable|exists:bank_accounts,id',
-        'account_id' => 'required|exists:bank_accounts,id',
-        'date' => 'nullable|date',
-        'description' => 'nullable|string',
-    ]);
-
-    $payment = Transaction::create($validatedData);
-
-    $bankAccount = BankAccount::find($request->account_id);
-    $disccountFormAccount = $request->amount;
-    $bankAccount->update([
-        'balance' => $bankAccount->balance + $disccountFormAccount
-    ]);
-
-    if ($request->filled('receiver_id')) {
-        $transfareTo = BankAccount::find($request->receiver_id);
-        $transfareTo->update([
-            'balance' => $transfareTo->balance + $request->amount
+    public function accountsStore(Request $request)
+    {
+        $validatedData = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'receiver_id' => 'nullable|exists:bank_accounts,id',
+            'account_id' => 'required|exists:bank_accounts,id',
+            'date' => 'nullable|date',
+            'description' => 'nullable|string',
         ]);
-    }
 
-    return response()->json(['message' => 'Transaction successful'], 200);
-}
+        $payment = Transaction::create($validatedData);
+
+        $bankAccount = BankAccount::find($request->account_id);
+        $disccountFormAccount = $request->amount;
+        $bankAccount->update([
+            'balance' => $bankAccount->balance + $disccountFormAccount
+        ]);
+
+        if ($request->filled('receiver_id')) {
+            $transfareTo = BankAccount::find($request->receiver_id);
+            $transfareTo->update([
+                'balance' => $transfareTo->balance + $request->amount
+            ]);
+        }
+
+        return response()->json(['message' => 'Transaction successful'], 200);
+    }
 
 
     public function accountsUpdate(Request $request, $id)
@@ -258,8 +263,7 @@ public function accountsStore(Request $request)
         ]);
 
         // send money to
-        $transfareTo = BankAccount::find($request->receiver_id);
-        ;
+        $transfareTo = BankAccount::find($request->receiver_id);;
         $transfareTo->update([
             'balance' => $transfareTo->balance + $amount
         ]);
@@ -277,7 +281,6 @@ public function accountsStore(Request $request)
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
         $mpdf->Output('invoice.pdf', 'I');
-
     }
 
     public function verified($id)
@@ -293,6 +296,8 @@ public function accountsStore(Request $request)
 
     public function store(Request $request)
     {
+        $this->authorize('create', Payment::class);
+
         $validatedData = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'account_id' => 'required|exists:bank_accounts,id',
@@ -317,6 +322,8 @@ public function accountsStore(Request $request)
      */
     public function show($order)
     {
+        $this->authorize('view', Payment::class);
+
         $order = Order::findOrFail($order);
         $bankAccounts = BankAccount::all();
 
@@ -331,6 +338,7 @@ public function accountsStore(Request $request)
     public function update(Request $request, $payment)
     {
         $payment = Payment::findOrFail($payment);
+        $this->authorize('update', $payment);
         $validatedData = $request->validate([
             'price' => 'required|numeric',
             'account_id' => 'required|exists:bank_accounts,id',
@@ -352,7 +360,6 @@ public function accountsStore(Request $request)
         ]);
 
         return back()->withSuccess(__('dashboard.success'));
-
     }
 
     /**
@@ -364,6 +371,7 @@ public function accountsStore(Request $request)
     public function destroy($payment)
     {
         $payment = Payment::findOrFail($payment);
+        $this->authorize('delete', $payment);
 
         $bankAccount = BankAccount::find($payment->account_id);
         $bankAccount->update([
@@ -377,6 +385,8 @@ public function accountsStore(Request $request)
 
     public function deleteAll(Request $request)
     {
+        $this->authorize('delete', Payment::class);
+
         $requestIds = json_decode($request->data);
 
         foreach ($requestIds as $id) {

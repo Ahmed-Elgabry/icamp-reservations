@@ -27,12 +27,14 @@ class TaskController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', Task::class);
         $tasks = Task::with(['assignedUser', 'creator', 'taskType'])->latest()->get();
         return view('dashboard.tasks.index', compact('tasks'));
     }
 
     public function create()
     {
+        $this->authorize('create', Task::class);
         $users = $this->userRepository->getAll();
         $taskTypes = TaskType::active()->get();
         return view('dashboard.tasks.create', compact('users', 'taskTypes'));
@@ -40,6 +42,8 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Task::class);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -62,6 +66,7 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
+        $this->authorize('update', $task);
         $users = $this->userRepository->getAll();
         $taskTypes = TaskType::active()->get();
         return view('dashboard.tasks.create', compact('task', 'users', 'taskTypes'));
@@ -70,7 +75,7 @@ class TaskController extends Controller
     public function update(Request $request, Task $task)
     {
         // Authorization check
-//        $this->authorize('update', $task);
+        $this->authorize('update', $task);
 
         // Base validation rules
         $rules = [
@@ -95,7 +100,7 @@ class TaskController extends Controller
 
         DB::transaction(function () use ($task, $validated, $originalAssignee) {
             // Update task
-            $task->update($validated);// Handle reassignment notifications
+            $task->update($validated); // Handle reassignment notifications
             if ($task->wasChanged('assigned_to')) {
                 // Delete notifications for old assignee
                 if ($originalAssignee) {
@@ -146,7 +151,7 @@ class TaskController extends Controller
     public function myTasks()
     {
         $tasks = Task::where('assigned_to', auth()->id())
-            ->with('creator','notifications', 'taskType')
+            ->with('creator', 'notifications', 'taskType')
             ->latest()
             ->get();
 
@@ -155,7 +160,7 @@ class TaskController extends Controller
 
     public function updateTaskStatus(Request $request, Task $task)
     {
-//        dd($request->audio_attachment);
+        //        dd($request->audio_attachment);
         $validated = $request->validate([
             'status' => 'required|in:pending,in_progress,completed,failed',
             'failure_reason' => 'required_if:status,failed|nullable|string',
@@ -203,7 +208,7 @@ class TaskController extends Controller
 
     public function reports()
     {
-//        $this->authorize('tasks.reports');
+        //        $this->authorize('tasks.reports');
 
         $filters = [
             'status' => request('status'),
@@ -246,7 +251,7 @@ class TaskController extends Controller
 
     public function exportReports()
     {
-//        $this->authorize('tasks.reports');
+        //        $this->authorize('tasks.reports');
 
         return Excel::download(new TasksExport(
             request('status'),

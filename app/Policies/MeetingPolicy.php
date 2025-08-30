@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Meeting;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class MeetingPolicy
+{
+    use HandlesAuthorization;
+
+    public function viewAny(User $user): bool
+    {
+        return $user->hasPermissionTo('meetings.index');
+    }
+
+    public function view(User $user, Meeting $meeting): bool
+    {
+        return $user->hasPermissionTo('meetings.show');
+    }
+
+    public function create(User $user): bool
+    {
+        return $user->hasPermissionTo('meetings.create');
+    }
+
+    public function update(User $user, Meeting $meeting): bool
+    {
+        return $user->hasPermissionTo('meetings.edit');
+    }
+
+    public function delete(User $user, Meeting $meeting): bool
+    {
+        return $user->hasPermissionTo('meetings.destroy');
+    }
+}

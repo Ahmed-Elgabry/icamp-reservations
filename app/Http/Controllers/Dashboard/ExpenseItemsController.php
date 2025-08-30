@@ -9,24 +9,26 @@ use Illuminate\Http\Request;
 
 class ExpenseItemsController extends Controller
 {
-    // عرض جميع بنود المصاريف
+    // List all expense items
     public function index()
-    {   
+    {
+        $this->authorize('viewAny', ExpenseItem::class);
+
         $expenseItems = ExpenseItem::orderBy('created_at','desc')->get();
-        
+
         return view('dashboard.expense_items.index', compact('expenseItems'));
     }
 
-    
 
-    // عرض نموذج إنشاء بند مصاريف جديد
+
+    // Show form to create new expense item
     public function create()
     {
         $expenseItems = ExpenseItem::orderBy('created_at','desc')->get();
         return view('dashboard.expense_items.create', compact('expenseItems'));
     }
 
-    // حفظ بند مصاريف جديد
+    // Store new expense item
     public function store(Request $request)
     {
         $request->validate([
@@ -60,7 +62,7 @@ class ExpenseItemsController extends Controller
 
         $query = Expense::query();
 
-        // الفلترة حسب التاريخ
+        // Filter by date
         if ($request->has('start_date') && $request->has('end_date')) {
             $query->whereBetween('date', [$request->start_date, $request->end_date]);
         }
@@ -69,12 +71,12 @@ class ExpenseItemsController extends Controller
 
         $expenses = $query->orderBy('created_at','desc')->paginate(100);
 
-        
+
         return view('dashboard.expense_items.show', compact('expenseItem', 'totalExpenses', 'currentMonthExpenses','expenses'));
     }
 
 
-    // عرض نموذج تعديل بند مصاريف
+    // Show form to edit expense item
     public function edit( $expenseItem)
     {
         $expenseItem = ExpenseItem::findOrFail($expenseItem);
@@ -83,7 +85,7 @@ class ExpenseItemsController extends Controller
         return view('dashboard.expense_items.create', compact('expenseItem','expenseItems'));
     }
 
-    // تحديث بند مصاريف موجود
+    // Update existing expense item
     public function update(Request $request,  $expenseItem)
     {
         $expenseItem = ExpenseItem::findOrFail($expenseItem);
@@ -101,7 +103,7 @@ class ExpenseItemsController extends Controller
         return response()->json();
     }
 
-    // حذف بند مصاريف
+    // Delete expense item
     public function destroy( $expenseItem)
     {
         $expenseItem = ExpenseItem::findOrFail($expenseItem);

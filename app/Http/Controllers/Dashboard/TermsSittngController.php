@@ -18,6 +18,8 @@ class TermsSittngController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', TermsSittng::class);
+
         $termsSittngs = TermsSittng::all();
         return view('dashboard.TermsSittngs.create', compact('termsSittngs'));
     }
@@ -27,6 +29,8 @@ class TermsSittngController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', TermsSittng::class);
+
         // البحث عن السجل الموجود باستخدام user_id أو أي شرط آخر
         $termsSittng = TermsSittng::query()->first();
 
@@ -40,6 +44,8 @@ class TermsSittngController extends Controller
      */
     public function store(TermsSittngRequest $request)
     {
+        $this->authorize('create', TermsSittng::class);
+
         $data = $request->all();
 
         // معالجة رفع الـ Logo
@@ -65,6 +71,8 @@ class TermsSittngController extends Controller
      */
     public function show(TermsSittng $termsSittng)
     {
+        $this->authorize('view', $termsSittng);
+
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
     }
 
@@ -73,6 +81,8 @@ class TermsSittngController extends Controller
      */
     public function edit(TermsSittng $termsSittng)
     {
+        $this->authorize('update', $termsSittng);
+
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
     }
 
@@ -81,6 +91,8 @@ class TermsSittngController extends Controller
      */
     public function update(TermsSittngRequest $request, TermsSittng $termsSittng)
     {
+        $this->authorize('update', $termsSittng);
+
         $validatedData = $request->validated();
 
         // معالجة رفع الصور
@@ -133,6 +145,8 @@ class TermsSittngController extends Controller
 
     public function destroy(TermsSittng $termsSittng)
     {
+        $this->authorize('delete', $termsSittng);
+
         $termsSittng->delete();
 
         return redirect()->route('terms_sittngs.create')
