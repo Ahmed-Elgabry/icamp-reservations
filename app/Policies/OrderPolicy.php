@@ -53,7 +53,7 @@ class OrderPolicy
     /**
      * Determine whether the user can view reports.
      */
-    public function reports(User $user): bool
+    public function reports(User $user, Order $order): bool
     {
         return $user->hasPermissionTo('orders.reports');
     }
@@ -61,7 +61,7 @@ class OrderPolicy
     /**
      * Determine whether the user can view quotes.
      */
-    public function quotes(User $user): bool
+    public function quotes(User $user, Order $order): bool
     {
         return $user->hasPermissionTo('orders.quote');
     }
