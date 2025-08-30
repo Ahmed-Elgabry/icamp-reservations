@@ -1298,7 +1298,7 @@ Route::get('/clear', function () {
 Route::resource('general_payments', GeneralPaymentsController::class);
 
 Route::resource('terms_sittngs', TermsSittngController::class)
-    ->middleware(['auth', 'permission:terms-settings.index|terms-settings.create|terms-settings.edit|terms-settings.destroy']);
+    ->middleware(['auth']);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);
 // Route::resource('stocks', StockController::class);

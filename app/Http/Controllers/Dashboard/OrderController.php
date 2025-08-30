@@ -259,8 +259,8 @@ class OrderController extends Controller
 
     public function edit($id)
     {
-        $this->authorize('update', Order::class);
         $order = $this->orderRepository->findOne($id);
+        $this->authorize('update', $order);
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
         $addonsPrice = OrderAddon::where('order_id', $order->id)->sum('price');
@@ -283,8 +283,8 @@ class OrderController extends Controller
 
     public function update(Request $request, $id)
     {
-        $this->authorize('update', Order::class);
         $order = Order::with('services.stocks')->findOrFail($id);
+        $this->authorize('update', $order);
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'service_ids' => 'required|array',
@@ -359,7 +359,8 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
-        $this->authorize('delete', Order::class);
+        $order = $this->orderRepository->findOne($id);
+        $this->authorize('delete', $order);
         $this->orderRepository->forceDelete($id);
         return response()->json();
     }
@@ -372,9 +373,8 @@ class OrderController extends Controller
                 return redirect()->route('orders.index')->with('error', __('dashboard.invalid_order_id'));
             }
 
-            $this->authorize('view', Order::class); // Authorization check
-
             $order = Order::with(['payments', 'expenses'])->findOrFail($id);
+            $this->authorize('view', $order); // Authorization check
             return view('dashboard.orders.show', compact('order'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return redirect()->route('orders.index')->with('error', __('dashboard.order_not_found'));
@@ -385,8 +385,8 @@ class OrderController extends Controller
 
     public function reports($id)
     {
-        $this->authorize('reports', Order::class);
         $order = Order::findOrFail($id);
+        $this->authorize('reports', $order);
         $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())
             ->orderBy('ordered_count')
             ->get();

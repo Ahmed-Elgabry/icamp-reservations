@@ -1066,16 +1066,16 @@
         </a>
         <!--end::Menu link-->
     </div>
-    @can('terms-settings.index')
+    {{-- @can('terms-settings.index') --}}
         <div class="menu-item">
             <!--begin::Menu link-->
-            <a href="{{ route('terms_sittngs.create')}}" class="menu-link py-3 ">
+            <a href="{{ route('terms_sittngs.index')}}" class="menu-link py-3 {{ isActiveRoute('terms_sittngs.index') }}">
                 <span class="menu-icon">
-                    <img src="{{ asset('images/logo.png') }}" style="width:25px;height:25px">
+                    <img src="{{ asset('images/terms.png') }}" style="width:25px;height:25px">
                 </span>
                 <span class="menu-title">@lang('dashboard.terms_setting')</span>
             </a>
             <!--end::Menu link-->
         </div>
-    @endcan
+    {{-- @endcan --}}
 </div>
