@@ -37,6 +37,7 @@
                                         <th class="min-w-200px">{{ __('dashboard.full_name') }}</th>
                                         <th class="min-w-210px">{{ __('dashboard.email') }}</th>
                                         <th class="min-w-80px text-center">{{ __('dashboard.view') }}</th>
+                                        <th class="min-w-80px text-center">{{ __('dashboard.date') }}</th>
                                         <th class="text-end min-w-180px">{{ __('dashboard.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -110,6 +111,9 @@
                                                     data-details='@json($details)' title="{{ __('dashboard.view_rest') }}">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
+                                            </td>
+                                            <td class="text-center">
+                                                {{ $dateStr .' / '. $slotLabel}}
                                             </td>
                                             <td class="text-end">
                                                 <div class="btn-group" role="group">

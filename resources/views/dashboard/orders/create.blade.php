@@ -46,8 +46,8 @@
                                     <select name="customer_id"
                                             class="js-select2 form-select form-select-lg form-select-solid"
                                             required>
+                                        <option value="" @unless ($customers) selected @endunless disabled>{{ __('dashboard.choose') }}</option>
                                         @foreach ($customers as $customer)
-                                            <option value="" @unless ($customer) selected @endunless>{{ __('dashboard.choose') }}</option>
                                             <option value="{{ $customer->id }}"
                                                     data-phone="{{ $customer->mobile_phone ?? '' }}"
                                                     data-email="{{ $customer->email ?? '' }}"
@@ -597,7 +597,7 @@
                 if (payload.date)      $('input[name="date"]').val(payload.date);
                 if (payload.time_from) $('input[name="time_from"]').val(payload.time_from);
                 if (payload.time_to)   $('input[name="time_to"]').val(payload.time_to);
-                if (payload.notes)     $('textarea[name="notes"]').val(payload.notes);
+                if (payload.notes)     $('textarea[name="client_notes"]').val(payload.notes);
 
                 const $cust = $('select[name="customer_id"]');
                 const c = payload.customer;

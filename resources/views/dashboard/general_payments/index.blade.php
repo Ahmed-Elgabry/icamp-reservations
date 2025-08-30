@@ -257,6 +257,6 @@
 @endsection
 @push('js')
     <script>
-        $("#customer_id").select2();
+        $("#customer_id,#order_id").select2();
     </script>
 @endpush

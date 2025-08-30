@@ -49,6 +49,7 @@ class ServicesController extends Controller
                 'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'report_orders' => 'nullable|array',
                 'report_orders.*' => 'nullable|integer',
+                'set_qty' => 'nullable|integer'
             ]);
 
             \DB::beginTransaction();
@@ -71,7 +72,8 @@ class ServicesController extends Controller
                     $newReport = $service->reports()->create([
                         'name' => $reportName,
                         'count' => $count,
-                        'report_orders' => $order
+                        'report_orders' => $order,
+                        'set_qty' => 0
                     ]);
                     if ($files = $request->file("reports_images.{$index}")) {
                         $path = $files->store('reports', 'public');
@@ -135,6 +137,7 @@ class ServicesController extends Controller
             'report_orders.*'=> 'nullable|integer',
             'images'         => 'nullable|array',
             'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'set_qty'       => 'nullable|integer'
         ]);
 
         $requestedCounts = collect($validated['stocks'] ?? [])
@@ -202,6 +205,7 @@ class ServicesController extends Controller
                         'name'       => $reportName,
                         'count'      => $count,
                         'service_id' => $service->id,
+                        'set_qty' => 0
                     ];
 
                     if ($reportId && isset($existingReports[$reportId])) {

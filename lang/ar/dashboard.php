@@ -58,7 +58,7 @@ return [
     'booking_date'              => 'تاريخ الحجز',
     'time_slot'                 => 'الفترة الزمنية',
     'persons'                   => 'عدد الأفراد',
-    'notes'                     => 'ملاحظات',
+    'notes'                     => 'ملاحظات داخلية',
 
     'confirm'                   => 'تأكيد',
     'cancel'                    => 'إلغاء',
@@ -162,8 +162,6 @@ return [
     'mark' => 'تعليم',
     'date_from' => 'التاريخ من ',
     'date_to' => 'التاريخ الي ',
-    'confiscated_full' => 'مصادرة التأمين كليًا',
-    'confiscated_partial' => 'مصادرة التأمين جزئيًا',
     'confiscation_description' => 'وصف المصادرة',
     'verified' => 'معتمد',
     'save_changes' => 'حفظ التغييرات',
@@ -185,7 +183,7 @@ return [
     'deposit' => 'عربون',
     'paied' => 'المدفوع',
     'add_report_item' => 'أضافة عنصر تقرير جديد',
-    'service_price' => 'مبلغ الاضافات',
+    'service_price' => 'مبلغ المخبم',
     'insurance_amount' => 'مبلغ التأمين',
     'out of' => 'من أصل',
     'rows' => 'صفوف',
@@ -257,7 +255,7 @@ return [
     'activities' => 'الانشطة',
     'cash' => 'نقدا',
     'visa' => 'تحويل بنكي',
-    'services' => 'نوع المخيم',
+    'services' => 'أنواع المخيمات',
     'price' => 'المبلغ',
     'invoice' => 'فاتورة',
     'days' => 'الايام',
@@ -270,7 +268,6 @@ return [
     'video_note' => 'مقطع الفيديو',
     'stop_recording_video' => 'إيقاف تسجيل الفيديو',
     'delete_video_note' => 'حذف مقطع الفيديو ',
-    'service' => 'نوع المخيم',
     'payment_method' => 'طريقة الدفع',
     'choose_payment_method' => 'اختر طريقة الدفع',
     'date' => 'التاريخ',
@@ -455,8 +452,9 @@ return [
     'deactivate_account' => 'تعطيل الحساب',
     'deactivate_desc' => '<h4 class="text-gray-900 fw-bolder">أنت تقوم بإلغاء تنشيط الحساب</h4>
     <div class="fs-6 text-gray-700">لمزيد من الأمان ، يتطلب ذلك تأكيد بريدك الإلكتروني أو رقم هاتفك عند إعادة تعيين كلمة مرور تسجيل الدخول.',
-
+    'expense_item'     => 'بند المصاريف',
     'confirm_deactivate' => 'أؤكد تعطيل الحساب',
+    'expense_date' => 'تاريخ المصروف',
 
     'activate_account' => 'تفعيل الحساب',
     'activate_desc' => '<h4 class="text-gray-900 fw-bolder">أنت تقوم بتنشيط الحساب</h4><div class="fs-6 text-gray-700"> سيتمكن صاحب الحساب من تسجيل الدخول بعد التفعيل بنجاح',
@@ -1115,6 +1113,8 @@ return [
     'customer_first_and_last_name' => 'الاسم الاول والاخير',
     'people_count' => 'عدد الأشخاص',
     'client_notes' => 'ملاحظات العميل',
+    'service' => 'نوع مخيم',
+    
     // Survey Email
     'survey_email_title' => 'تقييم نوع المخيم',
     'survey_email_greeting' => 'عميلنا العزيز',

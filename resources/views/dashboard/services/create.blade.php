@@ -1,5 +1,6 @@
 @extends('dashboard.layouts.app')
 @section('pageTitle', __('dashboard.services'))
+@props(['reports' => []])
 @section('content')
     <div class="post d-flex flex-column-fluid" id="kt_post">
         <div id="kt_content_container" class="container-xxl">
@@ -133,6 +134,7 @@
                                         </div>
 
                                     </div>
+
                                 @foreach ($reports as $index => $report)
                                     <div class="row align-reports-center reports-item-row mb-2" data-index="{{ $index }}">
                                         <div class="col-1 text-center"><span class="row-number">{{ $index + 1 }}</span></div>

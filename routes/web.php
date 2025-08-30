@@ -543,7 +543,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # orders registeration-forms
-    Route::post('orders/registeration-forms/update/{id}', [
+    Route::put('orders/registeration-forms/update/{id}', [
         'uses' => 'RegistrationformController@update',
         'as' => 'orders.registeration-forms.update',
         'title' => ['actions.index', 'dashboard.registeration-forms']

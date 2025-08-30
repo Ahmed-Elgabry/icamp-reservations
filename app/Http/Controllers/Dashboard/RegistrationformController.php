@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\{Customer,Registrationform};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 
 class RegistrationformController extends Controller
 {
@@ -85,25 +86,24 @@ class RegistrationformController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response|void
     */
-    public function update(Request $request, $id): void
+    public function update(Request $request, $id)
     {
-        DB::transaction(function() use($request, $id){
-            $rf = Registrationform::findOrFail($id);
-            $request->validate([
-                'booking_date' => 'required|date',
-                'time_slot'    => 'required|string|max:50',
-                'persons'      => 'required|integer|min:1',
-                'first_name'   => 'required|string|max:100',
-                'last_name'    => 'required|string|max:100',
-                'mobile_phone' => 'nullable|string|max:20',
-                'email'        => 'nullable|email|max:100',
-                'notes'        => 'nullable|string|max:2000',
-            ]);
-            $rf->update($request->only(['booking_date', 'time_slot', 'persons', 'first_name', 'last_name', 'mobile_phone', 'email', 'notes']));
-            return redirect()->back()->with(['success' => __('dashboard.updated_ok')]);
+        $rf = Registrationform::findOrFail($id);
+        $validated = $request->validate([
+            'booking_date' => 'required|date',
+            'time_slot'    => 'required|string|max:50',
+            'persons'      => 'required|integer|min:1',
+            'first_name'   => 'required|string|max:100',
+            'last_name'    => 'required|string|max:100',
+            'mobile_phone' => 'nullable|string|max:20',
+            'email'        => 'nullable|email|max:100',
+            'notes'        => 'nullable|string|max:2000',
+        ]);
+        DB::transaction(function() use($validated, $rf){
+            $rf->update($validated);
         });
+        return back()->with('success', __('dashboard.success'));
     }
 
     /**

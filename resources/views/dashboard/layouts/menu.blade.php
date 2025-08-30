@@ -378,7 +378,7 @@
                                 <span class="bullet bullet-dot"></span>
                             </span>
                             <span
-                                class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.services')])</span>
+                                class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.service')])</span>
                         </a>
                     </div>
                 @endcan
