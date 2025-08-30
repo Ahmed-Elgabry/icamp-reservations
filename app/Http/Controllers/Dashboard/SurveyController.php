@@ -140,6 +140,8 @@ class SurveyController extends Controller
      */
     public function statistics()
     {
+        $this->authorize('viewAny', Survey::class);
+
         $survey = Survey::with('questions')->find(1);
         $responses = $survey->responses()->with('answers.question')->get();
         $totalResponses = $responses->count();
@@ -189,7 +191,7 @@ class SurveyController extends Controller
 
         // Get all questions with answer counts for the table
         $allQuestions = $survey->questions->map(function ($question) {
-            // الأسئلة اللي تعتمد على خيارات
+            // Questions with options
             if (in_array($question->question_type, ['radio', 'checkbox', 'select', 'stars', 'rating'])) {
                 $question->answers_count = $question->answers()
                     ->where(function($query) {
@@ -198,7 +200,7 @@ class SurveyController extends Controller
                     })
                     ->count();
             } else {
-                // الأسئلة النصية فقط
+                // Text questions only
                 $question->answers_count = $question->answers()
                     ->whereNotNull('answer_text')
                     ->count();
@@ -283,6 +285,8 @@ class SurveyController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Survey::class);
+
         \Barryvdh\Debugbar\Facades\Debugbar::disable();
 
         $survey = Survey::with(['questions' => function ($query) {
@@ -312,6 +316,8 @@ class SurveyController extends Controller
     // In your SurveyController.php, update the update method
     public function update(Request $request, Survey $survey)
     {
+        $this->authorize('update', $survey);
+
         $validated = $request->validate([
             'survey.title' => 'required|string|max:255',
             'survey.description' => 'nullable|string',
@@ -442,6 +448,8 @@ class SurveyController extends Controller
      */
     public function show(Order $order)
     {
+        $this->authorize('view', Survey::class);
+
         $survey = Survey::with(['questions' => function ($query) {
             $query->where('hidden', 0); // only non-hidden questions
         }])->find(1);
@@ -491,6 +499,8 @@ class SurveyController extends Controller
      */
     public function results(Survey $survey)
     {
+        $this->authorize('view', $survey);
+
         $responses = $survey->responses()->with(['answers.question', 'order.customer'])->latest()->paginate(10);
         return view('dashboard.surveys.results', compact('survey', 'responses'));
     }
@@ -523,6 +533,8 @@ class SurveyController extends Controller
      */
     public function exportResultsExcel(Survey $survey)
     {
+        $this->authorize('export', $survey);
+
         $fileName = date('Y-m-d') . "-survey-results";
         return Excel::download(new SurveyResultsExport($survey), $fileName . '.xlsx');
     }
@@ -535,6 +547,8 @@ class SurveyController extends Controller
      */
     public function exportResultsPdf(Survey $survey)
     {
+        $this->authorize('export', $survey);
+
         $responses = $survey->responses()->with(['answers.question', 'order.customer'])->latest()->get();
 
         // HTML content for PDF
@@ -568,6 +582,8 @@ class SurveyController extends Controller
      */
     public function exportStatisticsExcel(Survey $survey)
     {
+        $this->authorize('export', $survey);
+
         $fileName = date('Y-m-d') . "-survey-statistics";
         return Excel::download(new SurveyStatisticsExport($survey), $fileName . '.xlsx');
     }
@@ -580,6 +596,8 @@ class SurveyController extends Controller
      */
     public function exportStatisticsPdf(Survey $survey)
     {
+        $this->authorize('export', $survey);
+
         $survey = Survey::with('questions')->find($survey->id);
         $responses = $survey->responses()->with('answers.question')->get();
         $totalResponses = $responses->count();
@@ -612,7 +630,7 @@ class SurveyController extends Controller
 
         // Get all questions with answer counts for the table
         $allQuestions = $survey->questions->map(function ($question) {
-            // الأسئلة اللي تعتمد على خيارات
+            // Questions with options
             if (in_array($question->question_type, ['radio', 'checkbox', 'select', 'stars', 'rating'])) {
                 $question->answers_count = $question->answers()
                     ->where(function($query) {
@@ -621,7 +639,7 @@ class SurveyController extends Controller
                     })
                     ->count();
             } else {
-                // الأسئلة النصية فقط
+                // Text questions only
                 $question->answers_count = $question->answers()
                     ->whereNotNull('answer_text')
                     ->count();
@@ -763,6 +781,8 @@ class SurveyController extends Controller
      */
     public function exportAnswersExcel($id)
     {
+        $this->authorize('export', Survey::class);
+
         $survey = Survey::with(['questions' => function ($query) {
             $query->where('hidden', 0); // only non-hidden questions
         }])->find(1);
@@ -780,6 +800,8 @@ class SurveyController extends Controller
      */
     public function exportAnswersPdf($id)
     {
+        $this->authorize('export', Survey::class);
+
         $survey = Survey::with(['questions' => function ($query) {
             $query->where('hidden', 0); // only non-hidden questions
         }])->find(1);

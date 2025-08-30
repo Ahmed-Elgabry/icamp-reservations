@@ -12,6 +12,8 @@ class StockController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Stock::class);
+
         // quantity fillter
         $filters = [
             'quantity_min' => request()->query('quantity_min'),
@@ -31,12 +33,15 @@ class StockController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Stock::class);
         return view('dashboard.stocks.create');
     }
 
 
     public function store(Request $request)
     {
+        $this->authorize('create', Stock::class);
+
         try {
             // Validate the input data
             $validatedData = $request->validate([
@@ -61,7 +66,6 @@ class StockController extends Controller
 
             $stock->save();
             return response()->json(['success' => 'Stock created successfully']);
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
         }
@@ -69,6 +73,7 @@ class StockController extends Controller
     public function show($stock)
     {
         $stock = Stock::with('orders')->findOrFail($stock);
+        $this->authorize('view', $stock);
         $orders = $stock->orders()->paginate(100);
 
 
@@ -78,12 +83,14 @@ class StockController extends Controller
     public function edit($stock)
     {
         $stock = Stock::findOrFail($stock);
+        $this->authorize('update', $stock);
         return view('dashboard.stocks.create', compact('stock'));
     }
 
     public function update(Request $request, $stock)
     {
         $stock = Stock::findOrFail($stock);
+        $this->authorize('update', $stock);
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable',
@@ -103,6 +110,7 @@ class StockController extends Controller
     public function destroy($stock)
     {
         $stock = Stock::findOrFail($stock);
+        $this->authorize('delete', $stock);
         $stock->delete();
         return response()->json();
     }
@@ -110,6 +118,8 @@ class StockController extends Controller
 
     public function deleteAll(Request $request)
     {
+        $this->authorize('delete', Stock::class);
+
         $requestIds = json_decode($request->data);
 
         foreach ($requestIds as $id) {
@@ -145,6 +155,4 @@ class StockController extends Controller
         $report->delete();
         return response()->json(['message' => __('dashboard.success')], 200);
     }
-
-
 }
