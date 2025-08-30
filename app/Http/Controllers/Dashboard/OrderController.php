@@ -54,6 +54,8 @@ class OrderController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', Order::class);
+
         $validStatuses = ['completed', 'rejected', 'canceled', 'delayed'];
         $status = request()->query('status');
         $customerId = request()->query('customer_id');
@@ -92,6 +94,8 @@ class OrderController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Order::class);
+
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
 
@@ -143,6 +147,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Order::class);
 
         $validatedData = $request->validate([
             'customer_id' => 'required',
@@ -255,6 +260,7 @@ class OrderController extends Controller
     public function edit($id)
     {
         $order = $this->orderRepository->findOne($id);
+        $this->authorize('update', $order);
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
         $addonsPrice = OrderAddon::where('order_id', $order->id)->sum('price');
@@ -266,7 +272,7 @@ class OrderController extends Controller
             'invoice' => $order->invoice,
             'receipt' => $order->receipt
         ];
-        return view('dashboard.orders.create', compact('order', 'customers', 'services', 'addonsPrice','additionalNotesData'));
+        return view('dashboard.orders.create', compact('order', 'customers', 'services', 'addonsPrice', 'additionalNotesData'));
     }
 
     public function insurance($id)
@@ -278,6 +284,7 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         $order = Order::with('services.stocks')->findOrFail($id);
+        $this->authorize('update', $order);
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'service_ids' => 'required|array',
@@ -352,6 +359,8 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
+        $order = $this->orderRepository->findOne($id);
+        $this->authorize('delete', $order);
         $this->orderRepository->forceDelete($id);
         return response()->json();
     }
@@ -364,9 +373,8 @@ class OrderController extends Controller
                 return redirect()->route('orders.index')->with('error', __('dashboard.invalid_order_id'));
             }
 
-            $this->authorize('view', Order::class); // Authorization check
-
             $order = Order::with(['payments', 'expenses'])->findOrFail($id);
+            $this->authorize('view', $order); // Authorization check
             return view('dashboard.orders.show', compact('order'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return redirect()->route('orders.index')->with('error', __('dashboard.order_not_found'));
@@ -378,9 +386,10 @@ class OrderController extends Controller
     public function reports($id)
     {
         $order = Order::findOrFail($id);
+        $this->authorize('reports', $order);
         $reports = ServiceReport::whereIn('service_id', $order->services->pluck('id')->toArray())
-                                    ->orderBy('ordered_count')
-                                    ->get();
+            ->orderBy('ordered_count')
+            ->get();
 
         $service = Service::findOrFail($order->services->pluck('id')->first());
         $stocks = Stock::all();
@@ -526,11 +535,11 @@ class OrderController extends Controller
                         'updated_at'   => now(),
                         'latest_activity' => $data['status']
                     ]);
-                abort_if($affected === 0 ,404 ,'Pivot not found for this stock.');
+                abort_if($affected === 0, 404, 'Pivot not found for this stock.');
 
                 $stock = Stock::whereKey($data['stockId'])
-                                ->lockForUpdate()
-                                ->firstOrFail();
+                    ->lockForUpdate()
+                    ->firstOrFail();
                 match ($data['status']) {
                     'increment' => $stock->increment('quantity', $data['qty']),
                     'decrement' => $data['qty'] > $stock->quantity ? abort(422, __('dashboard.insufficient_stock')) : $stock->decrement('quantity', $data['qty']),
@@ -766,7 +775,7 @@ class OrderController extends Controller
         $order = Order::with(['customer', 'services'])->findOrFail($id);
         $termsSittng = TermsSittng::firstOrFail();
 
-//        dd($termsSittng);
+        //        dd($termsSittng);
         // Generate QR code with link to edit page
         $editUrl = route('orders.edit', $id);
 
@@ -784,7 +793,6 @@ class OrderController extends Controller
             $qrCodePath = 'qrcodes/order_' . $id . '.png';
             Storage::disk('public')->put($qrCodePath, $result->getString());
             $qrCodeFullPath = Storage::disk('public')->path($qrCodePath);
-
         } catch (\Exception $e) {
             \Log::error('QR code generation failed: ' . $e->getMessage());
             $qrCodeFullPath = null;
@@ -813,10 +821,10 @@ class OrderController extends Controller
 
     public function quote($order)
     {
-        $order = Order::with(['payments', 'addons', 'services','customer'])->findOrFail($order);
+        $order = Order::with(['payments', 'addons', 'services', 'customer'])->findOrFail($order);
         $termsSittng = TermsSittng::firstOrFail();
 
-        $html = view('dashboard.orders.pdf.quote', compact('order','termsSittng'))->render();
+        $html = view('dashboard.orders.pdf.quote', compact('order', 'termsSittng'))->render();
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
 
@@ -826,11 +834,11 @@ class OrderController extends Controller
 
     public function invoice($order)
     {
-        $order = Order::with(['payments', 'addons', 'services','customer'])->findOrFail($order);
+        $order = Order::with(['payments', 'addons', 'services', 'customer'])->findOrFail($order);
         $termsSittng = TermsSittng::firstOrFail();
-//        dd($order->items);
+        //        dd($order->items);
 
-        $html = view('dashboard.orders.pdf.invoice', compact('order','termsSittng'))->render();
+        $html = view('dashboard.orders.pdf.invoice', compact('order', 'termsSittng'))->render();
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
@@ -879,7 +887,7 @@ class OrderController extends Controller
         if ($payment->order_id != $order->id) {
             abort(404, 'Payment not found for this order');
         }
-//dd($payment);
+        //dd($payment);
         $termsSittng = TermsSittng::firstOrFail();
 
         $html = view('dashboard.orders.pdf.payment_receipt', compact('order', 'payment', 'termsSittng'))->render();
@@ -906,7 +914,7 @@ class OrderController extends Controller
         }
 
         $termsSittng = TermsSittng::firstOrFail();
-//dd($warehouseItem);
+        //dd($warehouseItem);
         $html = view('dashboard.orders.pdf.warehouse_receipt', compact('order', 'warehouseItem', 'termsSittng'))->render();
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
@@ -927,7 +935,7 @@ class OrderController extends Controller
         $view = '';
         $qrCodeFullPath = null;
 
-        switch($type) {
+        switch ($type) {
             case 'show_price':
                 $view = 'dashboard.orders.pdf.quote';
                 break;
@@ -947,7 +955,6 @@ class OrderController extends Controller
                     $qrCodePath = 'qrcodes/order_' . $order->id . '.png';
                     Storage::disk('public')->put($qrCodePath, $result->getString());
                     $qrCodeFullPath = Storage::disk('public')->path($qrCodePath);
-
                 } catch (\Exception $e) {
                     \Log::error('QR code generation failed: ' . $e->getMessage());
                     $qrCodeFullPath = null;
@@ -1016,7 +1023,7 @@ class OrderController extends Controller
         if ($request->has('receipts')) {
             foreach ($request->receipts as $type => $ids) {
                 foreach ($ids as $itemId) {
-                    switch($type) {
+                    switch ($type) {
                         case 'addon':
                             $addon = $order->addons->where('pivot.id', $itemId)->first();
                             if ($addon) {

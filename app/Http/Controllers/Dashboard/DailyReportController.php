@@ -16,6 +16,8 @@ class DailyReportController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', DailyReport::class);
+
         $reports = DailyReport::with('employee')
             ->filter(request()->only(['employee_id', 'date_from', 'date_to', 'search']))
             ->latest()

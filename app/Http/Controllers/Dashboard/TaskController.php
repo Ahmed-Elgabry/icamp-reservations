@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Exports\TasksExport;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Models\TaskType;
 use App\Models\User;
 use App\Notifications\TaskAssignedNotification;
 use App\Repositories\IUserRepository;
@@ -26,24 +27,30 @@ class TaskController extends Controller
 
     public function index()
     {
-        $tasks = Task::with(['assignedUser', 'creator'])->latest()->get();
+        $this->authorize('viewAny', Task::class);
+        $tasks = Task::with(['assignedUser', 'creator', 'taskType'])->latest()->get();
         return view('dashboard.tasks.index', compact('tasks'));
     }
 
     public function create()
     {
+        $this->authorize('create', Task::class);
         $users = $this->userRepository->getAll();
-        return view('dashboard.tasks.create', compact('users'));
+        $taskTypes = TaskType::active()->get();
+        return view('dashboard.tasks.create', compact('users', 'taskTypes'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Task::class);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
             'due_date' => 'required|date|after_or_equal:today',
             'priority' => 'required|in:low,medium,high',
+            'task_type_id' => 'nullable|exists:task_types,id',
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -59,14 +66,16 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
+        $this->authorize('update', $task);
         $users = $this->userRepository->getAll();
-        return view('dashboard.tasks.create', compact('task', 'users'));
+        $taskTypes = TaskType::active()->get();
+        return view('dashboard.tasks.create', compact('task', 'users', 'taskTypes'));
     }
 
     public function update(Request $request, Task $task)
     {
         // Authorization check
-//        $this->authorize('update', $task);
+        $this->authorize('update', $task);
 
         // Base validation rules
         $rules = [
@@ -76,6 +85,7 @@ class TaskController extends Controller
             'due_date' => 'required|date|after_or_equal:today',
             'priority' => 'required|in:low,medium,high',
             'status' => 'required|in:pending,in_progress,completed,failed',
+            'task_type_id' => 'nullable|exists:task_types,id',
         ];
 
         // Conditional validation
@@ -90,7 +100,7 @@ class TaskController extends Controller
 
         DB::transaction(function () use ($task, $validated, $originalAssignee) {
             // Update task
-            $task->update($validated);// Handle reassignment notifications
+            $task->update($validated); // Handle reassignment notifications
             if ($task->wasChanged('assigned_to')) {
                 // Delete notifications for old assignee
                 if ($originalAssignee) {
@@ -141,7 +151,7 @@ class TaskController extends Controller
     public function myTasks()
     {
         $tasks = Task::where('assigned_to', auth()->id())
-            ->with('creator','notifications')
+            ->with('creator', 'notifications', 'taskType')
             ->latest()
             ->get();
 
@@ -150,7 +160,7 @@ class TaskController extends Controller
 
     public function updateTaskStatus(Request $request, Task $task)
     {
-//        dd($request->audio_attachment);
+        //        dd($request->audio_attachment);
         $validated = $request->validate([
             'status' => 'required|in:pending,in_progress,completed,failed',
             'failure_reason' => 'required_if:status,failed|nullable|string',
@@ -198,7 +208,7 @@ class TaskController extends Controller
 
     public function reports()
     {
-//        $this->authorize('tasks.reports');
+        //        $this->authorize('tasks.reports');
 
         $filters = [
             'status' => request('status'),
@@ -207,7 +217,7 @@ class TaskController extends Controller
             'date_to' => request('date_to')
         ];
 
-        $query = Task::query()->with(['assignedUser', 'creator']);
+        $query = Task::query()->with(['assignedUser', 'creator', 'taskType']);
 
         if ($filters['status']) {
             $query->where('status', $filters['status']);
@@ -241,7 +251,7 @@ class TaskController extends Controller
 
     public function exportReports()
     {
-//        $this->authorize('tasks.reports');
+        //        $this->authorize('tasks.reports');
 
         return Excel::download(new TasksExport(
             request('status'),

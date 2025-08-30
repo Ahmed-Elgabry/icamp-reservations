@@ -17,7 +17,7 @@
         </div>
 
         <div class="card-body pt-0">
-            <form action="{{ route('violations.update', $violation) }}" method="POST">
+            <form action="{{ route('violations.update', $violation) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -47,6 +47,58 @@
                         </div>
                     </div>
 
+                    <div class="row g-5 mt-3">
+                        <div class="col-md-4">
+                            <label class="form-label required">@lang('dashboard.violation_date')</label>
+                            <input type="date" name="violation_date" class="form-control form-control-solid"
+                                   value="{{ old('violation_date', $violation->violation_date ? $violation->violation_date->format('Y-m-d') : '') }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label required">@lang('dashboard.violation_time')</label>
+                            <input type="time" name="violation_time" class="form-control form-control-solid"
+                                   value="{{ old('violation_time', $violation->violation_time ? $violation->violation_time : '') }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label required">@lang('dashboard.violation_place')</label>
+                            <input type="text" name="violation_place" class="form-control form-control-solid"
+                                   value="{{ old('violation_place', $violation->violation_place) }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label">@lang('dashboard.violation_photo')</label>
+                            <div class="media-upload-container" data-type="photo">
+                                @if($violation->photo_path)
+                                    <div class="preview-image-container mb-2">
+                                        <img src="{{ Storage::url($violation->photo_path) }}" class="preview-image img-thumbnail" style="max-width: 200px;">
+                                        <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
+                                            <i class="fas fa-trash"></i> @lang('dashboard.remove')
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="existing_photo" value="{{ $violation->photo_path }}">
+                                @else
+                                    <div class="preview-image-container mb-2" style="display: none;">
+                                        <img src="" class="preview-image img-thumbnail" style="max-width: 200px;">
+                                        <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
+                                            <i class="fas fa-trash"></i> @lang('dashboard.remove')
+                                        </button>
+                                    </div>
+                                @endif
+                                <div class="btn-group w-100 mb-3">
+                                    <button type="button" class="btn btn-primary capture-media" data-media-type="photo">
+                                        <i class="fas fa-camera"></i> @lang('dashboard.capture_photo')
+                                    </button>
+                                    <button type="button" class="btn btn-secondary upload-media">
+                                        <i class="fas fa-upload"></i> @lang('dashboard.upload_photo')
+                                    </button>
+                                </div>
+                                <input type="file" name="photo" class="media-input d-none" accept="image/*">
+                                <input type="hidden" name="remove_photo" class="remove-photo-flag" value="0">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row mt-3">
                         <div class="col-12">
                             <label class="form-label">@lang('dashboard.employee_justification')</label>
@@ -64,8 +116,8 @@
                             </select>
                         </div>
                         <div class="col-md-6" id="deduction-amount-container"
-                             style="{{ (old('action_taken') == 'deduction' || $violation->action_taken == 'deduction') ? '' : 'display: none;' }}">
-                            @if(old('action_taken') == 'deduction' || $violation->action_taken == 'deduction' || $errors->has('deduction_amount'))
+                             style="{{ (old('action_taken', $violation->action_taken) == 'deduction') ? '' : 'display: none;' }}">
+                            @if(old('action_taken', $violation->action_taken) == 'deduction' || $errors->has('deduction_amount'))
                                 <label class="form-label required">@lang('dashboard.deduction_amount')</label>
                                 <input type="number" name="deduction_amount" class="form-control form-control-solid"
                                        value="{{ old('deduction_amount', $violation->deduction_amount) }}" step="0.01" min="0" required>
@@ -95,16 +147,7 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            // Initialize on page load
-            if ($('#action-taken').val() === 'deduction') {
-                $('#deduction-amount-container').html(`
-                    <label class="form-label required">@lang('dashboard.deduction_amount')</label>
-                    <input type="number" name="deduction_amount" class="form-control form-control-solid"
-                           value="{{ old('deduction_amount', $violation->deduction_amount) }}" step="0.01" min="0" required>
-                `).show();
-            }
-
-            // Handle changes
+            // Action taken dropdown handler
             $('#action-taken').change(function() {
                 if ($(this).val() === 'deduction') {
                     $('#deduction-amount-container').html(`
@@ -116,11 +159,66 @@
                     $('#deduction-amount-container').empty().hide();
                 }
             });
+
+            // Media upload handlers
+            const mediaContainer = $('.media-upload-container');
+            const input = mediaContainer.find('.media-input');
+            const previewContainer = mediaContainer.find('.preview-image-container');
+            const preview = mediaContainer.find('.preview-image');
+            const captureBtn = mediaContainer.find('.capture-media');
+            const uploadBtn = mediaContainer.find('.upload-media');
+            const removeBtn = mediaContainer.find('.remove-media');
+            const removeFlag = mediaContainer.find('.remove-photo-flag');
+
+            // Upload button click
+            uploadBtn.click(function() {
+                input.click();
+            });
+
+            // Capture button click
+            captureBtn.click(function() {
+                input.click();
+            });
+
+            // File selection handler
+            input.change(function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.attr('src', e.target.result);
+                    previewContainer.show();
+                    removeFlag.val('0'); // Reset remove flag
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Remove media handler
+            removeBtn.click(function() {
+                previewContainer.hide();
+                input.val('');
+                preview.attr('src', '');
+
+                // For existing photos, set the remove flag
+                const existingPhotoInput = $('input[name="existing_photo"]');
+                if (existingPhotoInput.length) {
+                    removeFlag.val('1');
+                }
+            });
         });
     </script>
 @endpush
+
 @push('css')
     <style>
+        .media-upload-container {
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -129,6 +227,10 @@
 
         input[type=number] {
             -moz-appearance: textfield;
+        }
+
+        .remove-media {
+            width: 100%;
         }
     </style>
 @endpush

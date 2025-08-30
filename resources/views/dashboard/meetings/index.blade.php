@@ -8,6 +8,9 @@
                 <h3>@lang('dashboard.meetings')</h3>
             </div>
             <div class="card-toolbar">
+                <a href="{{ route('meetings.export') }}" class="btn btn-success me-2">
+                    <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
+                </a>
                 <a href="{{ route('meetings.create') }}" class="btn btn-primary">
                     @lang('dashboard.create_meeting')
                 </a>

@@ -10,12 +10,12 @@ use App\Requests\dashboard\CreateUpdateRoleRequest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\Roles;
-use Spatie\Permission\Models\Role; // تأكد من استيراد نموذج Role
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     private $rolesRepository;
-    private $permissionRepository; // إضافة المتغير الخاص بالمستودع
+    private $permissionRepository;
     use Roles;
 
     public function __construct(IRoleRepository $rolesRepository, IPermissionRepository $permissionRepository)
@@ -41,18 +41,22 @@ class RoleController extends Controller
     {
         $data = $request->except('permissions');
 
-        // تحقق من وجود اسم الدور مسبقًا
-        if (Role::where('name', $data['nickname_ar'])->exists() || Role::where('name', $data['nickname_en'])->exists()) {
-            return response()->json(['message' => 'اسم الدور موجود مسبقًا'], 409);
+        // Check if role name already exists
+        if (Role::where('nickname_ar', $data['nickname_ar'])->exists() || Role::where('nickname_en', $data['nickname_en'])->exists()) {
+            return response()->json(['message' => 'Role name already exists'], 409);
         }
 
         $data['name'] = str_replace(' ', '-', $request->nickname_en);
 
-        // إنشاء الدور
+        // Create the role
         $role = $this->rolesRepository->create($data);
-        $role->syncPermissions($request->permissions);
 
-        return response()->json(['message' => 'تم إنشاء الدور بنجاح']);
+        // Check if permissions exist before syncing
+        if ($request->has('permissions') && is_array($request->permissions)) {
+            $role->syncPermissions($request->permissions);
+        }
+
+        return response()->json(['message' => 'Role created successfully']);
     }
 
     public function edit($id)
@@ -66,24 +70,24 @@ class RoleController extends Controller
     {
         $data = $request->validated();
 
-        // تحقق من وجود اسم الدور مسبقًا
-        if (Role::where('name', $data['nickname_ar'])->where('id', '!=', $id)->exists() || 
-            Role::where('name', $data['nickname_en'])->where('id', '!=', $id)->exists()) {
-            return response()->json(['message' => 'اسم الدور موجود مسبقًا'], 409);
+        // Check if role name already exists
+        if (Role::where('nickname_ar', $data['nickname_ar'])->where('id', '!=', $id)->exists() ||
+            Role::where('nickname_en', $data['nickname_en'])->where('id', '!=', $id)->exists()) {
+            return response()->json(['message' => 'Role name already exists'], 409);
         }
 
-        $data['name'] = str_replace(' ', '-', $request->name_en);
+        $data['name'] = str_replace(' ', '-', $request->nickname_en);
         $this->rolesRepository->update($data, $id);
         $role = $this->rolesRepository->findOne($id);
         $role->syncPermissions($request->permissions);
-        
-        return response()->json(['message' => 'تم تحديث الدور بنجاح']);
+
+        return response()->json(['message' => 'Role updated successfully']);
     }
 
     public function destroy($id)
     {
         $this->rolesRepository->forceDelete($id);
-        return response()->json(['message' => 'تم حذف الدور بنجاح']);
+        return response()->json(['message' => 'Role deleted successfully']);
     }
 
     public function deleteAll(Request $request)
@@ -96,9 +100,9 @@ class RoleController extends Controller
         }
 
         if ($this->rolesRepository->deleteForceWhereIn('id', $ids)) {
-            return response()->json(['message' => 'تم حذف الأدوار بنجاح']);
+            return response()->json(['message' => 'Roles deleted successfully']);
         } else {
-            return response()->json(['message' => 'فشل في حذف الأدوار'], 500);
+            return response()->json(['message' => 'Failed to delete roles'], 500);
         }
     }
 }

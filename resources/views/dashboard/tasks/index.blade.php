@@ -30,7 +30,9 @@
                     <!--begin::Card toolbar-->
                     <div class="card-toolbar">
                         <!--begin::Add task-->
-                        <a href="{{ route('tasks.create') }}" class="btn btn-primary">@lang('dashboard.create_task')</a>
+                        @can('tasks.create')
+                            <a href="{{ route('tasks.create') }}" class="btn btn-primary">@lang('dashboard.create_task')</a>
+                        @endcan
                         <!--end::Add task-->
                     </div>
                     <!--end::Card toolbar-->
@@ -45,6 +47,7 @@
                         <thead>
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                             <th class="min-w-100px">@lang('dashboard.title')</th>
+                            <th class="min-w-100px">@lang('dashboard.task_type')</th>
                             <th class="min-w-100px">@lang('dashboard.assigned_to')</th>
                             <th class="min-w-100px">@lang('dashboard.due_date')</th>
                             <th class="min-w-100px">@lang('dashboard.priority')</th>
@@ -59,6 +62,13 @@
                             <tr>
                                 <td>
                                     <a class="text-gray-800 text-hover-primary mb-1">{{ $task->title }}</a>
+                                </td>
+                                <td>
+                                    @if($task->taskType)
+                                        <span class="badge badge-light-primary">{{ $task->taskType->name }}</span>
+                                    @else
+                                        <span class="text-muted">@lang('dashboard.no_type')</span>
+                                    @endif
                                 </td>
                                 <td>{{ $task->assignedUser->name }}</td>
                                 <td>{{ $task->due_date->format('Y-m-d') }}</td>
@@ -84,12 +94,15 @@
                                     <!--begin::Menu-->
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
                                         <!--begin::Menu item-->
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('tasks.edit', $task->id) }}" class="menu-link px-3">@lang('dashboard.edit')</a>
-                                        </div>
+                                        @can('tasks.edit')
+                                            <div class="menu-item px-3">
+                                                <a href="{{ route('tasks.edit', $task->id) }}" class="menu-link px-3">@lang('dashboard.edit')</a>
+                                            </div>
+                                        @endcan
                                         <!--end::Menu item-->
                                         <!--begin::Menu item-->
-                                        <div class="menu-item px-3">
+                                        @can('tasks.destroy')
+                                            <div class="menu-item px-3">
                                             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')

@@ -126,6 +126,36 @@
                                 <!--begin::Input group-->
                                 <div class="row mb-6">
                                     <!--begin::Label-->
+                                    <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.task_type')</label>
+                                    <!--end::Label-->
+                                    <!--begin::Col-->
+                                    <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                                        <select name="task_type_id" aria-label="Select Task Type"
+                                                data-control="select2" data-placeholder="@lang('dashboard.select_task_type')"
+                                                class="form-select form-select-solid form-select-lg fw-bold">
+                                            <option value="">@lang('dashboard.select_task_type')</option>
+                                            @foreach ($taskTypes as $taskType)
+                                                <option value="{{ $taskType->id }}"
+                                                @if(isset($task))
+                                                    {{ $task->task_type_id == $taskType->id ? 'selected' : '' }}
+                                                    @else
+                                                    {{ old('task_type_id') == $taskType->id ? 'selected' : '' }}
+                                                    @endif
+                                                >{{ $taskType->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="fv-plugins-message-container invalid-feedback"></div>
+                                        @error('task_type_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <!--end::Col-->
+                                </div>
+                                <!--end::Input group-->
+
+                                <!--begin::Input group-->
+                                <div class="row mb-6">
+                                    <!--begin::Label-->
                                     <label class="col-lg-4 col-form-label required fw-bold fs-6">@lang('dashboard.assigned_to')</label>
                                     <!--end::Label-->
                                     <!--begin::Col-->

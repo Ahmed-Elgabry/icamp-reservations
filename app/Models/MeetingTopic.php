@@ -9,7 +9,11 @@ class MeetingTopic extends Model
 {
     protected $fillable = [
         'meeting_id', 'topic', 'discussion',
-        'action_items', 'assigned_to', 'task_id'
+        'action_items', 'assigned_to', 'task_id', 'due_date'
+    ];
+
+    protected $casts = [
+        'due_date' => 'date',
     ];
 
     public function meeting(): BelongsTo

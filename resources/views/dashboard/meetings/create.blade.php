@@ -107,13 +107,13 @@
                                 <div class="topic-row card card-bordered mb-5">
                                     <div class="card-body">
                                         <div class="row mb-4 g-3">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label class="form-label">@lang('dashboard.topic')</label>
                                                 <input type="text" name="topics[{{ $index }}][topic]"
                                                        class="form-control form-control-solid"
                                                        value="{{ old("topics.$index.topic", $topic->topic) }}">
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label class="form-label">@lang('dashboard.meeting_assigned_to')</label>
                                                 <select name="topics[{{ $index }}][assigned_to]"
                                                         class="form-select form-select-solid select2">
@@ -124,6 +124,12 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">@lang('dashboard.optional_task_due_date')</label>
+                                                <input type="date" name="topics[{{ $index }}][due_date]"
+                                                       class="form-control form-control-solid"
+                                                       value="{{ old("topics.$index.due_date", isset($topic->due_date) ? \Carbon\Carbon::parse($topic->due_date)->format('Y-m-d') : '') }}">
                                             </div>
                                         </div>
 
@@ -144,11 +150,11 @@
                             <div class="topic-row card card-bordered mb-5">
                                 <div class="card-body">
                                     <div class="row mb-4 g-3">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <label class="form-label">@lang('dashboard.topic')</label>
                                             <input type="text" name="topics[0][topic]" class="form-control form-control-solid">
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <label class="form-label">@lang('dashboard.meeting_assigned_to')</label>
                                             <select name="topics[0][assigned_to]" class="form-select form-select-solid select2">
                                                 <option value="">@lang('dashboard.select_user')</option>
@@ -156,6 +162,10 @@
                                                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">@lang('dashboard.optional_task_due_date')</label>
+                                            <input type="date" name="topics[0][due_date]" class="form-control form-control-solid">
                                         </div>
                                     </div>
 
@@ -225,11 +235,11 @@
                 <div class="topic-row card card-bordered mb-5">
                     <div class="card-body">
                         <div class="row mb-4 g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">@lang('dashboard.topic')</label>
                                 <input type="text" name="topics[${topicCount}][topic]" class="form-control form-control-solid">
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">@lang('dashboard.meeting_assigned_to')</label>
                                 <select name="topics[${topicCount}][assigned_to]" class="form-select form-select-solid select2">
                                     <option value="">@lang('dashboard.select_user')</option>
@@ -238,13 +248,15 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-4">
+                                <label class="form-label">@lang('dashboard.optional_task_due_date')</label>
+                                <input type="date" name="topics[${topicCount}][due_date]" class="form-control form-control-solid">
+                            </div>
                         </div>
 
                         <div class="row mb-4 g-3">
-                            <div class="col-md-6">
                                 <label class="form-label">@lang('dashboard.discussion')</label>
                                 <textarea name="topics[${topicCount}][discussion]" class="form-control form-control-solid tiny-editor" rows="5"></textarea>
-                            </div>
                         </div>
 
                         <button type="button" class="btn btn-sm btn-light-danger remove-topic">

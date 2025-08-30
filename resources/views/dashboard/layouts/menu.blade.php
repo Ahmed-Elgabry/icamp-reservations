@@ -154,7 +154,7 @@
                     </div>
                 @endcan
                 <!--end::Menu item-->
-                {{--    @can('notices.index')--}}
+                @can('notices.index')
                 <div class="menu-item">
                     <a href="{{ route('notices.index') }}" class="menu-link py-3 {{ isActiveRoute('notices.index') }}">
                         <span class="menu-bullet">
@@ -163,8 +163,8 @@
                         <span class="menu-title">@lang('dashboard.notices')</span>
                     </a>
                 </div>
-                {{--    @endcan--}}
-{{--                @can('notice-types.index')--}}
+                @endcan
+                @can('notice-types.index')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('notice-types.index') }}" class="menu-link py-3 {{ isActiveRoute('notice-types.index') }}">
@@ -175,7 +175,7 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
+                @endcan
             </div>
             <!--end::Menu sub-->
         </div>
@@ -701,12 +701,12 @@
         <!--end::Menu item-->
     @endcan
 
-{{--    @can('tasks.index')--}}
+    @can('tasks.index')
         <!--begin::Menu item-->
-        <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports','employee.tasks'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports','employee.tasks', 'task-types.index', 'task-types.create', 'task-types.edit', 'task-types.show'])}}"
              data-kt-menu-trigger="click">
             <!--begin::Menu link-->
-            <a href="#" class="menu-link py-3 {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports'])}}">
+            <a href="#" class="menu-link py-3 {{areActiveRoutes(['tasks.index', 'tasks.create', 'tasks.edit', 'tasks.reports', 'task-types.index', 'task-types.create', 'task-types.edit', 'task-types.show'])}}">
             <span class="menu-icon">
                 <img src="{{ asset('images/tasks.png') }}" style="width:25px;height:25px">
             </span>
@@ -728,7 +728,7 @@
                 </div>
                 <!--end::Menu item-->
 
-{{--                @can('tasks.create')--}}
+                @can('tasks.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('tasks.create') }}" class="menu-link py-3 {{ isActiveRoute('tasks.create') }}">
@@ -739,9 +739,9 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
+                @endcan
 
-{{--                @can('tasks.reports')--}}
+                @can('tasks.reports')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('tasks.reports') }}" class="menu-link py-3 {{ isActiveRoute('tasks.reports') }}">
@@ -752,8 +752,20 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
-{{--                @can('tasks.view')--}}
+                @endcan
+
+                    <!-- Task Types -->
+                    <div class="menu-item">
+                        <a href="{{ route('task-types.index') }}" class="menu-link py-3 {{ isActiveRoute('task-types.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">@lang('dashboard.task_types')</span>
+                        </a>
+                    </div>
+                    <!--end::Menu item-->
+
+                @can('tasks.index')
                     <!-- Employee Tasks -->
                     <div class="menu-item">
                         <a href="{{ route('employee.tasks') }}" class="menu-link py-3 {{ isActiveRoute('employee.tasks') }}">
@@ -763,13 +775,13 @@
                             <span class="menu-title">@lang('dashboard.my_tasks')</span>
                         </a>
                     </div>
-{{--                @endcan--}}
+                @endcan
             </div>
             <!--end::Menu sub-->
         </div>
         <!--end::Menu item-->
-{{--    @endcan--}}
-{{--    @can('daily-reports.index')--}}
+    @endcan
+    @can('daily-reports.index')
         <div class="menu-item menu-sub-indention menu-accordion {{ areActiveRoutes(['daily-reports.index', 'daily-reports.create', 'daily-reports.edit', 'daily-reports.export']) }}"
              data-kt-menu-trigger="click">
             <!--begin::Menu link-->
@@ -795,7 +807,7 @@
                 </div>
                 <!--end::Menu item-->
 
-{{--                @can('daily-reports.create')--}}
+                @can('daily-reports.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('daily-reports.create') }}" class="menu-link py-3 {{ isActiveRoute('daily-reports.create') }}">
@@ -806,12 +818,12 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
+                @endcan
             </div>
             <!--end::Menu sub-->
         </div>
-{{--    @endcan--}}
-{{--    @can('equipment-directories.index')--}}
+    @endcan
+    @can('equipment-directories.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes([
         'equipment-directories.index',
@@ -851,7 +863,7 @@
                 </div>
                 <!--end::Menu item-->
 
-{{--                @can('equipment-directories.create')--}}
+                @can('equipment-directories.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('equipment-directories.create') }}" class="menu-link py-3 {{ isActiveRoute('equipment-directories.create') }}">
@@ -862,13 +874,13 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
+                @endcan
             </div>
             <!--end::Menu sub-->
         </div>
         <!--end::Menu item-->
-{{--    @endcan--}}
-{{--    @can('camp-reports.index')--}}
+    @endcan
+    @can('camp-reports.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['camp-reports.index', 'camp-reports.create', 'camp-reports.edit', 'camp-reports.show'])}}"
              data-kt-menu-trigger="click">
@@ -895,7 +907,7 @@
                 </div>
                 <!--end::Menu item-->
 
-{{--                @can('camp-reports.create')--}}
+                @can('camp-reports.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('camp-reports.create') }}" class="menu-link py-3 {{ isActiveRoute('camp-reports.create') }}">
@@ -906,13 +918,13 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
+                @endcan
             </div>
             <!--end::Menu sub-->
         </div>
         <!--end::Menu item-->
-{{--    @endcan--}}
-{{--    @can('meetings.index')--}}
+    @endcan
+    @can('meetings.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{ areActiveRoutes(['meetings.index', 'meetings.create', 'meetings.edit', 'meetings.show','meeting-locations.index','meeting-locations.create','meeting-locations.edit']) }}"
              data-kt-menu-trigger="click">
@@ -950,7 +962,7 @@
                 <!--end::Menu item-->
 
 
-{{--                @can('meetings.create')--}}
+                @can('meetings.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('meetings.create') }}" class="menu-link py-3 {{ isActiveRoute('meetings.create') }}">
@@ -961,13 +973,13 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
+                @endcan
             </div>
             <!--end::Menu sub-->
         </div>
         <!--end::Menu item-->
-{{--    @endcan--}}
-{{--    @can('violations.index')--}}
+    @endcan
+    @can('violations.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{ areActiveRoutes(['violations.index', 'violations.create', 'violations.edit','violation-types.index', 'violation-types.create', 'violation-types.edit']) }}"
              data-kt-menu-trigger="click">
@@ -1004,7 +1016,7 @@
                 </div>
                 <!--end::Menu item-->
 
-{{--                @can('violations.create')--}}
+                @can('violations.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{ route('violations.create') }}" class="menu-link py-3 {{ isActiveRoute('violations.create') }}">
@@ -1015,12 +1027,12 @@
                         </a>
                     </div>
                     <!--end::Menu item-->
-{{--                @endcan--}}
+                @endcan
             </div>
             <!--end::Menu sub-->
         </div>
         <!--end::Menu item-->
-{{--    @endcan--}}
+    @endcan
     @can('reprots')
         <div class="menu-item">
             <!--begin::Menu link-->
@@ -1034,14 +1046,16 @@
         </div>
     @endcan
 
-    <div class="menu-item">
-        <a href="{{ route('statistics.index') }}" class="menu-link py-3" title="@lang('dashboard.statistics')">
-            <span class="menu-icon">
-                <img src="{{ asset('images/roles.png') }}" style="width:25px;height:25px">
-            </span>
-            <span class="menu-title">@lang('dashboard.statistics')</span>
-        </a>
-    </div>
+    @can('statistics.index')
+        <div class="menu-item">
+            <a href="{{ route('statistics.index') }}" class="menu-link py-3" title="@lang('dashboard.statistics')">
+                <span class="menu-icon">
+                    <img src="{{ asset('images/roles.png') }}" style="width:25px;height:25px">
+                </span>
+                <span class="menu-title">@lang('dashboard.statistics')</span>
+            </a>
+        </div>
+    @endcan
     <div class="menu-item">
         <!--begin::Menu link-->
         <a href="{{ route('calender') }}" class="menu-link py-3 {{areActiveRoutes(['calender'])}}">
@@ -1052,14 +1066,16 @@
         </a>
         <!--end::Menu link-->
     </div>
-    <div class="menu-item">
-        <!--begin::Menu link-->
-        <a href="{{ route('terms_sittngs.create')}}" class="menu-link py-3 ">
-            <span class="menu-icon">
-                <img src="{{ asset('images/logo.png') }}" style="width:25px;height:25px">
-            </span>
-            <span class="menu-title">@lang('dashboard.terms_setting')</span>
-        </a>
-        <!--end::Menu link-->
-    </div>
+    {{-- @can('terms-settings.index') --}}
+        <div class="menu-item">
+            <!--begin::Menu link-->
+            <a href="{{ route('terms_sittngs.index')}}" class="menu-link py-3 {{ isActiveRoute('terms_sittngs.index') }}">
+                <span class="menu-icon">
+                    <img src="{{ asset('images/terms.png') }}" style="width:25px;height:25px">
+                </span>
+                <span class="menu-title">@lang('dashboard.terms_setting')</span>
+            </a>
+            <!--end::Menu link-->
+        </div>
+    {{-- @endcan --}}
 </div>

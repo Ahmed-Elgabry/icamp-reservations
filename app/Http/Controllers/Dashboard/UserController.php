@@ -34,7 +34,7 @@ class UserController extends Controller
     public function index()
     {
         $users = $this->usersRepository->getWhereIn('user_type'  , [2 , 3] );
- 
+
         return view('dashboard.users.index' , compact('users'));
     }
 
@@ -43,7 +43,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+        public function create()
     {
         $data['permissions'] = $this->permissionRepository->getAll();
 
@@ -60,10 +60,10 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $data = $request->all();
-        
+
         if($request->has('image')){
 
             $data['image'] = $request->file('image')->store('dashboard/uploads');
@@ -74,12 +74,12 @@ class UserController extends Controller
         if($user){
             $ids = explode(',', $request->permission_id);
             $permissions = $this->permissionRepository->getWhereIn('id',$ids)->pluck('name');
-           
+
             if(count($permissions) > 0){
-                
+
                 $user->givePermissionTo($permissions);
             }
-            
+
 
             session()->flash('success', trans('admin.success', ['field' => __('admin.addition')]));
 
@@ -100,9 +100,11 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+        public function show($id)
     {
-        $data['user'] = $this->usersRepository->findOne($id);
+        $user = $this->usersRepository->findOne($id);
+
+        $data['user'] = $user;
 
         return view('dashboard.users.show')->with([
 
@@ -117,9 +119,10 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+        public function edit($id)
     {
         $user = $this->usersRepository->findOne($id);
+
         return view('dashboard.users.edit' , compact('user'));
     }
 
@@ -135,19 +138,19 @@ class UserController extends Controller
         $data = $request->except('permission_id','_method');
 
         $user = $this->usersRepository->findOne($id);
-    
+
         $updated = $this->usersRepository->update($data, $id);
 
         if($updated){
 
             $ids = explode(',', $request->permission_id);
             $permissions = $this->permissionRepository->getWhereIn('id',$ids)->pluck('name');
-           
+
             if(count($permissions) > 0){
-                
+
                 $user->syncPermissions($permissions);
             }
-            
+
 
             session()->flash('success', trans('admin.success', ['field' => __('admin.edition')]));
 
@@ -177,10 +180,10 @@ class UserController extends Controller
     }
 
 
-    
+
     public function deleteAll(Request $request) {
         $requestIds = json_decode($request->data);
-    
+
         foreach ($requestIds as $id) {
           $ids[] = $id->id;
         }

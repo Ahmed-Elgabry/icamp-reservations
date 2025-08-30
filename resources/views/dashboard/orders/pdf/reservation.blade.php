@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html dir="@lang('dashboard.direction')" lang="{{ app()->getLocale() }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>تفاصيل الحجز</title>
+    <title>@lang('dashboard.Reservation_information')</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -108,12 +108,8 @@
         .footer {
             position: relative;
             text-align: center;
-            /*margin-top: 30px;*/
-            /*padding: 20px;*/
-            border-top: 2px dashed #ddd;
             display: block;
             overflow: hidden;
-            /*min-height: 100px;*/
         }
 
         .thank-you {
@@ -246,6 +242,17 @@
             width: 120px;
             height: auto;
         }
+
+        /* RTL/LTR direction support */
+        .rtl-text {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .ltr-text {
+            direction: ltr;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -261,7 +268,7 @@
 
         <div class="logo">
             <img class="seal" src="{{ public_path('imgs/funcamp_remove.png') }}" alt="Funcamp Logo">
-            <P style="font-size: 20px;margin: 0"><b> بيانات الحجز</b></P>
+            <P style="@if(app()->getLocale() == 'en') font-size:15px; @else font-size:20px; @endif margin: 0"><b> @lang('dashboard.Reservation_info')</b></P>
         </div>
 
         <div class="qr-code">
@@ -270,47 +277,47 @@
     </div>
 
     <!-- Reservation Details -->
-    <div class="section">
-        <div class="section-title">تفاصيل الحجز</div>
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
+        <div class="section-title">@lang('dashboard.order_details')</div>
 
         <!-- Table for reservation details -->
         <table class="details-table">
             <thead>
             <tr>
-                <th>رقم الحجز</th>
-                <th>تاريخ الحجز</th>
-                <th>اسم العميل</th>
-                <th>رقم الهاتف</th>
+                <th>@lang('dashboard.reservation_number')</th>
+                <th>@lang('dashboard.order_date')</th>
+                <th>@lang('dashboard.Customer_Name')</th>
+                <th>@lang('dashboard.phone')</th>
             </tr>
             </thead>
             <tbody>
             <tr>
                 <td>{{ $order->id }}</td>
-                <td>{{ $order->date ? \Carbon\Carbon::parse($order->date)->format('Y-m-d') : 'غير محدد' }}</td>
-                <td>{{ $order->customer->name ?? 'غير محدد' }}</td>
-                <td>{{ $order->customer->phone ?? 'غير محدد' }}</td>
+                <td>{{ $order->date ? \Carbon\Carbon::parse($order->date)->format('Y-m-d') : __('dashboard.not_available') }}</td>
+                <td>{{ $order->customer->name ?? __('dashboard.not_available') }}</td>
+                <td>{{ $order->customer->phone ?? __('dashboard.not_available') }}</td>
             </tr>
             </tbody>
         </table>
     </div>
 
     <!-- Terms and Conditions -->
-    <div class="section">
-        <div class="section-title">الشروط والأحكام</div>
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
+        <div class="section-title">@lang('dashboard.Terms_and_Conditions')</div>
         <div>{!! $termsSittng->commercial_license !!}</div>
     </div>
 
     <!-- Additional Notes -->
     @if(!empty($order->order_data_notes))
-        <div class="section">
-            <div class="section-title">ملاحظات إضافية</div>
+        <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
+            <div class="section-title">@lang('dashboard.additional_notes')</div>
             <div>{!! $order->order_data_notes !!}</div>
         </div>
     @endif
 
     <!-- Thank You Message -->
     <div class="thank-you">
-        شكرًا لاختياركم لنا ونتمنى استقبالكُم مجددًا
+        @lang('dashboard.thanks')
     </div>
 
     <!-- Footer -->

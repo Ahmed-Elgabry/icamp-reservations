@@ -30,6 +30,8 @@ class AdminController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', User::class);
+
         $users = $this->usersRepository->getAll();
 
         return view('dashboard.admins.index' , compact('users'));

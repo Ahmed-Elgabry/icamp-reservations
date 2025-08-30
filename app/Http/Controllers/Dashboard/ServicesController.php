@@ -15,6 +15,7 @@ class ServicesController extends Controller
     // Display a listing of services
     public function index()
     {
+        $this->authorize('viewAny', Service::class);
         $services = Service::orderBy('created_at', 'desc')->get();
         return view('dashboard.services.index', compact('services'));
     }
@@ -22,6 +23,7 @@ class ServicesController extends Controller
     // Show the form for creating a new service
     public function create()
     {
+        $this->authorize('create', Service::class);
         $stocks = Stock::all();
         return view('dashboard.services.create', compact('stocks'));
     }
@@ -29,6 +31,8 @@ class ServicesController extends Controller
     // Store a newly created service in the database
     public function store(Request $request)
     {
+        $this->authorize('create', Service::class);
+
         try {
             $validatedData = $request->validate([
                 'name' => 'required|max:255',
@@ -101,6 +105,7 @@ class ServicesController extends Controller
     // Display the specified service
     public function show(Service $service)
     {
+        $this->authorize('view', $service);
         return view('dashboard.services.show', compact('service'));
     }
 
@@ -108,6 +113,7 @@ class ServicesController extends Controller
     public function edit($service)
     {
         $service = Service::findOrFail($service);
+        $this->authorize('update', $service);
         $stocks = Stock::all();
         $reports = ServiceReport::where('service_id', $service->id)
                                     ->orderBy('ordered_count')
@@ -118,8 +124,8 @@ class ServicesController extends Controller
 
     public function update(Request $request, $serviceId)
     {
-
         $service = Service::findOrFail($serviceId);
+        $this->authorize('update', $service);
 
         $validated = $request->validate([
             'name'           => 'required|max:255',
@@ -255,12 +261,15 @@ class ServicesController extends Controller
     public function destroy($service)
     {
         $service = Service::findOrFail($service);
+        $this->authorize('delete', $service);
         $service->delete();
         return response()->json();
     }
 
     public function deleteAll(Request $request)
     {
+        $this->authorize('delete', Service::class);
+
         $requestIds = json_decode($request->data);
 
         foreach ($requestIds as $id) {
@@ -275,6 +284,8 @@ class ServicesController extends Controller
 
     public function move(Request $request, Service $service, ServiceReport $report)
     {
+        $this->authorize('move', Service::class);
+
         $data = $request->validate([
             'direction' => 'required|in:up,down',
         ]);
