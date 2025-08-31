@@ -111,6 +111,7 @@
                                                 </button>
                                             </form>
                                         </div>
+                                        @endcan
                                         <!--end::Menu item-->
                                     </div>
                                     <!--end::Menu-->

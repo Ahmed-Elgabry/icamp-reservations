@@ -68,9 +68,15 @@
                                 <td>
                                     <div class="d-flex">
                                         <div class="ms-5">
-                                            <a href="{{ $expense->expense_item_id ? route('expense-items.show', $expense->expense_item_id) : route('orders.edit', $expense->order_id)}}" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1" data-kt-ecommerce-category-filter="category_name">
-                                                {{$expense->expenseItem ? $expense->expenseItem->name : $expense->order_id }}
-                                            </a>
+                                            @can('expenses.show')
+                                                <a href="{{ $expense->expense_item_id ? route('expense-items.show', $expense->expense_item_id) : route('orders.edit', $expense->order_id)}}" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1" data-kt-ecommerce-category-filter="category_name">
+                                                    {{$expense->expenseItem ? $expense->expenseItem->name : $expense->order_id }}
+                                                </a>
+                                            @else
+                                                <span class="text-gray-800 fs-5 fw-bolder mb-1">
+                                                    {{$expense->expenseItem ? $expense->expenseItem->name : $expense->order_id }}
+                                                </span>
+                                            @endcan
                                             <div class="text-muted fs-7 fw-bolder">{{$expense->notes}}</div>
                                         </div>
                                     </div>

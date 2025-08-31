@@ -4,18 +4,20 @@ namespace App\Policies;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Traits\SuperAdminTrait;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class OrderPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, SuperAdminTrait;
 
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('orders.index');
+
+        return $user->hasPermissionTo('bookings.index');
     }
 
     /**
@@ -23,7 +25,7 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        return $user->hasPermissionTo('orders.show');
+        return $user->hasPermissionTo('bookings.view');
     }
 
     /**
@@ -31,7 +33,7 @@ class OrderPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('orders.create');
+        return $user->hasPermissionTo('bookings.create');
     }
 
     /**
@@ -39,7 +41,7 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        return $user->hasPermissionTo('orders.edit');
+        return $user->hasPermissionTo('bookings.edit');
     }
 
     /**
@@ -47,7 +49,7 @@ class OrderPolicy
      */
     public function delete(User $user, Order $order): bool
     {
-        return $user->hasPermissionTo('orders.destroy');
+        return $user->hasPermissionTo('bookings.delete');
     }
 
     /**
@@ -55,7 +57,7 @@ class OrderPolicy
      */
     public function reports(User $user, Order $order): bool
     {
-        return $user->hasPermissionTo('orders.reports');
+        return $user->hasPermissionTo('bookings.reports');
     }
 
     /**
@@ -63,6 +65,6 @@ class OrderPolicy
      */
     public function quotes(User $user, Order $order): bool
     {
-        return $user->hasPermissionTo('orders.quote');
+        return $user->hasPermissionTo('bookings.quote');
     }
 }

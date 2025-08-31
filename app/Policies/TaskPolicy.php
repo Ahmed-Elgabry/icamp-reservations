@@ -4,11 +4,12 @@ namespace App\Policies;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Traits\SuperAdminTrait;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TaskPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, SuperAdminTrait;
 
     /**
      * Determine whether the user can view any models.

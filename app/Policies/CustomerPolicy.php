@@ -4,11 +4,12 @@ namespace App\Policies;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Traits\SuperAdminTrait;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CustomerPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, SuperAdminTrait;
 
     /**
      * Determine whether the user can view any models.

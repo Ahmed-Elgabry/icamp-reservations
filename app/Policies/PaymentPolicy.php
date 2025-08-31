@@ -4,11 +4,12 @@ namespace App\Policies;
 
 use App\Models\Payment;
 use App\Models\User;
+use App\Traits\SuperAdminTrait;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PaymentPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, SuperAdminTrait;
 
     public function viewAny(User $user): bool
     {

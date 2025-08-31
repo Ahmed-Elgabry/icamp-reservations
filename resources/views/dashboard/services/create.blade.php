@@ -183,11 +183,13 @@
                                             <i class="fa fa-arrow-down"></i>
                                         </button>
 
+                                        @can('services.delete.internal')
                                         <a href="#"
                                             class="btn btn-danger btn-sm js-delete-stock"
                                             data-url="{{ route('stocks.destroyServiceReport', ['report' => $report->id]) }}">
                                             @lang('dashboard.delete')
                                         </a>
+                                        @endcan
                                         </div>
 
                                         <input type="hidden" name="report_orders[]" value="{{ $report->order ?? ($index + 1) }}">
@@ -232,11 +234,13 @@
                                             </div>
 
                                             <div class="col-2">
+                                                @can('services.delete.internal')
                                                 <a href="#"
                                                     class="menu-link px-3 js-delete-stock"
                                                     data-url="{{ route('stocks.destroyServiceStock', ['service' => $service->id, 'stock' => $serviceStock->id]) }}">
                                                     @lang('dashboard.delete')
                                                 </a>
+                                                @endcan
                                             </div>
                                         </div>
                                     @endforeach

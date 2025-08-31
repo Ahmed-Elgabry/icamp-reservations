@@ -37,7 +37,7 @@ return [
     'total_price' => 'السعر الكلي',
     'registration_forms' => ' استمارات تسجيل البيانات',
     'sequence' => 'التسلسل',
-        'registration_forms'        => 'استمارات التسجيل',
+    'registration_forms'        => 'استمارات التسجيل',
     'registration_form'         => 'استمارة تسجيل',
     'search_rf_placeholder'     => 'ابحث برقم الاستمارة أو الهاتف المتحرك أو الاسم أو البريد',
 
@@ -312,6 +312,7 @@ return [
     'show_orders_of' => 'عرض الحجوزات',
     'user_orders' => 'الحجوزات',
     'payments' => 'المدفوعات',
+    'payment' => 'مدفوعة',
     // End New Transtions
 
     'app_name' => 'icamp',
@@ -561,7 +562,7 @@ return [
     'task_updated_successfully' => 'تم تحديث المهمة بنجاح',
     'task_deleted_successfully' => 'تم حذف المهمة بنجاح',
     'task_status_updated' => 'تم تحديث حالة المهمة',
-    
+
     // Task Types
     'task_types' => 'أنواع المهام',
     'task_type' => 'نوع المهمة',
@@ -1159,7 +1160,7 @@ return [
     'people_count' => 'عدد الأشخاص',
     'client_notes' => 'ملاحظات العميل',
     'service' => 'نوع مخيم',
-    
+
     // Survey Email
     'survey_email_title' => 'تقييم نوع المخيم',
     'survey_email_greeting' => 'عميلنا العزيز',

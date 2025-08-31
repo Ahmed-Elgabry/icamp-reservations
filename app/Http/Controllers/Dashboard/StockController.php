@@ -134,7 +134,6 @@ class StockController extends Controller
 
     public function destroyServiceStock(Service $service, Stock $stock)
     {
-
         $attached = $service->stocks()->whereKey($stock->id)->first();
         if (!$attached) {
             return response()->json(['error' => __('dashboard.stock_not_attached')], 422);

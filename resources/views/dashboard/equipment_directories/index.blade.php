@@ -15,9 +15,11 @@
                    class="btn btn-success me-2" title="@lang('dashboard.export_pdf')">
                     <i class="fas fa-file-pdf"></i> @lang('dashboard.export_pdf')
                 </a>
+                @if(Gate::allows('equipment.create'))
                 <a href="{{ route('equipment-directories.create') }}" class="btn btn-primary">
                     @lang('dashboard.create_directory')
                 </a>
+                @endif
             </div>
         </div>
 
@@ -50,18 +52,23 @@
                             </span>
                             </td>
                             <td>
+                                @if(Gate::allows('equipment.index'))
                                 <a href="{{ route('equipment-directories.items.index', $directory) }}"
                                    class="btn btn-sm btn-info" title="@lang('dashboard.manage_items')">
                                     <i class="fas fa-boxes"></i>
                                 </a>
+                                @endif
+                                @if(Gate::allows('equipment.edit'))
                                 <a href="{{ route('equipment-directories.edit', $directory) }}"
                                    class="btn btn-sm btn-primary" title="@lang('dashboard.edit')">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                @endif
                                 {{--                            <a href="{{ route('equipment-directories.export', $directory) }}"--}}
                                 {{--                               class="btn btn-sm btn-success" title="@lang('dashboard.export_pdf')">--}}
                                 {{--                                <i class="fas fa-file-pdf"></i>--}}
                                 {{--                            </a>--}}
+                                @if(Gate::allows('equipment.destroy'))
                                 <form action="{{ route('equipment-directories.destroy', $directory) }}"
                                       method="POST" class="d-inline">
                                     @csrf @method('DELETE')
@@ -71,6 +78,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

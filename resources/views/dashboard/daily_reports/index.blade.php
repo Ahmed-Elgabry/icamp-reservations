@@ -11,12 +11,16 @@
                 </div>
             </div>
             <div class="card-toolbar">
-                <a href="{{ route('daily-reports.export') }}" class="btn btn-success me-2">
-                    @lang('dashboard.export_pdf')
-                </a>
-                <a href="{{ route('daily-reports.create') }}" class="btn btn-primary">
-                    @lang('dashboard.create_report')
-                </a>
+                @can('daily-reports.export')
+                    <a href="{{ route('daily-reports.export') }}" class="btn btn-success me-2">
+                        @lang('dashboard.export_pdf')
+                    </a>
+                @endcan
+                @can('daily-reports.create')
+                    <a href="{{ route('daily-reports.create') }}" class="btn btn-primary">
+                        @lang('dashboard.create_report')
+                    </a>
+                @endcan
             </div>
         </div>
 
@@ -64,18 +68,24 @@
                         <td>{{ $report->employee->name }}</td>
                         <td>{{ $report->created_at->format('Y-m-d H:i') }}</td>
                         <td>
-                            <a href="{{ route('daily-reports.show', $report) }}" class="btn btn-sm btn-info">
-                                @lang('dashboard.view')
-                            </a>
-                            <a href="{{ route('daily-reports.edit', $report) }}" class="btn btn-sm btn-primary">
-                                @lang('dashboard.edit')
-                            </a>
-                            <form action="{{ route('daily-reports.destroy', $report) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">
-                                    @lang('dashboard.delete')
-                                </button>
-                            </form>
+                            @can('daily-reports.show')
+                                <a href="{{ route('daily-reports.show', $report) }}" class="btn btn-sm btn-info">
+                                    @lang('dashboard.view')
+                                </a>
+                            @endcan
+                            @can('daily-reports.edit')
+                                <a href="{{ route('daily-reports.edit', $report) }}" class="btn btn-sm btn-primary">
+                                    @lang('dashboard.edit')
+                                </a>
+                            @endcan
+                            @can('daily-reports.destroy')
+                                <form action="{{ route('daily-reports.destroy', $report) }}" method="POST" class="d-inline">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        @lang('dashboard.delete')
+                                    </button>
+                                </form>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

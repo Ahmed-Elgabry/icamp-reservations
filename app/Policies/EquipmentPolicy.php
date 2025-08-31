@@ -4,11 +4,12 @@ namespace App\Policies;
 
 use App\Models\EquipmentDirectory;
 use App\Models\User;
+use App\Traits\SuperAdminTrait;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class EquipmentPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, SuperAdminTrait;
 
     /**
      * Determine whether the user can view any models.

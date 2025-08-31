@@ -37,13 +37,13 @@
                 <!--begin::Card toolbar-->
                 <div class="card-toolbar">
                     <!--begin::Add customer-->
-                    @can('orders.create')
+                    @can('bookings.create')
                         <a href="{{ route('orders.create')}}"
                             class="btn btn-primary">@lang('dashboard.create_title', ['page_title' => __('dashboard.orders')])</a>
                     @endcan
                     <!--end::Add customer-->
                     <span class="w-5px h-2px"></span>
-                    @can('orders.deleteAll')
+                    @can('bookings.destroy')
                         <button type="button" data-route="{{route('orders.deleteAll')}}"
                             class="btn btn-danger delete_all_button">
                             <i class="feather icon-trash"></i>@lang('dashboard.delete_selected')</button>
@@ -94,19 +94,31 @@
 
                                 <!--begin::Order Date-->
                                 <td>
-                                    <a href="{{ route('orders.edit', $order->id) }}">{{$order->date }}</a>
+                                    @can('bookings.show')
+                                        <a href="{{ route('orders.show', $order->id) }}">{{$order->date }}</a>
+                                    @else
+                                        <span>{{$order->date }}</span>
+                                    @endcan
                                 </td>
                                 <!--end::Order Date-->
 
                                 <!--begin::Services-->
                                 <td>
-                                    <a href="{{ route('orders.edit', $order->id) }}">
+                                    @can('bookings.show')
+                                        <a href="{{ route('orders.show', $order->id) }}">
+                                            <ul>
+                                                @foreach($order->services as $service)
+                                                    <li>{{$service->name}}</li>
+                                                @endforeach
+                                            </ul>
+                                        </a>
+                                    @else
                                         <ul>
                                             @foreach($order->services as $service)
                                                 <li>{{$service->name}}</li>
                                             @endforeach
                                         </ul>
-                                    </a>
+                                    @endcan
                                 </td>
                                 <!--end::Services-->
 
@@ -114,10 +126,16 @@
                                 <td>
                                     <div class="d-flex">
                                         <div class="ms-5">
-                                            <a href="{{ route('orders.edit', $order->id) }}"
-                                                class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
-                                                {{$order->customer->name}}
-                                            </a>
+                                            @can('bookings.show')
+                                                <a href="{{ route('orders.show', $order->id) }}"
+                                                    class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
+                                                    {{$order->customer->name}}
+                                                </a>
+                                            @else
+                                                <span class="text-gray-800 fs-5 fw-bolder mb-1">
+                                                    {{$order->customer->name}}
+                                                </span>
+                                            @endcan
                                         </div>
                                     </div>
                                 </td>
@@ -226,14 +244,21 @@
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
                                         data-kt-menu="true">
 
-                                        @can('orders.edit')
+                                        @can('bookings.show')
+                                            <div class="menu-item px-3">
+                                                <a href="{{route('orders.show', $order->id)}}"
+                                                    class="menu-link px-3">{{__('dashboard.show')}}</a>
+                                            </div>
+                                        @endcan
+
+                                        @can('bookings.edit')
                                             <div class="menu-item px-3">
                                                 <a href="{{route('orders.edit', $order->id)}}"
                                                     class="menu-link px-3">{{__('dashboard.edit')}}</a>
                                             </div>
                                         @endcan
 
-                                        @can('orders.destroy')
+                                        @can('bookings.destroy')
                                             <div class="menu-item px-3">
                                                 <a href="#" class="menu-link px-3"
                                                     data-kt-ecommerce-category-filter="delete_row"

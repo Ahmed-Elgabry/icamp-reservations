@@ -31,23 +31,20 @@ trait Roles
             'financial' => ['title_ar' => 'النظام المالي', 'title_en' => 'Financial System'],
             'expense-items' => ['title_ar' => 'بنود المصاريف', 'title_en' => 'Expense Items'],
             'expenses' => ['title_ar' => 'المصاريف', 'title_en' => 'Expenses'],
-            'general' => ['title_ar' => 'العام', 'title_en' => 'General'],
             'daily-reports' => ['title_ar' => 'التقارير اليومية', 'title_en' => 'Daily Reports'],
             'payments' => ['title_ar' => 'المدفوعات', 'title_en' => 'Payments'],
             'statistics' => ['title_ar' => 'الإحصائيات', 'title_en' => 'Statistics'],
             'meetings' => ['title_ar' => 'الاجتماعات', 'title_en' => 'Meetings'],
             'violations' => ['title_ar' => 'المخالفات', 'title_en' => 'Violations'],
-            'financial-reports' => ['title_ar' => 'التقارير المالية', 'title_en' => 'Financial Reports'],
             'scheduling' => ['title_ar' => 'الجدولة', 'title_en' => 'Scheduling'],
-            'admins' => ['title_ar' => 'الإدارة', 'title_en' => 'Administration'],
+            'admins' => ['title_ar' => 'الموظفين', 'title_en' => 'Employees'],
             'roles' => ['title_ar' => 'الصلاحيات', 'title_en' => 'Roles'],
             'users' => ['title_ar' => 'المستخدمين', 'title_en' => 'Users'],
             'banners' => ['title_ar' => 'البانرات', 'title_en' => 'Banners'],
             'categories' => ['title_ar' => 'الفئات', 'title_en' => 'Categories'],
-            'cities' => ['title_ar' => 'المدن', 'title_en' => 'Cities'],
+            'services' => ['title_ar' => 'الخدمات', 'title_en' => 'Services'],
             'stocks' => ['title_ar' => 'المخزون', 'title_en' => 'Stocks'],
             'surveys' => ['title_ar' => 'الاستبيانات', 'title_en' => 'Surveys'],
-            'questions' => ['title_ar' => 'الأسئلة', 'title_en' => 'Questions'],
             'banks' => ['title_ar' => 'البنوك', 'title_en' => 'Banks'],
             'tasks' => ['title_ar' => 'المهام', 'title_en' => 'Tasks'],
             'equipment' => ['title_ar' => 'قائمة موقع المعدات', 'title_en' => 'Equipment Location List'],
@@ -65,6 +62,9 @@ trait Roles
             'orders.registeration-forms' => 'bookings',
             'orders.customers.check' => 'bookings',
             'order.verified' => 'bookings',
+            
+            // Services internal delete should appear in camp-types
+            'services.delete.internal' => 'camp-types',
 
             // All the permissions from the screenshot that should go to bookings
             'استخدام صلاحية صندوق (استمارات التسجيل) مع جميع الأذونات والدخول فيها' => 'bookings',
@@ -108,6 +108,11 @@ trait Roles
                         $groupKey = $key;
                         break;
                     }
+                }
+                
+                // Special handling for questions - move to surveys group
+                if (strpos($permissionName, 'questions.') === 0) {
+                    $groupKey = 'surveys';
                 }
 
                 // Additional pattern matching for Arabic permissions
@@ -211,15 +216,7 @@ trait Roles
                     ) {
                         $groupKey = 'financial';
                     }
-                    // Check for general system management patterns
-                    elseif (
-                        strpos($permissionName, 'توفير صلاحيات') !== false ||
-                        strpos($permissionName, 'إعادة تدريب') !== false ||
-                        strpos($permissionName, 'باللغة الإنجليزية') !== false ||
-                        strpos($permissionName, 'تحتاج لمعالجة') !== false
-                    ) {
-                        $groupKey = 'general';
-                    }
+                    // General permissions are now hidden - they will go to 'other' group
                 }
             }
 

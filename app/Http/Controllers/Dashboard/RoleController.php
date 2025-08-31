@@ -68,18 +68,72 @@ class RoleController extends Controller
 
     public function update(CreateUpdateRoleRequest $request, $id)
     {
+        \Log::info('Role update started', [
+            'role_id' => $id,
+            'request_data' => $request->all(),
+            'has_permissions' => $request->has('permissions'),
+            'permissions_count' => $request->has('permissions') ? count($request->permissions) : 0
+        ]);
+
         $data = $request->validated();
 
         // Check if role name already exists
-        if (Role::where('nickname_ar', $data['nickname_ar'])->where('id', '!=', $id)->exists() ||
-            Role::where('nickname_en', $data['nickname_en'])->where('id', '!=', $id)->exists()) {
+        if (
+            Role::where('nickname_ar', $data['nickname_ar'])->where('id', '!=', $id)->exists() ||
+            Role::where('nickname_en', $data['nickname_en'])->where('id', '!=', $id)->exists()
+        ) {
             return response()->json(['message' => 'Role name already exists'], 409);
         }
 
         $data['name'] = str_replace(' ', '-', $request->nickname_en);
+
+        \Log::info('Updating role basic data', ['data' => $data]);
         $this->rolesRepository->update($data, $id);
+
         $role = $this->rolesRepository->findOne($id);
-        $role->syncPermissions($request->permissions);
+        \Log::info('Role found after update', [
+            'role_id' => $role->id,
+            'role_name' => $role->name,
+            'current_permissions' => $role->permissions->pluck('name')->toArray()
+        ]);
+
+        // Check if permissions exist before syncing
+        if ($request->has('permissions') && is_array($request->permissions)) {
+            \Log::info('Syncing permissions', ['permissions' => $request->permissions]);
+            
+            // Log customer permissions specifically
+            $customerPermissions = array_filter($request->permissions, function($perm) {
+                return strpos($perm, 'customers.') === 0;
+            });
+            \Log::info('Customer permissions in request', ['customer_permissions' => $customerPermissions]);
+            
+            // Clear all permissions first, then sync new ones
+            $role->permissions()->detach();
+            \Log::info('All permissions detached for role', ['role_id' => $role->id]);
+            
+            $role->syncPermissions($request->permissions);
+
+            // Verify permissions were synced
+            $role->refresh();
+            $finalPermissions = $role->permissions->pluck('name')->toArray();
+            $finalCustomerPermissions = array_filter($finalPermissions, function($perm) {
+                return strpos($perm, 'customers.') === 0;
+            });
+            
+            \Log::info('Permissions after sync', [
+                'all_synced_permissions' => $finalPermissions,
+                'customer_permissions_after_sync' => $finalCustomerPermissions
+            ]);
+        } else {
+            \Log::warning('No permissions to sync - clearing all permissions', [
+                'has_permissions' => $request->has('permissions'),
+                'permissions_data' => $request->get('permissions')
+            ]);
+            
+            // If no permissions sent, clear all
+            $role->permissions()->detach();
+            \Log::info('All permissions cleared for role', ['role_id' => $role->id]);
+        }
 
         return response()->json(['message' => 'Role updated successfully']);
     }
