@@ -4,11 +4,12 @@ namespace App\Policies;
 
 use App\Models\ExpenseItem;
 use App\Models\User;
+use App\Traits\SuperAdminTrait;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ExpenseItemPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, SuperAdminTrait;
 
     public function viewAny(User $user): bool
     {

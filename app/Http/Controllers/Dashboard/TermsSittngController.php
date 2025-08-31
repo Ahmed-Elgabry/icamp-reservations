@@ -18,7 +18,7 @@ class TermsSittngController extends Controller
      */
     public function index()
     {
-        // $this->authorize('viewAny', TermsSittng::class);
+         $this->authorize('viewAny', TermsSittng::class);
 
         $termsSittngs = TermsSittng::all();
         return view('dashboard.TermsSittngs.create', compact('termsSittngs'));
@@ -29,7 +29,7 @@ class TermsSittngController extends Controller
      */
     public function create()
     {
-        // $this->authorize('create', TermsSittng::class);
+         $this->authorize('create', TermsSittng::class);
 
         $termsSittng = TermsSittng::query()->first();
 
@@ -43,7 +43,7 @@ class TermsSittngController extends Controller
      */
     public function store(TermsSittngRequest $request)
     {
-        // $this->authorize('create', TermsSittng::class);
+         $this->authorize('create', TermsSittng::class);
 
         $data = $request->all();
 
@@ -70,7 +70,7 @@ class TermsSittngController extends Controller
      */
     public function show(TermsSittng $termsSittng)
     {
-        // $this->authorize('view', $termsSittng);
+         $this->authorize('view', $termsSittng);
 
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
     }
@@ -80,7 +80,7 @@ class TermsSittngController extends Controller
      */
     public function edit(TermsSittng $termsSittng)
     {
-        // $this->authorize('update', $termsSittng);
+         $this->authorize('update', $termsSittng);
 
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
     }
@@ -90,7 +90,7 @@ class TermsSittngController extends Controller
      */
     public function update(TermsSittngRequest $request, TermsSittng $termsSittng)
     {
-        // $this->authorize('update', $termsSittng);
+         $this->authorize('update', $termsSittng);
 
         $validatedData = $request->validated();
 
@@ -144,7 +144,7 @@ class TermsSittngController extends Controller
 
     public function destroy(TermsSittng $termsSittng)
     {
-        // $this->authorize('delete', $termsSittng);
+         $this->authorize('delete', $termsSittng);
 
         $termsSittng->delete();
 

@@ -15,8 +15,6 @@ class EquipmentDirectoryController extends Controller
     // Main Directories
     public function index()
     {
-        $this->authorize('viewAny', EquipmentDirectory::class);
-
         $directories = EquipmentDirectory::with(['creator', 'items'])
             ->latest()
             ->get();
@@ -26,14 +24,11 @@ class EquipmentDirectoryController extends Controller
 
     public function create()
     {
-        $this->authorize('create', EquipmentDirectory::class);
-
         return view('dashboard.equipment_directories.create');
     }
 
     public function store(Request $request)
     {
-        $this->authorize('create', EquipmentDirectory::class);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -52,14 +47,11 @@ class EquipmentDirectoryController extends Controller
 
     public function edit(EquipmentDirectory $equipmentDirectory)
     {
-        $this->authorize('update', $equipmentDirectory);
-
         return view('dashboard.equipment_directories.create', compact('equipmentDirectory'));
     }
 
     public function update(Request $request, EquipmentDirectory $equipmentDirectory)
     {
-        $this->authorize('update', $equipmentDirectory);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -77,8 +69,6 @@ class EquipmentDirectoryController extends Controller
 
     public function destroy(EquipmentDirectory $equipmentDirectory)
     {
-        $this->authorize('delete', $equipmentDirectory);
-
         $equipmentDirectory->delete();
         return back()->with('success', __('Directory deleted successfully'));
     }

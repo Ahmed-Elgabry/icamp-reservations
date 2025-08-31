@@ -18,6 +18,13 @@ class NewPermissionsSeeder extends Seeder
 
         // Required permissions from requirements
         $additional_permissions = [
+            // Admins
+            ['name' => 'admins.index', 'nickname_ar' => 'عرض الموظفين', 'nickname_en' => 'View Admins', 'group' => 'admins'],
+            ['name' => 'admins.create', 'nickname_ar' => 'إضافة موظف', 'nickname_en' => 'Create Admin', 'group' => 'admins'],
+            ['name' => 'admins.edit', 'nickname_ar' => 'تعديل موظف', 'nickname_en' => 'Edit Admin', 'group' => 'admins'],
+            ['name' => 'admins.destroy', 'nickname_ar' => 'حذف موظف', 'nickname_en' => 'Delete Admin', 'group' => 'admins'],
+            ['name' => 'admins.show', 'nickname_ar' => 'عرض تفاصيل موظف', 'nickname_en' => 'View Admin Details', 'group' => 'admins'],
+
             // Customers
             ['name' => 'customers.index', 'nickname_ar' => 'عرض العملاء', 'nickname_en' => 'View Customers', 'group' => 'customers'],
             ['name' => 'customers.create', 'nickname_ar' => 'إضافة عميل', 'nickname_en' => 'Create Customer', 'group' => 'customers'],
@@ -43,7 +50,7 @@ class NewPermissionsSeeder extends Seeder
             ['name' => 'addons.create', 'nickname_ar' => 'إضافة إضافة', 'nickname_en' => 'Create Addon', 'group' => 'addons'],
             ['name' => 'addons.edit', 'nickname_ar' => 'تعديل إضافة', 'nickname_en' => 'Edit Addon', 'group' => 'addons'],
             ['name' => 'addons.delete', 'nickname_ar' => 'حذف إضافة', 'nickname_en' => 'Delete Addon', 'group' => 'addons'],
-            ['name' => 'addons.print', 'nickname_ar' => 'طباعة الإضافات', 'nickname_en' => 'Print Addons', 'group' => 'addons'],
+
 
             // Camp Types
             ['name' => 'camp-types.index', 'nickname_ar' => 'عرض أنواع المخيم', 'nickname_en' => 'View Camp Types', 'group' => 'camp_types'],

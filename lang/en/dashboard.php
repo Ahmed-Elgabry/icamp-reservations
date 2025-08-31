@@ -272,6 +272,7 @@ return [
     'show_orders_of' => 'Show Orders of',
     'user_orders' => 'User Orders',
     'payments' => 'Payments',
+    'payment' => 'Payment',
     // End New Translations
 
 
@@ -462,12 +463,12 @@ return [
     'slots' => [
         '4-12' => '4 PM to 12 AM',
         '5-1'  => '5 PM to 1 AM',
-        'other'=> 'Other',
+        'other' => 'Other',
     ],
-    'checkin_label'=> 'Check-in Time',
-    'checkout_label'=> 'Check-out Time',
+    'checkin_label' => 'Check-in Time',
+    'checkout_label' => 'Check-out Time',
     'time_note'    => 'Enter check-in/out time.',
-    'persons_label'=> 'Persons',
+    'persons_label' => 'Persons',
     'fname_label'  => 'First Name',
     'lname_label'  => 'Last Name',
     'phone_label'  => 'Mobile Phone',
@@ -492,7 +493,7 @@ return [
     'registration_forms' => 'Registration Forms',
     'copy_code'    => 'Copy Code',
     'copied'       => 'Copied',
-      'registration_forms'        => 'Registration Forms',
+    'registration_forms'        => 'Registration Forms',
     'registration_form'         => 'Registration Form',
     'search_rf_placeholder'     => 'Search by form #, phone, name, or email',
     'form_no'                   => 'Form No.',
@@ -615,7 +616,7 @@ return [
     'task_created_successfully' => 'Task created successfully',
     'task_updated_successfully' => 'Task updated successfully',
     'task_deleted_successfully' => 'Task deleted successfully',
-    
+
     // Task Types
     'task_types' => 'Task Types',
     'task_type' => 'Task Type',

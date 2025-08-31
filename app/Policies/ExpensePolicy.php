@@ -4,11 +4,12 @@ namespace App\Policies;
 
 use App\Models\Expense;
 use App\Models\User;
+use App\Traits\SuperAdminTrait;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ExpensePolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, SuperAdminTrait;
 
     public function viewAny(User $user): bool
     {
@@ -35,8 +36,4 @@ class ExpensePolicy
         return $user->hasPermissionTo('expenses.destroy');
     }
 
-    public function export(User $user): bool
-    {
-        return $user->hasPermissionTo('expenses.export');
-    }
 }

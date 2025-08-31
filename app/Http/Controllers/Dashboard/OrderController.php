@@ -54,6 +54,7 @@ class OrderController extends Controller
 
     public function index()
     {
+
         $this->authorize('viewAny', Order::class);
 
         $validStatuses = ['completed', 'rejected', 'canceled', 'delayed'];

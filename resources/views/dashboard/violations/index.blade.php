@@ -8,9 +8,11 @@
                 <h3>@lang('dashboard.violations')</h3>
             </div>
             <div class="card-toolbar">
-                <a href="{{ route('violations.create') }}" class="btn btn-primary">
-                    @lang('dashboard.create_violation')
-                </a>
+                @can('violations.create')
+                    <a href="{{ route('violations.create') }}" class="btn btn-primary">
+                        @lang('dashboard.create_violation')
+                    </a>
+                @endcan
             </div>
         </div>
         <div class="card-body pt-0">
@@ -90,18 +92,24 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{{ route('violations.show', $violation) }}" class="btn btn-sm btn-info">
-                                @lang('dashboard.view')
-                            </a>
-                            <a href="{{ route('violations.edit', $violation) }}" class="btn btn-sm btn-warning">
-                                @lang('dashboard.edit')
-                            </a>
-                            <form action="{{ route('violations.destroy', $violation) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
-                                    @lang('dashboard.delete')
-                                </button>
-                            </form>
+                            @can('violations.show')
+                                <a href="{{ route('violations.show', $violation) }}" class="btn btn-sm btn-info">
+                                    @lang('dashboard.view')
+                                </a>
+                            @endcan
+                            @can('violations.edit')
+                                <a href="{{ route('violations.edit', $violation) }}" class="btn btn-sm btn-warning">
+                                    @lang('dashboard.edit')
+                                </a>
+                            @endcan
+                            @can('violations.destroy')
+                                <form action="{{ route('violations.destroy', $violation) }}" method="POST" class="d-inline">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
+                                        @lang('dashboard.delete')
+                                    </button>
+                                </form>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach
