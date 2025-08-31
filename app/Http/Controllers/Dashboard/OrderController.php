@@ -415,20 +415,27 @@ class OrderController extends Controller
             'payment_method' => $validatedData['payment_method'] ?? null,
             'account_id' => $validatedData['account_id'] ?? null,
             'description' => $validatedData['description'] ?? '',
-            'transaction_id' => $transaction->id, // Store transaction ID for future updates
         ]);
         $order->update([
             'price' => $order->price
         ]);
-        // add transaction to the created pivot
-        Transaction::create([
-            'order_addon_id' => $order->addons()->where('id', $validatedData['addon_id'])->first()->pivot->id,
-            'account_id' => $request->input('account_id'),
-            'amount' => $validatedData['price'],
-            'description' => $validatedData['description'],
-            'source' =>'reservation_addon',
-            "type" => 'deposit'
-        ]);
+        // add transaction linked to the newly created pivot row
+        // Fetch the latest pivot row for this order/addon pair (assumes 'order_addon' has an auto-increment 'id')
+        $pivot = \App\Models\OrderAddon::where('order_id', $order->id)
+            ->where('addon_id', $validatedData['addon_id'])
+            ->orderByDesc('id')
+            ->first();
+
+        if ($pivot) {
+            Transaction::create([
+                'order_addon_id' => $pivot->id,
+                'account_id' => $request->input('account_id'),
+                'amount' => $validatedData['price'],
+                'description' => $validatedData['description'],
+                'source' => 'reservation_addon',
+                'type' => 'deposit'
+            ]);
+        }
         return back()->with('success', __('dashboard.success'));
     }
 

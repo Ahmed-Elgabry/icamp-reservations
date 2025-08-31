@@ -69,13 +69,6 @@ return [
     'expenses_by_item' => 'لګښتونه د توکو له مخې',
     "receiver" => "لیږل",
     'bank_account' => 'حساب',
-<<<<<<< HEAD
-    'from_account' => 'د حساب څخه',
-    'to_account' => 'حساب ته',
-    'choose_from_account' => 'د لیږونکي حساب غوره کړئ',
-    'choose_to_account' => 'د ترلاسه کونکي حساب غوره کړئ',
-=======
->>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     'financial_reports' => 'مالي راپورونه',
     'switch_accounts' => 'حسابونه بدلول',
     'rate link' => 'د درجه بندي لینک',
@@ -264,11 +257,6 @@ return [
     'EN' => 'انګلیسي نسخه',
     'arabic_data' => 'د عربي ژبې ډاټا',
     'english_data' => 'د انګلیسي ژبې ډاټا',
-<<<<<<< HEAD
-    'arabic' => 'عربي',
-    'english' => 'انګلیسي',
-=======
->>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     'back_to_home' => 'بیرته کور ته',
     'status_title' => ':page_title حالت',
     'status_desc' => ':page_title حالت وټاکئ',

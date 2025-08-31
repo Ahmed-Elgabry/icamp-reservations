@@ -46,6 +46,7 @@ class WarehousesalesController extends Controller
                 'description' => $data['notes'],
                 "type" =>"deposit",
                 'source' => 'warehouse_sale',
+                "stock_id" => $data['stock_id'],
             ]);
             \DB::commit();
         } catch (\Exception $e) {
@@ -74,6 +75,14 @@ class WarehousesalesController extends Controller
         }
         $stock->increment('quantity',$data['quantity']);
         $item->update($data);
+        Transaction::where('stock_id', $item->stock_id)->update([
+            'account_id' => $data['account_id'],
+            'amount' => $data['total_price'],
+            'description' => $data['notes'],
+            "type" =>"deposit",
+            'source' => 'warehouse_sale',
+            "stock_id" => $data['stock_id'],
+        ]);
 
         return redirect()->back()->with('success', __('dashboard.item_updated_successfully'));
     }

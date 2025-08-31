@@ -80,6 +80,7 @@ return [
     'confirm_delete_body'       => 'سيتم حذف الاستمارة بشكل نهائي. هل أنت متأكد؟',
 
     'deleted_ok'                => 'تم الحذف بنجاح',
+    "deleted_successfully"      => "تم الحذف بنجاح",
     'company_stamp' => 'ختم الشركة',
     'Reservation_information' => 'بيانات الحجز',
     'pending_and_show_price_desc' => 'معلق - عرض سعر',

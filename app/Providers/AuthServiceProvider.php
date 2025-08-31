@@ -42,9 +42,6 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-<<<<<<< HEAD
-        //
-=======
         // Super Admin bypass for all Gates/Permissions
         Gate::before(function ($user, $ability) {
             if ($user && $user->id == 1) {
@@ -185,6 +182,5 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('equipment.destroy', function ($user) {
             return $user->hasPermissionTo('equipment.destroy');
         });
->>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     }
 }

@@ -24,9 +24,11 @@
             <th class="">{{ __('dashboard.process') }}</th>
 
             <th class="">{{ __('dashboard.date') }}</th>
-            @if($pageTitle === "transactions")
-                <th class="">{{ __('dashboard.bank_account') }}</th>
-            @endif
+            @isset($pageTitle)
+                    @if($pageTitle === "transactions")
+                        <th class="">{{ __('dashboard.bank_account') }}</th>
+                    @endif
+            @endisset
             <th class="">{{ __('dashboard.receiver') }}</th>
 
             <th class="">{{ __('dashboard.price') }}</th>
@@ -88,50 +90,52 @@
             
             <!--begin::Date-->
             <td><a href="{{ $transaction->editRoute }}">{{ $transaction->date }}</a></td>
-            @if($pageTitle === "transactions")
-            <td>
-                
-                @if($transaction->account)
-                <span>
-                    <a href="{{ route('bank-accounts.show', $transaction->account->id) }}" >
-                        {{$transaction->account ? $transaction->account->name :""}}
-                    </a>
-                </span>
-                @elseif($transaction->senderAccount->name)
-                <span>
-                    <a href="{{ route('bank-accounts.show', $transaction->senderAccount->id) }}" >
-                        {{$transaction->senderAccount->name }}
-                    </a>
-                </span>
-                @endif
-
-                @if(!$transaction->order_id && $transaction->type != 'Payment')
-                  @if($transaction->senderAccount)
-                    <span >
-
-                        {{__('dashboard.debit')}}.
-
-                    </span>
-                  @endif
-
-                @endif
-
-
-
-                @if($transaction->account && $transaction->account->id && $transaction->order_id || $transaction->type == 'Payment')
-
+            @isset($pageTitle)
+                @if($pageTitle === "transactions")
+                <td>
+                    
+                    @if($transaction->account)
                     <span>
-
-                        {{__('dashboard.Deposit')}}
-
+                        <a href="{{ route('bank-accounts.show', $transaction->account->id) }}" >
+                            {{$transaction->account ? $transaction->account->name :""}}
+                        </a>
                     </span>
+                    @elseif($transaction->senderAccount->name)
+                    <span>
+                        <a href="{{ route('bank-accounts.show', $transaction->senderAccount->id) }}" >
+                            {{$transaction->senderAccount->name }}
+                        </a>
+                    </span>
+                    @endif
 
+                    @if(!$transaction->order_id && $transaction->type != 'Payment')
+                    @if($transaction->senderAccount)
+                        <span >
+
+                            {{__('dashboard.debit')}}.
+
+                        </span>
+                    @endif
+
+                    @endif
+
+
+
+                    @if($transaction->account && $transaction->account->id && $transaction->order_id || $transaction->type == 'Payment')
+
+                        <span>
+
+                            {{__('dashboard.Deposit')}}
+
+                        </span>
+
+                    @endif
+
+
+
+                </td>
                 @endif
-
-
-
-            </td>
-            @endif
+            @endisset
             <td>
 
                 @if($transaction->receiver)

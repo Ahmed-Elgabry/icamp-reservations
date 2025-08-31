@@ -14,6 +14,19 @@
 
         <!--begin::Category-->
         <div class="card card-flush">
+             <!-- customer information -->
+                  <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <!--begin::Card title-->

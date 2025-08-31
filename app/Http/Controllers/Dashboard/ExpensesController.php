@@ -145,7 +145,7 @@ class ExpensesController extends Controller
             $path = $request->file('image')->store('expenses', 'public');
         }
 
-        Expense::create([
+        $expense = Expense::create([
             'expense_item_id' => $request->expense_item_id,
             'account_id' => $request->account_id,
             'price' => $request->price,

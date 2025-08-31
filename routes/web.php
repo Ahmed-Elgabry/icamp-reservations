@@ -47,7 +47,8 @@ Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
 Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
     ->name('signature.store');
 
-
+Route::delete('/sign/{order}', [OrderSignatureController::class, 'destroy'])
+    ->name('signature.destroy');
 
 // Auth::routes();
 Route::group(['middleware' => ['web']], function () {

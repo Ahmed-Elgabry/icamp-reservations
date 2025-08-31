@@ -36,10 +36,14 @@ var KTAppEcommerceCategories = function () {
                             if (response.success && (response.deleted_amount || response.deleted_expense_amount)) {
                                 let targetElement;
                                 let deletedAmount;
-                               if (response.deleted_amount) {
-                                   targetElement = document.getElementById('payment-amount');
-                                   deletedAmount = parseFloat(response.deleted_amount) || 0;
+                                console.log(response.deleted_amount)
+                                if (response.deleted_amount) {
+                                    
+                                    targetElement = document.getElementById('payment-amount');
+                                    console.log(targetElement);
+                                    deletedAmount = parseFloat(response.deleted_amount) || 0;
                                } else if (response.deleted_expense_amount) {
+                                    console.log("true");
                                     targetElement = document.getElementById('expense-amount');
                                     deletedAmount = parseFloat(response.deleted_expense_amount) || 0;
                                 }

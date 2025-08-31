@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\ExpenseItem;
 use App\Models\Expense;
+use App\Models\BankAccount;
 use Illuminate\Http\Request;
 
 class ExpenseItemsController extends Controller
@@ -24,8 +25,9 @@ class ExpenseItemsController extends Controller
     // Show form to create new expense item
     public function create()
     {
+        $bankAccounts = BankAccount::all();
         $expenseItems = ExpenseItem::orderBy('created_at','desc')->get();
-        return view('dashboard.expense_items.create', compact('expenseItems'));
+        return view('dashboard.expense_items.create', compact('expenseItems', 'bankAccounts'));
     }
 
     // Store new expense item
