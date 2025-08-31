@@ -1,12 +1,12 @@
 @extends('dashboard.layouts.app')
-@section('pageTitle' , __('dashboard.create_title', ['page_title' => __('dashboard.expenses')]))
+@section('pageTitle' , __('dashboard.create_title', ['page_title' => __('dashboard.expense-items')]))
 
 @section('content')
 
 
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
-
-
+       
+    
         <!--begin::Post-->
         <div class="post d-flex flex-column-fluid" id="kt_post">
             <!--begin::Container-->
@@ -115,7 +115,7 @@
 
                                                     <div class="form-group col-12 mt-5">
                                                         <label for="notes">{{ __('dashboard.notes') }}</label>
-                                                        <textarea name="notes" id="notes" class="form-control">{{ isset($expense) ? $expense->notes : old('notes') }}</textarea>
+                                                        <textarea name="description" id="notes" class="form-control">{{ isset($expense) ? $expense->notes : old('notes') }}</textarea>
                                                     </div>
                                                 </div>
 
@@ -127,7 +127,6 @@
                                     </div>
                                 </div>
                                 <!--end::Tab pane-->
-
                             </div>
                             <!--end::Tab content-->
                             <div class="d-flex justify-content-end">
@@ -143,7 +142,6 @@
                                         <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
                                 </button>
                                 <!--end::Button-->
-
                             </div>
                         </div>
                         <!--end::Main column-->
@@ -169,10 +167,10 @@
             margin-bottom:20px !important;
         }
 
-
-
+        
+        
     </style>
-@endpush
+@endpush 
 @push('js')
     <script>
         $("#select2").select2();

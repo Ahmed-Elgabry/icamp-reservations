@@ -90,35 +90,29 @@
                             <!--begin::Table row-->
                             <tr data-id="{{$order->id}}">
                                 <td>{{ $orders->firstItem() + $loop->index }}</td>
-                                <td> <span class="badge bg-primary">{{ $order->id }}</span></td>
-
+                                <td>
+                                        @can('bookings.show')
+                                        <a href="{{ route('orders.show', $order->id) }}" class="badge bg-primary">{{ $order->id }}</a>
+                                        @else
+                                        <span>{{$order->id }}</span>
+                                        @endcan
+                                        
+                                    </td>
                                 <!--begin::Order Date-->
                                 <td>
-                                    @can('bookings.show')
-                                        <a href="{{ route('orders.show', $order->id) }}">{{$order->date }}</a>
-                                    @else
-                                        <span>{{$order->date }}</span>
-                                    @endcan
+                                    <span >{{$order->date }}</span>
                                 </td>
                                 <!--end::Order Date-->
 
                                 <!--begin::Services-->
                                 <td>
-                                    @can('bookings.show')
-                                        <a href="{{ route('orders.show', $order->id) }}">
-                                            <ul>
-                                                @foreach($order->services as $service)
-                                                    <li>{{$service->name}}</li>
-                                                @endforeach
-                                            </ul>
-                                        </a>
-                                    @else
+                                    <span>
                                         <ul>
                                             @foreach($order->services as $service)
                                                 <li>{{$service->name}}</li>
                                             @endforeach
                                         </ul>
-                                    @endcan
+                                    </span>
                                 </td>
                                 <!--end::Services-->
 

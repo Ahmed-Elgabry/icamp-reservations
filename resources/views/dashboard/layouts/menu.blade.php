@@ -1,5 +1,5 @@
 <div class="menu menu-column menu-title-gray-800 menu-state-title-primary menu-state-icon-primary menu-state-bullet-primary menu-arrow-gray-500"
-     id="#kt_aside_menu" data-kt-menu="true" data-kt-menu-expand="false">
+    id="#kt_aside_menu" data-kt-menu="true" data-kt-menu-expand="false">
     <div data-kt-menu-trigger="click" class="menu-item here show menu-accordion">
         <div class=" menu-active-bg">
             <div class="menu-item">
@@ -20,7 +20,7 @@
     @can('roles.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['roles.index', 'roles.create', 'roles.edit'])}}"
-             data-kt-menu-trigger="click">
+            data-kt-menu-trigger="click">
             <!--begin::Menu link-->
             <a href="#" class="menu-link py-3 {{areActiveRoutes(['roles.index', 'roles.create', 'roles.edit'])}}">
                 <span class="menu-icon">
@@ -562,8 +562,8 @@
                                 @can('payments.create')
                                     <!--begin::Menu item-->
                                     <div class="menu-item">
-                                        <a href="{{route('payments.create')}}"
-                                           class="menu-link py-3 {{ isActiveRoute('payments.create') }}">
+                                        <a href="{{route('payments.transfer')}}"
+                                            class="menu-link py-3 {{ isActiveRoute('payments.create') }}">
                                             <span class="menu-bullet">
                                                 <span class="bullet bullet-dot"></span>
                                             </span>

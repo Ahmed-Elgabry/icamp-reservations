@@ -12,6 +12,19 @@
 
             <!--begin::Category-->
             <div class="card card-flush">
+                <!-- customer information -->
+                  <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
                 <!--begin::Card header-->
                 <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                     <!--begin::Card title-->
@@ -47,9 +60,10 @@
                     <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
                         <thead>
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th>{{ __('dashboard.name') }}</th>
+                            <th>{{ __('dashboard.addon_type') }}</th>
+                            <th>{{ __('dashboard.addon_price') }}</th>
                             <th>{{ __('dashboard.quantity') }}</th>
-                            <th>{{ __('dashboard.price') }}</th>
+                            <th>{{ __('dashboard.total_price') }}</th>
                             <th>{{ __('dashboard.payment_method') }}</th>
                             <th>{{ __('dashboard.verified') }}</th>
                             <th>{{ __('dashboard.description') }}</th>
@@ -60,6 +74,7 @@
                         @foreach ($order->addons as $orderAddon)
                             <tr data-id="{{ $orderAddon->id }}">
                                 <td data-kt-ecommerce-category-filter="category_name">{{ $orderAddon->name }}</td>
+                                <td>{{ $orderAddon->price }}</td>
                                 <td >{{ $orderAddon->pivot->count }}</td>
                                 <td>{{ $orderAddon->pivot->price }}</td>
                                 <td>{{__('dashboard.'. $orderAddon->pivot->payment_method )}}</td>
@@ -72,10 +87,7 @@
                                     @endif
                                 </td>
                                 <td>{{ $orderAddon->pivot->description }}</td>
-                                {{-- <td>
 
-
-                                </td> --}}
 
                                 <!--begin::Action=-->
                                 <td class="text-end">
@@ -135,8 +147,9 @@
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="hidden" name="order_id" value="{{ $order->id }}">
+                                                <input type="hidden" name="source" value="reservation_addon">
                                                 <div class="form-group">
-                                                    <label for="addon_id">{{ __('dashboard.addon') }}</label>
+                                                    <label for="addon_id">{{ __('dashboard.addon_type') }}</label>
                                                     <select name="addon_id" id="edit_addon_id_{{ $orderAddon->pivot->id }}" class="form-control select2">
                                                         <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
                                                         @foreach ($addons as $addon)
@@ -145,19 +158,11 @@
                                                     </select>
                                                 </div>
                                                 <div class="form-group mt-3">
-                                                    <label for="edit_service_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.service_price') }}</label>
+                                                    <label for="edit_service_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.addon_price') }}</label>
                                                     <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->price }}" readonly>
                                                 </div>
-                                                <div class="mb-5 fv-row col-md-12">
-                                                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                                                    <select name="account_id" id="account_id" class="form-select" required>
-                                                        @foreach($bankAccounts as $bankAccount)
-                                                            <option @selected($orderAddon->pivot->account_id === $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
                                                 <div class="form-group mt-3">
-                                                    <label for="edit_count_{{ $orderAddon->id }}">{{ __('dashboard.count') }}</label>
+                                                    <label for="edit_count_{{ $orderAddon->id }}">{{ __('dashboard.quantity') }}</label>
                                                     <input type="number" name="count" id="edit_count_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->count }}">
                                                 </div>
                                                 <div class="form-group mt-3">
@@ -169,6 +174,14 @@
                                                     <select name="payment_method" id="" class="form-select" required>
                                                         @foreach(paymentMethod() as $paymentSelect)
                                                             <option @selected($orderAddon->pivot->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="mb-5 fv-row col-md-12">
+                                                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                                                    <select name="account_id" id="account_id" class="form-select" required>
+                                                        @foreach($bankAccounts as $bankAccount)
+                                                            <option @selected($orderAddon->pivot->account_id === $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>

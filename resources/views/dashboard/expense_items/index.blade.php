@@ -67,7 +67,7 @@
                                 </div>
                             </th>
                             <th class="">@lang('dashboard.name')</th>
-                            <th class="">@lang('dashboard.price')</th>
+                            <th class="">@lang('dashboard.number_of_times')</th>
                             <th class="">@lang('dashboard.notes')</th>
                             <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                         </tr>
@@ -88,12 +88,12 @@
                                 <td>
                                     <div class="d-flex">
                                         <div class="ms-5">
-                                            <a href="{{ route('expense-items.show', $item->id) }}" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1" data-kt-ecommerce-category-filter="category_name">{{$item->name}}</a>
+                                            <span >{{$item->name}}</a>
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{$item->expenses->sum('price') }} </td>
-                                <td>{{$item->notes}} </td>
+                                <td>{{$item->expenses->count() }} </td>
+                                <td>{{$item->description}} </td>
                            
                                 <!--begin::Action=-->
                                 <td class="text-end">

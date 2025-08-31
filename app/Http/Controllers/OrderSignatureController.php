@@ -38,10 +38,33 @@ class OrderSignatureController extends Controller
         Storage::disk('public')->put($path, $image);
 
         $order->update([
-            'signature_path'      => $path,
+            'signature_path'=> $path,
             'signature' => now()
         ]);
 
         return redirect()->back()->with('success' , __('dashboard.success'));
     }
+
+    public function destroy(Order $order)
+    {
+        // Delete signature image from storage if present
+        if ($order->signature_path && Storage::disk('public')->exists($order->signature_path)) {
+            Storage::disk('public')->delete($order->signature_path);
+        }
+
+        // Clear signature fields on the order
+        $order->update([
+            'signature_path' => null,
+            'signature' => null,
+        ]);
+
+        // If the request is AJAX/JSON (used by sending-forms.js), return JSON
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['message' => __('dashboard.success')]);
+        }
+
+        // Fallback to redirect for normal requests
+        return redirect()->back()->with('success', __('dashboard.success'));
+    }
+    
 }

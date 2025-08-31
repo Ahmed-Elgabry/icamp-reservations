@@ -1,4 +1,7 @@
-@section('pageTitle' , __('dashboard.bank-accounts'))
+@php
+$pageTitle = "transactions";
+@endphp
+@section('pageTitle' , __('dashboard.transactions'))
 
 @extends('dashboard.layouts.app')
 @section('content')

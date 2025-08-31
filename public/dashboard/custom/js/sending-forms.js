@@ -4,27 +4,39 @@ $(document).ready(function(){
 
     $(document).on('submit','.store',function(e){
         e.preventDefault();
-        var url = $(this).attr('action');
+        var $form = $(this);
+        var url = $form.attr('action');
         $.ajax({
             url: url,
             method: 'post',
-            data: new FormData($(this)[0]),
+            data: new FormData($form[0]),
             dataType:'json',
             processData: false,
             contentType: false,
             success: function(response){
-                o.setAttribute("data-kt-indicator", "on"), o.disabled = !0, setTimeout((function () {
-                    o.removeAttribute("data-kt-indicator");
+                o && o.setAttribute && o.setAttribute("data-kt-indicator", "on");
+                o && (o.disabled = !0);
+                setTimeout((function () {
+                    o && o.removeAttribute && o.removeAttribute("data-kt-indicator");
+                    var successMsg = $form.attr('data-success-message') || `${$.localize.data['app']['common']['submitted']}`;
                     Swal.fire({
-                        text: `${$.localize.data['app']['common']['submitted']}`,
+                        text: successMsg,
                         icon: "success",
                         buttonsStyling: !1,
                         confirmButtonText: `${$.localize.data['app']['common']['got_it']}`,
                         customClass: {
                             confirmButton: "btn btn-primary"
                         }
-                    }).then((function (e) {
-                        o.disabled = !1, window.location = t.getAttribute("data-kt-redirect");
+                    }).then((function () {
+                        // Emit a success event so pages can react without reload
+                        $form.trigger('store:success', [response]);
+                        // Optional redirect if attribute provided
+                        const redirect = t && t.getAttribute ? t.getAttribute("data-kt-redirect") : null;
+                        if (redirect) {
+                            window.location = redirect;
+                        } else {
+                            if (o) o.disabled = !1;
+                        }
                     }))
                 }), 2e3);
             },
@@ -40,34 +52,34 @@ $(document).ready(function(){
                 });
 
                 $(".text-danger").remove();
-                $('.store').find('input').removeClass('border-danger');
-                $('.store').find('textarea').removeClass('border-danger');
+                $form.find('input').removeClass('border-danger');
+                $form.find('textarea').removeClass('border-danger');
 
                 $.each(xhr.responseJSON.errors, function(key,value) {
                     var ar_item  =  key.includes('.ar') ?  key.replace(".ar", "[ar]") : key;
                     var en_item  =  key.includes('.en') ?  key.replace(".en", "[en]") : key;
                     if(ar_item != en_item) {
-                        $('.store input[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store input[name="' + en_item + '"]').addClass('border-danger');
-                        $('.store input[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + en_item + '"]').addClass('border-danger');
+                        $form.find('input[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
                        
-                        $('.store select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
     
-                        $('.store textarea[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store textarea[name="' + en_item + '"]').addClass('border-danger');
-                        $('.store textarea[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + en_item + '"]').addClass('border-danger');
+                        $form.find('textarea[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
                     } else {
-                        $('.store input[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
                         
-                        $('.store select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
     
-                        $('.store textarea[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
                     }
                 });
 

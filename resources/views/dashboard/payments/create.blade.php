@@ -11,7 +11,7 @@
             <div class="card-header border-0 cursor-pointer" role="button" data-bs-toggle="collapse" data-bs-target="#kt_account_profile_details" aria-expanded="true" aria-controls="kt_account_profile_details">
                 <!--begin::Card title-->
                 <div class="card-title m-0">
-                    <h3 class="fw-bolder m-0">{{ isset($payment) ? $payment->notes : __('dashboard.payments')}}</h3>
+                    <h3 class="fw-bolder m-0">{{__('dashboard.add_funds')}}</h3>
                 </div>
                 <!--end::Card title-->
             </div>
@@ -19,7 +19,7 @@
             <!--begin::Content-->
             <div id="kt_account_settings_profile_details" class="collapse show">
                 <form id="kt_ecommerce_add_product_form" 
-                      data-kt-redirect="{{  isset($payment) ? route('payments.edit',$payment->id) : route('payments.create') }}" 
+                      data-kt-redirect="{{  isset($payment) ? route('payments.edit',$payment->id) : route('payments.create', $bankAccount->id) }}" 
                       action="{{ isset($payment) ? route('accounts.update', $payment->id) : route('accounts.store') }}" 
                       method="post" enctype="multipart/form-data" 
                       class="form d-flex flex-column flex-lg-row store">
@@ -42,22 +42,10 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row mb-5">
-                            <div class="col-12">
-                                <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.bank_account') }}</label>
-                                <div class="col-lg-12">
-                                    <select name="account_id" id="account_id" class="form-select form-select-lg form-select-solid mb-3 mb-lg-0">
-                                        <option value="">{{ __('dashboard.choose_bank_account') }}</option>
-                                        @foreach($bankAccounts as $bankAccount)
-                                            <option value="{{ $bankAccount->id }}" data-currency="{{ $bankAccount->currency }}"
-                                            {{ isset($payment) && $payment->account_id == $bankAccount->id ? 'selected' : '' }}>{{ $bankAccount->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
+                    
+                        
+                        <input type="hidden" name="account_id" id="account_id" value="{{ $bankAccount->id }}">
+                
                         <!-- Notes input -->
                         <div class="row mb-6">
                             <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.description') }}</label>
@@ -91,7 +79,17 @@
 
 @push('js')
     <script>
-        $('#receiver_id').select2();
-        $('#account_id').select2();
+        // Initialize Select2 only when the element exists and is a <select>
+        $(function () {
+            var $receiver = $('#receiver_id');
+            if ($receiver.length && $receiver.is('select')) {
+                $receiver.select2({ width: '100%' });
+            }
+
+            var $account = $('#account_id');
+            if ($account.length && $account.is('select')) {
+                $account.select2({ width: '100%' });
+            }
+        });
     </script>
 @endpush

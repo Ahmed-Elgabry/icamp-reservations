@@ -134,7 +134,10 @@
                                         </div>
 
                                     </div>
+<<<<<<< HEAD
+=======
 
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
                                 @foreach ($reports as $index => $report)
                                     <div class="row align-reports-center reports-item-row mb-2" data-index="{{ $index }}">
                                         <div class="col-1 text-center"><span class="row-number">{{ $index + 1 }}</span></div>

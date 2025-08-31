@@ -29,92 +29,16 @@ class PaymentsController extends Controller
         $startDate = request('start_date');
         $endDate = request('end_date');
 
-        $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            return $query->whereBetween('date', [$startDate, $endDate]);
-        })
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('date', [$startDate, $endDate]);
-        })->whereNotNull('account_id')
-            ->whereHas('account', function ($query) {
-                $query->whereNotNull('id');
+        $transactions = Transaction::where('verified', true)
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                return $query->whereBetween('date', [$startDate, $endDate]);
             })
-            ->whereNotNull('order_id')
-            ->whereNotNull('account_id')
             ->orderBy('created_at', 'desc')
             ->get();
-
-
-        $expenses = Expense::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            return $query->whereBetween('date', [$startDate, $endDate]);
-        })
-            ->verified()
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $payments = Payment::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            return $query->whereBetween('created_at', [$startDate, $endDate]);
-        })
-            ->verified()
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $merged = collect();
-
-        foreach ($transactions as $transaction) {
-            $merged->push((object) [
-                'account' => $transaction->account,
-                'receiver' => $transaction->receiver,
-                'order_id' => $transaction->order_id,
-                'id' => $transaction->id,
-                'date' => $transaction->date,
-                'editRoute' => route('payments.edit', $transaction->id),
-                'destroyRoute' => route('transactions.destroy', $transaction->id),
-                'type' => 'Bank-account',
-                'amount' => $transaction->amount,
-                'description' => $transaction->description,
-                'created_at' => $transaction->created_at,
-            ]);
-        }
-        foreach ($expenses as $expense) {
-            $merged->push((object) [
-                'account' => $expense->account,
-                'receiver' => null,
-                'order_id' => null,
-                'editRoute' => route('expenses.edit', $expense->id),
-                'destroyRoute' => route('expenses.destroy', $expense->id),
-                'id' => $expense->id,
-                'date' => $expense->date,
-                'type' => 'Expense',
-                'amount' => $expense->price,
-                'description' => $expense->notes,
-                'created_at' => $expense->created_at,
-            ]);
-        }
-
-        foreach ($payments as $payment) {
-            $merged->push((object) [
-                'account' => $payment->account,
-                'receiver' => null,
-                'order_id' => $payment->order_id,
-                'editRoute' => route('payments.show', $payment->order_id),
-                'destroyRoute' => route('payments.destroy', $payment->id),
-                'id' => $payment->id,
-                'date' => $payment->created_at,
-                'type' => 'Payment',
-                'amount' => $payment->price,
-                'description' => $payment->notes,
-                'created_at' => $payment->created_at,
-            ]);
-        }
-
-
-        $merged = $merged->sortByDesc('created_at');
+        $transactions = $transactions->sortByDesc('created_at');
 
         return view('dashboard.banks.transactions', [
-            'transactions' => $merged
+            'transactions' => $transactions
         ]);
     }
 
@@ -147,8 +71,7 @@ class PaymentsController extends Controller
 
         $query = Payment::with(['order.customer', 'order.addons', 'order.items', 'order.expenses'])->where(
             fn($q) =>
-            $q->where('verified', '1')
-                ->whereNot('statement', 'the_insurance')
+            $q->whereNot('statement', 'the_insurance')
         );
 
         if ($request->customer_id) {
@@ -174,15 +97,27 @@ class PaymentsController extends Controller
         return view('dashboard.payments.index', compact('payments', 'customers', 'orders'));
     }
 
-    public function create()
+    public function create($bankAccount = null)
     {
         $this->authorize('create', Payment::class);
-
+        $selectedBank = $bankAccount ? BankAccount::findOrFail($bankAccount) : null;
         $bankAccounts = BankAccount::all();
         return view('dashboard.payments.create', [
+            'bankAccount' => $selectedBank,
             'bankAccounts' => $bankAccounts
         ]);
     }
+
+    public function transfer($bankAccount = null)
+    {
+        $selectedBank = $bankAccount ? BankAccount::findOrFail($bankAccount) : null;
+        $bankAccounts = BankAccount::all();
+        return view('dashboard.payments.transfer', [
+            'bankAccount' => $selectedBank,
+            'bankAccounts' => $bankAccounts
+        ]);
+    }
+    
 
     public function edit($id)
     {
@@ -195,33 +130,66 @@ class PaymentsController extends Controller
         ]);
     }
 
-    public function accountsStore(Request $request)
-    {
-        $validatedData = $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'receiver_id' => 'nullable|exists:bank_accounts,id',
-            'account_id' => 'required|exists:bank_accounts,id',
-            'date' => 'nullable|date',
-            'description' => 'nullable|string',
+public function accountsStore(Request $request)
+{
+    $validatedData = $request->validate([
+        'amount' => 'required|numeric|min:0',
+        'receiver_id' => 'nullable|exists:bank_accounts,id',
+        'account_id' => 'required|exists:bank_accounts,id',
+        'date' => 'nullable|date',
+        'description' => 'nullable|string',
+    ]);
+    $validatedData = array_merge($validatedData, [
+        'source' => "general",
+        'type' => "deposit",
+        'verified' => true , 
+    ]);
+    $payment = Transaction::create($validatedData);
+    $bankAccount = BankAccount::find($request->account_id);
+    $bankAccount->update([
+        'balance' => $bankAccount->balance +$request->amount
+    ]);
+
+    if ($request->filled('receiver_id')) {
+        $transfareTo = BankAccount::find($request->receiver_id);
+        $transfareTo->update([
+            'balance' => $transfareTo->balance + $request->amount
         ]);
-
-        $payment = Transaction::create($validatedData);
-
-        $bankAccount = BankAccount::find($request->account_id);
-        $disccountFormAccount = $request->amount;
-        $bankAccount->update([
-            'balance' => $bankAccount->balance + $disccountFormAccount
-        ]);
-
-        if ($request->filled('receiver_id')) {
-            $transfareTo = BankAccount::find($request->receiver_id);
-            $transfareTo->update([
-                'balance' => $transfareTo->balance + $request->amount
-            ]);
-        }
-
-        return response()->json(['message' => 'Transaction successful'], 200);
     }
+
+    return response()->json(['message' => 'Transaction successful'], 200);
+}
+
+public function moneyTransfer(Request $request)
+{
+    
+    $validatedData = $request->validate([
+        'amount' => 'required|numeric|min:0',
+        'receiver_id' => 'required|exists:bank_accounts,id',
+        'sender_account_id' => 'required|exists:bank_accounts,id',
+        "type" => "required|in:deposit,debit,transfer",
+        'date' => 'required|date',
+        'description' => 'nullable|string',
+    ]);
+    \Log::info(json_encode($validatedData));
+    $validatedData = array_merge($validatedData, [
+        'verified' => true , 
+    ]);
+    Transaction::create($validatedData);
+    $receiverBankAccount = BankAccount::find($request->receiver_id);
+    $receiverBankAccount->update([
+        'balance' => $receiverBankAccount->balance + $request->amount
+    ]);
+
+    $senderBankAccount = BankAccount::find($request->sender_account_id);
+
+    $senderBankAccount->update([
+        'balance' => $senderBankAccount->balance - $request->amount
+    ]);
+
+
+    return response()->json(['message' => 'Transaction successful'], 200);
+}
 
 
     public function accountsUpdate(Request $request, $id)
@@ -353,6 +321,14 @@ class PaymentsController extends Controller
         ]);
 
         $payment->update($validatedData);
+        Transaction::where('payment_id', $payment->id)->update([
+            'account_id' => $request->account_id,
+            'amount' => $request->price,
+            'type' => 'deposit',
+            'source'=> $request->source,
+            'date' => now(),
+            'description' => 'Payment: ' . $request->statement,
+        ]);
 
         $bankAccount = BankAccount::findOrFail($request->account_id);
         $bankAccount->update([
@@ -379,7 +355,7 @@ class PaymentsController extends Controller
         ]);
 
         $payment->delete();
-        return response()->json();
+        return response()->json(["success" => true,"deleted_amount" => $payment->price]);
     }
 
 

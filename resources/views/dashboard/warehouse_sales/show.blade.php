@@ -8,6 +8,19 @@
     @include('dashboard.orders.nav')
 
     <div class="card card-flush">
+      <!-- customer information -->
+                <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
       <div class="card-header align-items-center py-5 gap-2 gap-md-5">
         <div class="card-title">
           <div class="d-flex align-items-center position-relative my-1">
@@ -36,7 +49,8 @@
           <thead>
             <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
               <th>{{ __('dashboard.items') }}</th>
-              <th>{{ __('dashboard.count') }}</th>
+              <th>{{ __('dashboard.item_price') }}</th>
+              <th>{{ __('dashboard.quantity') }}</th>
               <th>{{ __('dashboard.total_amount') }}</th>
               <th>{{ __('dashboard.payment_method') }}</th>
               <th>{{ __('dashboard.verified') }}</th>
@@ -49,8 +63,9 @@
           @foreach ($items as $item)
             <tr>
               <td><span class="badge bg-primary">{{ $item?->stock->name }}</span></td>
-              <td>{{ $item?->quantity }}</td>
-              <td class="fw-bold">{{ $item?->total_price }}</td>
+              <td class="fw-bold">{{ $item?->stock->selling_price  % 1 === 0 ? (int) $item?->stock->selling_price : $item?->stock->selling_price }}</td>
+              <td>{{ (int) $item?->quantity }}</td>
+              <td class="fw-bold">{{ $item?->total_price % 1 === 0 ? (int) $item?->total_price : $item?->total_price }}</td>
               <td>{{__('dashboard.'. $item->payment_method )}}</td>
               <td>
                     {{ $item->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
@@ -123,11 +138,11 @@
                           @endforeach
                         </select>
                       </div>
-
+                      <input type="hidden" value="warehouse_sales" name="source">     
                       <div class="form-group mt-3">
-                        <label>{{ __('dashboard.count') }}</label>
+                        <label>{{ __('dashboard.quantity') }}</label>
                         <input type="number" name="quantity" class="form-control js-qty"
-                               value="{{ $item->quantity }}">
+                               value="{{(int) $item?->quantity }}">
                       </div>
 
                       <div class="form-group mt-3">
@@ -187,6 +202,7 @@
                 <form action="{{ route('warehouse_sales.store') }}" id="saveCountDetails" method="POST">
                   @csrf
                   <input type="hidden" value="{{ $order->id }}" name="order_id">
+                  <input type="hidden" value="warehouse_sales" name="source">
                   <div class="mb-5 fv-row col-md-12">
                     <label class="required form-label">{{ __('dashboard.items') }}</label>
                     <select name="stock_id" class="form-control js-stock" required>
@@ -195,9 +211,12 @@
                       @endforeach
                     </select>
                   </div>
-
+                 <div class="form-group mt-3">
+                    <label>{{ __('dashboard.item_price') }}</label>
+                    <input type="number" step="0.01" disabled class="form-control js-total" value="{{ $stock->selling_price }}">
+                  </div>
                   <div class="form-group mt-3">
-                    <label>{{ __('dashboard.count') }}</label>
+                    <label>{{ __('dashboard.quantity') }}</label>
                     <input type="number" name="quantity" class="form-control js-qty" value="1">
                   </div>
 
@@ -206,24 +225,24 @@
                     <input type="number" step="0.01" name="total_price" class="form-control js-total" value="0">
                   </div>
 
+                  
                   <div class="mb-5 fv-row col-md-12">
-                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                    <select name="account_id" id="" class="form-select" required>
-                        @foreach($bankAccounts as $id => $name)
-                            <option value="{{$id}}">{{ $name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="mb-5 fv-row col-md-12">
                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                     <select name="payment_method" id="" class="form-select" required>
                         @foreach(paymentMethod() as $paymentSelect)
                             <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
+                            @endforeach
+                          </select>
+                  </div>
+                        
+                  <div class="mb-5 fv-row col-md-12">
+                          <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                          <select name="account_id" id="" class="form-select" required>
+                              @foreach($bankAccounts as $id => $name)
+                                  <option value="{{$id}}">{{ $name }}</option>
+                              @endforeach
+                          </select>
+                      </div>
                   <div class="mb-5 fv-row col-md-12">
                     <label class="form-label">{{ __('dashboard.notes') }}</label>
                     <textarea name="notes" class="form-control mb-2">{{ old('notes') }}</textarea>

@@ -499,7 +499,6 @@
         });
         });
 
-
         $(function () {
         $('.roles-parent').change(function (e) {
             var id =  $(this).attr('id');
@@ -534,7 +533,6 @@
             }
         });
         });
-
 
         $(function () {
         $('.childs').change(function () {

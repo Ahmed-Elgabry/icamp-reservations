@@ -15,7 +15,11 @@ class Transaction extends Model
     {
         return $this->belongsTo(BankAccount::class, 'account_id');
     }
-
+        public function senderAccount()
+    {
+        return $this->belongsTo(BankAccount::class, 'sender_account_id');
+    }
+    
     // Define the receiver relationship
     public function receiver()
     {
@@ -39,6 +43,32 @@ class Transaction extends Model
         return $this->belongsTo(Order::class,'order_id');
     }
 
+    // Accessor for $transaction->editRoute
+    public function getEditRouteAttribute(): string
+    {
+        if ($this->expense_id) {
+            return route('expenses.edit', $this->expense_id);
+        }
+        if ($this->payment_id) {
+            return route('payments.edit', $this->payment_id);
+        }
+        if ($this->account_id) {
+            return route('bank-accounts.show', $this->account_id);
+        }
+        return '#';
+    }
+
+    // Accessor for $transaction->destroyRoute
+    public function getDestroyRouteAttribute(): string
+    {
+        if ($this->expense_id) {
+            return route('expenses.destroy', $this->expense_id);
+        }
+        if ($this->payment_id) {
+            return route('payments.destroy', $this->payment_id);
+        }
+        return '#';
+    }
     public function editRoute($id)
     {
         if($this->type == 'Expense'){

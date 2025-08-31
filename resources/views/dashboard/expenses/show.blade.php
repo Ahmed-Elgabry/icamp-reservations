@@ -14,6 +14,19 @@
 
         <!--begin::Category-->
         <div class="card card-flush">
+             <!-- customer information -->
+                  <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <!--begin::Card title-->
@@ -64,6 +77,7 @@
                             <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                         </div>
                     </th>
+                    <td>{{__('dashboard.statement') }}</td>
                     <th>{{ __('dashboard.price') }}</th>
                     <th class="">{{ __('dashboard.payment_method') }}</th>
                     <th class="">{{ __('dashboard.verified') }}</th>
@@ -86,6 +100,7 @@
                             </div>
                         </td>
                         <!--begin::Category=-->
+                        <td>{{__('dashboard.'. $payment->statement )}}</td>
                         <td>
                             <div class="d-flex">
                                 <!--end::Thumbnail-->
@@ -163,6 +178,15 @@
                                 @csrf
                                 @method('PUT')
                                 <!--begin::Card body-->
+                                 <div class="mb-5 fv-row col-md-12">
+                                    <label class="required form-label">{{ __('dashboard.statement') }}</label>
+                                    <select name="statement" id="" class="form-select" required>
+                                        @foreach(statements() as $statement)
+                                            <option {{$payment-> statement == $statement ? 'selected' : ''}} value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <input type="hidden" value="reservation_expenses" name="source">
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>
                                     <input type="number" name="price" id="price" value="{{   $payment->price }}"
@@ -228,7 +252,15 @@
             @csrf
             <!--begin::Input group-->
             <input type="hidden" value="{{ $order->id }}" name="order_id">
-
+            <input type="hidden" value="reservation_expenses" name="source">
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.statement') }}</label>
+                <select name="statement" id="" class="form-select" required>
+                    @foreach(statements() as $statement)
+                        <option value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
+                    @endforeach
+                </select>
+            </div> 
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.price') }}</label>
                 <input type="number" name="price" id="price" value="{{   old('price') }}"

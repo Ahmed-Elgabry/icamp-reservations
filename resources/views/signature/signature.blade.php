@@ -218,7 +218,7 @@
 
         @if ($terms)
             <div class="alert alert-warning">
-                <strong>تنبيه:</strong> {{ $terms?->commercial_license }}
+                <strong>تنبيه:</strong> {!! $terms?->commercial_license_ar !!}
             </div>
         @endif
 
@@ -226,7 +226,25 @@
             <div class="header">
                 <div>
                     <h2 class="title">التوقيع للموافقة</h2>
-                    <p class="subtitle">رقم الحجز: {{ $order->id }}</p>
+                   
+                                <div class="d-block">
+                                    <div class="border rounded p-3 bg-light-subtle">
+                                        <div class="row g-3 small">
+                                            <div class="col-md-4">
+                                                <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                                                <div class="fw-bold">{{ $order->id }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                                                <div class="fw-bold">{{ $order->customer->name }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="fw-semibold text-muted">{{ __('dashboard.phone')}}</div>
+                                                <div class="fw-bold">{{ $order->customer->phone }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                 </div>
                 <div class="row" style="margin:0">
                     <button id="undo" class="btn-ghost" type="button">تراجع</button>

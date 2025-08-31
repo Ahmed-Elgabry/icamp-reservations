@@ -33,6 +33,7 @@ use App\Repositories\IOrderRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ICategoryRepository;
 use Illuminate\Support\Facades\DB as FacadesDB;
+use App\Models\Transaction;
 //use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -418,10 +419,27 @@ class OrderController extends Controller
         $order->update([
             'price' => $order->price
         ]);
+        // add transaction linked to the newly created pivot row
+        // Fetch the latest pivot row for this order/addon pair (assumes 'order_addon' has an auto-increment 'id')
+        $pivot = \App\Models\OrderAddon::where('order_id', $order->id)
+            ->where('addon_id', $validatedData['addon_id'])
+            ->orderByDesc('id')
+            ->first();
+
+        if ($pivot) {
+            Transaction::create([
+                'order_addon_id' => $pivot->id,
+                'account_id' => $request->input('account_id'),
+                'amount' => $validatedData['price'],
+                'description' => $validatedData['description'],
+                'source' => 'reservation_addon',
+                'type' => 'deposit'
+            ]);
+        }
         return back()->with('success', __('dashboard.success'));
     }
 
-    public function updateAddons(Request $request, $pivotId)
+    public function updateAddons(Request $request ,$pivotId)
     {
         $validatedData = $request->validate([
             'addon_id' => 'required|exists:addons,id',
@@ -431,6 +449,11 @@ class OrderController extends Controller
             'payment_method' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
+
+        // Get the existing addon data to find the transaction
+        $existingAddon = \DB::table('order_addon')->where('id', $pivotId)->first();
+        
+        // Update the addon in pivot table
         \DB::table('order_addon')->where('id', $pivotId)->update([
             'addon_id' => $validatedData['addon_id'],
             'count' => $validatedData['count'],
@@ -439,6 +462,17 @@ class OrderController extends Controller
             'price' => $validatedData['price'],
             'description' => $validatedData['description'] ?? '',
         ]);
+        
+            $transaction = \App\Models\Transaction::where('order_addon_id', $pivotId)->first();
+            if ($transaction) {
+                // Update the transaction amount
+                $transaction->update([
+                    'amount' => $validatedData['price'] ,
+                    'account_id' => $validatedData['account_id'] ?? $transaction->account_id,
+                    'description' => $validatedData['description'] ?? $transaction->description,
+                ]);
+            }
+        
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -453,6 +487,14 @@ class OrderController extends Controller
 
         // Calculate the price difference
         $priceDifference = $existingAddon->price;
+        
+        // Handle transaction deletion if it exists
+        if ($existingAddon->transaction_id) {
+            $transaction = \App\Models\Transaction::find($existingAddon->transaction_id);
+            if ($transaction) {
+                $transaction->delete();
+            }
+        }
 
         // Delete the pivot record
         DB::table('order_addon')->where('id', $pivotId)->delete();

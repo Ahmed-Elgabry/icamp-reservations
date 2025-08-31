@@ -15,11 +15,8 @@ return new class extends Migration
     {
         Schema::create('terms_sittngs', function (Blueprint $table) {
             $table->id();
-            $table->string('logo')->nullable();
-            $table->longText('description')->nullable();
-            $table->longText('terms')->nullable();
-            $table->string('commercial_license')->nullable();
-            $table->string('company_name')->nullable();
+            $table->longText('commercial_license_ar')->nullable();
+            $table->longText('commercial_license_en')->nullable();
             $table->foreignId('order_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             

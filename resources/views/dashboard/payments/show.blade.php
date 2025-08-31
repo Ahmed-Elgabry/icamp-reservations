@@ -14,6 +14,19 @@
 
         <!--begin::Category-->
         <div class="card card-flush">
+            <!-- customer information -->
+                <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <!--begin::Card title-->
@@ -64,9 +77,10 @@
                             <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                         </div>
                     </th>
+                    <th class="">{{ __('dashboard.statement') }}</th>
                     <th>{{ __('dashboard.price') }}</th>
                     <th class="">{{ __('dashboard.payment_method') }}</th>
-                    <th class="">{{ __('dashboard.statement') }}</th>
+                    <th class="">{{ __('dashboard.bank_account') }}</th>
                     <th class="">{{ __('dashboard.verified') }}</th>
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
@@ -87,6 +101,7 @@
                             </div>
                         </td>
                         <!--begin::Category=-->
+                        <td>{{__('dashboard.'. $payment->statement )}}</td>
                         <td>
                             <div class="d-flex">
                                 <!--end::Thumbnail-->
@@ -100,8 +115,14 @@
                                 </div>
                             </div>
                         </td>
+
                         <td>{{__('dashboard.'. $payment->payment_method )}}</td>
-                        <td>{{__('dashboard.'. $payment->statement )}}</td>
+                        @foreach($bankAccounts as $bankAccount)
+                            @if($payment->account_id == $bankAccount->id)
+                            <td>{{__($bankAccount->name )}}</td>
+    
+                            @endif
+                        @endforeach
                         <td>
                             {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                             @if($payment->verified)
@@ -179,17 +200,11 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <div class="mb-5 fv-row col-md-12">
-                                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                                    <select name="account_id" id="" class="form-select" required>
-                                        @foreach($bankAccounts as $bankAccount)
-                                            <option {{$payment->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
+                                
                                 <!--begin::Card body-->
+                                 this
+                                 <input type="hidden" value="reservation_payments" name="source">
+
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>
                                     <input type="number" name="price" id="price" value="{{   $payment->price }}"
@@ -204,6 +219,15 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="mb-5 fv-row col-md-12">
+                                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                                    <select name="account_id" id="" class="form-select" required>
+                                        @foreach($bankAccounts as $bankAccount)
+                                            <option {{$payment->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 <!--begin::Input group-->
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="form-label">{{ __('dashboard.notes') }}</label>
@@ -240,20 +264,12 @@
             @csrf
             <!--begin::Input group-->
             <input type="hidden" value="{{ $order->id }}" name="order_id">
-
+            <input type="hidden" value="reservation_payments" name="source">
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.statement') }}</label>
                 <select name="statement" id="" class="form-select" required>
                     @foreach(statements() as $statement)
                         <option value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-5 fv-row col-md-12">
-                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                <select name="account_id" id="" class="form-select" required>
-                    @foreach($bankAccounts as $bankAccount)
-                        <option {{old('account_id') == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -268,6 +284,14 @@
                 <select name="payment_method" id="" class="form-select" required>
                     @foreach(paymentMethod() as $paymentSelect)
                         <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                <select name="account_id" id="" class="form-select" required>
+                    @foreach($bankAccounts as $bankAccount)
+                        <option {{old('account_id') == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                     @endforeach
                 </select>
             </div>

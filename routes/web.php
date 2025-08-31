@@ -47,7 +47,8 @@ Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
 Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
     ->name('signature.store');
 
-
+Route::delete('/sign/{order}', [OrderSignatureController::class, 'destroy'])
+    ->name('signature.destroy');
 
 // Auth::routes();
 Route::group(['middleware' => ['web']], function () {
@@ -846,9 +847,8 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payments.index',
         'title' => 'dashboard.payments',
         'type' => 'parent',
-        'child' => ['payments.create', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
+        'child' => ['payments.create', 'payments.transfer', 'money-transfer', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
     ]);
-
     # payments store
     Route::get('transactions', [
         'uses' => 'PaymentsController@transactions',
@@ -882,11 +882,26 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # payments store
-    Route::get('payments/create', [
+    Route::get('payments/create/{bankAccount?}', [
         'uses' => 'PaymentsController@create',
         'as' => 'payments.create',
         'title' => ['actions.add', 'dashboard.payments']
     ]);
+    
+        Route::get('payments/transfer', [
+        'uses' => 'PaymentsController@transfer',
+        'as' => 'payments.transfer',
+        'title' => ['actions.add', 'dashboard.payments']
+    ]);
+    
+    
+    Route::post('payments/money-transfer', [
+        'uses' => 'PaymentsController@moneyTransfer',
+        'as' => 'money-transfer',
+        // 'title' => ['actions.add', 'dashboard.payments']
+    ]);
+
+
     # payments show
     Route::get('payments/{id}/show', [
         'uses' => 'PaymentsController@show',

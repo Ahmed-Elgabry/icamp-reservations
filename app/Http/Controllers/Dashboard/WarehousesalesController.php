@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Models\{Order , OrderItem, Stock};
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Transaction;
 
 class WarehousesalesController extends Controller
 {
@@ -39,6 +40,14 @@ class WarehousesalesController extends Controller
             if ($stock->quantity < $data['quantity'])
                 throw new \Exception(__('dashboard.insufficient_stock'));
             $stock->decrement('quantity', $data['quantity']);
+            Transaction::create([
+                'account_id' => $data['account_id'],
+                'amount' => $data['total_price'],
+                'description' => $data['notes'],
+                "type" =>"deposit",
+                'source' => 'warehouse_sale',
+                "stock_id" => $data['stock_id'],
+            ]);
             \DB::commit();
         } catch (\Exception $e) {
             \DB::rollBack();
@@ -66,6 +75,14 @@ class WarehousesalesController extends Controller
         }
         $stock->increment('quantity',$data['quantity']);
         $item->update($data);
+        Transaction::where('stock_id', $item->stock_id)->update([
+            'account_id' => $data['account_id'],
+            'amount' => $data['total_price'],
+            'description' => $data['notes'],
+            "type" =>"deposit",
+            'source' => 'warehouse_sale',
+            "stock_id" => $data['stock_id'],
+        ]);
 
         return redirect()->back()->with('success', __('dashboard.item_updated_successfully'));
     }
