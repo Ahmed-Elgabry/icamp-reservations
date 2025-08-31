@@ -18,6 +18,7 @@ class ExpensesController extends Controller
 {
     public function show($id)
     {
+        $this->authorize('view', Expense::class);
 
         $expenses = Expense::where('order_id', $id)->orderBy('created_at', 'desc')->get();
         $order = Order::findOrFail($id);
@@ -27,6 +28,8 @@ class ExpensesController extends Controller
 
     public function export()
     {
+        $this->authorize('export', Expense::class);
+
         $expenseItem = request('expenseItem');
         $fileName = date('y-m-d') . "- المصاريف";
 
@@ -103,6 +106,8 @@ class ExpensesController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Expense::class);
+
         $expenseItems = ExpenseItem::all();
         $bankAccounts = BankAccount::all();
 
@@ -117,13 +122,13 @@ class ExpensesController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Expense::class);
+
         $validated = $request->validate([
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
             'payment_method' => 'nullable|string',
-            'statement' => 'nullable|string',
-            'source' => 'required|string',
             'image' => 'nullable|image',
             'date' => 'nullable|date',
             'order_id' => 'nullable|exists:orders,id',
@@ -140,7 +145,7 @@ class ExpensesController extends Controller
             $path = $request->file('image')->store('expenses', 'public');
         }
 
-        $expense = Expense::create([
+        Expense::create([
             'expense_item_id' => $request->expense_item_id,
             'account_id' => $request->account_id,
             'price' => $request->price,
@@ -173,8 +178,10 @@ class ExpensesController extends Controller
 
     public function edit($expense)
     {
-        $expenseItems = ExpenseItem::all();
         $expense = Expense::findOrFail($expense);
+        $this->authorize('update', $expense);
+
+        $expenseItems = ExpenseItem::all();
         $bankAccounts = BankAccount::all();
 
         return view('dashboard.expenses.create', compact('expenseItems', 'expense', 'bankAccounts'));
@@ -190,6 +197,7 @@ class ExpensesController extends Controller
     public function update(Request $request, $expense)
     {
         $expense = Expense::findOrFail($expense);
+        $this->authorize('update', $expense);
         $data = $request->validate([
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
@@ -239,6 +247,8 @@ class ExpensesController extends Controller
     public function destroy($expense)
     {
         $expense = Expense::findOrFail($expense);
+        $expense->delete();
+        $this->authorize('delete', $expense);
         $expense->delete();
         return response()->json(["success" => true,"deleted_expense_amount" => $expense->price]);
     }

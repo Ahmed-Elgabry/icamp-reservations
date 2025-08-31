@@ -33,20 +33,6 @@
                     @endif
                     <div class="card-body border-top p-9">
                         <div class="row">
-
-                            <!-- Logo Field -->
-                            <!-- <div class="form-group col-6 mb-3">
-                                <label for="logo" class="form-label">{{ __('dashboard.logo') }}</label>
-                                <input type="file" name="logo" id="logo" class="form-control">
-                                @if (isset($termsSittng->logo))
-                                    <img src="{{ asset('storage/' . $termsSittng->logo) }}" alt="Logo" width="100"
-                                        class="mt-2">
-                                @else
-                                    <img src="{{ asset('assets/media/logos/logo-1.png') }}" alt="{{ __('dashboard.logo') }}"
-                                        width="100" class="mt-2">
-                                @endif
-
-                            </div>will deleted -->
                             <!-- Commercial License Field - Arabic (Quill) -->
                             <div class="form-group col-md-6 mb-3">
                                 <label for="quill_ar" class="form-label">{{ __('dashboard.commercial_license') }} ({{ __('dashboard.arabic') }})</label>
@@ -61,34 +47,6 @@
                                 <textarea name="commercial_license_en" id="commercial_license_en" class="d-none">{{ isset($termsSittng->commercial_license_en) ? $termsSittng->commercial_license_en : '' }}</textarea>
                             </div>
 
-                            <!-- Description Field -->
-                            <!-- <div class="form-group col-6 mb-3">
-                                <label for="description"
-                                    class="form-label">{{ __('dashboard.company_description') }}</label>
-                                <textarea name="description" id="description" class="form-control"
-                                    rows="3">{{ old('description', $termsSittng->description ?? '') }}</textarea>
-                            </div>will deleted -->
-
-                            <!-- Company Name Field -->
-                            <!-- <div class="form-group col-6 mb-3">
-                                <label for="company_name" class="form-label">{{ __('dashboard.company_name') }}</label>
-                                <input type="text" name="company_name" id="company_name" class="form-control"
-                                    value="{{ old('company_name', $termsSittng->company_name ?? '') }}">
-                            </div>will deleted -->
-                            <!-- <div class="form-group col-12 mb-3">
-                                <label for="terms" class="form-label">{{ __('dashboard.terms') }} :</label>
-                                <textarea name="terms"  class="form-control"
-                                    rows="3">{{ old('terms', $termsSittng->terms ?? '') }}</textarea>
-                            </div> -->
-
-                            <!-- <script type="text/javascript">
-                                CKEDITOR.replace('terms', {
-                                    filebrowserUploadMethod: 'form',
-                                    filebrowserUploadUrl: '/ckeditor/upload',
-                                    language: 'ar',
-                                    height: 200
-                                });
-                            </script> -->
                         </div>
                         <!-- Submit Button -->
                         <div class="form-group">

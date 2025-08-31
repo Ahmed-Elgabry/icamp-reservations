@@ -34,7 +34,7 @@ class CreateUpdateRoleRequest extends FormRequest
             return [
                 'nickname_ar'         => 'required|string|max:191|unique:roles,nickname_ar',
                 'nickname_en'         => 'required|string|max:191|unique:roles,nickname_en',
-                'permissions'         => 'required|array',
+                'permissions'         => 'nullable|array',
             ];
         }
     }

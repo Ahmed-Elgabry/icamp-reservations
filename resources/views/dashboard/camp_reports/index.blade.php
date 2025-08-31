@@ -11,9 +11,11 @@
                 </div>
             </div>
             <div class="card-toolbar">
-                <a href="{{ route('camp-reports.export') }}" class="btn btn-success me-2">
-                    <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
-                </a>
+                @can('camp-reports.export')
+                    <a href="{{ route('camp-reports.export') }}" class="btn btn-success me-2">
+                        <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
+                    </a>
+                @endcan
                 <a href="{{ route('camp-reports.create') }}" class="btn btn-primary">
                     @lang('dashboard.create_report')
                 </a>

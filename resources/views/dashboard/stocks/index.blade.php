@@ -124,11 +124,6 @@
                                             <a href="{{ route('stocks.edit', $stock->id) }}"
                                                 class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
                                                 data-kt-ecommerce-category-filter="category_name">
-                                                {{-- @if($stock->image)--}}
-                                                {{-- <img src="{{ asset($stock->image) }}"
-                                                    style="width:50px;height:50px;border-radius: 50%;">--}}
-                                                {{-- @endif --}}
-
                                                 {{$stock->name}}
                                             </a>
                                             <!--end::Title-->
@@ -142,7 +137,16 @@
                                 </td>
                                 <!-- <td> Display image </td> -->
                                 <td>{{ $stock->quantity }}</td>
-                                <td>{{ $stock->percentage }}</td>
+                                <td>
+                                    @if ($stock->percentage)
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                                style="width:{{ $stock->percentage }}%;" aria-valuenow="{{ $stock->percentage }}" aria-valuemin="{{ $stock->percentage }}" aria-valuemax="100" >{{ $stock->percentage }}%</div>
+                                        </div>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <!--begin::Action=-->
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary"

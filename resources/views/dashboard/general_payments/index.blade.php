@@ -92,6 +92,7 @@
                             <th class="text-nowrap">{{ __('dashboard.expenses') }}</th>
                             <th class="text-nowrap">{{ __('dashboard.notes') }}</th>
                             <th class="text-nowrap">{{ __('dashboard.created_at') }}</th>
+                            <th class="text-end min-w-100px">@lang('dashboard.actions')</th>
                         </tr>
                     </thead>
 
@@ -227,6 +228,17 @@
                             {{-- Latest payment time --}}
                             <td class="text-muted">{{ optional($orderPayments->max('created_at'))->diffForHumans() }}</td>
 
+                            {{-- Actions (using latest payment id) --}}
+                            <td class="text-end">
+                                @can('payments.destroy')
+                                    <a href="#" class="btn btn-sm btn-light btn-danger"
+                                    data-kt-ecommerce-category-filter="delete_row"
+                                    data-url="{{ route('payments.destroy', $firstPayment->id) }}"
+                                    data-id="{{ $firstPayment->id }}">
+                                        @lang('dashboard.delete')
+                                    </a>
+                                @endcan
+                            </td>
                         </tr>
                     @empty
                         <tr><td colspan="10" class="text-center text-muted py-10">— {{ __('dashboard.no_results') }} —</td></tr>
@@ -245,6 +257,6 @@
 @endsection
 @push('js')
     <script>
-        $("#customer_id").select2();
+        $("#customer_id,#order_id").select2();
     </script>
 @endpush

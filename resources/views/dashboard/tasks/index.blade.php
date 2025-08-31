@@ -30,7 +30,9 @@
                     <!--begin::Card toolbar-->
                     <div class="card-toolbar">
                         <!--begin::Add task-->
-                        <a href="{{ route('tasks.create') }}" class="btn btn-primary">@lang('dashboard.create_task')</a>
+                        @can('tasks.create')
+                            <a href="{{ route('tasks.create') }}" class="btn btn-primary">@lang('dashboard.create_task')</a>
+                        @endcan
                         <!--end::Add task-->
                     </div>
                     <!--end::Card toolbar-->
@@ -92,12 +94,15 @@
                                     <!--begin::Menu-->
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
                                         <!--begin::Menu item-->
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('tasks.edit', $task->id) }}" class="menu-link px-3">@lang('dashboard.edit')</a>
-                                        </div>
+                                        @can('tasks.edit')
+                                            <div class="menu-item px-3">
+                                                <a href="{{ route('tasks.edit', $task->id) }}" class="menu-link px-3">@lang('dashboard.edit')</a>
+                                            </div>
+                                        @endcan
                                         <!--end::Menu item-->
                                         <!--begin::Menu item-->
-                                        <div class="menu-item px-3">
+                                        @can('tasks.destroy')
+                                            <div class="menu-item px-3">
                                             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -106,6 +111,7 @@
                                                 </button>
                                             </form>
                                         </div>
+                                        @endcan
                                         <!--end::Menu item-->
                                     </div>
                                     <!--end::Menu-->

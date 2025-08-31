@@ -73,6 +73,207 @@
 	</style>
 
 	@yield('style')
+
+	<!-- Custom Permissions Styling -->
+	<style>
+
+	:root {
+		--primary-brown: #8B4513 !important;
+		--secondary-brown: #A0522D !important;
+		--light-brown: #D2B48C !important;
+		--dark-brown: #654321 !important;
+		--cream: #F5F5DC !important;
+	}
+
+	.permissionCard {
+		border: 2px solid #e4e6ef !important;
+		border-radius: 15px !important;
+		margin-bottom: 1.5rem !important;
+		transition: all 0.3s ease !important;
+		box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1) !important;
+		background: white !important;
+		overflow: hidden !important;
+		position: relative !important;
+	}
+
+	.permissionCard:hover {
+		box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2) !important;
+		transform: translateY(-3px) !important;
+		border-color: var(--primary-brown) !important;
+	}
+
+	.role-title {
+		background: linear-gradient(135deg, var(--primary-brown) 0%, var(--dark-brown) 100%) !important;
+		border-radius: 0 !important;
+		padding: 1.2rem !important;
+		font-weight: 700 !important;
+		font-size: 1rem !important;
+		color: white !important;
+		text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+		border-bottom: 3px solid var(--secondary-brown) !important;
+		position: relative !important;
+	}
+
+	.permissionCard .card {
+		border: none !important;
+		box-shadow: none !important;
+		margin-bottom: 0 !important;
+		border-radius: 0 !important;
+	}
+
+	.permissionCard ul {
+		padding: 1.2rem !important;
+		margin: 0 !important;
+		max-height: 320px !important;
+		overflow-y: auto !important;
+		background: linear-gradient(to bottom, #fefefe 0%, #f9f9f9 100%) !important;
+	}
+
+	.permissionCard ul::-webkit-scrollbar {
+		width: 6px !important;
+	}
+
+	.permissionCard ul::-webkit-scrollbar-track {
+		background: var(--cream) !important;
+		border-radius: 3px !important;
+	}
+
+	.permissionCard ul::-webkit-scrollbar-thumb {
+		background: var(--primary-brown) !important;
+		border-radius: 3px !important;
+		transition: background 0.3s ease !important;
+	}
+
+	.permissionCard ul::-webkit-scrollbar-thumb:hover {
+		background: var(--dark-brown) !important;
+	}
+
+	.permissionCard li {
+		padding: 0.7rem 0 !important;
+		border-bottom: 1px solid #f0f0f0 !important;
+		transition: all 0.2s ease !important;
+	}
+
+	.permissionCard li:last-child {
+		border-bottom: none !important;
+	}
+
+	.permissionCard li:hover {
+		background: rgba(139, 69, 19, 0.05) !important;
+		padding-left: 0.3rem !important;
+		border-radius: 5px !important;
+	}
+
+	.title_lable {
+		font-size: 0.9rem !important;
+		font-weight: 500 !important;
+		color: #4a4a4a !important;
+		margin-left: 0.7rem !important;
+		cursor: pointer !important;
+		transition: all 0.2s ease !important;
+		line-height: 1.4 !important;
+	}
+
+	.title_lable:hover {
+		color: var(--primary-brown) !important;
+		font-weight: 600 !important;
+	}
+
+	.form-check-input:checked {
+		background-color: var(--primary-brown) !important;
+		border-color: var(--primary-brown) !important;
+		box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.25) !important;
+	}
+
+	.form-check-input:focus {
+		border-color: var(--secondary-brown) !important;
+		box-shadow: 0 0 0 0.25rem rgba(139, 69, 19, 0.25) !important;
+	}
+
+	.form-check-input {
+		width: 1.2em !important;
+		height: 1.2em !important;
+		border: 2px solid #dee2e6 !important;
+		transition: all 0.2s ease !important;
+	}
+
+	.selectP {
+		margin: 0 !important;
+		font-size: 0.95rem !important;
+		font-weight: 700 !important;
+		text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+	}
+
+	.permissions-container {
+		background: linear-gradient(135deg, #faf9f7 0%, #f5f4f2 100%) !important;
+		border-radius: 15px !important;
+		padding: 2.5rem !important;
+		margin-top: 1.5rem !important;
+		border: 1px solid var(--light-brown) !important;
+	}
+
+	.permissions-header {
+		background: white !important;
+		border-radius: 12px !important;
+		padding: 2rem !important;
+		margin-bottom: 2.5rem !important;
+		box-shadow: 0 6px 20px rgba(139, 69, 19, 0.1) !important;
+		border: 2px solid var(--light-brown) !important;
+	}
+
+	.select-all-container {
+		display: flex !important;
+		align-items: center !important;
+		justify-content: space-between !important;
+		flex-wrap: wrap !important;
+		gap: 1.5rem !important;
+	}
+
+	.select-all-container .fas {
+		color: var(--primary-brown) !important;
+		font-size: 2.2rem !important;
+	}
+
+
+	.btn-primary {
+		background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-brown) 100%) !important;
+		border-color: var(--primary-brown) !important;
+		border: none !important;
+		padding: 0.8rem 2rem !important;
+		font-weight: 600 !important;
+		border-radius: 8px !important;
+		transition: all 0.3s ease !important;
+	}
+
+	.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+		background: linear-gradient(135deg, var(--dark-brown) 0%, var(--primary-brown) 100%) !important;
+		border-color: var(--dark-brown) !important;
+		transform: translateY(-1px) !important;
+		box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3) !important;
+	}
+
+
+	.permissionCard::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 4px;
+		background: linear-gradient(to right, var(--primary-brown), var(--secondary-brown));
+		border-radius: 15px 15px 0 0;
+	}
+
+	.role-title::after {
+		content: '';
+		position: absolute;
+		bottom: -3px;
+		left: 0;
+		right: 0;
+		height: 3px;
+		background: linear-gradient(to right, var(--secondary-brown), var(--primary-brown));
+	}
+	</style>
 </head>
 <!--end::Head-->
 <!--begin::Body-->

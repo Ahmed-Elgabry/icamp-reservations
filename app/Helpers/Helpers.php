@@ -1,5 +1,5 @@
 <?php
-    /*
+/*
     |--------------------------------------------------------------------------
     | Detect Active URL Segment Function
     |--------------------------------------------------------------------------
@@ -10,6 +10,14 @@
     */
 
 use App\Models\Setting;
+
+/**
+ * Check if current user is Super Admin (ID = 1 only)
+ */
+function isSuperAdmin(): bool
+{
+    return auth()->check() && auth()->user()->id == 1;
+}
 
 
 function campInventory()
@@ -56,12 +64,9 @@ function paymentMethod($select = null)
         'payment_link'
     ];
 
-    if($select)
-    {
-        foreach($rows as $row)
-        {
-            if($row == $select)
-            {
+    if ($select) {
+        foreach ($rows as $row) {
+            if ($row == $select) {
                 return $row;
             }
         }
@@ -79,12 +84,9 @@ function statements($select = null)
         'the_insurance',
     ];
 
-    if($select)
-    {
-        foreach($rows as $row)
-        {
-            if($row == $select)
-            {
+    if ($select) {
+        foreach ($rows as $row) {
+            if ($row == $select) {
                 return $row;
             }
         }
@@ -94,24 +96,26 @@ function statements($select = null)
     return $rows;
 }
 
-function isActiveURLSegment($pageSlug, $segment, $output = "active"){
-    if (Request::segment($segment) == $pageSlug) return $output;
-}
-
-
-
-function isActivePanelSegment($pageSlug, $segment, $output = "show"){
-    if (Request::segment($segment) == $pageSlug) return $output;
-}
-
-
-function settings($key) : string|null
+function isActiveURLSegment($pageSlug, $segment, $output = "active")
 {
-    $setting = Setting::where('key' , $key)->first();
-    if($setting){
-        return $setting->value ;
-    }else{
-        return null ;
+    if (Request::segment($segment) == $pageSlug) return $output;
+}
+
+
+
+function isActivePanelSegment($pageSlug, $segment, $output = "show")
+{
+    if (Request::segment($segment) == $pageSlug) return $output;
+}
+
+
+function settings($key): string|null
+{
+    $setting = Setting::where('key', $key)->first();
+    if ($setting) {
+        return $setting->value;
+    } else {
+        return null;
     }
 }
 
@@ -127,7 +131,8 @@ function settings($key) : string|null
 | Very useful for navigation, marking if the link is active.
 |
 */
-function isActiveRoute($route, $output = "active"){
+function isActiveRoute($route, $output = "active")
+{
     if (Route::currentRouteName() == $route) return $output;
 }
 
@@ -140,8 +145,9 @@ function isActiveRoute($route, $output = "active"){
 | Very useful for navigation, marking if the link is active.
 |
 */
-function areActiveRoutes(Array $routes, $output = "active show"){
-    foreach ($routes as $route){
+function areActiveRoutes(array $routes, $output = "active show")
+{
+    foreach ($routes as $route) {
         if (Route::currentRouteName() == $route) return $output;
     }
 }
@@ -155,39 +161,44 @@ function areActiveRoutes(Array $routes, $output = "active show"){
 | translations.
 |
 */
-function formatSEOPageSlug($pageSlug){
-    return __('general.seo_'.str_replace("-", "_", $pageSlug).'_title');
+function formatSEOPageSlug($pageSlug)
+{
+    return __('general.seo_' . str_replace("-", "_", $pageSlug) . '_title');
 }
 
 
-function lang(){
-    return App() -> getLocale();
+function lang()
+{
+    return App()->getLocale();
 }
 
-function generateRandomCode(){
+function generateRandomCode()
+{
     return '1234';
-    return rand(1111,4444);
+    return rand(1111, 4444);
 }
 
 if (!function_exists('languages')) {
-    function languages() {
-    return ['ar', 'en','ps'];
+    function languages()
+    {
+        return ['ar', 'en', 'ps'];
     }
 }
 
 if (!function_exists('defaultLang')) {
-    function defaultLang() {
-    return 'ar';
+    function defaultLang()
+    {
+        return 'ar';
     }
 }
 
 
 
-function pushNotification($tokens , $data , $platforms)
+function pushNotification($tokens, $data, $platforms)
 {
 
     $url = 'https://fcm.googleapis.com/fcm/send';
-    $SERVER_API_KEY = Setting::where('key' , 'firebase_key')->first()->value ;
+    $SERVER_API_KEY = Setting::where('key', 'firebase_key')->first()->value;
 
     // $SERVER_API_KEY = 'AAAAi0Y_HnY:APA91bGeuHqUXsXiwWMDlJ-tenEOiKmRZ7pfifFPvI0XUzUiIRD6togg468docAR0gdTpY40Yvr50I8610Fdm9jG3RT-iYakNLthfVcxViBSJ6lIzt5gVh77Y_4VY3oqYyP64Svx6QxR';
 
@@ -201,19 +212,19 @@ function pushNotification($tokens , $data , $platforms)
     //     ]
     // ];
 
-    foreach($platforms as $device_type){
-        if($device_type == 'ios'){
+    foreach ($platforms as $device_type) {
+        if ($device_type == 'ios') {
             $Notify_data = [
                 "registration_ids" => $tokens,
                 "notification" => [
-                    "title"    => $data['title_'.lang()],
-                    "body"     =>  $data['body_'.lang()]  ,
+                    "title"    => $data['title_' . lang()],
+                    "body"     =>  $data['body_' . lang()],
                     "mutable_content" => true,
                     'sound'    => true,
                 ],
                 'data'  => $data
             ];
-        }else{
+        } else {
             $Notify_data = [
                 "registration_ids" => $tokens,
                 'data'  => $data
@@ -239,9 +250,4 @@ function pushNotification($tokens , $data , $platforms)
     $response = curl_exec($ch);
 
     return response()->json();
-
 }
-
-
-
-?>

@@ -21,6 +21,8 @@ class BankAccountsController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', BankAccount::class);
+
         $banks = BankAccount::orderBy('created_at','desc')->get();
         return view('dashboard.banks.index',[
             'banks' => $banks

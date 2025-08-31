@@ -287,5 +287,4 @@
 
 @endsection
 
-show.blade.php
-عرض show.blade.php.
+

@@ -254,7 +254,7 @@
                                                         data-stock="{{ $stock->pivot->id }}"
                                                         @if($stock && $stock->pivot->is_completed) style="display:none" @endif>
                                                         <label class="form-label">@lang('dashboard.not_completed_reason')</label>
-                                                        <textarea class="form-control" rows="2"
+                                                        <textarea class="form-control incomplete-reason" rows="2"
                                                                 name="not_completed_reason_stock[{{ $stock->pivot->id }}]"
                                                                 data-report="{{ $stock->pivot->id }}">{{ $stock ? $stock->pivot->not_completed_reason : '' }}</textarea>
                                                     </div>
@@ -288,54 +288,33 @@
 @push('js')
     <script type="text/javascript">
        $(document).ready(function () {
-            $('.reports-check').on('change', function () {
-                let reportId = $(this).data('report');
-                if ($(this).is(':checked')) {
-                    $('.reports-check-not[data-report="' + reportId + '"]').prop('checked', false);
-                    $('.incomplete-reason[data-report="' + reportId + '"]').hide();
+            $(document).on('change', '.reports-check', function () {
+                if (this.checked) {
+                    $('.reports-check-not,.stock-check-not').prop('checked', false);
+                    $('.incomplete-reason').hide();
                 }
             });
 
-            $('.reports-check-not').on('change', function () {
-                let reportId = $(this).data('report');
-                if ($(this).is(':checked')) {
-                    $('.reports-check[data-report="' + reportId + '"]').prop('checked', false);
-                    $('.incomplete-reason[data-report="' + reportId + '"]').show();
+            $(document).on('change', '.reports-check-not', function () {
+                if (this.checked) {
+                    $('.reports-check,.stock-check').prop('checked', false);
+                    $('.incomplete-reason').show();
                 } else {
-                    $('.incomplete-reason[data-report="' + reportId + '"]').hide();
+                    $('.incomplete-reason').hide();
                 }
             });
 
             $('#mark-all-completed').on('click', function () {
-                $('.reports-check').each(function () {
+                $('.reports-check,.stock-check').each(function () {
                     $(this).prop('checked', true).trigger('change');
                 });
             });
 
             $('#mark-all-not-completed').on('click', function () {
-                $('.reports-check-not').each(function () {
+                $('.reports-check-not,.stock-check-not').each(function () {
                     $(this).prop('checked', true).trigger('change');
                 });
             });
-
-            $('.stock-check').on('change', function () {
-                let reportId = $(this).data('stock');
-                if ($(this).is(':checked')) {
-                    $('.stock-check-not[data-stock="' + reportId + '"]').prop('checked', false);
-                    $('.incomplete-reason[data-stock="' + reportId + '"]').hide();
-                }
-            });
-
-            $('.stock-check-not').on('change', function () {
-                let reportId = $(this).data('stock');
-                if ($(this).is(':checked')) {
-                    $('.stock-check[data-stock="' + reportId + '"]').prop('checked', false);
-                    $('.incomplete-reason[data-stock="' + reportId + '"]').show();
-                } else {
-                    $('.incomplete-reason[data-stock="' + reportId + '"]').hide();
-                }
-            });
-
         });
 
        $(document).on('click', '.btn-decrement', function (e) {

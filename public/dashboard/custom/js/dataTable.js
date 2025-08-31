@@ -5,28 +5,8 @@ var KTAppEcommerceCategories = function () {
         t.querySelectorAll('[data-kt-ecommerce-category-filter="delete_row"]').forEach((t => {
             t.addEventListener("click", (function (t) {
                 t.preventDefault();
-                // Try to find a row, but allow non-table contexts
-                let o = "";
-                const n = t.target && t.target.closest ? t.target.closest("tr") : null;
-                if (n) {
-                    // Table context: extract name from row
-                    const nameEl = n.querySelector('[data-kt-ecommerce-category-filter="category_name"]');
-                    if (nameEl && typeof nameEl.innerText === 'string') {
-                        o = nameEl.innerText.trim();
-                    } else {
-                        const tds = n.querySelectorAll('td');
-                        if (tds && tds.length > 1 && typeof tds[1].innerText === 'string') {
-                            o = tds[1].innerText.trim();
-                        }
-                    }
-                } else {
-                    // Non-table context: use button text or fallback
-                    if (this.innerText) {
-                        o = this.innerText.trim();
-                    } else {
-                        o = '';
-                    }
-                }
+                const n = t.target.closest("tr"),
+                o = n.querySelector('[data-kt-ecommerce-category-filter="category_name"]').innerText;
                 var item = $(this).data('id');
                 var url =  $(this).data('url');
                 Swal.fire({

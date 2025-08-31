@@ -43,6 +43,7 @@ class Transaction extends Model
         return $this->belongsTo(Order::class,'order_id');
     }
 
+<<<<<<< HEAD
     // Accessor for $transaction->editRoute
     public function getEditRouteAttribute(): string
     {
@@ -68,6 +69,17 @@ class Transaction extends Model
             return route('payments.destroy', $this->payment_id);
         }
         return '#';
+=======
+    public function editRoute($id)
+    {
+        if($this->type == 'Expense'){
+            return route('expenses.edit', $id);
+        }elseif($this->type == 'Payment'){
+            return route('payments.edit', $id);
+        }elseif($this->type == 'Withdrawal'){
+          return   route('bank-accounts.show', $this->id);
+        }
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     }
 
 }

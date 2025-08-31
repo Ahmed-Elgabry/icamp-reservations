@@ -10,6 +10,8 @@ class CustomersController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Customer::class);
+
         $query = Customer::query();
         $request = request();
 
@@ -34,12 +36,15 @@ class CustomersController extends Controller
     // Show the form for creating a new customer
     public function create()
     {
+        $this->authorize('create', Customer::class);
         return view('dashboard.customers.create');
     }
 
     // Store a newly created customer in the database
     public function store(Request $request)
     {
+        $this->authorize('create', Customer::class);
+
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'email' => 'nullable|email|unique:customers',
@@ -58,16 +63,18 @@ class CustomersController extends Controller
     }
 
     // Display the specified customer
-    public function show( $customer)
+    public function show($customer)
     {
         $customer = Customer::findOrFail($customer);
+        $this->authorize('view', $customer);
         return view('dashboard.customers.show', compact('customer'));
     }
 
     // Show the form for editing the specified customer
-    public function edit( $customer)
+    public function edit($customer)
     {
         $customer = Customer::findOrFail($customer);
+        $this->authorize('update', $customer);
         return view('dashboard.customers.create', compact('customer'));
     }
 
@@ -75,6 +82,7 @@ class CustomersController extends Controller
     public function update(Request $request,  $customer)
     {
         $customer = Customer::findOrFail($customer);
+        $this->authorize('update', $customer);
 
         $validatedData = $request->validate([
             'name' => 'required|max:255',
@@ -88,22 +96,26 @@ class CustomersController extends Controller
     }
 
     // Remove the specified customer from the database
-    public function destroy( $customer)
+    public function destroy($customer)
     {
         $customer = Customer::findOrFail($customer);
+        $this->authorize('delete', $customer);
         $customer->delete();
         return response()->json();
     }
 
-    public function deleteAll(Request $request) {
+    public function deleteAll(Request $request)
+    {
+        $this->authorize('deleteAll', Customer::class);
+
         $requestIds = json_decode($request->data);
         foreach ($requestIds as $id) {
-          $ids[] = $id->id;
+            $ids[] = $id->id;
         }
         if (Customer::whereIn('id', $ids)->delete()) {
-          return response()->json('success');
+            return response()->json('success');
         } else {
-          return response()->json('failed');
+            return response()->json('failed');
         }
     }
 }

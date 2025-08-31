@@ -10,12 +10,12 @@ use App\Requests\dashboard\CreateUpdateRoleRequest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\Roles;
-use Spatie\Permission\Models\Role; // تأكد من استيراد نموذج Role
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     private $rolesRepository;
-    private $permissionRepository; // إضافة المتغير الخاص بالمستودع
+    private $permissionRepository;
     use Roles;
 
     public function __construct(IRoleRepository $rolesRepository, IPermissionRepository $permissionRepository)
@@ -41,18 +41,22 @@ class RoleController extends Controller
     {
         $data = $request->except('permissions');
 
-        // تحقق من وجود اسم الدور مسبقًا
-        if (Role::where('name', $data['nickname_ar'])->exists() || Role::where('name', $data['nickname_en'])->exists()) {
-            return response()->json(['message' => 'اسم الدور موجود مسبقًا'], 409);
+        // Check if role name already exists
+        if (Role::where('nickname_ar', $data['nickname_ar'])->exists() || Role::where('nickname_en', $data['nickname_en'])->exists()) {
+            return response()->json(['message' => 'Role name already exists'], 409);
         }
 
         $data['name'] = str_replace(' ', '-', $request->nickname_en);
 
-        // إنشاء الدور
+        // Create the role
         $role = $this->rolesRepository->create($data);
-        $role->syncPermissions($request->permissions);
 
-        return response()->json(['message' => 'تم إنشاء الدور بنجاح']);
+        // Check if permissions exist before syncing
+        if ($request->has('permissions') && is_array($request->permissions)) {
+            $role->syncPermissions($request->permissions);
+        }
+
+        return response()->json(['message' => 'Role created successfully']);
     }
 
     public function edit($id)
@@ -64,26 +68,80 @@ class RoleController extends Controller
 
     public function update(CreateUpdateRoleRequest $request, $id)
     {
+        \Log::info('Role update started', [
+            'role_id' => $id,
+            'request_data' => $request->all(),
+            'has_permissions' => $request->has('permissions'),
+            'permissions_count' => $request->has('permissions') ? count($request->permissions) : 0
+        ]);
+
         $data = $request->validated();
 
-        // تحقق من وجود اسم الدور مسبقًا
-        if (Role::where('name', $data['nickname_ar'])->where('id', '!=', $id)->exists() || 
-            Role::where('name', $data['nickname_en'])->where('id', '!=', $id)->exists()) {
-            return response()->json(['message' => 'اسم الدور موجود مسبقًا'], 409);
+        // Check if role name already exists
+        if (
+            Role::where('nickname_ar', $data['nickname_ar'])->where('id', '!=', $id)->exists() ||
+            Role::where('nickname_en', $data['nickname_en'])->where('id', '!=', $id)->exists()
+        ) {
+            return response()->json(['message' => 'Role name already exists'], 409);
         }
 
-        $data['name'] = str_replace(' ', '-', $request->name_en);
+        $data['name'] = str_replace(' ', '-', $request->nickname_en);
+
+        \Log::info('Updating role basic data', ['data' => $data]);
         $this->rolesRepository->update($data, $id);
+
         $role = $this->rolesRepository->findOne($id);
-        $role->syncPermissions($request->permissions);
-        
-        return response()->json(['message' => 'تم تحديث الدور بنجاح']);
+        \Log::info('Role found after update', [
+            'role_id' => $role->id,
+            'role_name' => $role->name,
+            'current_permissions' => $role->permissions->pluck('name')->toArray()
+        ]);
+
+        // Check if permissions exist before syncing
+        if ($request->has('permissions') && is_array($request->permissions)) {
+            \Log::info('Syncing permissions', ['permissions' => $request->permissions]);
+            
+            // Log customer permissions specifically
+            $customerPermissions = array_filter($request->permissions, function($perm) {
+                return strpos($perm, 'customers.') === 0;
+            });
+            \Log::info('Customer permissions in request', ['customer_permissions' => $customerPermissions]);
+            
+            // Clear all permissions first, then sync new ones
+            $role->permissions()->detach();
+            \Log::info('All permissions detached for role', ['role_id' => $role->id]);
+            
+            $role->syncPermissions($request->permissions);
+
+            // Verify permissions were synced
+            $role->refresh();
+            $finalPermissions = $role->permissions->pluck('name')->toArray();
+            $finalCustomerPermissions = array_filter($finalPermissions, function($perm) {
+                return strpos($perm, 'customers.') === 0;
+            });
+            
+            \Log::info('Permissions after sync', [
+                'all_synced_permissions' => $finalPermissions,
+                'customer_permissions_after_sync' => $finalCustomerPermissions
+            ]);
+        } else {
+            \Log::warning('No permissions to sync - clearing all permissions', [
+                'has_permissions' => $request->has('permissions'),
+                'permissions_data' => $request->get('permissions')
+            ]);
+            
+            // If no permissions sent, clear all
+            $role->permissions()->detach();
+            \Log::info('All permissions cleared for role', ['role_id' => $role->id]);
+        }
+
+        return response()->json(['message' => 'Role updated successfully']);
     }
 
     public function destroy($id)
     {
         $this->rolesRepository->forceDelete($id);
-        return response()->json(['message' => 'تم حذف الدور بنجاح']);
+        return response()->json(['message' => 'Role deleted successfully']);
     }
 
     public function deleteAll(Request $request)
@@ -96,9 +154,9 @@ class RoleController extends Controller
         }
 
         if ($this->rolesRepository->deleteForceWhereIn('id', $ids)) {
-            return response()->json(['message' => 'تم حذف الأدوار بنجاح']);
+            return response()->json(['message' => 'Roles deleted successfully']);
         } else {
-            return response()->json(['message' => 'فشل في حذف الأدوار'], 500);
+            return response()->json(['message' => 'Failed to delete roles'], 500);
         }
     }
 }

@@ -19,6 +19,7 @@ return [
     'transfer' => 'تحويل',
     'outgoing' => 'صادر',
     'incoming' => 'وارد',
+    'Withdrawal' => 'سحب',
     'pending_and_Initial_reservation' => 'معلق - حجز مبدئي',
     'pending_and_show_price' => 'معلق = عرض السعر',
     'delayed' => 'مؤجل',
@@ -43,7 +44,7 @@ return [
     'addon_price' => 'مبلغ الإضافة',
     'registration_forms' => ' استمارات تسجيل البيانات',
     'sequence' => 'التسلسل',
-        'registration_forms'        => 'استمارات التسجيل',
+    'registration_forms'        => 'استمارات التسجيل',
     'registration_form'         => 'استمارة تسجيل',
     'search_rf_placeholder'     => 'ابحث برقم الاستمارة أو الهاتف المتحرك أو الاسم أو البريد',
 
@@ -64,7 +65,7 @@ return [
     'booking_date'              => 'تاريخ الحجز',
     'time_slot'                 => 'الفترة الزمنية',
     'persons'                   => 'عدد الأفراد',
-    'notes'                     => 'ملاحظات',
+    'notes'                     => 'ملاحظات داخلية',
 
     'confirm'                   => 'تأكيد',
     'cancel'                    => 'إلغاء',
@@ -172,8 +173,6 @@ return [
     'mark' => 'تعليم',
     'date_from' => 'التاريخ من ',
     'date_to' => 'التاريخ الي ',
-    'confiscated_full' => 'مصادرة التأمين كليًا',
-    'confiscated_partial' => 'مصادرة التأمين جزئيًا',
     'confiscation_description' => 'وصف المصادرة',
     'verified' => 'معتمد',
     'save_changes' => 'حفظ التغييرات',
@@ -195,7 +194,8 @@ return [
     'deposit' => 'عربون',
     'paied' => 'المدفوع',
     'add_report_item' => 'أضافة عنصر تقرير جديد',
-    'service_price' => 'مبلغ الاضافات',
+    'addons_price' => 'مبلغ الاضافات',
+    'service_price' => 'مبلغ المخبم',
     'insurance_amount' => 'مبلغ التأمين',
     'out of' => 'من أصل',
     'rows' => 'صفوف',
@@ -268,7 +268,7 @@ return [
     'activities' => 'الانشطة',
     'cash' => 'نقدا',
     'visa' => 'تحويل بنكي',
-    'services' => 'نوع المخيم',
+    'services' => 'أنواع المخيمات',
     'price' => 'المبلغ',
     'invoice' => 'فاتورة',
     'days' => 'الايام',
@@ -282,7 +282,6 @@ return [
     'video_note' => 'مقطع الفيديو',
     'stop_recording_video' => 'إيقاف تسجيل الفيديو',
     'delete_video_note' => 'حذف مقطع الفيديو ',
-    'service' => 'نوع المخيم',
     'payment_method' => 'طريقة الدفع',
     'choose_payment_method' => 'اختر طريقة الدفع',
     'date' => 'التاريخ',
@@ -325,12 +324,12 @@ return [
     'rejected_desc' => ' تشير إلى أن الطلب أو المعاملة لم تُقبل نتيجة لمشكلة أو عدم استيفاء الشروط المطلوبة. في سياق التجارة الإلكترونية أو إدارة الطلبات',
     'completed_desc' => ' تشير إلى أن الطلب أو المعاملة قد تم تنفيذها بالكامل، وأن جميع الخطوات المطلوبة قد اكتملت بنجاح. في سياق التجارة الإلكترونية أو إدارة الطلبات',
     'Inventory withdrawal' => 'سحب المخزون',
-    "withdrawal" =>"سحب",
     'orders' => 'الحجوزات',
     'user_orders_by_status' => 'الحجوزات بناء علي الحالة',
     'show_orders_of' => 'عرض الحجوزات',
     'user_orders' => 'الحجوزات',
     'payments' => 'المدفوعات',
+    'payment' => 'مدفوعة',
     // End New Transtions
 
     'app_name' => 'icamp',
@@ -339,7 +338,6 @@ return [
     'dashboard' => 'لوحة التحكم',
     'home' => 'الرئيسية',
     'general' => 'عام',
-    
     'AR' => 'النسخة العربية',
     'EN' => 'النسخة الانجليزية',
     'arabic_data' => 'البيانات باللغة العربية',
@@ -483,8 +481,9 @@ return [
     'deactivate_account' => 'تعطيل الحساب',
     'deactivate_desc' => '<h4 class="text-gray-900 fw-bolder">أنت تقوم بإلغاء تنشيط الحساب</h4>
     <div class="fs-6 text-gray-700">لمزيد من الأمان ، يتطلب ذلك تأكيد بريدك الإلكتروني أو رقم هاتفك عند إعادة تعيين كلمة مرور تسجيل الدخول.',
-
+    'expense_item'     => 'بند المصاريف',
     'confirm_deactivate' => 'أؤكد تعطيل الحساب',
+    'expense_date' => 'تاريخ المصروف',
 
     'activate_account' => 'تفعيل الحساب',
     'activate_desc' => '<h4 class="text-gray-900 fw-bolder">أنت تقوم بتنشيط الحساب</h4><div class="fs-6 text-gray-700"> سيتمكن صاحب الحساب من تسجيل الدخول بعد التفعيل بنجاح',
@@ -585,7 +584,6 @@ return [
     'task_updated_successfully' => 'تم تحديث المهمة بنجاح',
     'task_deleted_successfully' => 'تم حذف المهمة بنجاح',
     'task_status_updated' => 'تم تحديث حالة المهمة',
-    
     // Task Types
     'task_types' => 'أنواع المهام',
     'task_type' => 'نوع المهمة',
@@ -1189,6 +1187,7 @@ return [
     'customer_first_and_last_name' => 'الاسم الاول والاخير',
     'people_count' => 'عدد الأشخاص',
     'client_notes' => 'ملاحظات العميل',
+    'service' => 'نوع مخيم',
     // Survey Email
     'survey_email_title' => 'تقييم نوع المخيم',
     'survey_email_greeting' => 'عميلنا العزيز',

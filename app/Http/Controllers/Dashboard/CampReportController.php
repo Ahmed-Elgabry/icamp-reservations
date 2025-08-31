@@ -13,6 +13,8 @@ class CampReportController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', CampReport::class);
+
         $reports = CampReport::with(['service', 'creator'])
             ->latest()
             ->get();
@@ -22,12 +24,16 @@ class CampReportController extends Controller
 
     public function create()
     {
+        $this->authorize('create', CampReport::class);
+
         $services = Service::all();
         return view('dashboard.camp_reports.create', compact('services'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', CampReport::class);
+
         $validated = $request->validate([
             'report_date' => 'required|date',
             'service_id' => 'nullable|exists:services,id',
@@ -67,17 +73,23 @@ class CampReportController extends Controller
 
     public function show(CampReport $campReport)
     {
+        $this->authorize('view', $campReport);
+
         return view('dashboard.camp_reports.show', compact('campReport'));
     }
 
     public function edit(CampReport $campReport)
     {
+        $this->authorize('update', $campReport);
+
         $services = Service::all();
         return view('dashboard.camp_reports.create', compact('campReport', 'services'));
     }
 
     public function update(Request $request, CampReport $campReport)
     {
+        $this->authorize('update', $campReport);
+
         $validated = $request->validate([
             'report_date' => 'required|date',
             'service_id' => 'nullable|exists:services,id',
@@ -141,6 +153,8 @@ class CampReportController extends Controller
 
     public function destroy(CampReport $campReport)
     {
+        $this->authorize('delete', $campReport);
+
         foreach ($campReport->items as $item) {
             $this->deleteItemAttachments($item);
 

@@ -11,8 +11,8 @@ use App\Http\Controllers\Dashboard\GeneralPaymentsController;
 use App\Http\Controllers\Dashboard\MeetingController;
 use App\Http\Controllers\Dashboard\MeetingLocationController;
 use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
 use App\Http\Controllers\Dashboard\OrderController;
-use App\Http\Controllers\Dashboard\OrderController as rateOrderController ;
 use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
@@ -32,7 +32,7 @@ use App\Http\Controllers\{Dashboard\CampReportController, OrderSignatureControll
  */
 
 
-Route::resource('registrationforms', RegistrationformController::class)->except(['index','edit', 'update', 'destroy']);
+Route::resource('registrationforms', RegistrationformController::class)->except(['index', 'edit', 'update', 'destroy']);
 
 Route::get('order-rate/{order}', "VisitorsController@rate")->name('rate');
 //  Route::post('order-rate', "VisitorsController@rateStore")->name('rate.save');
@@ -47,11 +47,6 @@ Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
 Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
     ->name('signature.store');
 
-// Delete an order signature (uses global delete_row JS handler)
-Route::delete('/sign/{order}', [OrderSignatureController::class, 'destroy'])
-    ->name('signature.destroy')
-    ->middleware(['auth']);
-
 
 
 // Auth::routes();
@@ -60,7 +55,31 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('admin-login', [LoginController::class, 'login'])->name('admin-login');
 });
 
+// Temporary route to check user permissions (outside check-role middleware)
+Route::get('check-permissions', function () {
+    if (!auth()->check()) {
+        return 'Please login first';
+    }
+
+    $user = auth()->user();
+    $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+
+    echo "<h3>User: " . $user->name . " (ID: " . $user->id . ")</h3>";
+    echo "<h3>All Permissions (" . count($permissions) . "):</h3>";
+    foreach ($permissions as $permission) {
+        echo "- " . $permission . "<br>";
+    }
+
+    echo "<br><h3>Specific Checks:</h3>";
+    echo "Has notices.index: " . ($user->hasPermissionTo('notices.index') ? 'YES' : 'NO') . "<br>";
+    echo "Can access notices.index: " . (Gate::allows('notices.index') ? 'YES' : 'NO') . "<br>";
+
+    return '';
+})->middleware('auth');
+
 Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'namespace' => 'Dashboard'], function () {
+
+
 
     Route::get('logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('edit-profile', [AdminController::class, 'editProfile'])->name('edit-profile');
@@ -198,41 +217,47 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::get('customers/create', [
         'uses' => 'CustomersController@create',
         'as' => 'customers.create',
-        'title' => ['actions.add', 'dashboard.customers']
+        'title' => ['actions.add', 'dashboard.customers'],
+        'middleware' => ['auth', 'permission:customers.create']
     ]);
 
     # customers store
     Route::post('customers/store', [
         'uses' => 'CustomersController@store',
         'as' => 'customers.store',
-        'title' => ['actions.add', 'dashboard.customers']
+        'title' => ['actions.add', 'dashboard.customers'],
+        'middleware' => ['auth', 'permission:customers.create']
     ]);
 
     # customers update
     Route::get('customers/{id}/edit', [
         'uses' => 'CustomersController@edit',
         'as' => 'customers.edit',
-        'title' => ['actions.edit', 'dashboard.customers']
+        'title' => ['actions.edit', 'dashboard.customers'],
+        'middleware' => ['auth', 'permission:customers.edit']
     ]);
 
     # customers update
     Route::put('customers/{id}', [
         'uses' => 'CustomersController@update',
         'as' => 'customers.update',
-        'title' => ['actions.edit', 'dashboard.customers']
+        'title' => ['actions.edit', 'dashboard.customers'],
+        'middleware' => ['auth', 'permission:customers.edit']
     ]);
 
     # customers delete
     Route::delete('customers/{id}', [
         'uses' => 'CustomersController@destroy',
         'as' => 'customers.destroy',
-        'title' => ['actions.delete', 'dashboard.customers']
+        'title' => ['actions.delete', 'dashboard.customers'],
+        'middleware' => ['auth', 'permission:customers.destroy']
     ]);
     #delete all customers
     Route::post('delete-all-customers', [
         'uses' => 'CustomersController@deleteAll',
         'as' => 'customers.deleteAll',
-        'title' => ['actions.delete_all', 'dashboard.customers']
+        'title' => ['actions.delete_all', 'dashboard.customers'],
+        'middleware' => ['auth', 'permission:customers.deleteAll']
     ]);
     /*------------ end Of customers ----------*/
     /*------------ start Of stocks ----------*/
@@ -241,7 +266,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'stocks.index',
         'title' => 'dashboard.stocks',
         'type' => 'parent',
-        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock' , 'stocks.destroyServiceReport', 'stock.decrement']
+        'child' => ['stocks.store', 'stocks.edit', 'stocks.show', 'stocks.update', 'stocks.destroy', 'stocks.deleteAll', 'stocks.destroyServiceStock', 'stocks.destroyServiceReport', 'stock.decrement']
     ]);
 
     # stocks storexa
@@ -317,6 +342,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'addons.index',
         'title' => 'dashboard.addons',
         'type' => 'parent',
+        'middleware' => ['auth', 'permission:addons.index'],
         'child' => ['addons.store', 'addons.edit', 'addons.show', 'addons.update', 'addons.destroy', 'addons.deleteAll', 'addons.print']
     ]);
 
@@ -324,27 +350,31 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::get('addons/create', [
         'uses' => 'AddonsController@create',
         'as' => 'addons.create',
-        'title' => ['actions.add', 'dashboard.addons']
+        'title' => ['actions.add', 'dashboard.addons'],
+        'middleware' => ['auth', 'permission:addons.create']
     ]);
     # addons show
     Route::get('addons/{id}/show', [
         'uses' => 'AddonsController@show',
         'as' => 'addons.show',
-        'title' => ['actions.show', 'dashboard.addons']
+        'title' => ['actions.show', 'dashboard.addons'],
+        'middleware' => ['auth', 'permission:addons.show']
     ]);
 
     # addons store
     Route::post('addons/store', [
         'uses' => 'AddonsController@store',
         'as' => 'addons.store',
-        'title' => ['actions.add', 'dashboard.addons']
+        'title' => ['actions.add', 'dashboard.addons'],
+        'middleware' => ['auth', 'permission:addons.create']
     ]);
 
     # addons update
     Route::get('addons/{id}/edit', [
         'uses' => 'AddonsController@edit',
         'as' => 'addons.edit',
-        'title' => ['actions.edit', 'dashboard.addons']
+        'title' => ['actions.edit', 'dashboard.addons'],
+        'middleware' => ['auth', 'permission:addons.edit']
     ]);
 
     Route::get('addons/{id}/print', [
@@ -357,20 +387,23 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::put('addons/{id}', [
         'uses' => 'AddonsController@update',
         'as' => 'addons.update',
-        'title' => ['actions.edit', 'dashboard.addons']
+        'title' => ['actions.edit', 'dashboard.addons'],
+        'middleware' => ['auth', 'permission:addons.edit']
     ]);
 
     # addons delete
     Route::delete('addons/{id}', [
         'uses' => 'AddonsController@destroy',
         'as' => 'addons.destroy',
-        'title' => ['actions.delete', 'dashboard.addons']
+        'title' => ['actions.delete', 'dashboard.addons'],
+        'middleware' => ['auth', 'permission:addons.destroy']
     ]);
     #delete all addons
     Route::post('delete-all-addons', [
         'uses' => 'AddonsController@deleteAll',
         'as' => 'addons.deleteAll',
-        'title' => ['actions.delete_all', 'dashboard.addons']
+        'title' => ['actions.delete_all', 'dashboard.addons'],
+        'middleware' => ['auth', 'permission:addons.destroy']
     ]);
     /*------------ end Of addons ----------*/
 
@@ -506,7 +539,8 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'orders.index',
         'title' => 'dashboard.orders',
         'type' => 'parent',
-        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes' , 'orders.registeration-forms' , 'orders.registeration-forms.edit','orders.registeration-forms.destroy','orders.registeration-forms.fetch' , 'orders.registeration-forms.fetch','orders.customers.check']
+        'middleware' => ['auth'],
+        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes', 'orders.registeration-forms', 'orders.registeration-forms.edit', 'orders.registeration-forms.destroy', 'orders.registeration-forms.fetch', 'orders.registeration-forms.fetch', 'orders.customers.check']
     ]);
 
     # orders store
@@ -545,7 +579,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # orders registeration-forms
-    Route::post('orders/registeration-forms/update/{id}', [
+    Route::put('orders/registeration-forms/update/{id}', [
         'uses' => 'RegistrationformController@update',
         'as' => 'orders.registeration-forms.update',
         'title' => ['actions.index', 'dashboard.registeration-forms']
@@ -1137,16 +1171,16 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # expense-items update
-    Route::get('expense-items/{id}/edit', [
-        'uses' => 'ExpenseItemsController@edit',
-        'as' => 'expense-items.edit',
-        'title' => ['actions.edit', 'dashboard.expense-items']
-    ]);
-
-    # expense-items update
     Route::put('expense-items/{id}', [
         'uses' => 'ExpenseItemsController@update',
         'as' => 'expense-items.update',
+        'title' => ['actions.edit', 'dashboard.expense-items']
+    ]);
+
+    # expense-items edit
+    Route::get('expense-items/{id}/edit', [
+        'uses' => 'ExpenseItemsController@edit',
+        'as' => 'expense-items.edit',
         'title' => ['actions.edit', 'dashboard.expense-items']
     ]);
 
@@ -1167,11 +1201,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'child' => ['expenses.create', 'expenses.edit', 'expenses.destroy']
     ]);
 
-    # expenses store
+    # expenses export
     Route::get('expenses/export', [
         'uses' => 'ExpensesController@export',
         'as' => 'expenses.export',
-        'title' => ['actions.add', 'dashboard.expenses']
+        'title' => ['actions.export', 'dashboard.expenses']
     ]);
 
     # expenses store
@@ -1196,18 +1230,19 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # expenses update
+    Route::put('expenses/{id}', [
+        'uses' => 'ExpensesController@update',
+        'as' => 'expenses.update',
+        'title' => ['actions.edit', 'dashboard.expenses']
+    ]);
+
+    # expenses edit
     Route::get('expenses/{id}/edit', [
         'uses' => 'ExpensesController@edit',
         'as' => 'expenses.edit',
         'title' => ['actions.edit', 'dashboard.expenses']
     ]);
 
-    # expenses update
-    Route::put('expenses/{id}', [
-        'uses' => 'ExpensesController@update',
-        'as' => 'expenses.update',
-        'title' => ['actions.edit', 'dashboard.expenses']
-    ]);
 
     # expenses delete
     Route::delete('expenses/{id}', [
@@ -1300,7 +1335,8 @@ Route::get('/clear', function () {
 
 Route::resource('general_payments', GeneralPaymentsController::class);
 
-Route::resource('terms_sittngs', TermsSittngController::class);
+Route::resource('terms_sittngs', TermsSittngController::class)
+    ->middleware(['auth']);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);
 // Route::resource('stocks', StockController::class);
@@ -1314,8 +1350,10 @@ Route::get('answers/user/{userId}', [QuestionController::class, 'showUserAnswers
 Route::group(['middleware' => ['auth', 'admin']], function () {
     // Task Types
     Route::resource('task-types', 'Dashboard\TaskTypeController');
-    
-    Route::resource('tasks', 'Dashboard\TaskController')->except('show');
+
+    Route::resource('tasks', 'Dashboard\TaskController')
+        ->except('show')
+        ->middleware(['auth', 'permission:tasks.index|tasks.create|tasks.edit|tasks.destroy']);
 
     Route::get('tasks/reports', 'Dashboard\TaskController@reports')
         ->name('tasks.reports');
@@ -1410,7 +1448,8 @@ Route::group(['middleware' => ['auth']], function () {
 
 // Equipment Directories
 Route::resource('equipment-directories', EquipmentDirectoryController::class)
-    ->except(['show'])->middleware(['auth']);
+    ->except(['show'])
+    ->middleware(['auth']);
 
 // Directory Items
 Route::prefix('equipment-directories/{equipmentDirectory}/items')->middleware('auth')->group(function () {
@@ -1440,7 +1479,9 @@ Route::get('equipment-directories/export', [EquipmentDirectoryController::class,
 Route::get('equipment-directories/{equipmentDirectory}/items/export', [EquipmentDirectoryController::class, 'exportItemsPdf'])
     ->name('equipment-directories.items.export')->middleware(['auth']);
 
-Route::resource('camp-reports', 'Dashboard\CampReportController')->except(['show'])->middleware(['auth']);
+Route::resource('camp-reports', 'Dashboard\CampReportController')
+    ->except(['show'])
+    ->middleware(['auth', 'permission:camp-reports.index|camp-reports.create|camp-reports.edit|camp-reports.destroy']);
 Route::get('camp-reports/{campReport}', 'Dashboard\CampReportController@show')
     ->name('camp-reports.show')->middleware(['auth']);
 Route::get('camp-reports/export/pdf', [CampReportController::class, 'exportPdf'])->name('camp-reports.export');
@@ -1500,6 +1541,8 @@ Route::get('/generate-order-numbers', function () {
         'total_errors' => count($errors)
     ]);
 });
+
+
 Route::post('orders/{id}/send-email', [OrderController::class, 'sendEmail'])->name('orders.sendEmail');
 Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);

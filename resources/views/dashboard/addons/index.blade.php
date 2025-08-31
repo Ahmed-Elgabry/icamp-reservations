@@ -37,7 +37,7 @@
                     @endcan 
                     <!--end::Add customer-->
                     <span class="w-5px h-2px"></span>
-                    @can('addons.create')
+                    @can('addons.destroy')
                     <button type="button" data-route="{{route('addons.deleteAll')}}" 
                     class="btn btn-danger delete_all_button">
                         <i class="feather icon-trash"></i>@lang('dashboard.delete_selected')</button>
@@ -86,14 +86,24 @@
                                     <div class="d-flex">
                                         <div class="ms-5">
                                             <!--begin::Title-->
-                                            <a href="{{ route('addons.edit', $addon->id) }}" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
-                                                data-kt-ecommerce-category-filter="category_name">
-                                                @if($addon->image)
-                                                <img src="{{ asset($addon->image) }}" style="width:50px;height:50px;border-radius: 50%;">
-                                                @endif 
+                                            @can('addons.show')
+                                                <a href="{{ route('addons.show', $addon->id) }}" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
+                                                    data-kt-ecommerce-category-filter="category_name">
+                                                    @if($addon->image)
+                                                    <img src="{{ asset($addon->image) }}" style="width:50px;height:50px;border-radius: 50%;">
+                                                    @endif 
 
-                                                {{$addon->name}}
-                                            </a>
+                                                    {{$addon->name}}
+                                                </a>
+                                            @else
+                                                <span class="text-gray-800 fs-5 fw-bolder mb-1">
+                                                    @if($addon->image)
+                                                    <img src="{{ asset($addon->image) }}" style="width:50px;height:50px;border-radius: 50%;">
+                                                    @endif 
+
+                                                    {{$addon->name}}
+                                                </span>
+                                            @endcan
                                             <!--end::Title-->
                                         </div>
                                     </div>

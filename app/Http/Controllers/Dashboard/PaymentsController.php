@@ -35,71 +35,6 @@ class PaymentsController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // $expenses = Expense::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-        //     return $query->whereBetween('date', [$startDate, $endDate]);
-        // })
-        // ->verified()
-        // ->orderBy('created_at', 'desc')
-        // ->get();
-
-        // $payments = Payment::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-        //     return $query->whereBetween('created_at', [$startDate, $endDate]);
-        // })
-        // ->verified()
-        // ->orderBy('created_at', 'desc')
-        // ->get();
-
-        // $merged = collect();
-
-        // foreach ($transactions as $transaction) {
-        //     $merged->push((object) [
-        //         'account' => $transaction->account,
-        //         'receiver' => $transaction->receiver,
-        //         'order_id' => $transaction->order_id,
-        //         'id' => $transaction->id,
-        //         'date' => $transaction->date,
-        //         'editRoute' => route('payments.edit', $transaction->id),
-        //         'destroyRoute' => route('transactions.destroy', $transaction->id),
-        //         'type' => 'Bank-account',
-        //         'amount' => $transaction->amount,
-        //         'description' => $transaction->description,
-        //         'created_at' => $transaction->created_at,
-        //     ]);
-        // }
-        // foreach ($expenses as $expense) {
-        //     $merged->push((object) [
-        //         'account' => $expense->account,
-        //         'receiver' => null,
-        //         'order_id' => null,
-        //         'editRoute' => route('expenses.edit', $expense->id),
-        //         'destroyRoute' => route('expenses.destroy', $expense->id),
-        //         'id' => $expense->id,
-        //         'date' => $expense->date,
-        //         'type' => 'Expense',
-        //         'amount' => $expense->price,
-        //         'description' => $expense->notes,
-        //         'created_at' => $expense->created_at,
-        //     ]);
-        // }
-
-        // foreach ($payments as $payment) {
-        //     $merged->push((object) [
-        //         'account' => $payment->account,
-        //         'receiver' => null,
-        //         'order_id' => $payment->order_id,
-        //         'editRoute' => route('payments.show', $payment->order_id),
-        //         'destroyRoute' => route('payments.destroy', $payment->id),
-        //         'id' => $payment->id,
-        //         'date' => $payment->created_at,
-        //         'type' => 'Payment',
-        //         'amount' => $payment->price,
-        //         'description' => $payment->notes,
-        //         'created_at' => $payment->created_at,
-        //     ]);
-        // } will deleted
-
-
         $transactions = $transactions->sortByDesc('created_at');
 
         return view('dashboard.banks.transactions', [
@@ -132,9 +67,11 @@ class PaymentsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Payment::with(['order.customer' , 'order.addons' , 'order.items' , 'order.expenses'])->where(fn ($q) =>
-            // $q->where('verified', '1')// will deleted 
-                $q->whereNot('statement', 'the_insurance')
+        $this->authorize('viewAny', Payment::class);
+
+        $query = Payment::with(['order.customer', 'order.addons', 'order.items', 'order.expenses'])->where(
+            fn($q) =>
+            $q->whereNot('statement', 'the_insurance')
         );
 
         if ($request->customer_id) {
@@ -155,13 +92,14 @@ class PaymentsController extends Controller
 
         $payments = $query->get();
 
-        $orders = Order::whereNot('insurance_status' , 'returned')->get();
+        $orders = Order::whereNot('insurance_status', 'returned')->get();
         $customers = Customer::all();
         return view('dashboard.payments.index', compact('payments', 'customers', 'orders'));
     }
 
     public function create($bankAccount = null)
     {
+        $this->authorize('create', Payment::class);
         $selectedBank = $bankAccount ? BankAccount::findOrFail($bankAccount) : null;
         $bankAccounts = BankAccount::all();
         return view('dashboard.payments.create', [
@@ -293,8 +231,7 @@ public function moneyTransfer(Request $request)
         ]);
 
         // send money to
-        $transfareTo = BankAccount::find($request->receiver_id);
-        ;
+        $transfareTo = BankAccount::find($request->receiver_id);;
         $transfareTo->update([
             'balance' => $transfareTo->balance + $amount
         ]);
@@ -312,7 +249,6 @@ public function moneyTransfer(Request $request)
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
         $mpdf->Output('invoice.pdf', 'I');
-
     }
 
     public function verified($id)
@@ -328,11 +264,12 @@ public function moneyTransfer(Request $request)
 
     public function store(Request $request)
     {
+        $this->authorize('create', Payment::class);
+
         $validatedData = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric',
-            'source' => 'required|string',
             'payment_method' => 'required|string',
             'statement' => 'required',
             'notes' => 'nullable|string',
@@ -341,15 +278,6 @@ public function moneyTransfer(Request $request)
         $payment = Payment::create($validatedData);
         $bankAccount->update([
             'balance' => $bankAccount->balance + $request->price
-        ]);
-        Transaction::create([
-            'account_id' => $request->account_id,
-            'amount' => $request->price,
-            'type' => 'deposit',
-            'source'=> $request->source,
-            'date' => now(),
-            'description' => 'Payment: ' . $request->statement,
-            "payment_id" => $payment->id
         ]);
         return back()->withSuccess(__('dashboard.success'));
     }
@@ -362,6 +290,8 @@ public function moneyTransfer(Request $request)
      */
     public function show($order)
     {
+        $this->authorize('view', Payment::class);
+
         $order = Order::findOrFail($order);
         $bankAccounts = BankAccount::all();
 
@@ -376,6 +306,7 @@ public function moneyTransfer(Request $request)
     public function update(Request $request, $payment)
     {
         $payment = Payment::findOrFail($payment);
+        $this->authorize('update', $payment);
         $validatedData = $request->validate([
             'price' => 'required|numeric',
             'account_id' => 'required|exists:bank_accounts,id',
@@ -405,7 +336,6 @@ public function moneyTransfer(Request $request)
         ]);
 
         return back()->withSuccess(__('dashboard.success'));
-
     }
 
     /**
@@ -417,6 +347,7 @@ public function moneyTransfer(Request $request)
     public function destroy($payment)
     {
         $payment = Payment::findOrFail($payment);
+        $this->authorize('delete', $payment);
 
         $bankAccount = BankAccount::find($payment->account_id);
         $bankAccount->update([
@@ -430,6 +361,8 @@ public function moneyTransfer(Request $request)
 
     public function deleteAll(Request $request)
     {
+        $this->authorize('delete', Payment::class);
+
         $requestIds = json_decode($request->data);
 
         foreach ($requestIds as $id) {

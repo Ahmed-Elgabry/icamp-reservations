@@ -18,6 +18,8 @@ class TermsSittngController extends Controller
      */
     public function index()
     {
+         $this->authorize('viewAny', TermsSittng::class);
+
         $termsSittngs = TermsSittng::all();
         return view('dashboard.TermsSittngs.create', compact('termsSittngs'));
     }
@@ -27,7 +29,8 @@ class TermsSittngController extends Controller
      */
     public function create()
     {
-        // البحث عن السجل الموجود باستخدام user_id أو أي شرط آخر
+         $this->authorize('create', TermsSittng::class);
+
         $termsSittng = TermsSittng::query()->first();
 
         // عرض صفحة الإنشاء مع البيانات الحالية إن وجدت
@@ -40,6 +43,8 @@ class TermsSittngController extends Controller
      */
     public function store(TermsSittngRequest $request)
     {
+         $this->authorize('create', TermsSittng::class);
+
         $data = $request->all();
 
         // معالجة رفع الـ Logo
@@ -65,6 +70,8 @@ class TermsSittngController extends Controller
      */
     public function show(TermsSittng $termsSittng)
     {
+         $this->authorize('view', $termsSittng);
+
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
     }
 
@@ -73,24 +80,31 @@ class TermsSittngController extends Controller
      */
     public function edit(TermsSittng $termsSittng)
     {
+         $this->authorize('update', $termsSittng);
+
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(TermsSittngRequest $request)
+    public function update(TermsSittngRequest $request, TermsSittng $termsSittng)
     {
+         $this->authorize('update', $termsSittng);
+
         $validatedData = $request->validated();
-        // // معالجة رفع الصور
-        // if ($request->hasFile('logo')) {
-        //     $logoFile = $request->file('logo');
-        //     $logoFilename = time() . '_logo.' . $logoFile->getClientOriginalExtension();
-        //     $logoPath = $logoFile->storeAs('logos', $logoFilename, 'public');
-        //     $validatedData['logo'] = $logoPath;
-        // }
-        
-         TermsSittng::first()->update($validatedData);
+
+        // معالجة رفع الصور
+        if ($request->hasFile('logo')) {
+            $logoFile = $request->file('logo');
+            $logoFilename = time() . '_logo.' . $logoFile->getClientOriginalExtension();
+            $logoPath = $logoFile->storeAs('logos', $logoFilename, 'public');
+            $validatedData['logo'] = $logoPath;
+        }
+
+        // تحديث السجل
+        $termsSittng->update($validatedData);
+
         return redirect()->route('terms_sittngs.create')
             ->with('success', 'تم تحديث الإعدادات بنجاح.');
     }
@@ -130,6 +144,8 @@ class TermsSittngController extends Controller
 
     public function destroy(TermsSittng $termsSittng)
     {
+         $this->authorize('delete', $termsSittng);
+
         $termsSittng->delete();
 
         return redirect()->route('terms_sittngs.create')

@@ -23,7 +23,7 @@
                 <li class="nav-item">
                     <a href="{{ route('payments.show',$order->id) }}"
                     class="nav-link text-active-primary pb-4 {{ isActiveRoute('payments.show') }}">
-                     {{ __('dashboard.payments') }} <span class="badge badge-primary" id="payment-amount">{{$order->payments->sum('price')}}</span>
+                     {{ __('dashboard.payments') }} <span class="badge badge-primary">{{$order->payments->sum('price')}}</span>
                     </a>
                 </li>
             @endcan

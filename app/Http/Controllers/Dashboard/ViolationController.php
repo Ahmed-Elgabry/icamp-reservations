@@ -13,6 +13,8 @@ class ViolationController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Violation::class);
+
         $violations = Violation::with(['type', 'employee', 'creator'])
             ->latest()
             ->filter(request()->all())

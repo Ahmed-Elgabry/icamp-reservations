@@ -12,6 +12,7 @@ use App\Requests\dashboard\editProfileRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use File;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -19,9 +20,11 @@ class AdminController extends Controller
     private $rolesRepository;
     private $permissionRepository;
 
-    public function __construct(IUserRepository $usersRepository,
-                                IRoleRepository $rolesRepository,
-                                IPermissionRepository $permissionRepository){
+    public function __construct(
+        IUserRepository $usersRepository,
+        IRoleRepository $rolesRepository,
+        IPermissionRepository $permissionRepository
+    ) {
 
         $this->usersRepository = $usersRepository;
         $this->rolesRepository = $rolesRepository;
@@ -30,40 +33,46 @@ class AdminController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', User::class);
+
         $users = $this->usersRepository->getAll();
 
-        return view('dashboard.admins.index' , compact('users'));
+        return view('dashboard.admins.index', compact('users'));
     }
 
     public function create()
     {
+        $this->authorize('create', User::class);
+
         $roles = $this->rolesRepository->getAll();
-        return view('dashboard.admins.create' , compact('roles'));
+        return view('dashboard.admins.create', compact('roles'));
     }
 
     public function store(CreateUpdateAdminRequest $request)
     {
+        $this->authorize('create', User::class);
+
         try {
             \DB::beginTransaction();
             $data = $request->all();
-            $data['user_type'] = 1 ;
+            $data['user_type'] = 1;
             $data['is_active'] = $request->is_active == 'on' ? '1' : '0';
 
-            if($request->has('image')){
+            if ($request->has('image')) {
                 $data['image'] = $request->file('image')->store('dashboard/uploads');
             }
             $user = $this->usersRepository->create($data);
 
-            if($user && $request->role_id){
+            if ($user && $request->role_id) {
                 $role = $this->rolesRepository->findOne($request->role_id);
 
-                if($role){
+                if ($role) {
 
                     $user->assignRole($role->name);
                 }
 
                 $user->syncPermissions($role->permissions()->pluck('name')->toArray());
-            //  $updateRole = $this->usersRepository->update(['user_type' =>  $request->role_id], $user->id);
+                //  $updateRole = $this->usersRepository->update(['user_type' =>  $request->role_id], $user->id);
             }
             \DB::commit();
             return response()->json();
@@ -72,7 +81,6 @@ class AdminController extends Controller
             \Log::error('Error creating admin: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
-
     }
 
     public function show($id)
@@ -88,48 +96,45 @@ class AdminController extends Controller
 
     public function edit($id)
     {
+        $this->authorize('update', User::class);
+
         $roles = $this->rolesRepository->getAll();
-        $user = $this->usersRepository->findWith($id , ['roles']);
+        $user = $this->usersRepository->findWith($id, ['roles']);
 
-
-        return view('dashboard.admins.create' , compact('user' , 'roles'));
-
+        return view('dashboard.admins.create', compact('user', 'roles'));
     }
 
     public function adminPermissions($id)
     {
         $permissions = $this->permissionRepository->getAll();
-        $admin = $this->usersRepository->findWith($id , ['roles']);
-        return view('dashboard.admins.permissions' , compact('admin' , 'permissions'));
-
+        $admin = $this->usersRepository->findWith($id, ['roles']);
+        return view('dashboard.admins.permissions', compact('admin', 'permissions'));
     }
 
     public function update(CreateUpdateAdminRequest $request, $id)
     {
-        $data = $request->except('role_id','_method');
+        $this->authorize('update', User::class);
+
+        $data = $request->except('role_id', '_method');
 
         $user = $this->usersRepository->findOne($id);
         $data['is_active'] = $request->is_active == 'on' ? '1' : '0';
-        if($request->has('image')){
+        if ($request->has('image')) {
             $data['image'] = $request->file('image')->store('dashboard/uploads');
         }
 
         $updated = $this->usersRepository->update($data, $id);
 
-        if($updated && $request->role_id){
+        if ($updated && $request->role_id) {
             $role = $this->rolesRepository->findOne($request->role_id);
 
-
-            if($role){
+            if ($role) {
                 $user->syncRoles([$role->name]);
+                $user->syncPermissions($role->permissions()->pluck('name')->toArray());
             }
-
-            $user->syncPermissions($role->permissions()->pluck('name')->toArray());
-         //   $updateRole = $this->usersRepository->update(['user_type' =>  $request->role_id], $user->id);
         }
 
-
-         return response()->json();
+        return response()->json();
     }
 
     public function activationStatus($id)
@@ -137,12 +142,11 @@ class AdminController extends Controller
 
         $admin = $this->usersRepository->findOne($id);
 
-        if($admin->is_active)
-        {
+        if ($admin->is_active) {
             $this->usersRepository->update(['is_active' => 0], $id);
             session()->flash('success', "عملية ناجحة");
             return back();
-        }else{
+        } else {
             $this->usersRepository->update(['is_active' => 1], $id);
             session()->flash('success', "عملية ناجحة");
             return back();
@@ -151,22 +155,27 @@ class AdminController extends Controller
 
     public function destroy($id)
     {
-         $this->usersRepository->forceDelete($id);
+        $this->authorize('delete', User::class);
+
+        $this->usersRepository->forceDelete($id);
         return response()->json('success');
     }
 
 
 
-    public function deleteAll(Request $request) {
+    public function deleteAll(Request $request)
+    {
+        $this->authorize('delete', User::class);
+
         $requestIds = json_decode($request->data);
 
         foreach ($requestIds as $id) {
-          $ids[] = $id->id;
+            $ids[] = $id->id;
         }
         if ($this->usersRepository->deleteForceWhereIn('id', $ids)) {
-          return response()->json('success');
+            return response()->json('success');
         } else {
-          return response()->json('failed');
+            return response()->json('failed');
         }
     }
 
@@ -174,20 +183,20 @@ class AdminController extends Controller
 
     public function editProfile()
     {
-       return view('dashboard.admins.edit-profile');
+        return view('dashboard.admins.edit-profile');
     }
 
     public function updateProfile(editProfileRequest $request)
     {
         $user = Auth::user();
         $requestData = $request->all();
-        if($request->password === null || trim($request->password) === ''){
+        if ($request->password === null || trim($request->password) === '') {
             unset($requestData['password']);
             unset($requestData['password_confirmation']);
-            $this->usersRepository->update( $requestData , $user->id);
+            $this->usersRepository->update($requestData, $user->id);
             return response()->json();
-        } else if($request->password !== null || trim($request->password) !== ''){
-            $this->usersRepository->update( $requestData , $user->id);
+        } else if ($request->password !== null || trim($request->password) !== '') {
+            $this->usersRepository->update($requestData, $user->id);
             Auth::logout();
             return response()->json(['logout' => true], 200);
         }
@@ -197,13 +206,11 @@ class AdminController extends Controller
     public function fileStorageServe($filePath)
     {
 
-        if(auth()->check())
-        {
-            $file = public_path().DIRECTORY_SEPARATOR .'storage'.DIRECTORY_SEPARATOR .str_replace('/',DIRECTORY_SEPARATOR,$filePath);
+        if (auth()->check()) {
+            $file = public_path() . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $filePath);
 
             return response()->file($file);
         }
         return redirect(route('home'));
     }
-
 }

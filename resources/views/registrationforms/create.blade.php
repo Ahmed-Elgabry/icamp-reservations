@@ -33,8 +33,8 @@
         :root{
             --radius: 16px;
             --shadow: 0 12px 32px rgba(0,0,0,.08);
-            --brand: #0d6efd;
-            --brand-2:#6610f2;
+            --brand: #B98220;
+            --brand-2:#6A3D1C;
             --success: #20c997;
             --surface:#ffffff;
             --muted:#6c757d;
@@ -185,6 +185,18 @@
             {{-- Section: Camp & Date --}}
             <div class="form-section-title"><i class="bi bi-geo-alt"></i> {{ __('booking.section_when_where') }}</div>
             <div class="row g-3">
+
+                {{-- Booking Date --}}
+                <div class="col-md-6">
+                    <label class="form-label required">{{ __('booking.date_label') }}</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                        <input type="date" name="booking_date" class="form-control @error('booking_date') is-invalid @enderror"
+                               value="{{ old('booking_date') }}" required>
+                    </div>
+                    @error('booking_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
                 {{-- Service --}}
                 <div class="col-md-6">
                     <label class="form-label required">{{ __('booking.camp_label') }}</label>
@@ -201,17 +213,6 @@
                     </select>
                     <small id="serviceHoursHint" class="help d-block mt-1"></small>
                     @error('service_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                </div>
-
-                {{-- Booking Date --}}
-                <div class="col-md-6">
-                    <label class="form-label required">{{ __('booking.date_label') }}</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                        <input type="date" name="booking_date" class="form-control @error('booking_date') is-invalid @enderror"
-                               value="{{ old('booking_date') }}" required>
-                    </div>
-                    @error('booking_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 {{-- Time Slot --}}
@@ -252,7 +253,7 @@
                             @error('checkout_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
-                    <small class="help">{{ __('booking.time_note') }}</small>
+                    <small class="help text-danger">{{ __('booking.time_note') }}</small>
                 </div>
             </div>
 
@@ -261,12 +262,6 @@
             {{-- Personal --}}
             <div class="form-section-title"><i class="bi bi-person-vcard"></i> {{ __('booking.section_personal') }}</div>
             <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label required">{{ __('booking.persons_label') }}</label>
-                    <input type="number" min="1" name="persons" class="form-control @error('persons') is-invalid @enderror"
-                           value="{{ old('persons') }}" required>
-                    @error('persons') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                </div>
                 <div class="col-md-4">
                     <label class="form-label required">{{ __('booking.fname_label') }}</label>
                     <input type="text" name="first_name" class="form-control @error('first_name') is-invalid @enderror"
@@ -278,6 +273,12 @@
                     <input type="text" name="last_name" class="form-control @error('last_name') is-invalid @enderror"
                            value="{{ old('last_name') }}" required>
                     @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label required">{{ __('booking.persons_label') }}</label>
+                    <input type="number" min="1" name="persons" class="form-control @error('persons') is-invalid @enderror"
+                           value="{{ old('persons') }}" required>
+                    @error('persons') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="col-md-6">

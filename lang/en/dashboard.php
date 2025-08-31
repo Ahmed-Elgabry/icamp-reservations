@@ -74,10 +74,13 @@ return [
     'expenses_by_item' => 'Expenses by Item',
     'receiver' => 'Transfer To',
     'bank_account' => 'Bank Account',
+<<<<<<< HEAD
     'from_account' => 'From Account',
     'to_account' => 'To Account',
     'choose_from_account' => 'Choose From Account',
     'choose_to_account' => 'Choose To Account',
+=======
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     'financial_reports' => 'Financial Reports',
     'switch_accounts' => 'Switch Accounts',
     'rate link' => 'Rating Link',
@@ -277,6 +280,10 @@ return [
     'show_orders_of' => 'Show Orders of',
     'user_orders' => 'User Orders',
     'payments' => 'Payments',
+<<<<<<< HEAD
+=======
+    'payment' => 'Payment',
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     // End New Translations
 
 
@@ -290,8 +297,11 @@ return [
     'EN' => 'English Version',
     'arabic_data' => 'Data in Arabic',
     'english_data' => 'Data in English',
+<<<<<<< HEAD
     'arabic' => 'Arabic',
     'english' => 'English',
+=======
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     'back_to_home' => 'Back to Home',
     'status_title' => ':page_title Status',
     'status_desc' => 'Set the status of :page_title',
@@ -469,12 +479,21 @@ return [
     'slots' => [
         '4-12' => '4 PM to 12 AM',
         '5-1'  => '5 PM to 1 AM',
+<<<<<<< HEAD
         'other'=> 'Other',
     ],
     'checkin_label'=> 'Check-in Time',
     'checkout_label'=> 'Check-out Time',
     'time_note'    => 'Enter check-in/out time.',
     'persons_label'=> 'Persons',
+=======
+        'other' => 'Other',
+    ],
+    'checkin_label' => 'Check-in Time',
+    'checkout_label' => 'Check-out Time',
+    'time_note'    => 'Enter check-in/out time.',
+    'persons_label' => 'Persons',
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     'fname_label'  => 'First Name',
     'lname_label'  => 'Last Name',
     'phone_label'  => 'Mobile Phone',
@@ -499,7 +518,11 @@ return [
     'registration_forms' => 'Registration Forms',
     'copy_code'    => 'Copy Code',
     'copied'       => 'Copied',
+<<<<<<< HEAD
       'registration_forms'        => 'Registration Forms',
+=======
+    'registration_forms'        => 'Registration Forms',
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     'registration_form'         => 'Registration Form',
     'search_rf_placeholder'     => 'Search by form #, phone, name, or email',
     'form_no'                   => 'Form No.',
@@ -529,6 +552,12 @@ return [
     'confirm_reservation_title' => 'Confirm creating a reservation',
     'required_qty' => 'Required qty set',
     'upload_image' => 'Upload image',
+<<<<<<< HEAD
+=======
+    'expense_item'     => 'Expense item',
+    'service' => 'Camp Type',
+    'expense_date' => 'Expense Date',
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     'controll' => 'Controll',
     'edit_sort' => 'Edit Sort',
     'confirm_reservation_body'  => 'You will be redirected to Add Reservations with the form data prefilled. Continue?',
@@ -619,7 +648,11 @@ return [
     'task_created_successfully' => 'Task created successfully',
     'task_updated_successfully' => 'Task updated successfully',
     'task_deleted_successfully' => 'Task deleted successfully',
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 18758d534e007aa6e1b5c697ef86cb35ed21f1b3
     // Task Types
     'task_types' => 'Task Types',
     'task_type' => 'Task Type',

@@ -36,7 +36,7 @@
                     <!--end::Add customer-->
 
                     <span class="w-5px h-2px"></span>
-                    <button type="button" data-route="{{route('roles.deleteAll')}}" 
+                    <button type="button" data-route="{{route('roles.deleteAll')}}"
                     class="btn btn-danger delete_all_button">
                         <i class="feather icon-trash"></i>@lang('dashboard.delete_selected')</button>
 
@@ -143,5 +143,4 @@
     <!--end::Container-->
 </div>
 <!--end::Post-->
-					
 @endsection

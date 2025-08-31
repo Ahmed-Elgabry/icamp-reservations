@@ -76,4 +76,4 @@
             text-align: right;
         }
     </style>
-@endpush   
+@endpush    

@@ -20,7 +20,7 @@
                 <div class="card-header border-0 d-flex align-items-center justify-content-between">
                     <div class="card-title m-0">
                         <h3 class="fw-bolder m-0">
-                            {{ __('dashboard.edit_title', ['page_title' => __('dashboard.registration_forms')]) }}
+                            {{ __('dashboard.edit', ['page_title' => __('dashboard.registration_forms')]) }}
                         </h3>
                         <div class="text-muted mt-1">
                             {{ __('dashboard.form_no') }}:
@@ -29,11 +29,6 @@
                                 <span class="badge bg-light text-dark ms-2">{{ $rf->request_code }}</span>
                             @endif
                         </div>
-                    </div>
-                    <div class="card-toolbar">
-                        <a href="{{ route('orders.registeration-forms') }}" class="btn btn-light">
-                            <i class="bi bi-arrow-left"></i> {{ __('dashboard.back') }}
-                        </a>
                     </div>
                 </div>
 
@@ -119,7 +114,6 @@
                                 </div>
                             </div>
 
-                            {{-- Other times (visible only when slot=other) --}}
                             <div class="row mb-6 {{ $slotOld==='other' ? '' : 'd-none' }}" id="otherTimesWrap">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">{{ __('dashboard.custom_times') }}</label>
                                 <div class="col-lg-8">
@@ -257,14 +251,12 @@
 @endsection
 
 @section('scripts')
-    {{-- flatpickr (date/time picker) --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
     <script>
         (function(){
             const isRTL = @json($isAr);
 
-            // ---- Select2: init ONLY on the original select (do NOT target .select2-hidden-accessible) ----
             if (window.jQuery && $.fn.select2) {
                 $('#service_id').select2({
                     width: '100%',
@@ -273,7 +265,6 @@
                 });
             }
 
-            // ---- Service hours hint ----
             const sel = document.getElementById('service_id');
             const hint = document.getElementById('serviceHoursHint');
             const HINT = {
@@ -289,7 +280,6 @@
             }
             sel.addEventListener('change', updateHint); updateHint();
 
-            // ---- Slot pills toggle ----
             function syncSlots(){
                 document.querySelectorAll('#slotGroup .slot-pill').forEach(lbl=>{
                     const input = lbl.querySelector('input');
@@ -301,14 +291,12 @@
             document.querySelectorAll('#slotGroup input[name="time_slot"]').forEach(r=>r.addEventListener('change', syncSlots));
             syncSlots();
 
-            // ---- flatpickr date ----
             flatpickr("#booking_date", {
                 dateFormat: "Y-m-d",
                 locale: isRTL ? 'ar' : 'default',
                 allowInput: true
             });
 
-            // ---- flatpickr times (when needed) ----
             const timeOpts = {
                 enableTime: true,
                 noCalendar: true,

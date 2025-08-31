@@ -29,6 +29,7 @@ class EquipmentDirectoryController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'name' => 'required|string|max:255',
             'is_active' => 'boolean',
@@ -51,6 +52,7 @@ class EquipmentDirectoryController extends Controller
 
     public function update(Request $request, EquipmentDirectory $equipmentDirectory)
     {
+
         $request->validate([
             'name' => 'required|string|max:255',
             'is_active' => 'boolean',

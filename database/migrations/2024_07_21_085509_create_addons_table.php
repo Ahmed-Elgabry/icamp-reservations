@@ -15,8 +15,6 @@ return new class extends Migration
     {
         Schema::create('addons', function (Blueprint $table) {
             $table->id();
-            // $table->unsignedBigInteger('transaction_id')->nullable();
-            // $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('set null')->onUpdate('cascade');
             $table->string('name');
             $table->decimal('price', 8, 2);
             $table->text('description')->nullable();

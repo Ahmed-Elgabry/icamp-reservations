@@ -2,22 +2,8 @@
 
 @section('pageTitle', __('dashboard.accept_terms'))
 @section('content')
-@push('css')
-<style>
-    .terms-view { background: #fff; }
-    .terms-view table { border-collapse: collapse; border-spacing: 0; width: 100%; margin: 10px 0; }
-    .terms-view table, .terms-view th, .terms-view td { border: 1px solid #dee2e6; }
-    .terms-view th, .terms-view td { padding: 8px 12px; vertical-align: top; background: #fff; }
-    .terms-view th { background: #f8f9fa; font-weight: 700; border-bottom: 2px solid #dee2e6; }
-    .terms-view ul { list-style: disc; padding-left: 1.25rem; }
-    .terms-view ol { list-style: decimal; padding-left: 1.25rem; }
-    .terms-view h1, .terms-view h2, .terms-view h3 { margin-top: 0.75rem; margin-bottom: 0.5rem; }
-    .terms-view p { margin-bottom: 0.5rem; }
-    .terms-view a { color: #0d6efd; text-decoration: underline; }
-    </style>
-@endpush
 
-<!--begin::Post-->
+    <!--begin::Post-->
     <div class="post d-flex flex-column-fluid" id="kt_post">
         <div id="kt_content_container" class="container-xxl">
             @include('dashboard.orders.nav')
