@@ -34,23 +34,26 @@ class WarehousesalesController extends Controller
         ]);
 
         try {
-            \DB::beginTransaction();
-            Order::find($data['order_id'])->items()->create($data);
+                // Create item via the order relation so order_id is set consistently
+            $order = Order::findOrFail($data['order_id']);
             $stock = Stock::findOrFail($data['stock_id']);
             if ($stock->quantity < $data['quantity'])
                 throw new \Exception(__('dashboard.insufficient_stock'));
             $stock->decrement('quantity', $data['quantity']);
+            $orderItem = $order->items()->create($data);
+            // Ensure we have the generated primary key loaded before using it
+                \Log::info(['order_item_id' => $orderItem->id]);
             Transaction::create([
                 'account_id' => $data['account_id'],
                 'amount' => $data['total_price'],
                 'description' => $data['notes'],
+                'order_id' => $data['order_id'],
                 "type" =>"deposit",
                 'source' => 'warehouse_sale',
                 "stock_id" => $data['stock_id'],
+                'order_item_id' => $orderItem->id,
             ]);
-            \DB::commit();
         } catch (\Exception $e) {
-            \DB::rollBack();
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
 
@@ -75,7 +78,8 @@ class WarehousesalesController extends Controller
         }
         $stock->increment('quantity',$data['quantity']);
         $item->update($data);
-        Transaction::where('stock_id', $item->stock_id)->update([
+        // Update the exact transaction linked to this item
+        Transaction::where('order_item_id', $item->id)->update([
             'account_id' => $data['account_id'],
             'amount' => $data['total_price'],
             'description' => $data['notes'],

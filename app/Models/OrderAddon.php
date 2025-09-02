@@ -3,22 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class OrderAddon extends Model
+class OrderAddon extends Pivot
 {
     use HasFactory;
-    protected $guarded = [];
+
     protected $table = 'order_addon';
+    protected $guarded = [];
+    public $timestamps = true;
+    public $incrementing = true;
+    protected $primaryKey = 'id';
 
     public function order()
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     public function addon()
     {
-        return $this->belongsTo(Addon::class);
+        return $this->belongsTo(Addon::class, 'addon_id');
     }
 
     public function account()

@@ -205,6 +205,8 @@
             border-radius: 8px;
             margin-bottom: 16px;
         }
+
+    .text-center { text-align: center; }
     </style>
 </head>
 
@@ -230,15 +232,15 @@
                                 <div class="d-block">
                                     <div class="border rounded p-3 bg-light-subtle">
                                         <div class="row g-3 small">
-                                            <div class="col-md-4">
+                                            <div class="col-md-4 text-center">
                                                 <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
                                                 <div class="fw-bold">{{ $order->id }}</div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-4 text-center">
                                                 <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
                                                 <div class="fw-bold">{{ $order->customer->name }}</div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-4 text-center">
                                                 <div class="fw-semibold text-muted">{{ __('dashboard.phone')}}</div>
                                                 <div class="fw-bold">{{ $order->customer->phone }}</div>
                                             </div>

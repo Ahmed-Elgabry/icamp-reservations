@@ -29,11 +29,12 @@ class PaymentsController extends Controller
         $startDate = request('start_date');
         $endDate = request('end_date');
 
-        $transactions = Transaction::where('verified', true)
+        $transactions = Transaction::where('verified', 1)
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                 return $query->whereBetween('date', [$startDate, $endDate]);
             })
             ->orderBy('created_at', 'desc')
+            ->where('verified', "1")
             ->get();
         $transactions = $transactions->sortByDesc('created_at');
 
@@ -90,7 +91,7 @@ class PaymentsController extends Controller
             $query->whereBetween('created_at', [$dateFrom, $dateTo]);
         }
 
-        $payments = $query->get();
+        $payments = $query->where('verified', "1")->get();
 
         $orders = Order::whereNot('insurance_status', 'returned')->get();
         $customers = Customer::all();
@@ -258,6 +259,9 @@ public function moneyTransfer(Request $request)
         $payment->update([
             'verified' => $payment->verified ? '0' : '1'
         ]);
+        $payment->transaction()->update([
+            'verified' => $payment->verified ? '0' : '1'
+        ]);
 
         return back()->withSuccess(__('dashboard.success'));
     }
@@ -270,12 +274,32 @@ public function moneyTransfer(Request $request)
             'order_id' => 'required|exists:orders,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric',
+            'source' => 'required|string',
             'payment_method' => 'required|string',
             'statement' => 'required',
             'notes' => 'nullable|string',
         ]);
         $bankAccount = BankAccount::findOrFail($request->account_id);
         $payment = Payment::create($validatedData);
+        if ($request->source) {
+            if ($request->statement == 'deposit' || $request->statement == 'complete the amount') {
+                $source = 'reservation_payments';
+            } else {
+                $source = 'insurances';
+            }
+        }
+        Transaction::create([
+            'account_id' => $request->account_id,
+            'amount' => $request->price,
+            'type' => 'deposit',
+            'source'=> $source ? $source : $request->source,
+            'date' => now(),
+            'description' => 'Payment: ' . $request->statement,
+            'payment_id' => $payment->id,
+            'verified' => 0, // Changed from false to true so it appears in general payments
+            'order_id' => $payment->order_id,
+            'customer_id' => $payment->customer_id ?? null
+        ]);
         $bankAccount->update([
             'balance' => $bankAccount->balance + $request->price
         ]);

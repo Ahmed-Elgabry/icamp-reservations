@@ -145,15 +145,16 @@ class GeneralPaymentsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Payment::with([
+        $query = Transaction::with([
                 'order.customer',
                 'order.expenses' => fn ($q) => $q->where('verified' , true),
                 'order.addons'  => fn ($q) => $q->where('verified', true),
                 'order.items'  => fn ($q) => $q->where('verified', true)
             ])
             ->where(fn ($q) =>
-                $q->where('verified', '1')
-                ->where('statement', 'the_insurance')
+                $q->where('source', "insurances")
+                ->orWhere('source', 'reservation_addon')
+                ->orWhere('source', 'warehouse_sale')
             );
 
         if ($request->customer_id) {
@@ -172,13 +173,59 @@ class GeneralPaymentsController extends Controller
             $query->whereBetween('created_at', [$dateFrom, $dateTo]);
         }
 
-        $general_payments = $query->get();
+        $general_payments = $query->where('verified', "1")->get();
         $paymentsByOrder = $general_payments->groupBy('order_id');
+        // $paymentsByCustomer = $general_payments->groupBy(function($t){
+            //     return optional(optional($t->order)->customer)->id;
+            // });
+
+        // Process order payment summaries (iterate by orders instead of customers)
+        $orderSummaries = collect();
+        foreach ($paymentsByOrder as $orderId => $orderTransactions) {
+            $order = $orderTransactions->first()?->order;
+            
+            // Skip if order is null (orphaned transactions)
+            if (!$order || !$order->customer) continue;
+            
+            // Group transactions by source for this specific order
+            $insurances = $orderTransactions->where('source', 'insurances');
+            $addonTransactions = $orderTransactions->where('source', 'reservation_addon');
+            $warehouseTransactions = $orderTransactions->where('source', 'warehouse_sale');
+            \Log::info(json_encode($insurances));
+            
+            // Calculate totals from transactions (using 'amount' field)
+            $insurancesTotal = $insurances->sum('amount');
+            $addonsTotal = $addonTransactions->sum('amount');
+            $warehouseTotal = $warehouseTransactions->sum('amount');
+            // Count items for this order
+            $insurancesCount = $insurances->count();
+            $addonsCount = $addonTransactions->count();
+            $warehouseCount = $warehouseTransactions->count();
+
+            $grandTotal = $insurancesTotal + $addonsTotal + $warehouseTotal;
+
+            // Get latest transaction date for this order
+            $latestDate = $orderTransactions->max('created_at');
+
+            $orderSummaries->push((object)[
+                'order' => $order,
+                'customer' => $order->customer,
+                'insurance_total' => $insurancesTotal,
+                'insurance_count' => $insurancesCount,
+                'addons_total' => $addonsTotal,
+                'addons_count' => $addonsCount,
+                'warehouse_total' => $warehouseTotal,
+                'warehouse_count' => $warehouseCount,
+                'grand_total' => $grandTotal,
+                'latest_date' => $latestDate
+            ]);
+        }
 
         $orders = Order::whereNot('insurance_status' , 'returned')->get();
-        $customers = Customer::all();
+        // Show all customers in filter, not only those with payments
+        $customers = Customer::orderBy('name')->get(['id','name']);
 
-        return view('dashboard.general_payments.index', compact('general_payments', 'customers','orders' , 'paymentsByOrder'));
+        return view('dashboard.general_payments.index', compact('general_payments', 'customers','orders' , 'paymentsByOrder', 'orderSummaries'));
     }
 
     public function create ()

@@ -15,11 +15,11 @@
                 <!-- customer information -->
                   <div class="pt-5 px-9 gap-2 gap-md-5">
                     <div class="row g-3 small">
-                        <div class="col-md-1">
+                        <div class="col-md-1 text-center">
                             <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
                             <div class="fw-bold">{{ $order->id }}</div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 text-center">
                             <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
                             <div class="fw-bold">{{ $order->customer->name }}</div>
                         </div>
@@ -65,8 +65,9 @@
                             <th>{{ __('dashboard.quantity') }}</th>
                             <th>{{ __('dashboard.total_price') }}</th>
                             <th>{{ __('dashboard.payment_method') }}</th>
+                            <th>{{ __('dashboard.bank_account') }}</th>
                             <th>{{ __('dashboard.verified') }}</th>
-                            <th>{{ __('dashboard.description') }}</th>
+                            <th>{{ __('dashboard.notes') }}</th>
                             <th>{{ __('dashboard.actions') }}</th>
                         </tr>
                         </thead>
@@ -78,6 +79,7 @@
                                 <td >{{ $orderAddon->pivot->count }}</td>
                                 <td>{{ $orderAddon->pivot->price }}</td>
                                 <td>{{__('dashboard.'. $orderAddon->pivot->payment_method )}}</td>
+                                <td>{{ $orderAddon->pivot->account->name }}</td>
                                 <td>
                                     {{ $orderAddon->pivot->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                                     @if($orderAddon->pivot->verified)
@@ -146,6 +148,7 @@
                                             <form id="editAddonForm-{{ $orderAddon->pivot->id }}" action="{{ route('ordersUpdate.addons', $orderAddon->pivot->id) }}" method="POST">
                                                 @csrf
                                                 @method('PUT')
+
                                                 <input type="hidden" name="order_id" value="{{ $order->id }}">
                                                 <input type="hidden" name="source" value="reservation_addon">
                                                 <div class="form-group">
@@ -186,7 +189,7 @@
                                                     </select>
                                                 </div>
                                                 <div class="form-group mt-3">
-                                                    <label for="edit_description_{{ $orderAddon->pivot->id }}">{{ __('dashboard.description') }}</label>
+                                                    <label for="edit_description_{{ $orderAddon->pivot->id }}">{{ __('dashboard.notes') }}</label>
                                                     <textarea name="description" id="edit_description_{{ $orderAddon->pivot->id }}" class="form-control">{{ $orderAddon->pivot->description }}</textarea>
                                                 </div>
                                             </form>
@@ -224,7 +227,7 @@
                     <form id="addAddonForm" action="{{ route('ordersStore.addons', $order->id) }}" method="POST">
                         @csrf
                         <div class="form-group">
-                            <label for="addon_id">{{ __('dashboard.addon') }}</label>
+                            <label for="addon_id">{{ __('dashboard.addon_type') }}</label>
                             <select name="addon_id" id="addon_id" class="form-control">
                                 <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
                                 @foreach ($addons as $addon)
@@ -233,9 +236,18 @@
                             </select>
                         </div>
                         <div class="form-group mt-3">
-                            <label for="service_price">{{ __('dashboard.service_price') }}</label>
-                            <input type="number" step="0.01" name="service_price" id="service_price" class="form-control" value="0" readonly>
+                            <label for="addon_price">{{ __('dashboard.addon_price') }}</label>
+                            <input type="number" step="0.01" name="addon_price" id="addon_price" class="form-control" value="0" readonly>
                         </div>
+                        <div class="form-group mt-3">
+                            <label for="count">{{ __('dashboard.quantity') }}</label>
+                            <input type="number" name="count" id="count" class="form-control" value="1">
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="price">{{ __('dashboard.total_price') }}</label>
+                            <input type="number" step="0.01" name="price" id="price" class="form-control" value="0">
+                        </div>
+        
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                             <select name="payment_method" id="" class="form-select" required>
@@ -252,17 +264,9 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group mt-3">
-                            <label for="count">{{ __('dashboard.count') }}</label>
-                            <input type="number" name="count" id="count" class="form-control" value="1">
-                        </div>
-                        <div class="form-group mt-3">
-                            <label for="price">{{ __('dashboard.total_price') }}</label>
-                            <input type="number" step="0.01" name="price" id="price" class="form-control" value="0">
-                        </div>
 
                         <div class="form-group mt-3">
-                            <label for="description">{{ __('dashboard.description') }}</label>
+                            <label for="description">{{ __('dashboard.notes') }}</label>
                             <textarea name="description" id="description" class="form-control"></textarea>
                         </div>
                     </form>
@@ -278,14 +282,14 @@
 
 @push('js')
     <script>
-        $(document).ready(function() {
+    $(document).ready(function() {
             // Initialize select2
             $('#addon_id').select2();
 
             // Update service price field when addon is selected
             $('#addon_id').on('change', function() {
                 let price = $(this).find(':selected').data('price');
-                $('#service_price').val(price); // Display the service price in the new field
+        $('#addon_price').val(price ?? 0); // Display the service price in the correct field
                 updateTotalPrice();
             });
 
@@ -296,15 +300,17 @@
 
             function updateTotalPrice() {
                 let count = parseFloat($('#count').val());
-                let servicePrice = parseFloat($('#service_price').val()); // Get the service price from the new field
+                let servicePrice = parseFloat($('#addon_price').val()); // Get the service price from the correct field
+                count = isNaN(count) ? 0 : count;
+                servicePrice = isNaN(servicePrice) ? 0 : servicePrice;
                 let totalPrice = count * servicePrice;
-                $('#price').val(totalPrice); // Keep the total price logic
+                $('#price').val(totalPrice.toFixed(2)); // Keep the total price logic
             }
         });
 
         $(document).ready(function() {
             // Update service price when addon changes
-            $(document).on('change', 'select[name="addon_id"]', function() {
+            $(document).on('change', 'select[id^="edit_addon_id_"]', function() {
                 let selectedAddon = $(this).find(':selected');
                 let price = parseFloat(selectedAddon.data('price'));
                 let addonId = $(this).attr('id').split('_').pop();
@@ -313,15 +319,17 @@
             });
 
             // Update total price when count changes
-            $(document).on('keyup', 'input[name="count"]', function() {
+            $(document).on('keyup', 'input[id^="edit_count_"]', function() {
                 let addonId = $(this).attr('id').split('_').pop();
                 updateTotalPriceEdit(addonId);
             });
 
             // Function to update total price
             function updateTotalPriceEdit(addonId) {
-                let count = $('#edit_count_' + addonId).val();
+                let count = parseFloat($('#edit_count_' + addonId).val());
                 let servicePrice = parseFloat($('#edit_service_price_' + addonId).val()); // Get the service price from the new field
+                count = isNaN(count) ? 0 : count;
+                servicePrice = isNaN(servicePrice) ? 0 : servicePrice;
                 let totalPrice = (count * servicePrice).toFixed(2);
                 $('#edit_price_' + addonId).val(totalPrice); // Update the total price logic
             }

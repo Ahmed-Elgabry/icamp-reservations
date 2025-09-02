@@ -51,7 +51,7 @@
                         <!-- Submit Button -->
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">
-                                {{ isset($termsSittng) ? __('dashboard.update_terms') : __('dashboard.save_settings') }}
+                                {{  __('dashboard.update_terms_setting') }}
                             </button>
                         </div>
                     </div>
@@ -68,7 +68,6 @@
 @push('css')
 <!-- QuillJS styles -->
 <link href="https://unpkg.com/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
-<link href="https://unpkg.com/quill-better-table@1.2.10/dist/quill-better-table.min.css" rel="stylesheet">
 <!-- Google Fonts for Arabic -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,10 +162,22 @@
         stroke: #0d6efd;
     }
 
-    /* Custom icon hint for table button */
-    .ql-insertTable::before {
-        content: '▦';
-        font-size: 14px;
+    /* RTL list fixes: ensure caret appears after bullet/number in Arabic */
+    #quill_ar .ql-editor[dir="rtl"] ol,
+    #quill_ar .ql-editor[dir="rtl"] ul {
+        padding-right: 1.5em;
+        padding-left: 0;
+    }
+    #quill_ar .ql-editor[dir="rtl"] li {
+        direction: rtl;
+        text-align: right;
+        list-style: none; /* Quill uses pseudo markers */
+    }
+    #quill_ar .ql-editor[dir="rtl"] li::before {
+        float: right;
+        margin-right: -1.5em; /* pull marker to the right */
+        margin-left: .3em;
+        text-align: right;
     }
 
     /* Ensure Quill tooltip (link editor) is visible and inputs are wide */
@@ -250,7 +261,6 @@
 @push('js')
 <!-- QuillJS scripts -->
 <script src="https://unpkg.com/quill@1.3.7/dist/quill.min.js"></script>
-<script src="https://unpkg.com/quill-better-table@1.2.10/dist/quill-better-table.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -273,10 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
     Quill.register(Color, true);
     Quill.register(Background, true);
 
-    // Register better-table module if available
-    if (window.QuillBetterTable) {
-        Quill.register({'modules/better-table': QuillBetterTable}, true);
-    }
 
     var toolbarOptions = [
         [{ 'font': Font.whitelist }],
@@ -286,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
         [{ 'align': [] }],
-        ['link', 'clean', 'insertTable'] // insertTable is a custom handler
+    ['link', 'clean']
     ];
 
     function buildQuill(elementId, opts) {
@@ -294,23 +300,10 @@ document.addEventListener('DOMContentLoaded', function() {
             theme: 'snow',
             placeholder: opts.placeholder || '',
             formats: ['bold','italic','underline','strike','blockquote','color','background','header','list','align','link','font','size','direction'],
-            modules: Object.assign({
+            modules: {
                 toolbar: toolbarOptions,
                 history: { delay: 500, maxStack: 500, userOnly: true }
-            }, window.QuillBetterTable ? {
-                'better-table': {
-                    operationMenu: {
-                        items: {
-                            unmergeCells: {
-                                text: 'Unmerge Cells'
-                            }
-                        }
-                    }
-                },
-                keyboard: {
-                    bindings: window.QuillBetterTable ? QuillBetterTable.keyboardBindings : {}
-                }
-            } : {})
+            }
         });
 
         // Default directions and fonts
@@ -376,24 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        toolbar.addHandler('insertTable', function() {
-            try {
-                if (q.getModule('better-table')) {
-                    q.getModule('better-table').insertTable(3, 3);
-                } else {
-                    // Fallback: insert a basic HTML table
-                    var tableHtml = '<table><thead><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr></thead>' +
-                                    '<tbody><tr><td></td><td></td><td></td></tr>' +
-                                    '<tr><td></td><td></td><td></td></tr></tbody></table>';
-                    var range2 = q.getSelection(true) || { index: q.getLength(), length: 0 };
-                    q.clipboard.dangerouslyPasteHTML(range2.index, tableHtml);
-                    // Place cursor into the first cell
-                    setTimeout(function(){ q.setSelection(range2.index + 1, 0); }, 0);
-                }
-            } catch (e) {
-                console.warn('Table insertion failed:', e);
-            }
-        });
+    // Removed insertTable handler and dependency
 
         return q;
     }

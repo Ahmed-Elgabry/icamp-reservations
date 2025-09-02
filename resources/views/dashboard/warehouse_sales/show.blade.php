@@ -11,11 +11,11 @@
       <!-- customer information -->
                 <div class="pt-5 px-9 gap-2 gap-md-5">
                     <div class="row g-3 small">
-                        <div class="col-md-1">
+                        <div class="col-md-1 text-center">
                             <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
                             <div class="fw-bold">{{ $order->id }}</div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 text-center">
                             <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
                             <div class="fw-bold">{{ $order->customer->name }}</div>
                         </div>
@@ -53,6 +53,7 @@
               <th>{{ __('dashboard.quantity') }}</th>
               <th>{{ __('dashboard.total_amount') }}</th>
               <th>{{ __('dashboard.payment_method') }}</th>
+              <th>{{ __('dashboard.bank_account') }}</th>
               <th>{{ __('dashboard.verified') }}</th>
               <th>{{ __('dashboard.notes') }}</th>
               <th>{{ __('dashboard.created_at') }}</th>
@@ -67,6 +68,7 @@
               <td>{{ (int) $item?->quantity }}</td>
               <td class="fw-bold">{{ $item?->total_price % 1 === 0 ? (int) $item?->total_price : $item?->total_price }}</td>
               <td>{{__('dashboard.'. $item->payment_method )}}</td>
+              <td>{{ $item?->bank_account }}</td>
               <td>
                     {{ $item->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                     @if($item->verified)

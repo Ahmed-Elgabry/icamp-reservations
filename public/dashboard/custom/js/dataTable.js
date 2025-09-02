@@ -5,8 +5,16 @@ var KTAppEcommerceCategories = function () {
         t.querySelectorAll('[data-kt-ecommerce-category-filter="delete_row"]').forEach((t => {
             t.addEventListener("click", (function (t) {
                 t.preventDefault();
-                const n = t.target.closest("tr"),
-                o = n.querySelector('[data-kt-ecommerce-category-filter="category_name"]').innerText;
+                const n = t.target.closest("tr");
+                // Try to get a friendly label; fallback to first cell text or data-id
+                let o = '';
+                const nameEl = n.querySelector('[data-kt-ecommerce-category-filter="category_name"]');
+                if (nameEl && nameEl.innerText) {
+                    o = nameEl.innerText.trim();
+                } else {
+                    const firstCell = n.querySelector('td');
+                    o = (firstCell && firstCell.innerText ? firstCell.innerText.trim() : '') || ($(this).data('id') || '');
+                }
                 var item = $(this).data('id');
                 var url =  $(this).data('url');
                 Swal.fire({

@@ -5,9 +5,6 @@
 @section('content')
     <div class="post d-flex flex-column-fluid" id="kt_post">
         <div id="kt_content_container" class="container-xxl">
-
-            @include('dashboard.orders.nav')
-
             <div class="card mb-5 mb-xl-10">
                 <div class="card-header border-0 d-flex align-items-center justify-content-between">
                     <div class="card-title m-0">

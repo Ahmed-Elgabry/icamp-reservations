@@ -75,12 +75,13 @@ class BankAccountsController extends Controller
                 $query->where('account_id', $bank->id)
                       ->orWhere('receiver_id', $bank->id)
                       ->orWhere('sender_account_id', $bank->id);
-            })
-            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-                return $query->whereBetween('date', [$startDate, $endDate]);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+                    })
+                    ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                        return $query->whereBetween('date', [$startDate, $endDate]);
+                    })
+                    ->orderBy('created_at', 'desc')
+                    ->where("verified", 1)
+                    ->get();
 
         // $expenses = Expense::where('account_id', $bank->id)
         //     ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {

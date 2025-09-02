@@ -430,6 +430,7 @@ class OrderController extends Controller
             Transaction::create([
                 'order_addon_id' => $pivot->id,
                 'account_id' => $request->input('account_id'),
+                'order_id' => $order->id,
                 'amount' => $validatedData['price'],
                 'description' => $validatedData['description'],
                 'source' => 'reservation_addon',
@@ -778,17 +779,32 @@ class OrderController extends Controller
 
             if ($type == 'addon') {
                 $item = OrderAddon::findOrFail($id);
-            } elseif ($type == 'expense') {
+                $transaction = Transaction::where('order_addon_id', $item->id)->first();
+            } elseif($type == 'payment'){
+                \Log::info($id) ;
+                $item = Payment::findOrFail($id);
+                $transaction = Transaction::where('payment_id', $item->id)->first();
+            }
+            elseif ($type == 'expense') {
                 $item = Expense::findOrFail($id);
+                $transaction = Transaction::where('expense_id', $item->id)->first();
             } elseif ($type == 'warehouse_sales') {
+                \Log::info('Warehouse sales verification');
                 $item = OrderItem::findOrFail($id);
+                \Log::info($item);
+                $transaction = Transaction::where('order_item_id', $item->id)->first();
+
+                \Log::info($transaction);
             } else {
                 return redirect()->back()->with('error', __('dashboard.invalid_type'));
             }
+            \Log::info($item->verified);
+            $newVerifiedStatus = !$item->verified;
+            \Log::info($newVerifiedStatus);
+            $item->update(["verified"=>$newVerifiedStatus]);
 
-            $item->verified = !$item->verified;
-            $item->save();
-
+            $transaction->update(["verified"=>$newVerifiedStatus]);
+            
             \DB::commit();
             return redirect()->back()->with('success', __('dashboard.success'));
         } catch (\Exception $e) {
