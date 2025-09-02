@@ -14,16 +14,12 @@
                     @if(isset($order->signature_path))  
                         @can('orders.destroy')
                             <div class="mt-3">
-                                                                <form id="kt_ecommerce_add_product_form"
-                                      class="d-inline store"
-                                      action="{{ route('signature.destroy', $order) }}"
-                                                                            method="post"
-                                                                            data-success-message="@lang('dashboard.deleted_successfully')">
+                                 <form id="kt_ecommerce_add_product_form" class="d-inline store" action="{{ route('signature.destroy', $order) }}" method="post" data-success-message="@lang('dashboard.deleted_successfully')" data-kt-redirect="{{ request()->fullUrl() }}">
                                     @csrf
                                     @method('DELETE')
-                                                                        <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-danger btn-sm text-white d-inline-flex align-items-center gap-1">
-                                                                                <i class="fa fa-trash"></i>
-                                                                                {{ __('dashboard.delete') }}
+                                <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-danger btn-sm text-white d-inline-flex align-items-center gap-1">
+                                        <i class="fa fa-trash"></i>
+                                        {{ __('dashboard.delete') }}
                                     </button>
                                 </form>
                             </div>
@@ -39,15 +35,15 @@
                                 <div class="d-block">
                                     <div class="border rounded p-3 bg-light-subtle">
                                         <div class="row g-3 small">
-                                            <div class="col-md-4">
+                                            <div class="col-md-4 text-center">
                                                 <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
                                                 <div class="fw-bold">{{ $order->id }}</div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-4 text-center">
                                                 <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
                                                 <div class="fw-bold">{{ $order->customer->name }}</div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-4 text-center">
                                                 <div class="fw-semibold text-muted">{{ __('dashboard.phone')}}</div>
                                                 <div class="fw-bold">{{ $order->customer->phone }}</div>
                                             </div>
@@ -190,16 +186,9 @@
         }
     });
 
-    // Update UI in-place after successful delete (no redirect)
-    $(document).on('store:success', '#kt_ecommerce_add_product_form', function(e, response){
-        // Hide signature area and delete form
-        const $cardHeader = $(this).closest('.card').find('.card-header');
-        $(this).remove();
-        // Hide the image and signature text
-        const $sigBlock = $('.col-lg-8.d-flex.flex-column.gap-3.mb-2').first();
-        $sigBlock.find('img[alt="Signature"]').closest('.col-lg-8').length;
-        $sigBlock.find('img[alt="Signature"]').remove();
-        $sigBlock.find('.text-success.fw-bold').remove();
+    // As a fallback, reload the page on success in case redirect attribute is ignored
+    $(document).on('store:success', '#kt_ecommerce_add_product_form', function(){
+        window.location.reload();
     });
 </script>
 @endpush

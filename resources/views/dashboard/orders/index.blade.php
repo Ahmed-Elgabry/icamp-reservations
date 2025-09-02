@@ -92,7 +92,7 @@
                                 <td>{{ $orders->firstItem() + $loop->index }}</td>
                                 <td>
                                         @can('bookings.show')
-                                        <a href="{{ route('orders.show', $order->id) }}" class="badge bg-primary">{{ $order->id }}</a>
+                                        <a href="{{ route('orders.edit', $order->id) }}" class="badge bg-primary">{{ $order->id }}</a>
                                         @else
                                         <span>{{$order->id }}</span>
                                         @endcan

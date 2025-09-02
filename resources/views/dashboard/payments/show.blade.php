@@ -17,11 +17,11 @@
             <!-- customer information -->
                 <div class="pt-5 px-9 gap-2 gap-md-5">
                     <div class="row g-3 small">
-                        <div class="col-md-1">
+                        <div class="col-md-1 text-center">
                             <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
                             <div class="fw-bold">{{ $order->id }}</div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 text-center">
                             <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
                             <div class="fw-bold">{{ $order->customer->name }}</div>
                         </div>
@@ -125,11 +125,11 @@
                         @endforeach
                         <td>
                             {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
-                            @if($payment->verified)
-                                <a href="{{ route('payments.verified', $payment->id) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
-                            @else
-                                 <a href="{{ route('payments.verified', $payment->id) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }} <i class="fa fa-check"></i></a>
-                            @endif
+                              @if($payment->verified)
+                                    <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                @else
+                                    <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                @endif
                         </td>
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
@@ -202,7 +202,6 @@
                                 </div>
                                 
                                 <!--begin::Card body-->
-                                 this
                                  <input type="hidden" value="reservation_payments" name="source">
 
                                 <div class="mb-5 fv-row col-md-12">

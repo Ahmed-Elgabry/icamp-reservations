@@ -20,6 +20,10 @@ class Payment extends Model
     {
         return $this->belongsTo(BankAccount::class, 'account_id');
     }
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class , 'payment_id');
+    }
 
     public function scopeVerified()
     {

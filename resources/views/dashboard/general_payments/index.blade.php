@@ -89,159 +89,76 @@
                             <th class="text-nowrap">{{ __('dashboard.Insurance') }}</th>
                             <th class="text-nowrap">{{ __('dashboard.addons') }}</th>
                             <th class="text-nowrap">{{ __('dashboard.warehouse_sales') }}</th>
-                            <th class="text-nowrap">{{ __('dashboard.expenses') }}</th>
-                            <th class="text-nowrap">{{ __('dashboard.notes') }}</th>
+                            <th class="text-nowrap">{{ __('dashboard.total') }}</th>
                             <th class="text-nowrap">{{ __('dashboard.created_at') }}</th>
-                            <th class="text-end min-w-100px">@lang('dashboard.actions')</th>
                         </tr>
                     </thead>
 
                     <tbody class="fw-semibold text-gray-700">
-                    @forelse ($paymentsByOrder as $orderId => $orderPayments)
-                        @php
-                            $firstPayment  = $orderPayments->first();
-                            $order         = $firstPayment->order ?? null;
-                            $customerName  = $order?->customer?->name ?? null;
+                    @forelse ($orderSummaries as $summary)
 
-                            $paymentsCount = $orderPayments->count();
-                            $paymentsTotal = $orderPayments->sum('price');
+                        <tr data-order-id="{{ $summary->order->id }}">
 
-                            $addonsTotal = $order?->addons?->sum(fn($q) => $q->pivot->price) ?? 0;
-                            $itemsTotal  = $order?->items?->sum(fn($q) => $q->total_price) ?? 0;
-                            $expensesTotal = $order?->expenses?->sum(fn($q) => $q->price) ?? 0;
-
-                            $addonsCount   = $order?->addons?->count() ?? 0;
-                            $itemsCount    = $order?->items?->count() ?? 0;
-                            $expensesCount = $order?->expenses?->count() ?? 0;
-                        @endphp
-
-                        <tr data-id="{{ $firstPayment->id }}">
-
-                            {{-- Order Id --}}
-                            <td>
-                                @if($order)
-                                    <a href="{{ route('general_payments.show', $orderId) }}" class="text-hover-primary fw-bold">
-                                        #{{ $orderId }}
-                                    </a>
-                                    @if($customerName)
-                                        <div class="text-muted small">{{ $customerName }}</div>
-                                    @endif
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-
-                            {{-- Payments summary --}}
+                            {{-- Order ID with Customer Name --}}
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="fw-bold">{{ number_format($paymentsTotal, 2) }}</span>
-                                    <span class="badge badge-light-primary mt-1">{{ $paymentsCount }} {{ __('dashboard.Insurance') }}</span>
+                                    <a href="{{ route('general_payments.show', $summary->order->id) }}" class="fw-bold text-hover-primary">
+                                        #{{ $summary->order->id }}
+                                    </a>
+                                    <span class="text-muted small">{{ $summary->customer->name }}</span>
                                 </div>
                             </td>
 
+                            {{-- Insurance Payments --}}
+                            <td>
+                                @if($summary->insurance_count)
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold">{{ number_format($summary->insurance_total, 2) }}</span>
+                                        <span class="badge badge-light-primary">{{ $summary->insurance_count }} {{ __('dashboard.Insurance') }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+
+
                             {{-- Addons --}}
                             <td>
-                                @if($addonsCount)
-                                    <details>
-                                        <summary class="cursor-pointer">
-                                            <span class="badge badge-light">{{ $addonsCount }}</span>
-                                            <span class="text-muted mx-1">•</span>
-                                            <span class="fw-bold">{{ __('dashboard.total') }}: {{ number_format($addonsTotal, 2) }}</span>
-                                        </summary>
-                                        <div class="mt-2">
-                                            <ul class="mb-0 ps-3 small">
-                                                @foreach($order->addons as $addon)
-                                                    <li class="mb-1">
-                                                        {{ $addon->name ?? '—' }}
-                                                        <span class="text-muted">—</span>
-                                                        {{ number_format(isset($addon->pivot?->price) ? $addon->pivot->price : ($addon->price ?? 0), 2) }}
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    </details>
+                                @if($summary->addons_count)
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold">{{ number_format($summary->addons_total, 2) }}</span>
+                                        <span class="badge badge-light-primary">{{ $summary->addons_count }} {{ __('dashboard.addons') }}</span>
+                                    </div>
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif
                             </td>
 
-                            {{-- Items (warehouse sales) --}}
+                            {{-- Warehouse Sales --}}
                             <td>
-                                @if($itemsCount)
-                                    <details>
-                                        <summary class="cursor-pointer">
-                                            <span class="badge badge-light">{{ $itemsCount }}</span>
-                                            <span class="text-muted mx-1">•</span>
-                                            <span class="fw-bold">{{ __('dashboard.total') }}: {{ number_format($itemsTotal, 2) }}</span>
-                                        </summary>
-                                        <div class="mt-2">
-                                            <ul class="mb-0 ps-3 small">
-                                                @foreach($order->items as $item)
-                                                    @php
-                                                        $line = isset($item->total_price)
-                                                            ? (float)$item->total_price
-                                                            : (float)($item->price ?? 0) * (int)($item->qty ?? 1);
-                                                    @endphp
-                                                    <li class="mb-1">
-                                                        {{ $item->stock->name ?? $item->name ?? '—' }}
-                                                        <span class="text-muted">—</span>
-                                                        {{ number_format($line, 2) }}
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    </details>
+                                @if($summary->warehouse_count)
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold">{{ number_format($summary->warehouse_total, 2) }}</span>
+                                        <span class="badge badge-light-info">{{ $summary->warehouse_count }} {{ __('dashboard.sales') }}</span>
+                                    </div>
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif
                             </td>
 
-                            {{-- Expenses --}}
+
+                            {{-- Total --}}
                             <td>
-                                @if($expensesCount)
-                                    <details>
-                                        <summary class="cursor-pointer">
-                                            <span class="badge badge-light">{{ $expensesCount }}</span>
-                                            <span class="text-muted mx-1">•</span>
-                                            <span class="fw-bold">{{ __('dashboard.total') }}: {{ number_format($expensesTotal, 2) }}</span>
-                                        </summary>
-                                        <div class="mt-2">
-                                            <ul class="mb-0 ps-3 small">
-                                                @foreach($order->expenses as $ex)
-                                                    <li class="mb-1">
-                                                        {{ $ex->description ?? '—' }}
-                                                        <span class="text-muted">—</span>
-                                                        {{ number_format($ex->amount ?? $ex->price ?? 0, 2) }}
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    </details>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
+                                <span class="fw-bold text-success fs-6">{{ number_format($summary->grand_total, 2) }}</span>
                             </td>
 
-                            {{-- Notes (latest payment) --}}
-                            <td class="text-muted">{{ $firstPayment->notes }}</td>
-
-                            {{-- Latest payment time --}}
-                            <td class="text-muted">{{ optional($orderPayments->max('created_at'))->diffForHumans() }}</td>
-
-                            {{-- Actions (using latest payment id) --}}
-                            <td class="text-end">
-                                @can('payments.destroy')
-                                    <a href="#" class="btn btn-sm btn-light btn-danger"
-                                    data-kt-ecommerce-category-filter="delete_row"
-                                    data-url="{{ route('payments.destroy', $firstPayment->id) }}"
-                                    data-id="{{ $firstPayment->id }}">
-                                        @lang('dashboard.delete')
-                                    </a>
-                                @endcan
+                            {{-- Created At --}}
+                            <td class="text-muted">
+                                {{ $summary->latest_date ? \Carbon\Carbon::parse($summary->latest_date)->diffForHumans() : '—' }}
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="10" class="text-center text-muted py-10">— {{ __('dashboard.no_results') }} —</td></tr>
+                        <tr><td colspan="8" class="text-center text-muted py-10">— {{ __('dashboard.no_results') }} —</td></tr>
                     @endforelse
                     </tbody>
                 </table>

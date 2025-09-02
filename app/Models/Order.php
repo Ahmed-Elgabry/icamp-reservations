@@ -94,6 +94,10 @@ class Order extends Model
     {
         return $this->hasMany(PreLoginImage::class);
     }
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'order_id');
+    }
 
     public function PreLogoutImages()
     {
@@ -117,6 +121,7 @@ class Order extends Model
     public function addons()
     {
         return $this->belongsToMany(Addon::class, 'order_addon')
+            ->using(OrderAddon::class)
             ->withPivot('verified','count', 'price', 'description', 'id' , 'account_id' , 'payment_method')
             ->withTimestamps();
     }

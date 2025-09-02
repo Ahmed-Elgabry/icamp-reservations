@@ -24,18 +24,22 @@
             <th class="">{{ __('dashboard.process') }}</th>
 
             <th class="">{{ __('dashboard.date') }}</th>
-            @isset($pageTitle)
+            @if(isset($pageTitle))
                     @if($pageTitle === "transactions")
                         <th class="">{{ __('dashboard.bank_account') }}</th>
                     @endif
-            @endisset
+            @else
+                <th class="">{{ __('dashboard.transfer_from') }}</th>
+            @endif
+    
+
             <th class="">{{ __('dashboard.receiver') }}</th>
 
             <th class="">{{ __('dashboard.price') }}</th>
 
             <th class="">{{ __('dashboard.source') }}</th>
 
-            <th class="">{{ __('dashboard.notes') }}</th>
+            <!-- <th class="">{{ __('dashboard.notes') }}</th> -->
 
             <th class="">{{ __('dashboard.orders') }}</th>
 
@@ -89,7 +93,7 @@
             </td>
             
             <!--begin::Date-->
-            <td><a href="{{ $transaction->editRoute }}">{{ $transaction->date }}</a></td>
+            <td><a href="{{ $transaction->editRoute }}">{{ $transaction->created_at }}</a></td>
             @isset($pageTitle)
                 @if($pageTitle === "transactions")
                 <td>
@@ -107,20 +111,20 @@
                         </a>
                     </span>
                     @endif
-
+                    
                     @if(!$transaction->order_id && $transaction->type != 'Payment')
                     @if($transaction->senderAccount)
                         <span >
 
                             {{__('dashboard.debit')}}.
-
+                            
                         </span>
                     @endif
-
+                    
                     @endif
-
-
-
+                    
+                    
+                    
                     @if($transaction->account && $transaction->account->id && $transaction->order_id || $transaction->type == 'Payment')
 
                         <span>
@@ -131,11 +135,20 @@
 
                     @endif
 
-
-
+                    
+                    
                 </td>
                 @endif
             @endisset
+
+            <td>
+                @if($transaction->senderAccount)
+                <span class="badge  badge-primary">
+                            <a href="{{ $transaction->senderAccount ? route('bank-accounts.show', $transaction->senderAccount->id) : '#' }}" class="text-light">
+                                {{$transaction->senderAccount ? $transaction->senderAccount->name : ''}}
+                            </a>
+                </span>
+                @endif
             <td>
 
                 @if($transaction->receiver)
@@ -172,7 +185,7 @@
 
             </td>
 
-            <td>{{ $transaction->description }}</td>
+            <!-- <td>{{ $transaction->description }}</td> -->
 
             <td>{{ $transaction->order_id ? $transaction->order_id : '' }}</td>
 

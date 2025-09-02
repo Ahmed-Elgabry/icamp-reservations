@@ -45,20 +45,13 @@ class TermsSittngController extends Controller
     {
          $this->authorize('create', TermsSittng::class);
 
-        $data = $request->all();
 
-        // معالجة رفع الـ Logo
-        if ($request->hasFile('logo')) {
-            $data['logo'] = $request->file('logo')->store('logos', 'public'); // حفظ الصورة في مجلد public/logos
-        }
+         $termsSittng = TermsSittng::updateOrCreate([
+            "commercial_license_ar"=>$request->input('commercial_license_ar'),
+            "commercial_license_en"=>$request->input('commercial_license_en')
+         ]);
 
-        // معالجة رفع الـ Commercial License
-        if ($request->hasFile('commercial_license')) {
-            $data['commercial_license'] = $request->file('commercial_license')->store('licenses', 'public'); // حفظ الصورة في مجلد public/licenses
-        }
 
-        // تخزين البيانات في قاعدة البيانات
-        TermsSittng::create($data);
 
         return redirect()->route('terms_sittngs.create')->with('success', 'Settings saved successfully');
     }
@@ -88,21 +81,12 @@ class TermsSittngController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(TermsSittngRequest $request, TermsSittng $termsSittng)
+    public function update(TermsSittngRequest $request)
     {
+        $termsSittng = TermsSittng::first();
          $this->authorize('update', $termsSittng);
 
         $validatedData = $request->validated();
-
-        // معالجة رفع الصور
-        if ($request->hasFile('logo')) {
-            $logoFile = $request->file('logo');
-            $logoFilename = time() . '_logo.' . $logoFile->getClientOriginalExtension();
-            $logoPath = $logoFile->storeAs('logos', $logoFilename, 'public');
-            $validatedData['logo'] = $logoPath;
-        }
-
-        // تحديث السجل
         $termsSittng->update($validatedData);
 
         return redirect()->route('terms_sittngs.create')
