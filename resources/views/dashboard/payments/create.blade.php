@@ -18,15 +18,36 @@
             <!--begin::Card header-->
             <!--begin::Content-->
             <div id="kt_account_settings_profile_details" class="collapse show">
-                <form id="kt_ecommerce_add_product_form" 
-                      data-kt-redirect="{{  isset($payment) ? route('payments.edit',$payment->id) : route('payments.create', $bankAccount->id) }}" 
-                      action="{{ isset($payment) ? route('accounts.update', $payment->id) : route('accounts.store') }}" 
-                      method="post" enctype="multipart/form-data" 
-                      class="form d-flex flex-column flex-lg-row store">
-                    @csrf 
-                    @if(isset($payment)) @method('PUT') @endif
-
-                    <div class="card-body border-top p-9">
+                <form id="kt_ecommerce_add_product_form"
+                data-kt-redirect="{{  isset($payment) ? route('payments.edit',$payment->id) : (isset($bankAccount) ? route('payments.create', $bankAccount->id) : route('payments.create')) }}"
+                action="{{ isset($payment) ? route('accounts.update', $payment->id) : route('accounts.store') }}"
+                method="post" enctype="multipart/form-data"
+                class="form d-flex flex-column flex-lg-row store">
+                @csrf 
+                @if(isset($payment)) @method('PUT') @endif
+                
+                <div class="card-body border-top p-9">
+                        @if(isset($bankAccount))
+                            <input type="hidden" name="account_id" id="account_id" value="{{ $bankAccount->id }}">
+                        @else
+                            <div class="row mb-6">
+                                <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.bank_account') }}</label>
+                                <div class="col-lg-12">
+                                    <select name="account_id" id="account_id" class="form-select form-select-lg form-select-solid" required>
+                                        @if(isset($bankAccounts) && count($bankAccounts))
+                                            @foreach($bankAccounts as $account)
+                                                <option value="{{ $account->id }}"
+                                                    {{ (string)old('account_id', isset($payment) ? ($payment->account_id ?? null) : (isset($firstBankAccount) ? $firstBankAccount->id : null)) === (string)$account->id ? 'selected' : '' }}>
+                                                    {{ $account->name  }}
+                                                </option>
+                                            @endforeach
+                                        @else
+                                            <option value="" disabled selected>{{ __('dashboard.choose') }}</option>
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                        @endif
                         <!-- Input group for Total amount -->
                         <div class="row mb-5">
                             <div class="col-6">
@@ -42,10 +63,8 @@
                                 </div>
                             </div>
                         </div>
-                    
-                        
-                        <input type="hidden" name="account_id" id="account_id" value="{{ $bankAccount->id }}">
-                
+
+
                         <!-- Notes input -->
                         <div class="row mb-6">
                             <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.description') }}</label>

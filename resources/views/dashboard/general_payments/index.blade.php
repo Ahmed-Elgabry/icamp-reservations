@@ -112,7 +112,7 @@
                             {{-- Insurance Payments --}}
                             <td>
                                 @if($summary->insurance_count)
-                                    <div class="d-flex flex-column">
+                                    <div class="d-flex flex-column text-center">
                                         <span class="fw-bold">{{ number_format($summary->insurance_total, 2) }}</span>
                                         <span class="badge badge-light-primary">{{ $summary->insurance_count }} {{ __('dashboard.Insurance') }}</span>
                                     </div>
@@ -125,7 +125,7 @@
                             {{-- Addons --}}
                             <td>
                                 @if($summary->addons_count)
-                                    <div class="d-flex flex-column">
+                                    <div class="d-flex flex-column text-center">
                                         <span class="fw-bold">{{ number_format($summary->addons_total, 2) }}</span>
                                         <span class="badge badge-light-primary">{{ $summary->addons_count }} {{ __('dashboard.addons') }}</span>
                                     </div>
@@ -137,7 +137,7 @@
                             {{-- Warehouse Sales --}}
                             <td>
                                 @if($summary->warehouse_count)
-                                    <div class="d-flex flex-column">
+                                    <div class="d-flex flex-column text-center">
                                         <span class="fw-bold">{{ number_format($summary->warehouse_total, 2) }}</span>
                                         <span class="badge badge-light-info">{{ $summary->warehouse_count }} {{ __('dashboard.sales') }}</span>
                                     </div>

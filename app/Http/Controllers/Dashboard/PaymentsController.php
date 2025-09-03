@@ -124,9 +124,11 @@ class PaymentsController extends Controller
     {
         $bankAccounts = BankAccount::all();
         $payment = Transaction::findOrFail($id);
+        $firstBankAccount = BankAccount::first();
 
         return view('dashboard.payments.create', [
             'bankAccounts' => $bankAccounts,
+            'firstBankAccount' => $firstBankAccount,
             'payment' => $payment
         ]);
     }

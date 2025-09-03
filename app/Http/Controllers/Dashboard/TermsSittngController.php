@@ -31,7 +31,7 @@ class TermsSittngController extends Controller
     {
          $this->authorize('create', TermsSittng::class);
 
-        $termsSittng = TermsSittng::query()->first();
+        $termsSittng = TermsSittng::first();
 
         // عرض صفحة الإنشاء مع البيانات الحالية إن وجدت
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
@@ -45,15 +45,13 @@ class TermsSittngController extends Controller
     {
          $this->authorize('create', TermsSittng::class);
 
+         $termsSittng = TermsSittng::first();
 
-         $termsSittng = TermsSittng::create([
-            "commercial_license_ar"=>$request->input('commercial_license_ar'),
-            "commercial_license_en"=>$request->input('commercial_license_en')
-         ]);
+        $validatedData = $request->validated();
+        $termsSittng->update($validatedData);
 
-
-
-        return redirect()->route('terms_sittngs.create')->with('success', 'Settings saved successfully');
+        return redirect()->route('terms_sittngs.create')
+            ->with('success', 'تم تحديث الإعدادات بنجاح.');
     }
 
 
@@ -61,9 +59,10 @@ class TermsSittngController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TermsSittng $termsSittng)
+    public function show()
     {
          $this->authorize('view', $termsSittng);
+         $termsSittng = TermsSittng::first();
 
         return view('dashboard.TermsSittngs.create', compact('termsSittng'));
     }
