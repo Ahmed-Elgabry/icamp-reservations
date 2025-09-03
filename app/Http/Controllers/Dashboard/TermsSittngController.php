@@ -20,7 +20,7 @@ class TermsSittngController extends Controller
     {
          $this->authorize('viewAny', TermsSittng::class);
 
-        $termsSittngs = TermsSittng::all();
+        $termsSittngs = TermsSittng::first();
         return view('dashboard.TermsSittngs.create', compact('termsSittngs'));
     }
 
@@ -46,7 +46,7 @@ class TermsSittngController extends Controller
          $this->authorize('create', TermsSittng::class);
 
 
-         $termsSittng = TermsSittng::updateOrCreate([
+         $termsSittng = TermsSittng::create([
             "commercial_license_ar"=>$request->input('commercial_license_ar'),
             "commercial_license_en"=>$request->input('commercial_license_en')
          ]);
