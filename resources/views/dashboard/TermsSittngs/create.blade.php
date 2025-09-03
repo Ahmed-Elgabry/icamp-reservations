@@ -25,26 +25,24 @@
             <div id="kt_account_settings_profile_details" class="collapse show">
 
                 <form
-                    action="{{ isset($termsSittng) ? route('terms_sittngs.update', $termsSittng->id) : route('terms_sittngs.store') }}"
+                    action="{{  route('terms_sittngs.create') }}"
                     method="POST" enctype="multipart/form-data">
                     @csrf
-                    @if (\App\Models\TermsSittng::exists())
-                        @method('PUT')
-                    @endif
+                    @method('PUT')
                     <div class="card-body border-top p-9">
                         <div class="row">
                             <!-- Commercial License Field - Arabic (Quill) -->
                             <div class="form-group col-md-6 mb-3">
                                 <label for="quill_ar" class="form-label">{{ __('dashboard.commercial_license') }} ({{ __('dashboard.arabic') }})</label>
                                 <div id="quill_ar" class="quill-container"></div>
-                                <textarea name="commercial_license_ar" id="commercial_license_ar" class="d-none">{{ \App\Models\TermsSittng::exists() ? $termsSittng->commercial_license_ar : '' }}</textarea>
+                                <textarea name="commercial_license_ar" id="commercial_license_ar" class="d-none">{{ isset($termsSittng->commercial_license_ar) ? $termsSittng->commercial_license_ar : '' }}</textarea>
                             </div>
 
                             <!-- Commercial License Field - English (Quill) -->
                             <div class="form-group col-md-6 mb-3">
                                 <label for="quill_en" class="form-label">{{ __('dashboard.commercial_license') }} ({{ __('dashboard.english') }})</label>
                                 <div id="quill_en" class="quill-container"></div>
-                                <textarea name="commercial_license_en" id="commercial_license_en" class="d-none">{{ \App\Models\TermsSittng::exists() ? $termsSittng->commercial_license_en : '' }}</textarea>
+                                <textarea name="commercial_license_en" id="commercial_license_en" class="d-none">{{ isset($termsSittng->commercial_license_en) ? $termsSittng->commercial_license_en : '' }}</textarea>
                             </div>
 
                         </div>

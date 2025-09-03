@@ -245,7 +245,7 @@ return [
     'characters' => 'الكلمات',
     'terms' => ' الأحكام والشروط',
     'stocks' => 'المخزون',
-
+    
     'latest_payments' => 'أحدث المدفوعات',
     'view_all' => 'عرض الكل',
     'order' => 'الطلب',
