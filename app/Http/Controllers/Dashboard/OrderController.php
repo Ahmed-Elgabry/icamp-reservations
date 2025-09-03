@@ -416,9 +416,12 @@ class OrderController extends Controller
             'account_id' => $validatedData['account_id'] ?? null,
             'description' => $validatedData['description'] ?? '',
         ]);
+
         $order->update([
             'price' => $order->price
         ]);
+        BankAccount::findOrFail($validatedData['account_id'])->increment('balance', $validatedData['price']);
+
         // add transaction linked to the newly created pivot row
         // Fetch the latest pivot row for this order/addon pair (assumes 'order_addon' has an auto-increment 'id')
         $pivot = \App\Models\OrderAddon::where('order_id', $order->id)
@@ -453,7 +456,8 @@ class OrderController extends Controller
 
         // Get the existing addon data to find the transaction
         $existingAddon = \DB::table('order_addon')->where('id', $pivotId)->first();
-        
+        // discount the amount added in creation
+        $discountedBalance = $existingAddon->price ;
         // Update the addon in pivot table
         \DB::table('order_addon')->where('id', $pivotId)->update([
             'addon_id' => $validatedData['addon_id'],
@@ -463,7 +467,7 @@ class OrderController extends Controller
             'price' => $validatedData['price'],
             'description' => $validatedData['description'] ?? '',
         ]);
-        
+        BankAccount::findOrFail($validatedData['account_id'])->increment('balance', $validatedData['price'] - $discountedBalance);
             $transaction = \App\Models\Transaction::where('order_addon_id', $pivotId)->first();
             if ($transaction) {
                 // Update the transaction amount
@@ -504,7 +508,7 @@ class OrderController extends Controller
         $order->update([
             'price' => $order->price - $priceDifference
         ]);
-
+        BankAccount::findOrFail($existingAddon->account_id)->decrement('balance', $priceDifference);
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -804,6 +808,14 @@ class OrderController extends Controller
             $item->update(["verified"=>$newVerifiedStatus]);
 
             $transaction->update(["verified"=>$newVerifiedStatus]);
+            // Fire event so bank balance is adjusted by listener
+            event(new \App\Events\VerificationStatusChanged(match($type) {
+                'addon' => 'addon',
+                'payment' => 'payment',
+                'expense' => 'expense',
+                'warehouse_sales' => 'warehouse_sale',
+                default => $type,
+            }, $item, $newVerifiedStatus));
             
             \DB::commit();
             return redirect()->back()->with('success', __('dashboard.success'));

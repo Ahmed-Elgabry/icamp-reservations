@@ -80,7 +80,9 @@ class BankAccountsController extends Controller
                         return $query->whereBetween('date', [$startDate, $endDate]);
                     })
                     ->orderBy('created_at', 'desc')
-                    ->where("verified", 1)
+                    ->where('verified', "1")
+                    ->orWhere("source" , "general")
+                    ->orWhere("source" , "general_expenses")  
                     ->get();
 
         // $expenses = Expense::where('account_id', $bank->id)

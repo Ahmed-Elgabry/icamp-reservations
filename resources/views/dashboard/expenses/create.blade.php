@@ -60,7 +60,7 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
-
+                                                    <input type="hidden" name="source" id="source" value="general_expenses">
                                                     <div class="form-group col-6 mt-5">
                                                         <label for="expense_item_id" class="required">{{ __('dashboard.expense_item') }}</label>
                                                         <select name="expense_item_id" id="expense_item_id" class="form-control" required>

@@ -18,23 +18,25 @@ class TermsSittngController extends Controller
      */
     public function index()
     {
-         $this->authorize('viewAny', TermsSittng::class);
-
-        $termsSittngs = TermsSittng::first();
-        return view('dashboard.TermsSittngs.create', compact('termsSittngs'));
+        $this->authorize('viewAny', TermsSittng::class);
+        $termsSittings = TermsSittng::first();
+        \Log::info("1");
+        \Log::info($termsSittings);
+        return view('dashboard.TermsSittngs.create', compact('termsSittings'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($id = null)
     {
-         $this->authorize('create', TermsSittng::class);
+        $this->authorize('create', TermsSittng::class);
 
-        $termsSittng = TermsSittng::first();
-
+        // Load specific record if ID provided, otherwise the first (singleton behavior)
+        $termsSittings = $id ? TermsSittng::find($id) : TermsSittng::first();
+        \Log::info('3');
         // عرض صفحة الإنشاء مع البيانات الحالية إن وجدت
-        return view('dashboard.TermsSittngs.create', compact('termsSittng'));
+        return view('dashboard.TermsSittngs.create', compact('termsSittings'));
     }
 
 
@@ -43,13 +45,17 @@ class TermsSittngController extends Controller
      */
     public function store(TermsSittngRequest $request)
     {
-         $this->authorize('create', TermsSittng::class);
+        $this->authorize('create', TermsSittng::class);
+        $data = $request->validated();
 
-         $termsSittng = TermsSittng::first();
-
-        $validatedData = $request->validated();
-        $termsSittng->update($validatedData);
-
+        // For singleton settings: update the first row if exists, otherwise create
+        $terms = TermsSittng::first();
+        if ($terms) {
+            $terms->update($data);
+        } else {
+            $terms = TermsSittng::create($data);
+        }
+        \Log::info('2');
         return redirect()->route('terms_sittngs.create')
             ->with('success', 'تم تحديث الإعدادات بنجاح.');
     }
@@ -59,35 +65,35 @@ class TermsSittngController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show()
+    public function show($id)
     {
-         $this->authorize('view', $termsSittng);
-         $termsSittng = TermsSittng::first();
+        $termsSittings = TermsSittng::findOrFail($id);
+        $this->authorize('view', $termsSittings);
 
-        return view('dashboard.TermsSittngs.create', compact('termsSittng'));
+        return view('dashboard.TermsSittngs.create', compact('termsSittings'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TermsSittng $termsSittng)
+    public function edit($id)
     {
-         $this->authorize('update', $termsSittng);
+        $termsSittings = TermsSittng::findOrFail($id);
+        $this->authorize('update', $termsSittings);
 
-        return view('dashboard.TermsSittngs.create', compact('termsSittng'));
+        return view('dashboard.TermsSittngs.create', compact('termsSittings'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(TermsSittngRequest $request)
+    public function update(TermsSittngRequest $request, $id)
     {
-        $termsSittng = TermsSittng::first();
-         $this->authorize('update', $termsSittng);
-
-        $validatedData = $request->validated();
-        $termsSittng->update($validatedData);
-
+        $termsSittings = TermsSittng::findOrFail($id);
+        $this->authorize('update', $termsSittings);
+        $data = $request->validated();
+        \Log::info('4');
+        $termsSittings->update($data);
         return redirect()->route('terms_sittngs.create')
             ->with('success', 'تم تحديث الإعدادات بنجاح.');
     }
@@ -125,11 +131,12 @@ class TermsSittngController extends Controller
      * Remove the specified resource from storage.
      */
 
-    public function destroy(TermsSittng $termsSittng)
+    public function destroy($id)
     {
-         $this->authorize('delete', $termsSittng);
+        $termsSittings = TermsSittng::findOrFail($id);
+        $this->authorize('delete', $termsSittings);
 
-        $termsSittng->delete();
+        $termsSittings->delete();
 
         return redirect()->route('terms_sittngs.create')
             ->with('success', 'Terms setting deleted successfully.');

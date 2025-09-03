@@ -1067,6 +1067,7 @@ return [
     'direction' => 'rtl',
     'Reservation_info' => 'بيانات الحجز',
     'reservation_expenses' => 'الحجوزات - المصاريف',
+    'add_expenses' => 'إضافة مصاريف',
     "general_expenses" => "عام",
     'reservation_addon' => 'الحجوزات - الإضافات',
     'warehouse_sale' => 'مبيعات المخزن',

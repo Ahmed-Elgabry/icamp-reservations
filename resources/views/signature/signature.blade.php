@@ -220,7 +220,14 @@
 
         @if ($terms)
             <div class="alert alert-warning">
-                <strong>تنبيه:</strong> {!! $terms?->commercial_license_ar !!}
+                <div style="margin-bottom: 8px;">
+                    <strong>تنبيه:</strong> {!! $terms?->commercial_license_ar !!}
+                </div>
+                @if($terms?->commercial_license_en)
+                    <div style="border-top: 1px solid rgba(180, 83, 9, 0.2); padding-top: 8px; margin-top: 8px;">
+                        <strong>Notice:</strong> {!! $terms?->commercial_license_en !!}
+                    </div>
+                @endif
             </div>
         @endif
 

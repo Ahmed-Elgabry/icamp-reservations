@@ -14,7 +14,7 @@
                 <!--begin::Card title-->
                 <div class="card-title m-0">
                     <h3 class="fw-bolder m-0">
-                        {{ \App\Models\TermsSittng::exists() ? __('dashboard.update_terms_setting') : __('dashboard.create_terms_setting') }}
+                        {{  __('dashboard.update_terms_setting')  }}
                     </h3>
                 </div>
                 <!--end::Card title-->
@@ -25,24 +25,26 @@
             <div id="kt_account_settings_profile_details" class="collapse show">
 
                 <form
-                    action="{{  route('terms_sittngs.create') }}"
+                    action="{{ optional($termsSittings)->id ? route('terms_sittngs.update', optional($termsSittings)->id) : route('terms_sittngs.store') }}"
                     method="POST" enctype="multipart/form-data">
                     @csrf
-                    @method('PUT')
+                    @if(optional($termsSittings)->id)
+                        @method('PUT')
+                    @endif
                     <div class="card-body border-top p-9">
-                        <div class="row">
+                        <div class="row terms-editors">
                             <!-- Commercial License Field - Arabic (Quill) -->
                             <div class="form-group col-md-6 mb-3">
                                 <label for="quill_ar" class="form-label">{{ __('dashboard.commercial_license') }} ({{ __('dashboard.arabic') }})</label>
                                 <div id="quill_ar" class="quill-container"></div>
-                                <textarea name="commercial_license_ar" id="commercial_license_ar" class="d-none">{{ isset($termsSittng->commercial_license_ar) ? $termsSittng->commercial_license_ar : '' }}</textarea>
+                                <textarea name="commercial_license_ar" id="commercial_license_ar" class="d-none">{{ optional($termsSittings)->commercial_license_ar ?? '' }}</textarea>
                             </div>
 
                             <!-- Commercial License Field - English (Quill) -->
                             <div class="form-group col-md-6 mb-3">
                                 <label for="quill_en" class="form-label">{{ __('dashboard.commercial_license') }} ({{ __('dashboard.english') }})</label>
                                 <div id="quill_en" class="quill-container"></div>
-                                <textarea name="commercial_license_en" id="commercial_license_en" class="d-none">{{ isset($termsSittng->commercial_license_en) ? $termsSittng->commercial_license_en : '' }}</textarea>
+                                <textarea name="commercial_license_en" id="commercial_license_en" class="d-none">{{ optional($termsSittings)->commercial_license_en ?? '' }}</textarea>
                             </div>
 
                         </div>
@@ -100,6 +102,11 @@
         line-height: 1.6;
         padding: 1rem;
     }
+
+    /* Keep the two editors aligned at the same vertical start */
+    .terms-editors .form-label { display: block; min-height: 24px; margin-bottom: .5rem; }
+    .terms-editors .quill-container { margin-top: 0; }
+    .terms-editors .form-group { display: flex; flex-direction: column; }
 
     /* Arabic RTL styles */
     #quill_ar .ql-editor {
@@ -377,8 +384,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var quillEn = buildQuill('#quill_en', { rtl: false, placeholder: 'Write terms and conditions in English...' });
 
     // Load initial content from hidden textareas
-    var initialAr = @json(old('commercial_license_ar', isset($termsSittng) ? ($termsSittng->commercial_license_ar ?? '') : ''));
-    var initialEn = @json(old('commercial_license_en', isset($termsSittng) ? ($termsSittng->commercial_license_en ?? '') : ''));
+    var initialAr = @json(old('commercial_license_ar', optional($termsSittings)->commercial_license_ar ?? ''));
+    var initialEn = @json(old('commercial_license_en', optional($termsSittings)->commercial_license_en ?? ''));
     if (initialAr) quillAr.clipboard.dangerouslyPasteHTML(initialAr);
     if (initialEn) quillEn.clipboard.dangerouslyPasteHTML(initialEn);
 
