@@ -1336,7 +1336,13 @@ Route::get('/clear', function () {
 
 Route::resource('general_payments', GeneralPaymentsController::class);
 
+// Custom create route with optional id for terms settings
+Route::get('terms_sittngs/create/{id?}', [TermsSittngController::class, 'create'])
+    ->name('terms_sittngs.create')
+    ->middleware(['auth']);
+// Other resource routes (excluding create) remain
 Route::resource('terms_sittngs', TermsSittngController::class)
+    ->except(['create'])
     ->middleware(['auth']);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Exports\ExpensesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use DB;
 
 
 class ExpensesController extends Controller
@@ -135,44 +136,64 @@ class ExpensesController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $date = $request->date ? $request->date : date('y-m-d');
-        $bankAccount = BankAccount::findOrFail($request->account_id);
-        $bankAccount->update([
-            'balance' => $bankAccount->balance - $request->price
-        ]);
+        DB::beginTransaction();
+        
+        try {
+            $date = $request->date ? $request->date : date('y-m-d');
+            $bankAccount = BankAccount::findOrFail($request->account_id);
+            if($request->statement !== "reservation_expenses"){
+                $bankAccount->update([
+                    'balance' => $bankAccount->balance - $request->price
+                ]);
+            }
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('expenses', 'public');
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('expenses', 'public');
+            }
+
+            $expense = Expense::create([
+                'expense_item_id' => $request->expense_item_id,
+                'account_id' => $request->account_id,
+                'price' => $request->price,
+                'payment_method' => $request->payment_method,
+                'date' => $date,
+                'statement' => $request->statement,
+                'notes' => $request->notes,
+                'image' => $path ?? null,
+                'order_id' => $request->order_id,
+                'source' => $request->source,
+            ]);
+            
+            Transaction::create([
+                'account_id' => $request->account_id,
+                'amount' => $request->price,
+                'order_id' => $request->order_id,
+                'type' => 'debit',
+                'date' => $date,
+                'description' => 'Expense: ' . $request->statement,
+                'source' => $request->source,
+                "expense_id"=>$expense->id
+            ]);
+
+            DB::commit();
+
+            // that mean he is get form orders page
+            if (!$request->date) {
+                return back()->withSuccess(__('dashboard.success'));
+            }
+
+            return response()->json(['message' => 'Expense created successfully']);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Expense store transaction failed: ' . $e->getMessage());
+            
+            if (!$request->date) {
+                return back()->withErrors(['error' => 'Expense creation failed']);
+            }
+            
+            return response()->json(['message' => 'Expense creation failed'], 500);
         }
-
-        $expense = Expense::create([
-            'expense_item_id' => $request->expense_item_id,
-            'account_id' => $request->account_id,
-            'price' => $request->price,
-            'payment_method' => $request->payment_method,
-            'date' => $date,
-            'statement' => $request->statement,
-            'notes' => $request->notes,
-            'image' => $path ?? null,
-            'order_id' => $request->order_id,
-            'source' => $request->source,
-        ]);
-        Transaction::create([
-            'account_id' => $request->account_id,
-            'amount' => $request->price,
-            'type' => 'debit',
-            'date' => $date,
-            'description' => 'Expense: ' . $request->statement,
-            'source' => $request->source,
-            "expense_id"=>$expense->id
-        ]);
-
-        // that mean he is get form orders page
-        if (!$request->date) {
-            return back()->withSuccess(__('dashboard.success'));
-        }
-
-        return response()->json();
     }
 
 
@@ -198,6 +219,7 @@ class ExpensesController extends Controller
     {
         $expense = Expense::findOrFail($expense);
         $this->authorize('update', $expense);
+        
         $data = $request->validate([
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
@@ -209,33 +231,53 @@ class ExpensesController extends Controller
             'image' => 'nullable|image',
             'notes' => 'nullable|string',
         ]);
-        $data['date'] = $request->date ? $request->date : $expense->date;
-        $bankAccount = BankAccount::findOrFail($request->account_id);
-        $bankAccount->update([
-            'balance' => $bankAccount->balance + $expense->price
-        ]);
-        $bankAccount->update([
-            'balance' => $bankAccount->balance - $request->price
-        ]);
-        if ($request->hasFile('image')) {
-            if ($expense->image) {
-                \Storage::disk('public')->delete($expense->image);
+        
+        DB::beginTransaction();
+        
+        try {
+            $data['date'] = $request->date ? $request->date : $expense->date;
+            if ($request->statement !== "reservation_expenses") {
+                $bankAccount = BankAccount::findOrFail($request->account_id);
+                $bankAccount->update([
+                    'balance' => ($bankAccount->balance + $expense->price) - $data['price']
+                ]);
+            }            
+            if ($request->hasFile('image')) {
+                if ($expense->image) {
+                    \Storage::disk('public')->delete($expense->image);
+                }
+                $data['image'] = $request->file('image')->store('expenses', 'public');
             }
-            $data['image'] = $request->file('image')->store('expenses', 'public');
+            
+            $expense->update($data);
+            
+            Transaction::where('expense_id', $expense->id)->update([
+                'account_id' => $request->account_id,
+                'amount' => $request->price,
+                'type' => 'debit',
+                'date' => $data['date'],
+                'description' => 'Expense: ' . $request->statement,
+                'source' => $request->source,
+            ]);
+            
+            DB::commit();
+            
+            if (!$request->date) {
+                return back()->withSuccess(__('dashboard.success'));
+            }
+            
+            return response()->json(['message' => 'Expense updated successfully']);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Expense update transaction failed: ' . $e->getMessage());
+            
+            if (!$request->date) {
+                return back()->withErrors(['error' => 'Expense update failed']);
+            }
+            
+            return response()->json(['message' => 'Expense update failed'], 500);
         }
-        $expense->update($data);
-        Transaction::where('expense_id', $expense->id)->update([
-            'account_id' => $request->account_id,
-            'amount' => $request->price,
-            'type' => 'debit',
-            'date' => $data['date'],
-            'description' => 'Expense: ' . $request->statement,
-            'source' => $request->source,
-        ]);
-        if (!$request->date) {
-            return back()->withSuccess(__('dashboard.success'));
-        }
-        return response()->json();
     }
 
     /**
@@ -247,9 +289,25 @@ class ExpensesController extends Controller
     public function destroy($expense)
     {
         $expense = Expense::findOrFail($expense);
-        $expense->delete();
         $this->authorize('delete', $expense);
-        $expense->delete();
-        return response()->json(["success" => true,"deleted_expense_amount" => $expense->price]);
+        
+        DB::beginTransaction();
+        
+        try {
+            if($expense->statement !== "reservation_expenses"){
+                $bankAccount = BankAccount::findOrFail($expense->account_id);
+                $bankAccount->increment('balance', $expense->price);
+            }
+
+            $expense->delete();
+            
+            DB::commit();
+            return response()->json(["success" => true,"deleted_expense_amount" => $expense->price]);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Expense destroy transaction failed: ' . $e->getMessage());
+            return response()->json(["success" => false, "message" => "Delete failed"], 500);
+        }
     }
 }

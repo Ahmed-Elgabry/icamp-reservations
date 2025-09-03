@@ -82,9 +82,11 @@
                             <td>{{$expense->date }} </td>
                             <td>{{$expense->price}} </td>
                             @if($expense->source === 'reservation_expenses')
-                                <td>{{__('dashboard.reservations')}}-{{$expense->order->id }} </td>
+                                <td>{{ __('dashboard.reservations') }}-{{ optional($expense->order)->id  }} </td>
                             @elseif($expense->source === 'general_expenses')
-                            <td>{{__('dashboard.general')}}</td>
+                                <td>{{ __('dashboard.general') }}</td>
+                            @else
+                                <td>{{ __('dashboard.not_specified') }}</td>
                             @endif
                                 <td>{{$expense->payment_method ? __('dashboard.' . $expense->payment_method) : __('dashboard.not_specified')}} </td>
                                 <td>{{$expense->notes }} </td>
