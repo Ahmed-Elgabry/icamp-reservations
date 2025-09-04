@@ -100,15 +100,23 @@
                                                         <input type="date" name="date" id="date" class="form-control" value="{{ isset($expense) ? $expense->date : (old('date') ? old('date') : date('Y-m-d')) }}" required>
                                                     </div>
 
-                                                    <div class="form-group col-6 mt-5">
-                                                        <label for="image">@lang('dashboard.upload_or_take_image')</label>
-                                                        <input type="file" name="image" id="image"
-                                                            class="form-control"
-                                                            accept="image/*"
-                                                            capture="environment">
-                                                    </div>
-
-                                                    <div class="form-group col-6 mt-5">
+                                    <div class="form-group col-6 mt-5">
+                                        <label for="image">@lang('dashboard.upload_or_take_image')</label>
+                                        <input type="file" name="image" id="image"
+                                            class="form-control"
+                                            accept="image/*"
+                                            capture="environment">
+                                        @if(isset($expense) && $expense->image_path)
+                                            <div class="mt-2">
+                                                <p class="text-muted">@lang('dashboard.existing_attachments'):</p>
+                                                <img src="{{ asset('storage/' . $expense->image_path) }}" alt="@lang('dashboard.attached')" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">
+                                                <br>
+                                                <button type="button" class="btn btn-sm btn-primary mt-2" onclick="previewImage('{{ asset('storage/' . $expense->image_path) }}')">
+                                                    <i class="fas fa-eye"></i> @lang('dashboard.view')
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>                                                    <div class="form-group col-6 mt-5">
                                                         <label for="price" class="required">{{ __('dashboard.amount') }}</label>
                                                         <input type="number" step="any" name="price" id="price" class="form-control" required value="{{ isset($expense) ? $expense->price : old('price') }}">
                                                     </div>
@@ -160,6 +168,27 @@
     </div>
     <!--end::Content-->
 
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewModalLabel">@lang('dashboard.attached')</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" src="" alt="@lang('dashboard.attached')" class="img-fluid" style="max-height: 500px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('dashboard.close')</button>
+                <a id="downloadImageBtn" href="" download class="btn btn-primary">
+                    <i class="fas fa-download"></i> @lang('dashboard.save_changes')
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @endsection
 @push('css')
@@ -201,5 +230,15 @@
 
 
     $("#expense_item_id").select2();
+
+    // Image preview function
+    function previewImage(imageSrc) {
+        document.getElementById('previewImage').src = imageSrc;
+        document.getElementById('downloadImageBtn').href = imageSrc;
+        
+        // Show the modal
+        var modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        modal.show();
+    }
     </script>
 @endpush

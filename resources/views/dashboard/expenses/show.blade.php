@@ -184,7 +184,7 @@
                                 <!--begin::Card body-->
                                  <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.statement') }}</label>
-                                    <input name="statement" id="" class="form-control" required>
+                                    <input name="statement" id="" class="form-control" value="{{ $payment->statement }}" required>
                                 </div>
                                 <input type="hidden" value="reservation_expenses" name="source">
                                 <div class="mb-5 fv-row col-md-12">

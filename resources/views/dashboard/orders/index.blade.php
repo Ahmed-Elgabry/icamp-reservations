@@ -144,21 +144,21 @@
                                 <!--end::Time From-->
 
                                 <!--begin::Payments-->
-                                @php $totalPrice = ($order->price + $order->deposit + $order->insurance_amount + $order->addons->sum('price')) @endphp
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format($order->verified_payments_sum) }}
+                                        {{ number_format( $order->verifiedPayments()->sum("price")) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
-                                    {{ number_format($totalPrice) }}
+                                    {{ number_format($order->totalPayments()) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
                                         @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
                                         @else
-                                            {{ number_format($totalPrice - $order->payments->sum('price')) }}
+                                        {{ number_format( $order->totalPayments() - $order->verifiedPayments()->sum("price")) }}
+                                        
                                         @endif
                                     </span>
                                 </td>

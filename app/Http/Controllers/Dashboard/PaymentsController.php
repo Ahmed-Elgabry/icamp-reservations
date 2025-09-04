@@ -33,9 +33,13 @@ class PaymentsController extends Controller
                 return $query->whereBetween('date', [$startDate, $endDate]);
             })
             ->orderBy('created_at', 'desc')
-            ->where('verified', "1")
-            ->orWhere("source" , "general")
-            ->orWhere("source" , "general_expenses")          
+            ->where(function ($query) {
+                $query->where('verified', "1")
+                      ->whereHas('order', fn($q) => $q->where('insurance_status', '1'))
+                      ->orWhere("source", "charge_account")
+                      ->orWhere("source", "general_payments_deposit");
+            }) // this is the transaction source for the page which have not approved button
+            ->where("amount", ">", 0)
             ->get();
         $transactions = $transactions->sortByDesc('created_at');
 
@@ -104,9 +108,11 @@ class PaymentsController extends Controller
         $this->authorize('create', Payment::class);
         $selectedBank = $bankAccount ? BankAccount::findOrFail($bankAccount) : null;
         $bankAccounts = BankAccount::all();
+        $recentPayments = Transaction::with('account')->where('source', 'add_payment')->latest()->limit(10)->get();
         return view('dashboard.payments.create', [
             'bankAccount' => $selectedBank,
-            'bankAccounts' => $bankAccounts
+            'bankAccounts' => $bankAccounts,
+            'recentPayments' => $recentPayments
         ]);
     }
 
@@ -141,19 +147,25 @@ public function accountsStore(Request $request)
         'receiver_id' => 'nullable|exists:bank_accounts,id',
         'account_id' => 'required|exists:bank_accounts,id',
         'date' => 'nullable|date',
+        'source' => 'nullable|string',
         'description' => 'nullable|string',
+        'image' => 'nullable|image',
     ]);
     
     DB::beginTransaction();
     
     try {
         $validatedData = array_merge($validatedData, [
-            'source' => "general",
             'type' => "deposit",
             'verified' => true , 
         ]);
-        
-        $payment = Transaction::create($validatedData);
+        // Handle optional photo
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('payments/images', 'public');
+            $validatedData['image_path'] = $path;
+        }
+        $payment = Payment::create($validatedData);
+        $transaction = $payment->transaction()->create($validatedData);
         $bankAccount = BankAccount::find($request->account_id);
         $bankAccount->increment('balance', $request->amount);
 
@@ -224,11 +236,18 @@ public function moneyTransfer(Request $request)
             'account_id' => 'required|exists:bank_accounts,id',
             'date' => 'nullable|date',
             'description' => 'nullable|string',
+            'photo' => 'nullable|image',
         ]);
 
         DB::beginTransaction();
         
         try {
+            // Handle optional replacement photo
+            if ($request->hasFile('photo')) {
+                $path = $request->file('photo')->store('payments/photos', 'public');
+                $validatedData['photo_path'] = $path;
+            }
+
             $payment->update($validatedData);
             $oldBankAccount = BankAccount::find($account_id);
 

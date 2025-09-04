@@ -9,7 +9,7 @@ class Payment extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $fillable = ["order_id",'account_id' , 'price'  ,'payment_method','statement','notes', "verified","account_id"];
+    protected $fillable = ["order_id",'account_id' , 'price' ,"insurance_status" ,'payment_method','statement','notes', "verified","account_id", "image_path"];
 
     public function order()
     {
@@ -28,5 +28,10 @@ class Payment extends Model
     public function scopeVerified()
     {
         return $this->where('verified', true);
+    }
+
+    public function isInsuranceReturned()
+    {
+        return $this->insurance_status === 'returned';
     }
 }

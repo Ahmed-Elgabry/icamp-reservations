@@ -3,25 +3,19 @@
 namespace App\Listeners;
 
 use App\Events\VerificationStatusChanged;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\DB;
 
-class ApplyVerificationBankAdjustment implements ShouldQueue
+class ApplyVerificationBankAdjustment 
 {
-    use InteractsWithQueue;
-
     /**
-     * Ensure this queued listener runs only after surrounding DB transactions commit.
+     * Handle the verification status changed event.
      */
-    public $afterCommit = true;
-
     public function handle(VerificationStatusChanged $event): void
     {
         $item = $event->item;
         $action = $event->action; // 'addon' | 'payment' | 'expense' | 'warehouse_sale'
-        // Derive verification state directly from the item
-        $verified = $this->resolveVerified($item);
+        // Use the verification state from the event, not from the item
+        $verified = $event->verified;
 
         // Expect models to expose: account_id, total/amount/price
         try {
@@ -30,7 +24,6 @@ class ApplyVerificationBankAdjustment implements ShouldQueue
 
             $amount = $this->resolveAmount($action, $item);
             if ($amount <= 0) return;
-
 
             DB::beginTransaction();
 
@@ -52,6 +45,11 @@ class ApplyVerificationBankAdjustment implements ShouldQueue
                 }else {
                     $account->decrement('balance', $amount);
                 }
+            }
+            if ($action === 'warehouse_sales' && $verified) {
+                $item->stock->decrement('quantity', $item->quantity);
+            } elseif ($action === 'warehouse_sales' && !$verified) {
+                $item->stock->increment('quantity', $item->quantity);
             }
 
             DB::commit();

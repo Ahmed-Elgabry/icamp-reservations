@@ -83,7 +83,7 @@ class Order extends Model
         return $this->belongsToMany(Service::class, 'order_service')->withPivot('price');
     }
 
-
+ 
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'order_stock')
@@ -108,6 +108,10 @@ class Order extends Model
     {
         return $this->hasMany(Payment::class);
     }
+    public function verifiedPayments()
+    {
+        return $this->payments()->where('verified', true);
+    }
 
     public function paymentLinks()
     {
@@ -125,6 +129,14 @@ class Order extends Model
             ->withPivot('verified','count', 'price', 'description', 'id' , 'account_id' , 'payment_method')
             ->withTimestamps();
     }
+    public function verifiedAddons()
+    {
+       return $this->addons()->wherePivot('verified', true);
+    }
+    public function verifiedInsurance()
+    {
+        return $this->verifiedPayments()->where('statement', 'the_insurance');
+    }
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -133,7 +145,6 @@ class Order extends Model
     {
         return $this->hasOne(OrderRate::class, 'order_id');
     }
-
 
     public function reports()
     {
@@ -144,7 +155,10 @@ class Order extends Model
     {
         return $this->hasMany(Expense::class);
     }
-
+    public function verifiedExpenses()
+    {
+        return $this->expenses()->where('verified', true);
+    }
     public function setImageBeforeReceivingAttribute($value)
     {
         if ($value) {
@@ -158,7 +172,7 @@ class Order extends Model
             return asset('storage/' . $value);
         }
     }
-
+    
     public function setImageAfterDeliveryAttribute($value)
     {
         if ($value) {
@@ -185,11 +199,38 @@ class Order extends Model
         });
     }
 
-     public function items()       { return $this->hasMany(OrderItem::class); }
-     public function stocksItems()      { return $this->belongsToMany(Stock::class, 'order_items')
-                                                  ->withPivot(['unit_price','quantity'])
-                                                  ->using(OrderItemPivot::class)
-                                                  ->withTimestamps(); }
+     public function items() { 
+        return $this->hasMany(OrderItem::class);
+     }
+     // after partial confiscated the confiscated amount is set to  transaction related to any payment to order
+    public function insuranceFromTransaction()
+    {
+        $payment = $this->verifiedPayments()->where('statement', 'the_insurance')->first();
+        return $payment && $payment->transaction ? $payment->transaction->amount : 0;
+     }
+     public function verifiedInsuranceAmount()
+     {
+         return $this->verifiedPayments()->where('statement', 'the_insurance')->sum('price');
+     }
+     public function verifiedWarehouseSalesAmount(){
+        return $this->verifiedPayments()->where('statement', 'the_warehouse_sales')->sum('price');
+     }
+     // the total payment calucate the amount of payments except the deposit and addons and warehouse sales
+     public function totalPayments() {
+        $payments = $this->payments()->where('statement', '!=', 'deposit')->where("verified", "1")->sum('price');
+        $addons = $this->verifiedAddons()->sum('order_addon.price');
+        $warehouseSales = $this->verifiedWarehouseSalesAmount();
+        return $this->price + $payments + $addons + $warehouseSales;
+     }
+     public function verifiedItems() {
+        return $this->items(OrderItem::class)->where('verified', true);
+     } 
+     public function stocksItems() { 
+         return $this->belongsToMany(Stock::class, 'order_items')
+             ->withPivot(['unit_price','quantity'])
+             ->using(OrderItemPivot::class)
+             ->withTimestamps();
+     }
 
     public function getItemsTotalAttribute()
     {

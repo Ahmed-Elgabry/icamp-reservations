@@ -9,7 +9,28 @@ class Transaction extends Model
 {
     use HasFactory;
     protected $guarded = [];
-
+    protected $fillable = [
+        'account_id',
+        'sender_account_id', 
+        'receiver_id',
+        'amount',
+        'type',
+        'source',
+        'date',
+        'verified',
+        'description',
+        'verified',
+        'order_id',
+        'order_addon_id',
+        'customer_id',
+        'payment_id',
+        'expense_id',
+        'order_item_id',
+        'general_payment_id',
+        'image_path',
+        'stock_id'
+        ];
+    
      // Define the sender relationship
     public function account()
     {
@@ -19,7 +40,10 @@ class Transaction extends Model
     {
         return $this->belongsTo(BankAccount::class, 'sender_account_id');
     }
-    
+       public function isInsuranceReturned()
+    {
+        return $this->payment()->where('insurance_status', 'returned')->exists();
+    }
     // Define the receiver relationship
     public function receiver()
     {
@@ -58,6 +82,9 @@ class Transaction extends Model
         return '#';
     }
 
+    public function payment(){
+        return $this->belongsTo(Payment::class);
+    }
     // Accessor for $transaction->destroyRoute
     public function getDestroyRouteAttribute(): string
     {

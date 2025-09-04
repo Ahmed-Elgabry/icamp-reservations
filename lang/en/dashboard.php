@@ -7,6 +7,8 @@ return [
     'Duration of hours' => 'Duration (hours)',
     'expenses' => 'Expenses',
     'bank-accounts' => 'Bank Accounts',
+    'account_charge' => 'general',
+    'add_payment'=> 'general',
     'expense-items' => 'Expense Items',
     'name' => 'Account Name',
     'user_answers_list' => 'User Answers List',
@@ -887,6 +889,12 @@ return [
     'full_price' => 'Total price',
 
     'meeting_assigned_to' => 'Assigned To',
+
+    // Recent payments and data display
+    'recent_payments' => 'Recent Payments',
+    'no_data_found' => 'No data found',
+    'attached' => 'Attached',
+    'select_order' => 'Select Order',
 
     // Meeting Locations
     'meeting_locations' => 'Meeting Locations',

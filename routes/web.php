@@ -1335,6 +1335,8 @@ Route::get('/clear', function () {
 /*------------ start Of general payments ----------*/
 
 Route::resource('general_payments', GeneralPaymentsController::class);
+Route::get('general_payments/{id}/download', [GeneralPaymentsController::class, 'downloadImage'])->name('general_payments.download');
+Route::get('general_payments/{id}/verified', [GeneralPaymentsController::class, 'verified'])->name('general_payments.verified');
 
 // Custom create route with optional id for terms settings
 Route::get('terms_sittngs/create/{id?}', [TermsSittngController::class, 'create'])

@@ -133,6 +133,9 @@
                         </td>
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
+                            @if($payment->isInsuranceReturned())
+                                <br><span class="badge badge-success">{{ __('dashboard.insurance_returned_note') }}</span>
+                            @endif
                         </td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}

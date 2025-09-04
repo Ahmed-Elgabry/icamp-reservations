@@ -10,24 +10,29 @@
         <div class="card card-flush">
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-                <!--begin::Card title-->
+                <div class="title">
+                    <h1 class="text-dark fw-bolder fs-3 mb-0">@lang('dashboard.reservation_revenue')</h1>
+                </div>
+                        <!--begin::Card title-->
                 <div class="card-title">
                     <form action="" method="GET" class="row">
                         <div class="form-group col-6 mt-3">
-                            <label for="">{{ __('dashboard.select') }} {{ __('dashboard.customer') }}</label>
+                            <label for=""> {{ __('dashboard.customer') }}</label>
                             <select name="customer_id" id="customer_id" class="form-control">
-                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.customer') }}</option>
+                                <option value="">{{ __('dashboard.customer') }}</option>
                                 @foreach($customers as $customer)
                                     <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group col-6 mt-3 ">
-                            <label for="">{{ __('dashboard.orders') }}</label>
+                            <label for="">{{ __('dashboard.order_id') }}</label>
                             <select name="order_id" id="order_id" class="form-control">
                                 <option value="">{{ __('dashboard.select') }} {{ __('dashboard.orders') }}</option>
                                 @foreach($orders as $order)
+                                    if($order->status == "approved")
                                     <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>{{ $order->id }} [{{$order->customer->name }}]</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -98,7 +103,7 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('payments.show', $payment->order_id) }}">
-                                        {{ $payment->order_id }} @isset($order) [{{$order->customer->name }}] @endisset
+                                        {{ $payment->order_id }} [{{$payment->order->customer->name }}]
                                     </a>
                                 </td>
                                 <td>{{__('dashboard.'. $payment->statement )}}</td>

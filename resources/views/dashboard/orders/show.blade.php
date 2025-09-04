@@ -170,6 +170,9 @@
                                         {{ __('dashboard.price') }}: {{ number_format($payment->price, 2) }},
                                         {{ __('dashboard.payment_method') }}: {{ $payment->payment_method }},
                                         {{ __('dashboard.notes') }}: {{ $payment->notes }}
+                                        @if($payment->isInsuranceReturned())
+                                            <br><span class="badge badge-success">{{ __('dashboard.insurance_returned_note') }}</span>
+                                        @endif
                                     </li>
                                 @endforeach
                             </ul>

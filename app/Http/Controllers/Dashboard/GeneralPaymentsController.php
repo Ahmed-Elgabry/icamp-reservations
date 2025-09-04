@@ -153,6 +153,8 @@ class GeneralPaymentsController extends Controller
             ])
             ->where(fn ($q) =>
                 $q->where('source', "insurances")
+                ->whereHas("payment", fn ($q) => $q->whereNot('insurance_status', 'returned'))
+                ->whereHas("order", fn ($q) => $q->where('insurance_status', "1"))
                 ->orWhere('source', 'reservation_addon')
                 ->orWhere('source', 'warehouse_sale')
             );
@@ -232,9 +234,15 @@ class GeneralPaymentsController extends Controller
     {
         $orders = Order::all();
         $bankAccounts = BankAccount::all();
+        $recentGeneralPayments = GeneralPayment::with('account', 'order.customer')
+            ->latest()
+            ->take(10)
+            ->get();
+            
         return view('dashboard.general_payments.create',[
             'bankAccounts' => $bankAccounts,
-            'orders' => $orders
+            'orders' => $orders,
+            'recentGeneralPayments' => $recentGeneralPayments
         ]);
     }
 
@@ -258,25 +266,42 @@ class GeneralPaymentsController extends Controller
             'date' => 'nullable|date',
             'description' => 'nullable|string',
             'order_id' => 'required|exists:orders,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $payment = Transaction::create($validatedData);
-        $bankAccount = BankAccount::find($request->account_id);
-        $disccountFormAccount = $request->amount;
-        $amount = $request->amount;
+        DB::beginTransaction();
+        
+        try {
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('general_payments', 'public');
+                $validatedData['image_path'] = $imagePath;
+            }
 
-        $bankAccount->update([
-            'balance' => $bankAccount->balance - $disccountFormAccount
-        ]);
+            $payment = Transaction::create($validatedData);
+            $bankAccount = BankAccount::find($request->account_id);
+            $disccountFormAccount = $request->amount;
+            $amount = $request->amount;
 
-        $transfareTo =  BankAccount::find($request->receiver_id);;
-        $transfareTo->update([
-            'balance' => $transfareTo->balance + $amount
-        ]);
+            $bankAccount->update([
+                'balance' => $bankAccount->balance - $disccountFormAccount
+            ]);
 
+            if ($request->receiver_id) {
+                $transfareTo = BankAccount::find($request->receiver_id);
+                $transfareTo->update([
+                    'balance' => $transfareTo->balance + $amount
+                ]);
+            }
 
-
-        return response()->json();
+            DB::commit();
+            return response()->json(['message' => 'Payment created successfully']);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('General payment store failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Payment creation failed'], 500);
+        }
     }
 
     public function accountsUpdate(Request $request, $id)
@@ -295,37 +320,60 @@ class GeneralPaymentsController extends Controller
             'date' => 'nullable|date',
             'description' => 'nullable|string',
             'order_id' => 'required|exists:orders,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        DB::beginTransaction();
+        
+        try {
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($payment->image_path) {
+                    \Storage::disk('public')->delete($payment->image_path);
+                }
+                $imagePath = $request->file('image')->store('general_payments', 'public');
+                $validatedData['image_path'] = $imagePath;
+            }
 
-        $payment->update($validatedData);
-        $oldBankAccount = BankAccount::find($account_id);
+            $payment->update($validatedData);
+            $oldBankAccount = BankAccount::find($account_id);
 
-        // return money to the accounts
-        // back money to the sender account_id
-        $newBalance = $oldBankAccount->balance + $disccountFormAccount;
-        BankAccount::where('id', $account_id)->update(['balance' => $newBalance]);
-        // take money form resever account
-        // back money to resever
-        $oldResever = BankAccount::find($receiver);
-        $newBalance = $oldResever->balance - $paymentAmount;
-        BankAccount::where('id', $receiver)->update(['balance' => $newBalance]);
+            // return money to the accounts
+            // back money to the sender account_id
+            $newBalance = $oldBankAccount->balance + $disccountFormAccount;
+            BankAccount::where('id', $account_id)->update(['balance' => $newBalance]);
+            
+            // take money form receiver account
+            // back money to receiver
+            if ($receiver) {
+                $oldReceiver = BankAccount::find($receiver);
+                $newBalance = $oldReceiver->balance - $paymentAmount;
+                BankAccount::where('id', $receiver)->update(['balance' => $newBalance]);
+            }
 
+            // save them again, take money from new account
+            $bankAccount = BankAccount::find($request->account_id);
+            $bankAccount->update([
+                'balance' => $bankAccount->balance - $disccountFormAccount
+            ]);
 
-        // save them again , take money form
-        $bankAccount = BankAccount::find($request->account_id);
-        $bankAccount->update([
-            'balance' => $bankAccount->balance - $disccountFormAccount
-        ]);
+            // send money to new receiver
+            if ($request->receiver_id) {
+                $transfareTo = BankAccount::find($request->receiver_id);
+                $transfareTo->update([
+                    'balance' => $transfareTo->balance + $amount
+                ]);
+            }
 
-        // send money to
-        $transfareTo =  BankAccount::find($request->receiver_id);;
-        $transfareTo->update([
-            'balance' => $transfareTo->balance + $amount
-        ]);
-
-
-        return response()->json();
+            DB::commit();
+            return response()->json(['message' => 'Payment updated successfully']);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('General payment update failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Payment update failed'], 500);
+        }
     }
 
 
@@ -360,13 +408,24 @@ class GeneralPaymentsController extends Controller
             'payment_method' => 'required|string',
             'statement' => 'nullable',
             'notes' => 'nullable|string',
+            "image" => "nullable|image|mimes:jpeg,png,jpg,gif"
         ]);
 
 
-
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('general_payments', 'public');
+            $validatedData['image_path'] = $imagePath;
+        }
         $bankAccount = BankAccount::findOrFail($request->account_id);
         $payment = GeneralPayment::create($validatedData);
-
+        $payment->transaction()->create([
+            'amount' => $request->price,
+            'source' => 'general_revenue_deposit',
+            'account_id' => $request->account_id,
+            'type' => 'deposit',
+            'description' => $request->notes,
+            'order_id' => $request->order_id,
+        ]);
         $bankAccount->update([
             'balance' => $bankAccount->balance + $request->price
         ]);
@@ -457,5 +516,21 @@ class GeneralPaymentsController extends Controller
         } else {
           return response()->json('failed');
         }
+    }
+
+    public function downloadImage($id)
+    {
+        $payment = GeneralPayment::findOrFail($id);
+        
+        if (!$payment->image_path) {
+            abort(404, 'Image not found');
+        }
+
+        // Check if file exists in storage
+        if (!\Storage::disk('public')->exists($payment->image_path)) {
+            abort(404, 'File not found');
+        }
+
+        return \Storage::disk('public')->download($payment->image_path, 'general_payment_' . $payment->id . '_image.jpg');
     }
 }

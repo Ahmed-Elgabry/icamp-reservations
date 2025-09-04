@@ -40,9 +40,6 @@ class WarehousesalesController extends Controller
             // Create item via the order relation so order_id is set consistently
             $order = Order::findOrFail($data['order_id']);
             $stock = Stock::findOrFail($data['stock_id']);
-            if ($stock->quantity < $data['quantity'])
-                throw new \Exception(__('dashboard.insufficient_stock'));
-            $stock->decrement('quantity', $data['quantity']);
             $orderItem = $order->items()->create($data);
             \App\Models\BankAccount::findOrFail($data['account_id'])->increment('balance', $data['total_price']);
             Transaction::create([

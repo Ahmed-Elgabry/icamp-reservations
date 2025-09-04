@@ -141,12 +141,6 @@ class ExpensesController extends Controller
         try {
             $date = $request->date ? $request->date : date('y-m-d');
             $bankAccount = BankAccount::findOrFail($request->account_id);
-            if($request->statement !== "reservation_expenses"){
-                $bankAccount->update([
-                    'balance' => $bankAccount->balance - $request->price
-                ]);
-            }
-
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('expenses', 'public');
             }
@@ -159,7 +153,7 @@ class ExpensesController extends Controller
                 'date' => $date,
                 'statement' => $request->statement,
                 'notes' => $request->notes,
-                'image' => $path ?? null,
+                'image_path' => $path ?? null,
                 'order_id' => $request->order_id,
                 'source' => $request->source,
             ]);

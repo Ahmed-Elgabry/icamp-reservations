@@ -52,8 +52,30 @@ class BankAccountsController extends Controller
             'name' => 'required',
             'balance' => 'required|numeric',
             'notes' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $path = $image->storeAs('payments/images', $imageName , 'public');
+                $validatedData['image'] = $path;
+            }
+
+            $validatedData['image'] = $validatedData['image'] ?? null;
+            $payment = Payment::create([
+                'price' => $validatedData['balance'],
+                'notes' => __('dashboard.general_revenue_deposit'),
+                'date' => now(),
+                'verified' => true,
+                'source' => 'add_payment',
+            ]);
+            $payment->transaction()->create([
+                'account_id' => null,
+                'amount' => $validatedData['balance'],
+                "type" =>"deposit",
+                'source' => 'general_payments_deposit',
+            ]);
         $bankAccount = BankAccount::create($validatedData);
 
         return response()->json(['message' => 'Bank account created successfully', 'bank_account' => $bankAccount]);
@@ -79,10 +101,14 @@ class BankAccountsController extends Controller
                     ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                         return $query->whereBetween('date', [$startDate, $endDate]);
                     })
+                    ->where(function ($query) {
+                        $query->where('verified', "1")
+                              ->orWhere("source" , "add_payment")
+                              ->orWhere("source" , "charge_account")
+                              ->orWhere("source" , "general_expenses");
+                    })
+                    ->where("amount" , ">" , 0)
                     ->orderBy('created_at', 'desc')
-                    ->where('verified', "1")
-                    ->orWhere("source" , "general")
-                    ->orWhere("source" , "general_expenses")  
                     ->get();
 
         // $expenses = Expense::where('account_id', $bank->id)

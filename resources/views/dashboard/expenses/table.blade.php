@@ -62,8 +62,11 @@
                             <th class="">@lang('dashboard.price')</th>
                             <th class="">@lang('dashboard.source')</th>
                             <th class="">@lang('dashboard.payment_method')</th>
+                            @if($pageTitle == 'add_expenses')
+                            <th class="">@lang('dashboard.verified')</th>
+                            <th class="">@lang('dashboard.attached')</th>
+                            @endif
                             <th class="">@lang('dashboard.notes')</th>
-                            <th class=" min-w-70px">@lang('dashboard.actions')</th>
                         </tr>
                         <!--end::Table row-->
                     </thead>
@@ -85,11 +88,33 @@
                                 <td>{{ __('dashboard.reservations') }}-{{ optional($expense->order)->id  }} </td>
                             @elseif($expense->source === 'general_expenses')
                                 <td>{{ __('dashboard.general') }}</td>
-                            @else
-                                <td>{{ __('dashboard.not_specified') }}</td>
+                            @elseif($expense->source === 'other_expenses')
+                                <td>{{ __('dashboard.other') }}</td>
                             @endif
                                 <td>{{$expense->payment_method ? __('dashboard.' . $expense->payment_method) : __('dashboard.not_specified')}} </td>
-                                <td>{{$expense->notes }} </td>
+                            @if($pageTitle == 'add_expenses')
+                                <td>
+                                    {{ $expense->verified ? __('dashboard.yes') : __('dashboard.no') }}
+                                    @if(($expense->source ?? null) === 'reservation_expenses')
+                                        <br>
+                                        @if($expense->verified)
+                                            <a href="{{ route('order.verified' , [$expense->id , 'expense']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                        @else
+                                            <a href="{{ route('order.verified' , [$expense->id , 'expense']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                        @endif
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($expense->image)
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="previewImage('{{ asset('storage/' . $expense->image) }}', '{{ $expense->id }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    @else
+                                        <span class="text-muted">@lang('dashboard.no_data')</span>
+                                        @endif
+                                    </td>
+                            @endif
+                                    <td>{{$expense->notes }} </td>
 
                                 <!--begin::Action=-->
                                 <!--end::Action=-->
@@ -102,6 +127,27 @@
                 <!--end::Table-->
                 <div class="mt-4">{{$expenses->onEachSide(1)->links('pagination::bootstrap-5')}}</div>
             </div>
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewModalLabel">@lang('dashboard.attached')</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" src="" alt="@lang('dashboard.attached')" class="img-fluid" style="max-height: 500px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('dashboard.close')</button>
+                <a id="downloadImageBtn" href="" download class="btn btn-primary">
+                    <i class="fas fa-download"></i> @lang('dashboard.save_changes')
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 @push('css')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -159,5 +205,15 @@ $(document).ready(function() {
     });
     @endif
 });
+
+// Image preview function
+function previewImage(imageSrc, expenseId) {
+    document.getElementById('previewImage').src = imageSrc;
+    document.getElementById('downloadImageBtn').href = imageSrc;
+    
+    // Show the modal
+    var modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+    modal.show();
+}
 </script>
 @endpush
