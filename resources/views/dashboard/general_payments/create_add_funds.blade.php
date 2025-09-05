@@ -47,10 +47,8 @@
                                         value="{{ isset($payment) ? $payment->date : date('Y-m-d') }}"
                                         class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
                                 </div>
-                                <input type="hidden" name="source" id="source"
-                                        value="general_revenue_deposit"
-                                        class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" >
-                                 </div>
+                                <input type="hidden" name="source" value="add_funds_page">
+                            </div>
                         </div>
 
                         <div class="row mb-5">
@@ -140,147 +138,7 @@
         </div>
         <!--end::Basic info-->
 
-        <!--begin::Recent General Payments-->
-        @if(isset($recentGeneralPayments) && $recentGeneralPayments->count() > 0)
-        <div class="card mb-5 mb-xl-10">
-            <!--begin::Card header-->
-            <div class="card-header border-0 cursor-pointer">
-                <!--begin::Card title-->
-                <div class="card-title m-0">
-                    <h3 class="fw-bolder m-0">{{ __('dashboard.recent_general_payments') }}</h3>
-                </div>
-                <!--end::Card title-->
-            </div>
-            <!--begin::Content-->
-            <div class="card-body border-top p-9">
-                <!--begin::Table-->
-                <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
-                    <!--begin::Table head-->
-                    <thead>
-                        <!--begin::Table row-->
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="w-10px pe-2">
-                                <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
-                                    <input class="form-check-input" id="checkedAll" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
-                                </div>
-                            </th>
-                            <th class="">{{ __('dashboard.statement') }}</th>
-                            <th>{{ __('dashboard.price') }}</th>
-                            <th class="">{{ __('dashboard.payment_method') }}</th>
-                            <th class="">{{ __('dashboard.bank_account') }}</th>
-                            <th class="">{{ __('dashboard.verified') }}</th>
-                            <th class="">{{ __('dashboard.attached') }}</th>
-                            <th class="">{{ __('dashboard.notes') }}</th>
-                            <th class="">{{ __('dashboard.created_at') }}</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
-                        </tr>
-                        <!--end::Table row-->
-                    </thead>
-                    <!--end::Table head-->
-                    <!--begin::Table body-->
-                    <tbody class="fw-bold text-gray-600">
-                        @foreach ($recentGeneralPayments as $payment)
-                            <!--begin::Table row-->
-                            <tr data-id="{{$payment->id}}">
-                                <!--begin::Checkbox-->
-                                <td>
-                                    <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                        <input class="form-check-input checkSingle" type="checkbox" value="1" id="{{$payment->id}}"/>
-                                    </div>
-                                </td>
-                                <!--begin::Statement-->
-                                <td>{{ $payment->statement ? __('dashboard.'. $payment->statement) : '-' }}</td>
-                                <!--begin::Price-->
-                                <td>
-                                    <div class="d-flex">
-                                        <div class="ms-5">
-                                            <a href="#" class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">{{$payment->price}}</a>
-                                        </div>
-                                    </div>
-                                </td>
-                                <!--begin::Payment Method-->
-                                <td>{{ $payment->payment_method ? __('dashboard.'. $payment->payment_method) : '-' }}</td>
-                                <!--begin::Bank Account-->
-                                <td>{{$payment->account->name ?? '-'}}</td>
-                                <!--begin::Verified-->
-                                <td>
-                                    {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
-                                    @if($payment->verified)
-                                        <a href="{{ route('general_payments.verified', $payment->id) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
-                                    @else
-                                        <a href="{{ route('general_payments.verified', $payment->id) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
-                                    @endif
-                                </td>
-                                <!--begin::Attached-->
-                                <td>
-                                    @if($payment->image_path)
-                                        <button type="button" class="btn btn-sm btn-primary" onclick="previewImage('{{ asset('storage/' . $payment->image_path) }}', '{{ $payment->id }}')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    @else
-                                        <span class="text-muted">{{ __('dashboard.no_data') }}</span>
-                                    @endif
-                                </td>
-                                <!--begin::Notes-->
-                                <td data-kt-ecommerce-category-filter="category_name">
-                                    {{$payment->notes ?? '-'}}
-                                </td>
-                                <!--begin::Created At-->
-                                <td>
-                                    {{$payment->created_at->diffForHumans() }}
-                                </td>
-                                <!--begin::Action-->
-                                <td class="text-end">
-                                    <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-                                    {{ __('dashboard.actions') }}
-                                    <span class="svg-icon svg-icon-5 m-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                            <path d="M11.4343 12.7344L7.25 8.55005C6.83579 8.13583 6.16421 8.13584 5.75 8.55005C5.33579 8.96426 5.33579 9.63583 5.75 10.05L11.2929 15.5929C11.6834 15.9835 12.3166 15.9835 12.7071 15.5929L18.25 10.05C18.6642 9.63584 18.6642 8.96426 18.25 8.55005C17.8358 8.13584 17.1642 8.13584 16.75 8.55005L12.5657 12.7344C12.2533 13.0468 11.7467 13.0468 11.4343 12.7344Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                    </a>
-                                    <!--begin::Menu-->
-                                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
-                                        @if($payment->order_id)
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('general_payments.print', $payment->id) }}" class="menu-link px-3" target="_blank">
-                                                {{ __('dashboard.receipt') }}
-                                            </a>
-                                        </div>
-                                        @endif
-                                        @if($payment->image_path)
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('general_payments.download', $payment->id) }}" class="menu-link px-3">
-                                                <i class="fas fa-download"></i> {{ __('dashboard.download_image') }}
-                                            </a>
-                                        </div>
-                                        @endif
-                                        @can('general_payments.edit')
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('general_payments.edit', $payment->id) }}" class="menu-link px-3">{{ __('actions.edit') }}</a>
-                                        </div>
-                                        @endcan
-                                        @can('general_payments.destroy')
-                                        <div class="menu-item px-3">
-                                            <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('general_payments.destroy', $payment->id)}}" data-id="{{$payment->id}}"> @lang('dashboard.delete')</a>
-                                        </div>
-                                        @endcan
-                                    </div>
-                                    <!--end::Menu-->
-                                </td>
-                                <!--end::Action-->
-                            </tr>
-                            <!--end::Table row-->
-                        @endforeach
-                    </tbody>
-                    <!--end::Table body-->
-                </table>
-                <!--end::Table-->
-            </div>
-            <!--end::Content-->
-        </div>
-        <!--end::Recent General Payments-->
-        @endif
+  
     </div>
     <!--end::Container-->
 </div>

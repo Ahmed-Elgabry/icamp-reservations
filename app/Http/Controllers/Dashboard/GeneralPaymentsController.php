@@ -235,6 +235,7 @@ class GeneralPaymentsController extends Controller
         $orders = Order::all();
         $bankAccounts = BankAccount::all();
         $recentGeneralPayments = GeneralPayment::with('account', 'order.customer')
+            ->whereHas('transaction' , fn($q) => $q->where('source' , 'general_revenue_deposit'))
             ->latest()
             ->take(10)
             ->get();
@@ -420,7 +421,7 @@ class GeneralPaymentsController extends Controller
         $payment = GeneralPayment::create($validatedData);
         $payment->transaction()->create([
             'amount' => $request->price,
-            'source' => 'general_revenue_deposit',
+            'source' => $request->source,
             'account_id' => $request->account_id,
             'type' => 'deposit',
             'description' => $request->notes,
@@ -532,5 +533,105 @@ class GeneralPaymentsController extends Controller
         }
 
         return \Storage::disk('public')->download($payment->image_path, 'general_payment_' . $payment->id . '_image.jpg');
+    }
+
+    /**
+     * Show the form for creating a new add funds payment.
+     */
+    public function createAddFunds()
+    {
+        // Get all bank accounts for the dropdown
+        $bankAccounts = BankAccount::all();
+
+        // Get all approved orders for the dropdown
+        $orders = Order::with(['customer'])
+            ->where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get recent add funds payments for the table (last 10)
+        $recentPayments = GeneralPayment::with(['account', 'order.customer'])
+            ->where('statement', 'add_funds')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+        
+        return view('dashboard.general_payments.create_add_funds', compact(
+            'bankAccounts', 
+            'orders', 
+            'recentPayments'
+        ));
+    }
+
+    /**
+     * Store a newly created add funds payment in storage.
+     */
+    public function storeAddFunds(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'date' => 'required|date',
+            'account_id' => 'required|exists:bank_accounts,id',
+            'order_id' => 'nullable|exists:orders,id',
+            'description' => 'nullable|string|max:1000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'payment_method' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        
+        try {
+            // Handle image upload if provided
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('general_payments', 'public');
+            }
+
+            // Create the general payment record
+            $payment = GeneralPayment::create([
+                'price' => $request->amount,
+                'date' => $request->date,
+                'account_id' => $request->account_id,
+                'order_id' => $request->order_id,
+                'notes' => $request->description,
+                'image_path' => $imagePath,
+                'statement' => 'add_funds', // Set statement type
+                'payment_method' => $request->payment_method ?? 'bank_transfer',
+                'verified' => false, // Default to unverified
+            ]);
+
+            // Create corresponding transaction
+            Transaction::create([
+                'account_id' => $request->account_id,
+                'amount' => $request->amount,
+                'order_id' => $request->order_id,
+                'type' => 'credit', // Credit for adding funds
+                'date' => $request->date,
+                'description' => 'Add Funds: ' . ($request->description ?? 'General funds addition'),
+                'source' => 'add_funds_page',
+                'verified' => false,
+            ]);
+
+            // Update bank account balance only if verified (optional based on your business logic)
+            if ($payment->verified) {
+                $bankAccount = BankAccount::find($request->account_id);
+                if ($bankAccount) {
+                    $bankAccount->increment('balance', $request->amount);
+                }
+            }
+
+            DB::commit();
+            
+            return redirect()->route('general_payments.create_add_funds')
+                ->with('success', __('dashboard.add_funds_created_successfully'));
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Add funds creation failed: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', __('dashboard.error_occurred') . ': ' . $e->getMessage());
+        }
     }
 }

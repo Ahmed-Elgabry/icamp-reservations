@@ -28,9 +28,9 @@
                         <div class="form-group col-6 mt-3 ">
                             <label for="">{{ __('dashboard.order_id') }}</label>
                             <select name="order_id" id="order_id" class="form-control">
-                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.orders') }}</option>
+                                <option value=""> {{ __('dashboard.order_id') }}</option>
                                 @foreach($orders as $order)
-                                    if($order->status == "approved")
+                                    @if($order->status == "approved")
                                     <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>{{ $order->id }} [{{$order->customer->name }}]</option>
                                     @endif
                                 @endforeach

@@ -9,7 +9,7 @@ class Expense extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $fillable = ['expense_item_id', 'price', 'payment_method', 'date', 'source', 'notes', 'statement', 'account_id', 'order_id', 'verified', 'image'];
+    protected $fillable = ['expense_item_id', 'price', 'payment_method', 'date', 'source', 'notes', 'statement', 'account_id', 'order_id', 'verified', 'image_path'];
 
     public function expenseItem()
     {
@@ -19,6 +19,11 @@ class Expense extends Model
     public function account()
     {
         return $this->belongsTo(BankAccount::class, 'account_id');
+    }
+
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class, 'expense_id');
     }
 
     public function order()

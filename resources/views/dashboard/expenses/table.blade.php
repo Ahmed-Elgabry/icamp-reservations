@@ -62,10 +62,12 @@
                             <th class="">@lang('dashboard.price')</th>
                             <th class="">@lang('dashboard.source')</th>
                             <th class="">@lang('dashboard.payment_method')</th>
-                            @if($pageTitle == 'add_expenses')
-                            <th class="">@lang('dashboard.verified')</th>
-                            <th class="">@lang('dashboard.attached')</th>
-                            @endif
+                            @isset($pageTitle) 
+                               @if($pageTitle == 'add_expenses')
+                                    <th class="">@lang('dashboard.verified')</th>
+                                    <th class="">@lang('dashboard.attached')</th>
+                               @endif
+                            @endisset
                             <th class="">@lang('dashboard.notes')</th>
                         </tr>
                         <!--end::Table row-->
@@ -92,7 +94,8 @@
                                 <td>{{ __('dashboard.other') }}</td>
                             @endif
                                 <td>{{$expense->payment_method ? __('dashboard.' . $expense->payment_method) : __('dashboard.not_specified')}} </td>
-                            @if($pageTitle == 'add_expenses')
+                            @isset($pageTitle)
+                                @if($pageTitle == 'add_expenses')
                                 <td>
                                     {{ $expense->verified ? __('dashboard.yes') : __('dashboard.no') }}
                                     @if(($expense->source ?? null) === 'reservation_expenses')
@@ -113,7 +116,8 @@
                                         <span class="text-muted">@lang('dashboard.no_data')</span>
                                         @endif
                                     </td>
-                            @endif
+                                @endif
+                            @endisset
                                     <td>{{$expense->notes }} </td>
 
                                 <!--begin::Action=-->

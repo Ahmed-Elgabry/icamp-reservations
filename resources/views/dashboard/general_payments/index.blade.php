@@ -10,13 +10,14 @@
         <div class="card card-flush">
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-                <div class="col-4 mt-3">
+                <h3 class="card-title">{{ __('dashboard.general_payments') }}</h3>
+                <div class="col-3 mt-3">
 
                     <a href="{{route('general_payments.create')}}"
-                        class="btn btn-primary">{{ __('dashboard.general_payments') }}</a>
+                        class="btn btn-primary">{{ __('dashboard.add') }}</a>
                 </div>
                 <!--begin::Card title-->
-                <div class="card-title">
+                <div class="card-title w-100">
                     <form action="" method="GET" class="row g-3 align-items-end">
 
                         <div class="col-md-6">
@@ -33,12 +34,12 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-5 col-md-6">
                             <label for="order_id" class="form-label">
                                 {{ __('dashboard.order_id') }}
                             </label>
-                            <select name="order_id" id="order_id" class="form-select">
-                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.orders') }}</option>
+                            <select name="order_id" id="order_id" class="form-select ">
+                                <option value=""> {{ __('dashboard.order_id') }}</option>
                                 @foreach($orders as $order)
                                     @if($order->status == "approved")
                                             <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>

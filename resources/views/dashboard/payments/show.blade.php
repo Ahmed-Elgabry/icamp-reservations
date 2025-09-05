@@ -81,7 +81,9 @@
                     <th>{{ __('dashboard.price') }}</th>
                     <th class="">{{ __('dashboard.payment_method') }}</th>
                     <th class="">{{ __('dashboard.bank_account') }}</th>
-                    <th class="">{{ __('dashboard.verified') }}</th>
+                    @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
+                        <th class="">{{ __('dashboard.verified') }}</th>
+                    @endif
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
                     <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
@@ -107,13 +109,20 @@
                                 <!--end::Thumbnail-->
                                 <div class="ms-5">
                                     <!--begin::Title-->
-                                    <a href="#"
-                                    data-kt-ecommerce-category-filter="search"
-                                     class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
-                                   >{{$payment->price}}</a>
-                                    <!--end::Title-->
+                                    @if($payment->insurance_status == 'confiscated_partial')
+                                        <a href="#"
+                                        data-kt-ecommerce-category-filter="search"
+                                        class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
+                                    >{{$payment->price - $payment->transaction->amount }}</a>
+                                    @else
+                                         <a href="#"
+                                        data-kt-ecommerce-category-filter="search"
+                                        class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
+                                         >{{$payment->price}}</a>
+                                        <!--end::Title-->
+                                    @endif
+                                    </div>
                                 </div>
-                            </div>
                         </td>
 
                         <td>{{__('dashboard.'. $payment->payment_method )}}</td>
@@ -123,14 +132,16 @@
     
                             @endif
                         @endforeach
-                        <td>
-                            {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
-                              @if($payment->verified)
-                                    <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
-                                @else
-                                    <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
-                                @endif
-                        </td>
+                        @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
+                            <td>
+                                {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                                @if($payment->verified)
+                                        <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                    @else
+                                        <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                    @endif
+                            </td>
+                        @endif
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
                             @if($payment->isInsuranceReturned())

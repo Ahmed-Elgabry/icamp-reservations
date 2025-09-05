@@ -103,7 +103,7 @@ class BankAccountsController extends Controller
                     })
                     ->where(function ($query) {
                         $query->where('verified', "1")
-                              ->orWhere("source" , "add_payment")
+                            //   ->whereHas('payment', fn($q) => $q->whereNot('insurance_status', 'returned'))
                               ->orWhere("source" , "charge_account")
                               ->orWhere("source" , "general_expenses");
                     })

@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Transaction;
 use App\Models\BankAccount;
 use App\Models\Expense;
+use App\Models\GeneralPayment;
 use Illuminate\Http\Request;
 use PDF;
 use DB;
@@ -34,10 +35,10 @@ class PaymentsController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->where(function ($query) {
-                $query->where('verified', "1")
-                      ->whereHas('order', fn($q) => $q->where('insurance_status', '1'))
-                      ->orWhere("source", "charge_account")
-                      ->orWhere("source", "general_payments_deposit");
+                $query->where('verified', "1");
+                    //   ->whereHas('payment', fn($q) => $q->whereNot('insurance_status', 'returned'))
+                    //   ->orWhere("source", "charge_account")//they will have verificaion button 
+                    //   ->orWhere("source", "general_payments_deposit");//they will have verificaion button 
             }) // this is the transaction source for the page which have not approved button
             ->where("amount", ">", 0)
             ->get();
@@ -108,7 +109,13 @@ class PaymentsController extends Controller
         $this->authorize('create', Payment::class);
         $selectedBank = $bankAccount ? BankAccount::findOrFail($bankAccount) : null;
         $bankAccounts = BankAccount::all();
-        $recentPayments = Transaction::with('account')->where('source', 'add_payment')->latest()->limit(10)->get();
+        $recentPayments = GeneralPayment::with(['account', 'transaction'])
+            ->whereHas('transaction', function ($q) {
+            $q->where('source', 'add_payment');
+            })
+            ->latest()
+            ->limit(10)
+            ->get();
         return view('dashboard.payments.create', [
             'bankAccount' => $selectedBank,
             'bankAccounts' => $bankAccounts,
@@ -156,18 +163,16 @@ public function accountsStore(Request $request)
     
     try {
         $validatedData = array_merge($validatedData, [
-            'type' => "deposit",
-            'verified' => true , 
-        ]);
+            'type' => "deposit"
+                ]);
         // Handle optional photo
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('payments/images', 'public');
             $validatedData['image_path'] = $path;
         }
-        $payment = Payment::create($validatedData);
+        $validatedData["price"] = $validatedData["amount"];
+        $payment = GeneralPayment::create($validatedData);
         $transaction = $payment->transaction()->create($validatedData);
-        $bankAccount = BankAccount::find($request->account_id);
-        $bankAccount->increment('balance', $request->amount);
 
         if ($request->filled('receiver_id')) {
             $transfareTo = BankAccount::find($request->receiver_id);

@@ -49,6 +49,10 @@ class Transaction extends Model
     {
         return $this->belongsTo(BankAccount::class, 'receiver_id');
     }
+        public function generalPayment()
+    {
+        return $this->belongsTo(GeneralPayment::class , 'general_payment_id');
+    }
 
     // Define the supplier relationship
     public function supplier()

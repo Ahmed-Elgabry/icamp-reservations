@@ -32,6 +32,6 @@ class Payment extends Model
 
     public function isInsuranceReturned()
     {
-        return $this->insurance_status === 'returned';
+        return $this->insurance_status === 'returned' && $this->order && $this->order->insurance_approved;
     }
 }

@@ -99,21 +99,16 @@ class OrderController extends Controller
         switch ($insuranceStatus) {
             case 'returned':
                 foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
-                    \Log::info('Returning insurance for account ID: ' . $insurance->account_id . ' Amount: ' . $insurance->price);
                     $insurance->update([
                         'insurance_status' => 'returned',
                     ]);
                     // Set transaction amount to 0 since insurance is returned
-                    if ($insurance->transaction) {
-                        \Log::info('Updating transaction ID: ' . $insurance->transaction->id . ' to amount: 0');
-                        $insurance->transaction->update(['amount' => 0]);
-                    } else {
-                        \Log::warning('No transaction found for insurance payment ID: ' . $insurance->id);
-                    }
+                    $insurance->transaction->update(['amount' => 0]);
+                    BankAccount::find($insurance->account_id)->decrement('balance', $insurance->price);
                 }
                 $insuranceAmounts = 0; // No insurance remaining after return
                 break;
-                
+
             case 'confiscated_partial':
                 $remainingAmount = $originalInsuranceAmount - $insuranceAmount;
                 foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
@@ -123,11 +118,9 @@ class OrderController extends Controller
                     // Set transaction to the confiscated amount (what system keeps)
                     if ($insurance->transaction) {
                         $confiscatedPortion = ($insurance->price / $originalInsuranceAmount) * $insuranceAmount;
-                        \Log::info('Updating transaction ID: ' . $insurance->transaction->id . ' to amount: ' . $confiscatedPortion);
                         $insurance->transaction->update(['amount' => $confiscatedPortion]);
-                    } else {
-                        \Log::warning('No transaction found for insurance payment ID: ' . $insurance->id);
                     }
+
                     // Deduct the confiscated portion from bank balance
                     if ($insurance->account_id) {
                         $confiscatedPortion = ($insurance->price / $originalInsuranceAmount) * $insuranceAmount;
@@ -143,15 +136,10 @@ class OrderController extends Controller
                         'insurance_status' => 'confiscated_full',
                     ]);
                     // Set transaction to 0 since fully confiscated
-                    if ($insurance->transaction) {
-                        \Log::info('Updating transaction ID: ' . $insurance->transaction->id . ' to amount: 0 (full confiscation)');
                         $insurance->transaction->update(['amount' => $insurance->price]);
-                    } else {
-                        \Log::warning('No transaction found for insurance payment ID: ' . $insurance->id);
-                    }
                     // Deduct full amount from bank balance
                     if ($insurance->account_id) {
-                        BankAccount::find($insurance->account_id)->decrement('balance', $insurance->price);
+                        BankAccount::find($insurance->account_id)->increment('balance', $insurance->price);
                     }
                 }
                 $insuranceAmounts = 0; // No insurance remaining after full confiscation
@@ -188,11 +176,17 @@ class OrderController extends Controller
             'confiscation_description' => 'nullable|string',
             'partial_confiscation_amount' => 'nullable|numeric|min:0',
         ]);
-        \Log::info($validatedData)  ;
         $order = Order::findOrFail($orderId);
+        if (!$order->insurance_approved) {
+            return redirect()->back();
+        }
+        
+        if ($order->insurance_status == $validatedData["insurance_status"]) {
+            return redirect()->back();
+        }
+        $insuranceAmount = $request->input('partial_confiscation_amount', 0);
         $originalInsuranceAmount = $order->verifiedInsuranceAmount();
         $price = $order->price;
-        $insuranceAmount = $request->input('partial_confiscation_amount', 0);
         if ($originalInsuranceAmount <= 0) {
             return back()->withErrors(['insurance_amount' => 'لا يوجد تأمين مسدد قابل للرد']);
         }
@@ -839,8 +833,6 @@ class OrderController extends Controller
     public function updateVerified(int $id, string $type)
     {
         try {
-            \DB::beginTransaction();
-
             if ($type == 'addon') {
                 $item = OrderAddon::findOrFail($id);
                 $transaction = Transaction::where('order_addon_id', $item->id)->first();
@@ -851,19 +843,11 @@ class OrderController extends Controller
             }elseif ($type == 'general_revenue_deposit') {
                 $item = GeneralPayment::findOrFail($id);
                 $transaction = $item->transaction()->first();
+                \Log::info($item);
+                
             }elseif ($type == 'insurance') {
                     $item = Order::findOrFail($id);                    
-                    // Get all insurance payments for this order
-                    $currentStatus = $item->insurance_approved;
-                    $newVerifiedStatus =$currentStatus ? "0" : "1"; // Toggle status
-                   
-                    $item->update(["insurance_approved" => $newVerifiedStatus]);
-                    event(new \App\Events\VerificationStatusChanged('payment', $insurance, $newVerifiedStatus));
-                    
-                    \DB::commit();
-                    \Log::info('Database transaction committed successfully');
-                    \Log::info('Insurance verification process completed successfully for order ID: ' . $id);
-                    
+                    event(new \App\Events\VerificationStatusChanged('insurance', $item, $item->insurance_approved));                    
                     return redirect()->back()->with('success', __('dashboard.success'));
                     
             }
@@ -871,9 +855,7 @@ class OrderController extends Controller
                 $item = Expense::findOrFail($id);
                 $transaction = Transaction::where('expense_id', $item->id)->first();
             } elseif ($type == 'warehouse_sales') {
-                \Log::info('Warehouse sales verification');
                 $item = OrderItem::findOrFail($id);
-                \Log::info($item);
                 $transaction = Transaction::where('order_item_id', $item->id)->first();
 
                 \Log::info($transaction);
@@ -881,8 +863,10 @@ class OrderController extends Controller
                 return redirect()->back()->with('error', __('dashboard.invalid_type'));
             }
             $newVerifiedStatus = !$item->verified;
-            $item->update(["verified"=>$newVerifiedStatus]);
+                        \Log::info($item->verified);
 
+            $item->update(["verified"=>$newVerifiedStatus]);
+            \Log::info($item->verified);
             if ($transaction) {
                 $transaction->update(["verified"=>$newVerifiedStatus]);
             }
@@ -891,16 +875,14 @@ class OrderController extends Controller
                 'addon' => 'addon',
                 'payment' => 'payment',
                 'expense' => 'expense',
-                'general_revenue_deposit' => 'general_revenue_deposit',
+                'general_revenue_deposit' => 'general_revenue_deposit', // Map to 'payment' since it's handled the same way
                 'insurance' => 'insurance',
-                'warehouse_sales' => 'warehouse_sales',
+                'p' => 'warehouse_sales',
                 default => $type,
             }, $item, $newVerifiedStatus));
             
-            \DB::commit();
             return redirect()->back()->with('success', __('dashboard.success'));
         } catch (\Exception $e) {
-            \DB::rollback();
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

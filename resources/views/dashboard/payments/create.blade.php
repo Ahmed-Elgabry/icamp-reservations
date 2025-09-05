@@ -170,14 +170,14 @@
                                     <td>
                                         {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                                         @if($payment->verified)
-                                            <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                        <a href="{{ route('order.verified' , [$payment->id , 'general_revenue_deposit']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                         @else
-                                            <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                            <a href="{{ route('order.verified' , [$payment->id , 'general_revenue_deposit']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                                         @endif
                                     </td>
                                     <td>
                                         @if($payment->image_path)
-                                            <button type="button" class="btn btn-sm btn-primary" onclick="previewImage('{{ asset('storage/' . $payment->image_path) }}', '{{ $payment->id }}')">
+                                            <button type="button" border-0 onclick="previewImage('{{ asset('storage/' . $payment->image_path) }}', '{{ $payment->id }}')">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                         @else

@@ -730,7 +730,7 @@
                 @can('payments.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
-                        <a href="{{route('payments.create')}}" class="menu-link py-3 {{ isActiveRoute('payments.create') }}">
+                        <a href="{{route('general_payments.create_add_funds')}}" class="menu-link py-3 {{ isActiveRoute('general_payments.create_add_funds') }}">
                             <span class="menu-bullet">
                                 <span class="bullet bullet-dot"></span>
                             </span>

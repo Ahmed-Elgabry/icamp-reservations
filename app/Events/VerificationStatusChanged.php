@@ -12,9 +12,9 @@ class VerificationStatusChanged
 
     public string $action; // 'addon' | 'payment' | 'expense' | 'warehouse_sale'
     public $item; // The related model instance (polymorphic)
-    public bool $verified; // New verification state
+    public string $verified; // New verification state
 
-    public function __construct(string $action, $item, bool $verified)
+    public function __construct(string $action, $item, string $verified)
     {
         $this->action = $action;
         $this->item = $item;

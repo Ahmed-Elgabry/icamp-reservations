@@ -113,6 +113,7 @@ class Order extends Model
         return $this->payments()->where('verified', true);
     }
 
+
     public function paymentLinks()
     {
         return $this->hasMany(PaymentLink::class);
@@ -213,14 +214,15 @@ class Order extends Model
          return $this->verifiedPayments()->where('statement', 'the_insurance')->sum('price');
      }
      public function verifiedWarehouseSalesAmount(){
-        return $this->verifiedPayments()->where('statement', 'the_warehouse_sales')->sum('price');
+        return OrderItem::where('verified', true)->where("order_id", $this->id)->sum('total_price');
      }
      // the total payment calucate the amount of payments except the deposit and addons and warehouse sales
-     public function totalPayments() {
-        $payments = $this->payments()->where('statement', '!=', 'deposit')->where("verified", "1")->sum('price');
+     public function totalPaymentsPrice() {
+        $deposit = $this->payments()->where('statement', 'deposit')->where("verified", "1")->sum('price');
+        $insurances = $this->payments()->where('statement','the_insurance')->where("verified", "1")->sum('price');
         $addons = $this->verifiedAddons()->sum('order_addon.price');
         $warehouseSales = $this->verifiedWarehouseSalesAmount();
-        return $this->price + $payments + $addons + $warehouseSales;
+        return $this->price - $deposit + $insurances + $addons + $warehouseSales;
      }
      public function verifiedItems() {
         return $this->items(OrderItem::class)->where('verified', true);

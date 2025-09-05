@@ -150,15 +150,15 @@
                                         {{ number_format( $order->verifiedPayments()->sum("price")) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
-                                    {{ number_format($order->totalPayments()) }}
+                                    {{ number_format($order->totalPaymentsPrice()) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
                                         @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
                                         @else
-                                        {{ number_format( $order->totalPayments() - $order->verifiedPayments()->sum("price")) }}
-                                        
+                                        {{ number_format( $order->totalPaymentsPrice() - $order->verifiedPayments()->sum("price")) }}
+
                                         @endif
                                     </span>
                                 </td>
