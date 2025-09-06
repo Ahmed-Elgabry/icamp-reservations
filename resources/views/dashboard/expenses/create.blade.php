@@ -25,7 +25,7 @@
                 <div class="tab-pane fade active show" id="product_details" role="tab-panel">
                     <!--begin::Form-->
                     <form id="kt_ecommerce_add_product_form" action="{{ isset($expense) ?  route('expenses.update',$expense->id) : route('expenses.store') }}" method="POST"
-                        class="form d-flex flex-column flex-lg-row store" data-kt-redirect="{{route('expenses.index')}}" enctype='multipart/form-data'>
+                        class="form d-flex flex-column flex-lg-row store" data-kt-redirect="{{ url()->full() }}" enctype='multipart/form-data'>
                         @csrf
 
                         @if(isset($expense)) @method('PUT') @endif
@@ -60,6 +60,7 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
+                        
                                                     <input type="hidden" name="source" id="source" value="general_expenses">
                                                     <div class="form-group col-6 mt-5">
                                                         <label for="expense_item_id" class="required">{{ __('dashboard.expense_item') }}</label>
@@ -234,8 +235,11 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if($expense->image)
-                                            <button type="button" class="btn btn-sm btn-primary" onclick="previewImage('{{ asset('storage/' . $expense->image) }}', '{{ $expense->id }}')">
+                                        @if($expense->image_path || $expense->image)
+                                            @php
+                                                $imagePath = $expense->image_path ?? $expense->image;
+                                            @endphp
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="previewImage('{{ asset('storage/' . $imagePath) }}', '{{ $expense->id }}')">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                         @else
@@ -264,7 +268,7 @@
                                         <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
                                             @can('expenses.edit')
                                             <div class="menu-item px-3">
-                                                <a href="{{ route('expenses.edit', $expense->id) }}" class="menu-link px-3">{{ __('actions.edit') }}</a>
+                                                <a href="#" class="menu-link px-3" onclick="openEditModal({{ $expense->id }}, '{{ $expense->account_id }}', '{{ $expense->expense_item_id }}', '{{ $expense->payment_method }}', '{{ $expense->date }}', '{{ $expense->price }}', '{{ addslashes($expense->notes) }}')">{{ __('actions.edit') }}</a>
                                             </div>
                                             @endcan
                                             @can('expenses.destroy')
@@ -322,6 +326,97 @@
 
 
 @endsection
+<!-- Edit Expense Modal -->
+<div class="modal fade" id="editExpenseModal" tabindex="-1" aria-labelledby="editExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editExpenseModalLabel">{{ __('actions.edit') }} {{ __('dashboard.expenses') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editExpenseForm" class="custom-modal-form store" method="POST" enctype="multipart/form-data" data-kt-redirect="{{ url()->full() }}">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.bank_account') }}</label>
+                        <div class="col-lg-12">
+                            <select name="account_id" id="editAccountId" class="form-select form-select-lg form-select-solid" required>
+                                <option value="" disabled>{{ __('dashboard.choose_bank_account') }}</option>
+                                @if(isset($bankAccounts))
+                                    @foreach($bankAccounts as $account)
+                                        <option value="{{ $account->id }}">{{ $account->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.expense_item') }}</label>
+                        <div class="col-lg-12">
+                            <select name="expense_item_id" id="editExpenseItemId" class="form-select form-select-lg form-select-solid" required>
+                                <option value="" disabled>{{ __('dashboard.select') }}</option>
+                                @if(isset($expenseItems))
+                                    @foreach($expenseItems as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.payment_method') }}</label>
+                            <div class="col-lg-12">
+                                <select name="payment_method" id="editPaymentMethod" class="form-select form-select-lg form-select-solid" required>
+                                    <option value="" disabled>{{ __('dashboard.choose_payment_method') }}</option>
+                                    @foreach(paymentMethod() as $paymentSelect)
+                                        <option value="{{ $paymentSelect }}">{{ __('dashboard.'. $paymentSelect) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.expense_date') }}</label>
+                            <div class="col-lg-12">
+                                <input type="date" name="date" id="editDate" class="form-control form-control-lg form-control-solid" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.amount') }}</label>
+                        <div class="col-lg-12">
+                            <input type="number" step="any" name="price" id="editPrice" class="form-control form-control-lg form-control-solid" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.upload_or_take_image') }}</label>
+                        <div class="col-lg-12">
+                            <input type="file" name="image" id="editImage" class="form-control form-control-lg form-control-solid" accept="image/*" capture="environment">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.notes') }}</label>
+                        <div class="col-lg-12">
+                            <textarea name="notes" id="editNotes" class="form-control form-control-lg form-control-solid" placeholder="{{ __('dashboard.notes') }}"></textarea>
+                        </div>
+                    </div>
+                    <input type="hidden" name="source" value="general_expenses">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('dashboard.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="indicator-label">{{ __('dashboard.save_changes') }}</span>
+                        <span class="indicator-progress d-none">{{ __('dashboard.please_wait') }}
+                            <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+</div>
 @push('css')
     <style>
         .nav-line-tabs
@@ -369,6 +464,22 @@
         
         // Show the modal
         var modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        modal.show();
+    }
+
+    // Open Edit Modal and populate fields
+    window.openEditModal = function(expenseId, accountId, expenseItemId, paymentMethod, date, price, notes) {
+        const form = document.getElementById('editExpenseForm');
+        form.action = "{{ route('expenses.update', ':id') }}".replace(':id', expenseId);
+
+        document.getElementById('editAccountId').value = accountId;
+        document.getElementById('editExpenseItemId').value = expenseItemId;
+        document.getElementById('editPaymentMethod').value = paymentMethod;
+        document.getElementById('editDate').value = date;
+        document.getElementById('editPrice').value = price;
+        document.getElementById('editNotes').value = notes || '';
+
+        const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
         modal.show();
     }
     </script>

@@ -114,6 +114,9 @@ class ExpensesController extends Controller
         
         // Get recent expenses (last 10 expenses)
         $recentExpenses = Expense::with(['expenseItem', 'account'])
+            ->whereHas('transaction', function($q) {
+                $q->where('source', 'general_expenses');
+            })
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
@@ -132,28 +135,27 @@ class ExpensesController extends Controller
         $this->authorize('create', Expense::class);
 
         $validated = $request->validate([
-            'expense_item_id' => 'required|exists:expense_items,id',
+            'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'date' => 'required|date',
+            'date' => 'nullable|date',
             'order_id' => 'nullable|exists:orders,id',
             'notes' => 'nullable|string|max:1000',
             'source' => 'required|string',
         ]);
 
+
         DB::beginTransaction();
         
         try {
-            $date = $request->date ? $request->date : date('Y-m-d');
-            $bankAccount = BankAccount::findOrFail($request->account_id);
-            
+            $date = $request->date ? $request->date : date('Y-m-d');            
             // Handle image upload
             $imagePath = null;
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('expenses', 'public');
-            }
+             }
 
             $expense = Expense::create([
                 'expense_item_id' => $request->expense_item_id,
@@ -182,13 +184,16 @@ class ExpensesController extends Controller
 
             DB::commit();
 
-            // Check if this is an AJAX request or form submission
-            if ($request->wantsJson()) {
-                return response()->json(['message' => 'Expense created successfully']);
+            // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.expense_created_successfully')
+                ], 200);
             }
 
-            return redirect()->route('expenses.index')->with('success', __('dashboard.expense_created_successfully'));
-            
+            return redirect()->back()->with('success', __('dashboard.expense_created_successfully'));
+
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Expense store transaction failed: ' . $e->getMessage());
@@ -235,13 +240,13 @@ class ExpensesController extends Controller
         $this->authorize('update', $expense);
         
         $data = $request->validate([
-            'expense_item_id' => 'required|exists:expense_items,id',
+            'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
             'source' => 'required|string',
             'statement' => 'nullable|string',
-            'date' => 'required|date',
+            'date' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -250,12 +255,13 @@ class ExpensesController extends Controller
         
         try {
             $data['date'] = $request->date ? $request->date : $expense->date;
-            
-            // Handle bank account balance update if not reservation expense
-            if ($request->source !== "reservation_expenses") {
+
+            // Handle bank account balance update if expense is verified
+            if ( $expense->verified) {
                 $bankAccount = BankAccount::findOrFail($request->account_id);
+                // Calculate the difference and update the balance accordingly
                 $bankAccount->update([
-                    'balance' => ($bankAccount->balance + $expense->price) - $data['price']
+                    'balance' => ($bankAccount->balance + $expense->price) 
                 ]);
             }
             
@@ -274,7 +280,7 @@ class ExpensesController extends Controller
                 $data['image'] = $imagePath;
                 $data['image_path'] = $imagePath;
             }
-            
+            $data["verified"] = 0 ; // Reset verified status on update
             $expense->update($data);
             
             Transaction::where('expense_id', $expense->id)->update([
@@ -287,13 +293,17 @@ class ExpensesController extends Controller
             ]);
             
             DB::commit();
-            
-            if ($request->wantsJson()) {
-                return response()->json(['message' => 'Expense updated successfully']);
+
+            // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.expense_updated_successfully')
+                ], 200);
             }
-            
-            return redirect()->route('expenses.index')->with('success', __('dashboard.expense_updated_successfully'));
-            
+
+            return redirect()->back()->with('success', __('dashboard.expense_updated_successfully'));
+
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Expense update transaction failed: ' . $e->getMessage());
@@ -320,9 +330,9 @@ class ExpensesController extends Controller
         DB::beginTransaction();
         
         try {
-            if($expense->statement !== "reservation_expenses"){
-                $bankAccount = BankAccount::findOrFail($expense->account_id);
-                $bankAccount->increment('balance', $expense->price);
+            if ($expense->verified) {
+                    $bankAccount = BankAccount::findOrFail($expense->account_id);
+                    $bankAccount->increment('balance', $expense->price);
             }
 
             // Delete image files if they exist

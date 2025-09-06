@@ -6,6 +6,7 @@ use App\Models\{Order , OrderItem, Stock};
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
+use App\Models\BankAccount;
 use DB;
 
 class WarehousesalesController extends Controller
@@ -41,7 +42,6 @@ class WarehousesalesController extends Controller
             $order = Order::findOrFail($data['order_id']);
             $stock = Stock::findOrFail($data['stock_id']);
             $orderItem = $order->items()->create($data);
-            \App\Models\BankAccount::findOrFail($data['account_id'])->increment('balance', $data['total_price']);
             Transaction::create([
                 'account_id' => $data['account_id'],
                 'amount' => $data['total_price'],
@@ -79,11 +79,12 @@ class WarehousesalesController extends Controller
         try {
             $item = OrderItem::findOrFail($id);
             $stock = Stock::findOrFail($item->stock_id);
-            if ($stock->quantity + $item->quantity < $data['quantity']) {
-                throw new \Exception(__('dashboard.insufficient_stock'));
+            if ($item->verified) {
+                // Return previous quantity to stock before deducting new quantity
+                $stock->increment('quantity', $item->quantity);
+                BankAccount::findOrFail($item->account_id)->decrement('balance', $item->total_price);
             }
-            \App\Models\BankAccount::findOrFail($data['account_id'])->increment('balance', ($data['total_price'] - $item->total_price));
-            $stock->increment('quantity', $item->quantity - $data['quantity']);
+            $data["verified"] = 0 ; // Reset verified status on update
             $item->update($data);
             Transaction::where('order_item_id', $item->id)->update([
                 'account_id' => $data['account_id'],
@@ -92,6 +93,7 @@ class WarehousesalesController extends Controller
                 "type" =>"deposit",
                 'source' => 'warehouse_sale',
                 "stock_id" => $data['stock_id'],
+                'verified' => 0
             ]);
             
             DB::commit();
@@ -101,7 +103,7 @@ class WarehousesalesController extends Controller
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
 
-        return redirect()->back()->with('success', __('dashboard.item_updated_successfully'));
+        return redirect()->back()->with('success', __('dashboard.deleted_successfully'));
     }
 
     public function destroy($id)
@@ -113,9 +115,11 @@ class WarehousesalesController extends Controller
             $stock = Stock::findOrFail($item->stock_id);
             
             // Return stock quantity and reverse bank account balance
-            $stock->increment('quantity', $item->quantity);
-            \App\Models\BankAccount::findOrFail($item->account_id)->decrement('balance', $item->total_price);
-            
+            if ($item->verified) {
+                $stock->increment('quantity', $item->quantity);
+                BankAccount::findOrFail($item->account_id)->decrement('balance', $item->total_price);
+            }
+
             // Delete related transaction
             Transaction::where('order_item_id', $item->id)->delete();
             

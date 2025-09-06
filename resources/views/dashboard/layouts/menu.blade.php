@@ -520,11 +520,11 @@
                 <div class="menu-item">
                     @can('bank-accounts.index')
                         <!--begin::Menu item-->
-                        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['bank-accounts.index', 'bank-accounts.create', 'payments.create', 'payments.edit', 'transactions.index', 'bank-accounts.edit', 'bank-accounts.show'])}}"
+                        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['bank-accounts.index', 'bank-accounts.create', 'payments.create', 'payments.edit', 'payments.create-bank-account', 'transactions.index', 'bank-accounts.edit', 'bank-accounts.show'])}}"
                              data-kt-menu-trigger="click">
                             <!--begin::Menu link-->
                             <a href="#"
-                               class="menu-link py-3 {{areActiveRoutes(['bank-accounts.index', 'bank-accounts.create', 'bank-accounts.edit'])}}">
+                               class="menu-link py-3 {{areActiveRoutes(['bank-accounts.index', 'bank-accounts.create', 'payments.create-bank-account', 'bank-accounts.edit'])}}">
                                 <span class="menu-icon">
                                     <img src="{{ asset('images/bank-accounts.png') }}" style="width:25px;height:25px">
                                 </span>

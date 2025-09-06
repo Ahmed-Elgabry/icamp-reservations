@@ -56,9 +56,12 @@ class PaymentsController extends Controller
         $disccountFormAccount = $payment->amount;
         $amount = $payment->amount;
 
-        $bankAccount->update([
+        // Only refund the amount to the bank account if the transaction was verified
+        if ($payment->verified) {
+            $bankAccount->update([
             'balance' => $bankAccount->balance + $disccountFormAccount
-        ]);
+            ]);
+        }
 
         if ($payment->receiver_id) {
             $transfareTo = BankAccount::find($payment->receiver_id);
@@ -252,32 +255,23 @@ public function moneyTransfer(Request $request)
                 $path = $request->file('photo')->store('payments/photos', 'public');
                 $validatedData['photo_path'] = $path;
             }
-
-            $payment->update($validatedData);
-            $oldBankAccount = BankAccount::find($account_id);
-
+            
             // return money to the accounts
             // back money to the sender account_id
-            $newBalance = $oldBankAccount->balance + $disccountFormAccount;
-            BankAccount::where('id', $account_id)->update(['balance' => $newBalance]);
-            // take money form resever account
-            // back money to resever
-            $oldResever = BankAccount::find($receiver);
-            $newBalance = $oldResever->balance - $paymentAmount;
-            BankAccount::where('id', $receiver)->update(['balance' => $newBalance]);
-
-
-            // save them again , take money form
-            $bankAccount = BankAccount::find($request->account_id);
-            $bankAccount->update([
-                'balance' => $bankAccount->balance - $disccountFormAccount
-            ]);
+            // first remove money send from the previous transaction and then add amount will be handle in the varification
+            if ($payment->verified) {
+                BankAccount::where('id', $account_id)->update(['balance' => $payment->amount ]);
+            }
+            $validatedData['verified'] = 0;
+            $payment->update($validatedData);
 
             // send money to
-            $transfareTo = BankAccount::find($request->receiver_id);;
-            $transfareTo->update([
-                'balance' => $transfareTo->balance + $amount
-            ]);
+            if ($request->filled('receiver_id')) {
+                $transfareTo = BankAccount::find($request->receiver_id);
+                $transfareTo->update([
+                    'balance' => $transfareTo->balance + $amount
+                ]);
+            }
 
             DB::commit();
             return response()->json(['message' => 'Update successful'], 200);
@@ -342,10 +336,6 @@ public function moneyTransfer(Request $request)
                 }
             }
             
-            // $bankAccount->update([
-            //     'balance' => $bankAccount->balance + $request->price
-            // ]);
-            
             Transaction::create([
                 'account_id' => $request->account_id,
                 'amount' => $request->price,
@@ -360,6 +350,13 @@ public function moneyTransfer(Request $request)
             ]);
             
             DB::commit();
+             // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.payment_updated_successfully')
+                ], 200);
+            }
             return back()->withSuccess(__('dashboard.success'));
             
         } catch (\Exception $e) {
@@ -401,8 +398,13 @@ public function moneyTransfer(Request $request)
             'statement' => 'required',
             'notes' => 'nullable|string',
         ]);
-
-        $previousAccountBalance = BankAccount::find($payment->account_id)->balance;
+        $validatedData['verified'] = 0;
+        if ($payment->verified) {
+            $bankAccount = BankAccount::find($payment->account_id);
+            if ($bankAccount) {
+                $bankAccount->decrement('balance', $payment->price);
+            }
+        }
         $payment->update($validatedData);
         Transaction::where('payment_id', $payment->id)->update([
             'account_id' => $request->account_id,
@@ -411,12 +413,8 @@ public function moneyTransfer(Request $request)
             'source'=> $request->source,
             'date' => now(),
             'description' => 'Payment: ' . $request->statement,
+            'verified' => 0, 
         ]);
-
-        // $bankAccount = BankAccount::findOrFail($request->account_id);
-        // $bankAccount->update([
-        //     'balance' => ($bankAccount->balance - $previousAccountBalance) + $request->price
-        // ]);
 
         return back()->withSuccess(__('dashboard.success'));
     }
@@ -435,6 +433,13 @@ public function moneyTransfer(Request $request)
         DB::beginTransaction();
         
         try {
+            // If payment is verified, discount from the bank account
+            if ($payment->verified) {
+                $bankAccount = BankAccount::find($payment->account_id);
+                if ($bankAccount) {
+                    $bankAccount->decrement('balance', $payment->price);
+                }
+            }
             $payment->delete();
             DB::commit();
             return response()->json(["success" => true,"deleted_amount" => $payment->price]);
@@ -457,10 +462,15 @@ public function moneyTransfer(Request $request)
             $requestIds = json_decode($request->data);
     
             foreach ($requestIds as $id) {
-                $payment = Payment::find($id);
-                if ($payment) {
+                $payment = Payment::findOrFail($id);
+                    // If payment is verified, discount from the bank account
+                    if ($payment->verified) {
+                        $bankAccount = BankAccount::find($payment->account_id);
+                        if ($bankAccount) {
+                            $bankAccount->decrement('balance', $payment->price);
+                        }
+                    }
                     $payment->delete();
-                }                        
             }
             
             DB::commit();

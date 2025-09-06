@@ -29,8 +29,8 @@
                             <label for="">{{ __('dashboard.order_id') }}</label>
                             <select name="order_id" id="order_id" class="form-control">
                                 <option value=""> {{ __('dashboard.order_id') }}</option>
-                                @foreach($orders as $order)
-                                    @if($order->status == "approved")
+                                @foreach(App\Models\Order::all() as $order)
+                                    @if($order->status == "approved" || $order->status == "delayed")
                                     <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>{{ $order->id }} [{{$order->customer->name }}]</option>
                                     @endif
                                 @endforeach

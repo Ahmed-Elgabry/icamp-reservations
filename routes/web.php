@@ -1348,6 +1348,7 @@ Route::get('general_payments/{id}/verified', [GeneralPaymentsController::class, 
 // Add funds routes
 Route::get('general_payments/add-funds/create', [GeneralPaymentsController::class, 'createAddFunds'])->name('general_payments.create_add_funds');
 Route::post('general_payments/add-funds/store', [GeneralPaymentsController::class, 'storeAddFunds'])->name('general_payments.store_add_funds');
+Route::put('general_payments/add-funds/update/{id}', [GeneralPaymentsController::class, 'updateAddFunds'])->name('general_payments.update_add_funds');
 
 /*------------ end Of general payments ----------*/
 

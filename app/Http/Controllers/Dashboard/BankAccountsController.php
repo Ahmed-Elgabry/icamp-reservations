@@ -63,20 +63,16 @@ class BankAccountsController extends Controller
             }
 
             $validatedData['image'] = $validatedData['image'] ?? null;
-            $payment = Payment::create([
-                'price' => $validatedData['balance'],
-                'notes' => __('dashboard.general_revenue_deposit'),
-                'date' => now(),
-                'verified' => true,
-                'source' => 'add_payment',
-            ]);
-            $payment->transaction()->create([
-                'account_id' => null,
+            $bankAccount = BankAccount::create($validatedData);
+            Transaction::create([
+                'account_id' => $bankAccount->id,
                 'amount' => $validatedData['balance'],
                 "type" =>"deposit",
                 'source' => 'general_payments_deposit',
+                "verified" => 1,
+                'date' => now(),
+                'description' => 'Initial deposit',
             ]);
-        $bankAccount = BankAccount::create($validatedData);
 
         return response()->json(['message' => 'Bank account created successfully', 'bank_account' => $bankAccount]);
     }

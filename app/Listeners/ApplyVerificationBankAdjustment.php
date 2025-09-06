@@ -17,7 +17,6 @@ class ApplyVerificationBankAdjustment
         $action = $event->action; // 'addon' | 'payment' | 'expense' | 'warehouse_sale' | 'insurance'
         // Use the verification state from the event, not from the item
         $verified = $event->verified;
-        \Log::info("ApplyVerificationBankAdjustment handling action: $action for item ID: ".(method_exists($item, 'getKey') ? $item->getKey() : 'unknown'));
         // Expect models to expose: account_id, total/amount/price
         try {
             $accountId = $item->account_id  ?? null;
@@ -26,79 +25,77 @@ class ApplyVerificationBankAdjustment
             $amount = $this->resolveAmount($action, $item);
             if ($amount <= 0 && $action !== "insurance") return;
 
-
             $account = BankAccount::find($accountId);
             if (!$account && $action !== "insurance") {
-                return;
+            return;
             }
-            \Log::info("ApplyVerificationBankAdjustment processing action: $action for item ID: ".(method_exists($item, 'getKey') ? $item->getKey() : 'unknown')." with amount: $amount on account ID: $accountId");
-            if ($action === 'expense') {
+
+            switch ($action) {
+            case 'expense':
                 if ($verified) {
-                    $account->decrement('balance', $amount);
-                }else {
-                    $account->increment('balance', $amount);
+                $account->decrement('balance', $amount);
+                } else {
+                $account->increment('balance', $amount);
                 }
-            } elseif ($action == 'insurance') {
+                break;
+
+            case 'insurance':
                 $insurances = $item->payments()->where('statement', 'the_insurance')->get();
-                $newstatus = $verified ? "0" : "1"; // Use the new status from event
-
+                $newstatus = $verified ? "0" : "1";
                 foreach ($insurances as $insurance) {
-                    if (!$insurance->account_id) {
-                        continue;
-                    }
-                    
-                    $bankAccount = BankAccount::find($insurance->account_id);
-                    if (!$bankAccount) {
-                        continue;
-                    }
-                    
-                    // Apply bank balance changes based on new verification status
-                    if ($verified) {
-                        if ($insurance->verified == "1") {
-                            $bankAccount->increment('balance', $insurance->transaction->amount);
-                        }
-                    } else {
-
-                        if ($insurance->verified == "1") {
-                            $bankAccount->decrement('balance', $insurance->transaction->amount);
-                        }
-                    }
-                    
-                    // Update payment and transaction verification status
-                    $insurance->update(['verified' => $newstatus]);
-                    if ($insurance->transaction) {
-                        $insurance->transaction->update(['verified' => $newstatus]);
-                    }
-                }
-                
-                $item->update(['insurance_approved' => $newstatus]);
-                            DB::commit();
-            } else {
+                if (!$insurance->account_id) continue;
+                $bankAccount = BankAccount::find($insurance->account_id);
+                if (!$bankAccount) continue;
                 if ($verified) {
-                    \Log::info("1");
-                    $account->increment('balance', $amount);
-                }else {
-                    \Log::info("2");
-                    \Log::info("Decrementing account ID: $accountId by amount: $amount");
-                    $account->decrement('balance', $amount);
+                    if ($insurance->verified == "1") {
+                    $bankAccount->increment('balance', $insurance->transaction->amount);
+                    }
+                } else {
+                    if ($insurance->verified == "1") {
+                    $bankAccount->decrement('balance', $insurance->transaction->amount);
+                    }
                 }
-            }
-            if ($action === 'warehouse_sales' && $verified) {
-                \Log::info("x");
-                $item->stock()->decrement('quantity', $item->quantity);
-                \Log::info($item->stock->quantity);
-            } elseif ($action === 'warehouse_sales' && !$verified) {
-                                \Log::info("y");
+                $insurance->update(['verified' => $newstatus]);
+                if ($insurance->transaction) {
+                    $insurance->transaction->update(['verified' => $newstatus]);
+                }
+                }
+                $item->update(['insurance_approved' => $newstatus]);
+                DB::commit();
+                break;
 
-                $item->stock()->increment('quantity', $item->quantity);
-                                \Log::info($item->stock->quantity);
+            case 'warehouse_sales':
+                if ($verified) {
+                    if ($item->stock->quantity < $item->quantity) {
+                        throw new \Exception(__('dashboard.insufficient_stock'));
+                    }
+                   $item->stock()->decrement('quantity', $item->quantity);
+                } else {
+                   $item->stock()->increment('quantity', $item->quantity);
+                }
+                if ($verified) {
+                $account->increment('balance', $amount);
+                } else {
+                $account->decrement('balance', $amount);
+                }
+                break;
+
+            case 'payment':
+            case 'addon':
+            case 'general_revenue_deposit':
+                if ($verified) {
+                $account->increment('balance', $amount);
+                } else {
+                $account->decrement('balance', $amount);
+                }
+                break;
             }
         } catch (\Exception $e) {
-            \Log::error('ApplyVerificationBankAdjustment failed: '.$e->getMessage(), [
-                'action' => $action,
-                'item' => method_exists($item, 'getKey') ? $item->getKey() : null,
-            ]);
+            // Handle exception or log error
+            DB::rollBack();
+            throw $e;
         }
+
     }
     private function resolveAmount(string $action, $item): float
     {

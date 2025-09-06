@@ -177,10 +177,22 @@ class OrderController extends Controller
             'partial_confiscation_amount' => 'nullable|numeric|min:0',
         ]);
         $order = Order::findOrFail($orderId);
+        if ($order->verifiedInsurance()->count() == 0) {
+            foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
+                $insurance->update([
+                    'insurance_status' => null,
+                ]);
+            }
+            $order->update([
+            'insurance_status' => null,
+        ]);
+        return redirect()->back()->withErrors(['insurance_amount' => 'لا يوجد تأمين معتمد']);
+        }
+        
         if (!$order->insurance_approved) {
             return redirect()->back();
         }
-        
+
         if ($order->insurance_status == $validatedData["insurance_status"]) {
             return redirect()->back();
         }
@@ -326,10 +338,10 @@ class OrderController extends Controller
 
     public function insurance($id)
     {
-        $order = $this->orderRepository->findOne($id);
+        $order = Order::findOrFail($id);
         $insurances = Payment::with(['account'])
             ->where('statement', 'the_insurance')
-            ->where('order_id', $order->id)
+            ->where('order_id', $id)
             ->where('verified', "1")
             ->orderByDesc('created_at')
             ->get();
@@ -470,12 +482,6 @@ class OrderController extends Controller
             'account_id' => $validatedData['account_id'] ?? null,
             'description' => $validatedData['description'] ?? '',
         ]);
-
-        $order->update([
-            'price' => $order->price
-        ]);
-        BankAccount::findOrFail($validatedData['account_id'])->increment('balance', $validatedData['price']);
-
         // add transaction linked to the newly created pivot row
         // Fetch the latest pivot row for this order/addon pair (assumes 'order_addon' has an auto-increment 'id')
         $pivot = \App\Models\OrderAddon::where('order_id', $order->id)
@@ -512,6 +518,9 @@ class OrderController extends Controller
         $existingAddon = \DB::table('order_addon')->where('id', $pivotId)->first();
         // discount the amount added in creation
         $discountedBalance = $existingAddon->price ;
+        if ($existingAddon->verified ) {
+            BankAccount::findOrFail($existingAddon->account_id)->decrement('balance', $discountedBalance);
+        }
         // Update the addon in pivot table
         \DB::table('order_addon')->where('id', $pivotId)->update([
             'addon_id' => $validatedData['addon_id'],
@@ -520,8 +529,8 @@ class OrderController extends Controller
             'payment_method' => $validatedData['payment_method'] ?? null,
             'price' => $validatedData['price'],
             'description' => $validatedData['description'] ?? '',
+            'verified' => 0, // Reset verified status on update
         ]);
-        BankAccount::findOrFail($validatedData['account_id'])->increment('balance', $validatedData['price'] - $discountedBalance);
             $transaction = \App\Models\Transaction::where('order_addon_id', $pivotId)->first();
             if ($transaction) {
                 // Update the transaction amount
@@ -529,6 +538,7 @@ class OrderController extends Controller
                     'amount' => $validatedData['price'] ,
                     'account_id' => $validatedData['account_id'] ?? $transaction->account_id,
                     'description' => $validatedData['description'] ?? $transaction->description,
+                    'verified' => 0, // Reset verified status on update
                 ]);
             }
         
@@ -543,10 +553,9 @@ class OrderController extends Controller
         if (!$existingAddon) {
             return back()->with('error', __('dashboard.addon_not_found'));
         }
-
-        // Calculate the price difference
-        $priceDifference = $existingAddon->price;
-        
+        if ($existingAddon->verified) {
+            BankAccount::findOrFail($existingAddon->account_id)->decrement('balance', $existingAddon->price);
+        }
         // Handle transaction deletion if it exists
         if ($existingAddon->transaction_id) {
             $transaction = \App\Models\Transaction::find($existingAddon->transaction_id);
@@ -554,15 +563,13 @@ class OrderController extends Controller
                 $transaction->delete();
             }
         }
+        // Calculate the price difference
+        $priceDifference = $existingAddon->price;
+        
 
         // Delete the pivot record
         DB::table('order_addon')->where('id', $pivotId)->delete();
 
-        // Update order price
-        $order->update([
-            'price' => $order->price - $priceDifference
-        ]);
-        BankAccount::findOrFail($existingAddon->account_id)->decrement('balance', $priceDifference);
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -824,7 +831,7 @@ class OrderController extends Controller
                 return [
                     'content' => $notice->notice,
                     'created_at' => $notice->created_at->format('Y-m-d H:i'),
-                    'created_by' => $notice->creator->name
+                    'created_by' => $notice->creator->name  
                 ];
             })
         ]);

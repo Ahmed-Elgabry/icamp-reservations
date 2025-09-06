@@ -14,6 +14,7 @@ use App\Models\BankAccount;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\GeneralPayment;
+use App\Services\GeneralPaymentSummaryService;
 use Illuminate\Support\Collection;
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\Paginator;
@@ -21,6 +22,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class GeneralPaymentsController extends Controller
 {
+    protected $generalPaymentSummaryService;
+
+    public function __construct(GeneralPaymentSummaryService $generalPaymentSummaryService)
+    {
+        $this->generalPaymentSummaryService = $generalPaymentSummaryService;
+    }
 
 
     public function transactions(){
@@ -126,9 +133,12 @@ class GeneralPaymentsController extends Controller
         $disccountFormAccount = $payment->amount;
         $amount = $payment->amount;
 
-        $bankAccount->update([
-            'balance' => $bankAccount->balance + $disccountFormAccount
-        ]);
+        // Only update bank account balance if transaction is verified
+        if ($payment->verified) {
+            $bankAccount->update([
+            'balance' => $bankAccount->balance - $disccountFormAccount
+            ]);
+        }
 
         if($payment->receiver_id)
         {
@@ -145,6 +155,10 @@ class GeneralPaymentsController extends Controller
 
     public function index(Request $request)
     {
+        // Use the service to get payment summaries and related data
+        $data = $this->generalPaymentSummaryService->getPaymentSummariesWithStats($request);
+        
+        // Get the original transactions for the view (if needed)
         $query = Transaction::with([
                 'order.customer',
                 'order.expenses' => fn ($q) => $q->where('verified' , true),
@@ -177,57 +191,15 @@ class GeneralPaymentsController extends Controller
 
         $general_payments = $query->where('verified', "1")->get();
         $paymentsByOrder = $general_payments->groupBy('order_id');
-        // $paymentsByCustomer = $general_payments->groupBy(function($t){
-            //     return optional(optional($t->order)->customer)->id;
-            // });
 
-        // Process order payment summaries (iterate by orders instead of customers)
-        $orderSummaries = collect();
-        foreach ($paymentsByOrder as $orderId => $orderTransactions) {
-            $order = $orderTransactions->first()?->order;
-            
-            // Skip if order is null (orphaned transactions)
-            if (!$order || !$order->customer) continue;
-            
-            // Group transactions by source for this specific order
-            $insurances = $orderTransactions->where('source', 'insurances');
-            $addonTransactions = $orderTransactions->where('source', 'reservation_addon');
-            $warehouseTransactions = $orderTransactions->where('source', 'warehouse_sale');
-            \Log::info(json_encode($insurances));
-            
-            // Calculate totals from transactions (using 'amount' field)
-            $insurancesTotal = $insurances->sum('amount');
-            $addonsTotal = $addonTransactions->sum('amount');
-            $warehouseTotal = $warehouseTransactions->sum('amount');
-            // Count items for this order
-            $insurancesCount = $insurances->count();
-            $addonsCount = $addonTransactions->count();
-            $warehouseCount = $warehouseTransactions->count();
-
-            $grandTotal = $insurancesTotal + $addonsTotal + $warehouseTotal;
-
-            // Get latest transaction date for this order
-            $latestDate = $orderTransactions->max('created_at');
-
-            $orderSummaries->push((object)[
-                'order' => $order,
-                'customer' => $order->customer,
-                'insurance_total' => $insurancesTotal,
-                'insurance_count' => $insurancesCount,
-                'addons_total' => $addonsTotal,
-                'addons_count' => $addonsCount,
-                'warehouse_total' => $warehouseTotal,
-                'warehouse_count' => $warehouseCount,
-                'grand_total' => $grandTotal,
-                'latest_date' => $latestDate
-            ]);
-        }
-
-        $orders = Order::whereNot('insurance_status' , 'returned')->get();
-        // Show all customers in filter, not only those with payments
-        $customers = Customer::orderBy('name')->get(['id','name']);
-
-        return view('dashboard.general_payments.index', compact('general_payments', 'customers','orders' , 'paymentsByOrder', 'orderSummaries'));
+        return view('dashboard.general_payments.index', [
+            'general_payments' => $general_payments,
+            'customers' => $data['customers'],
+            'orders' => $data['orders'],
+            'paymentsByOrder' => $paymentsByOrder,
+            'orderSummaries' => $data['order_summaries'],
+            'statistics' => $data['statistics'] ?? null,
+        ]);
     }
 
     public function create ()
@@ -266,6 +238,7 @@ class GeneralPaymentsController extends Controller
             'account_id' => 'required|exists:bank_accounts,id',
             'date' => 'nullable|date',
             'description' => 'nullable|string',
+            'source' => 'required|string',
             'order_id' => 'required|exists:orders,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -273,6 +246,7 @@ class GeneralPaymentsController extends Controller
         DB::beginTransaction();
         
         try {
+                $validatedData['type'] = "deposit";
             // Handle image upload
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('general_payments', 'public');
@@ -280,13 +254,6 @@ class GeneralPaymentsController extends Controller
             }
 
             $payment = Transaction::create($validatedData);
-            $bankAccount = BankAccount::find($request->account_id);
-            $disccountFormAccount = $request->amount;
-            $amount = $request->amount;
-
-            $bankAccount->update([
-                'balance' => $bankAccount->balance - $disccountFormAccount
-            ]);
 
             if ($request->receiver_id) {
                 $transfareTo = BankAccount::find($request->receiver_id);
@@ -307,8 +274,9 @@ class GeneralPaymentsController extends Controller
 
     public function accountsUpdate(Request $request, $id)
     {
-        $payment = Transaction::findOrFail($id);
+        $payment = GeneralPayment::findOrFail($id);
         $account_id = $payment->account_id;
+        $bankAccount = BankAccount::find($account_id);
         $receiver = $payment->receiver_id;
         $disccountFormAccount = $payment->amount;
         $amount = $request->amount;
@@ -327,6 +295,9 @@ class GeneralPaymentsController extends Controller
         DB::beginTransaction();
         
         try {
+            $validatedData['type'] = "deposit";
+            $validatedData['verified'] = 0;
+
             // Handle image upload
             if ($request->hasFile('image')) {
                 // Delete old image if exists
@@ -336,28 +307,14 @@ class GeneralPaymentsController extends Controller
                 $imagePath = $request->file('image')->store('general_payments', 'public');
                 $validatedData['image_path'] = $imagePath;
             }
-
-            $payment->update($validatedData);
-            $oldBankAccount = BankAccount::find($account_id);
-
-            // return money to the accounts
-            // back money to the sender account_id
-            $newBalance = $oldBankAccount->balance + $disccountFormAccount;
-            BankAccount::where('id', $account_id)->update(['balance' => $newBalance]);
-            
-            // take money form receiver account
-            // back money to receiver
-            if ($receiver) {
-                $oldReceiver = BankAccount::find($receiver);
-                $newBalance = $oldReceiver->balance - $paymentAmount;
-                BankAccount::where('id', $receiver)->update(['balance' => $newBalance]);
+            if ($payment->verified) {
+                $bankAccount->update([
+                    'balance' => $bankAccount->balance - $paymentAmount
+                ]);
             }
-
-            // save them again, take money from new account
-            $bankAccount = BankAccount::find($request->account_id);
-            $bankAccount->update([
-                'balance' => $bankAccount->balance - $disccountFormAccount
-            ]);
+            $payment->update($validatedData);
+            $payment->transaction()->update($validatedData);
+            
 
             // send money to new receiver
             if ($request->receiver_id) {
@@ -417,7 +374,6 @@ class GeneralPaymentsController extends Controller
             $imagePath = $request->file('image')->store('general_payments', 'public');
             $validatedData['image_path'] = $imagePath;
         }
-        $bankAccount = BankAccount::findOrFail($request->account_id);
         $payment = GeneralPayment::create($validatedData);
         $payment->transaction()->create([
             'amount' => $request->price,
@@ -427,9 +383,7 @@ class GeneralPaymentsController extends Controller
             'description' => $request->notes,
             'order_id' => $request->order_id,
         ]);
-        $bankAccount->update([
-            'balance' => $bankAccount->balance + $request->price
-        ]);
+
 
         return back()->withSuccess(__('dashboard.success'));
 
@@ -466,22 +420,14 @@ class GeneralPaymentsController extends Controller
             'notes' => 'nullable|string',
             'order_id' => 'required|exists:orders,id',
         ]);
-
-        $oldBankAccount = BankAccount::find($payment->account_id);
-        //  return money back
-        $oldBankAccount->update([
-            'balance' => $oldBankAccount->balance - $payment->price
-        ]);
-
+        if ($payment->verified) {
+            $bankAccount = BankAccount::find($payment->account_id);
+            $bankAccount->update([
+                'balance' => $bankAccount->balance - $payment->price
+            ]);
+        }
+        $validatedData['verified'] = 0;
         $payment->update($validatedData);
-
-
-        $bankAccount = BankAccount::findOrFail($request->account_id);
-        // take money form bank
-        $bankAccount->update([
-            'balance' => $bankAccount->balance + $request->price
-        ]);
-
         return back()->withSuccess(__('dashboard.success'));
 
     }
@@ -495,27 +441,45 @@ class GeneralPaymentsController extends Controller
     public function destroy( $payment)
     {
         $payment = GeneralPayment::findOrFail($payment);
-
-        $bankAccount = BankAccount::find($payment->account_id);
-        $bankAccount->update([
-            'balance' => $bankAccount->balance - $payment->price
-        ]);
-
+        if ($payment->verified) {
+            $bankAccount = BankAccount::find($payment->account_id);
+            $bankAccount->update([
+                'balance' => $bankAccount->balance - $payment->price
+            ]);
+        }
         $payment->delete();
         return response()->json();
     }
 
 
     public function deleteAll(Request $request) {
-        $requestIds = json_decode($request->data);
-
-        foreach ($requestIds as $id) {
-          $ids[] = $id->id;
-        }
-        if (GeneralPayment::whereIn('id', $ids)->delete()) {
-          return response()->json('success');
-        } else {
-          return response()->json('failed');
+        try {
+            $requestIds = json_decode($request->data);
+            foreach ($requestIds as $id) {
+                $payment = GeneralPayment::find($id);
+                if (!$payment) {
+                    \Log::warning("GeneralPayment not found for ID: $id");
+                    continue;
+                }
+                if ($payment->verified) {
+                    $bankAccount = BankAccount::find($payment->account_id);
+                    if ($bankAccount) {
+                        $bankAccount->update([
+                            'balance' => $bankAccount->balance - $payment->price
+                        ]);
+                    } else {
+                        \Log::warning("BankAccount not found for Payment ID: $id, Account ID: {$payment->account_id}");
+                    }
+                }
+                $payment->delete();
+            }
+            return response()->json(['status' => 'success']);
+        } catch (\Throwable $th) {
+            \Log::error('Bulk delete failed: ' . $th->getMessage(), [
+                'trace' => $th->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            return response()->json(['status' => 'failed', 'error' => $th->getMessage()], 500);
         }
     }
 
@@ -543,18 +507,23 @@ class GeneralPaymentsController extends Controller
         // Get all bank accounts for the dropdown
         $bankAccounts = BankAccount::all();
 
-        // Get all approved orders for the dropdown
+        // Get all approved orders for the dropdown (optional)
         $orders = Order::with(['customer'])
             ->where('status', 'approved')
             ->orderBy('created_at', 'desc')
             ->get();
         
         // Get recent add funds payments for the table (last 10)
-        $recentPayments = GeneralPayment::with(['account', 'order.customer'])
-            ->where('statement', 'add_funds')
+        // Filter by source 'add_funds_page' in the transaction relationship
+        $recentPayments = GeneralPayment::with(['account', 'order.customer', 'transaction'])
+            ->whereHas('transaction', function($query) {
+                $query->where('source', 'add_funds_page');
+            })
+            ->orWhere('statement', 'add_funds') // Also include by statement type
             ->orderBy('created_at', 'desc')
-            ->limit(10)
             ->get();
+        
+        \Log::info('Recent add funds payments count: ' . $recentPayments->count());
         
         return view('dashboard.general_payments.create_add_funds', compact(
             'bankAccounts', 
@@ -568,6 +537,8 @@ class GeneralPaymentsController extends Controller
      */
     public function storeAddFunds(Request $request)
     {
+       
+
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
@@ -576,6 +547,7 @@ class GeneralPaymentsController extends Controller
             'description' => 'nullable|string|max:1000',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'payment_method' => 'nullable|string',
+            'source' => 'required|string',
         ]);
 
         DB::beginTransaction();
@@ -585,49 +557,154 @@ class GeneralPaymentsController extends Controller
             $imagePath = null;
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('general_payments', 'public');
+            } else {
+                \Log::info('No image file found in add funds request');
             }
 
             // Create the general payment record
             $payment = GeneralPayment::create([
                 'price' => $request->amount,
-                'date' => $request->date,
                 'account_id' => $request->account_id,
                 'order_id' => $request->order_id,
                 'notes' => $request->description,
                 'image_path' => $imagePath,
                 'statement' => 'add_funds', // Set statement type
-                'payment_method' => $request->payment_method ?? 'bank_transfer',
+                'payment_method' => $request->payment_method,
+                'date' => $request->date,
                 'verified' => false, // Default to unverified
             ]);
 
+            \Log::info('General payment created with ID: ' . $payment->id);
+
             // Create corresponding transaction
-            Transaction::create([
+            $transaction = Transaction::create([
                 'account_id' => $request->account_id,
                 'amount' => $request->amount,
-                'order_id' => $request->order_id,
-                'type' => 'credit', // Credit for adding funds
                 'date' => $request->date,
-                'description' => 'Add Funds: ' . ($request->description ?? 'General funds addition'),
-                'source' => 'add_funds_page',
-                'verified' => false,
+                'order_id' => $request->order_id,
+                'source' => $request->source ?? 'add_funds_page',
+                'description' => $request->description ?? 'Add funds to account',
+                'general_payment_id' => $payment->id,
+                'type' => 'deposit', // Funds added to account
             ]);
-
-            // Update bank account balance only if verified (optional based on your business logic)
-            if ($payment->verified) {
-                $bankAccount = BankAccount::find($request->account_id);
-                if ($bankAccount) {
-                    $bankAccount->increment('balance', $request->amount);
-                }
-            }
-
+            
             DB::commit();
             
+            // Check if this is an AJAX request
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.add_funds_success'),
+                    'payment_id' => $payment->id
+                ]);
+            }
+            
             return redirect()->route('general_payments.create_add_funds')
-                ->with('success', __('dashboard.add_funds_created_successfully'));
+                ->with('success', __('dashboard.add_funds_success'));
 
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error('Add funds creation failed: ' . $e->getMessage());
+            \Log::error('Add funds creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            
+            // Check if this is an AJAX request
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('dashboard.error_occurred') . ': ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', __('dashboard.error_occurred') . ': ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update an existing add funds payment.
+     */
+    public function updateAddFunds(Request $request, $id)
+    {
+        $payment = GeneralPayment::findOrFail($id);
+        
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'date' => 'nullable|date',
+            'account_id' => 'required|exists:bank_accounts,id',
+            'description' => 'nullable|string|max:1000',
+            'payment_method' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        DB::beginTransaction();
+        
+        try {
+            // Handle image upload if provided
+            $updateData = [
+                'price' => $request->amount,
+                'account_id' => $request->account_id,
+                'notes' => $request->description,
+                'payment_method' => $request->payment_method,
+                'date' => $request->date,
+                'verified' => false, // Reset verification on update
+            ];
+
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($payment->image_path) {
+                    \Storage::disk('public')->delete($payment->image_path);
+                }
+                $imagePath = $request->file('image')->store('general_payments', 'public');
+                $updateData['image_path'] = $imagePath;
+            }
+            if ($payment->verified) {
+                BankAccount::where('id', $payment->account_id)->decrement('balance', $payment->price);
+            }
+            // Update the general payment record
+            $payment->update($updateData);
+
+            // Update corresponding transaction if it exists
+            if ($payment->transaction) {
+                $payment->transaction->update([
+                    'account_id' => $request->account_id,
+                    'amount' => $request->amount,
+                    'date' => $request->date,
+                    'description' => $request->description ?? 'Updated add funds to account',
+                    'verified' => false, // Reset verification on update
+                ]);
+            }
+            
+            DB::commit();
+            
+            // Check if this is an AJAX request
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.payment_updated_successfully'),
+                    'payment_id' => $payment->id
+                ]);
+            }
+            
+            return redirect()->route('general_payments.create_add_funds')
+                ->with('success', __('dashboard.payment_updated_successfully'));
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Add funds update failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            
+            // Check if this is an AJAX request
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('dashboard.error_occurred') . ': ' . $e->getMessage()
+                ], 500);
+            }
             
             return redirect()->back()
                 ->withInput()
