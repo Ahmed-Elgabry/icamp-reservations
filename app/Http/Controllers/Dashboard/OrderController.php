@@ -27,6 +27,7 @@ use App\Models\ServiceReport;
 use App\Models\PreLogoutImage;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
+use App\Models\GeneralPayment;
 use App\Models\OrderItem;
 use App\Repositories\IUserRepository;
 use App\Repositories\IOrderRepository;
@@ -93,6 +94,67 @@ class OrderController extends Controller
 
         return view('dashboard.orders.index', compact('orders'));
     }
+    public function updateInsuranceStatusAndPrice($order, $price, $originalInsuranceAmount, $insuranceStatus, $confiscationDescription, $insuranceAmount)
+    {
+        switch ($insuranceStatus) {
+            case 'returned':
+                foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
+                    $insurance->update([
+                        'insurance_status' => 'returned',
+                    ]);
+                    // Set transaction amount to 0 since insurance is returned
+                    $insurance->transaction->update(['amount' => 0]);
+                    BankAccount::find($insurance->account_id)->decrement('balance', $insurance->price);
+                }
+                $insuranceAmounts = 0; // No insurance remaining after return
+                break;
+
+            case 'confiscated_partial':
+                $remainingAmount = $originalInsuranceAmount - $insuranceAmount;
+                foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
+                    $insurance->update([
+                        'insurance_status' => 'confiscated_partial',
+                    ]);
+                    // Set transaction to the confiscated amount (what system keeps)
+                    if ($insurance->transaction) {
+                        $confiscatedPortion = ($insurance->price / $originalInsuranceAmount) * $insuranceAmount;
+                        $insurance->transaction->update(['amount' => $confiscatedPortion]);
+                    }
+
+                    // Deduct the confiscated portion from bank balance
+                    if ($insurance->account_id) {
+                        $confiscatedPortion = ($insurance->price / $originalInsuranceAmount) * $insuranceAmount;
+                        BankAccount::find($insurance->account_id)->decrement('balance', $confiscatedPortion);
+                    }
+                }
+                $insuranceAmounts = $remainingAmount;
+                break;
+                
+            case 'confiscated_full':
+                foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
+                    $insurance->update([
+                        'insurance_status' => 'confiscated_full',
+                    ]);
+                    // Set transaction to 0 since fully confiscated
+                        $insurance->transaction->update(['amount' => $insurance->price]);
+                    // Deduct full amount from bank balance
+                    if ($insurance->account_id) {
+                        BankAccount::find($insurance->account_id)->increment('balance', $insurance->price);
+                    }
+                }
+                $insuranceAmounts = 0; // No insurance remaining after full confiscation
+                break;
+                
+            default:
+                $insuranceAmounts = $originalInsuranceAmount;
+        }
+        
+        $order->update([
+            'insurance_status' => $insuranceStatus,
+            'confiscation_description' => $confiscationDescription,
+            'insurance_amount' => $insuranceAmounts,
+        ]);
+    }
 
     public function create()
     {
@@ -114,36 +176,33 @@ class OrderController extends Controller
             'confiscation_description' => 'nullable|string',
             'partial_confiscation_amount' => 'nullable|numeric|min:0',
         ]);
-
         $order = Order::findOrFail($orderId);
-        $originalInsuranceAmount = $order->insurance_amount;
-        $price = $order->price;
-
-        if ($originalInsuranceAmount <= 0) {
-            return back()->withErrors(['insurance_amount' => 'لا يمكن تنفيذ العملية لان مبلغ التامين = 0 ']);
-        }
-
-        if ($validatedData['insurance_status'] === 'confiscated_partial') {
-            $insuranceAmount = $request->input('partial_confiscation_amount', 0);
-
-            $insuranceAmounts = $originalInsuranceAmount - $insuranceAmount;
-            $price += $insuranceAmount;
-        } elseif ($validatedData['insurance_status'] === 'confiscated_full') {
-            $insuranceAmounts = 0;
-        } elseif ($validatedData['insurance_status'] === 'returned') {
-            $insuranceAmounts = 0;
-        } else {
-            $insuranceAmounts = $originalInsuranceAmount;
-            $price = $originalInsuranceAmount;
-        }
-
-        $order->update([
-            'insurance_status' => $validatedData['insurance_status'],
-            'confiscation_description' => $validatedData['confiscation_description'],
-            'insurance_amount' => $insuranceAmounts,
-            'price' => $price,
+        if ($order->verifiedInsurance()->count() == 0) {
+            foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
+                $insurance->update([
+                    'insurance_status' => null,
+                ]);
+            }
+            $order->update([
+            'insurance_status' => null,
         ]);
+        return redirect()->back()->withErrors(['insurance_amount' => 'لا يوجد تأمين معتمد']);
+        }
+        
+        if (!$order->insurance_approved) {
+            return redirect()->back();
+        }
 
+        if ($order->insurance_status == $validatedData["insurance_status"]) {
+            return redirect()->back();
+        }
+        $insuranceAmount = $request->input('partial_confiscation_amount', 0);
+        $originalInsuranceAmount = $order->verifiedInsuranceAmount();
+        $price = $order->price;
+        if ($originalInsuranceAmount <= 0) {
+            return back()->withErrors(['insurance_amount' => 'لا يوجد تأمين مسدد قابل للرد']);
+        }
+        $this->updateInsuranceStatusAndPrice($order, $price, $originalInsuranceAmount, $validatedData["insurance_status"] , $validatedData["confiscation_description"],  $insuranceAmount);
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -279,8 +338,15 @@ class OrderController extends Controller
 
     public function insurance($id)
     {
-        $order = $this->orderRepository->findOne($id);
-        return view('dashboard.orders.insurance', compact('order'));
+        $order = Order::findOrFail($id);
+        $insurances = Payment::with(['account'])
+            ->where('statement', 'the_insurance')
+            ->where('order_id', $id)
+            ->where('verified', "1")
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('dashboard.orders.insurance', compact('order', 'insurances'));
     }
 
     public function update(Request $request, $id)
@@ -416,12 +482,6 @@ class OrderController extends Controller
             'account_id' => $validatedData['account_id'] ?? null,
             'description' => $validatedData['description'] ?? '',
         ]);
-
-        $order->update([
-            'price' => $order->price
-        ]);
-        BankAccount::findOrFail($validatedData['account_id'])->increment('balance', $validatedData['price']);
-
         // add transaction linked to the newly created pivot row
         // Fetch the latest pivot row for this order/addon pair (assumes 'order_addon' has an auto-increment 'id')
         $pivot = \App\Models\OrderAddon::where('order_id', $order->id)
@@ -458,6 +518,9 @@ class OrderController extends Controller
         $existingAddon = \DB::table('order_addon')->where('id', $pivotId)->first();
         // discount the amount added in creation
         $discountedBalance = $existingAddon->price ;
+        if ($existingAddon->verified ) {
+            BankAccount::findOrFail($existingAddon->account_id)->decrement('balance', $discountedBalance);
+        }
         // Update the addon in pivot table
         \DB::table('order_addon')->where('id', $pivotId)->update([
             'addon_id' => $validatedData['addon_id'],
@@ -466,8 +529,8 @@ class OrderController extends Controller
             'payment_method' => $validatedData['payment_method'] ?? null,
             'price' => $validatedData['price'],
             'description' => $validatedData['description'] ?? '',
+            'verified' => 0, // Reset verified status on update
         ]);
-        BankAccount::findOrFail($validatedData['account_id'])->increment('balance', $validatedData['price'] - $discountedBalance);
             $transaction = \App\Models\Transaction::where('order_addon_id', $pivotId)->first();
             if ($transaction) {
                 // Update the transaction amount
@@ -475,6 +538,7 @@ class OrderController extends Controller
                     'amount' => $validatedData['price'] ,
                     'account_id' => $validatedData['account_id'] ?? $transaction->account_id,
                     'description' => $validatedData['description'] ?? $transaction->description,
+                    'verified' => 0, // Reset verified status on update
                 ]);
             }
         
@@ -489,10 +553,9 @@ class OrderController extends Controller
         if (!$existingAddon) {
             return back()->with('error', __('dashboard.addon_not_found'));
         }
-
-        // Calculate the price difference
-        $priceDifference = $existingAddon->price;
-        
+        if ($existingAddon->verified) {
+            BankAccount::findOrFail($existingAddon->account_id)->decrement('balance', $existingAddon->price);
+        }
         // Handle transaction deletion if it exists
         if ($existingAddon->transaction_id) {
             $transaction = \App\Models\Transaction::find($existingAddon->transaction_id);
@@ -500,15 +563,13 @@ class OrderController extends Controller
                 $transaction->delete();
             }
         }
+        // Calculate the price difference
+        $priceDifference = $existingAddon->price;
+        
 
         // Delete the pivot record
         DB::table('order_addon')->where('id', $pivotId)->delete();
 
-        // Update order price
-        $order->update([
-            'price' => $order->price - $priceDifference
-        ]);
-        BankAccount::findOrFail($existingAddon->account_id)->decrement('balance', $priceDifference);
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -770,7 +831,7 @@ class OrderController extends Controller
                 return [
                     'content' => $notice->notice,
                     'created_at' => $notice->created_at->format('Y-m-d H:i'),
-                    'created_by' => $notice->creator->name
+                    'created_by' => $notice->creator->name  
                 ];
             })
         ]);
@@ -779,8 +840,6 @@ class OrderController extends Controller
     public function updateVerified(int $id, string $type)
     {
         try {
-            \DB::beginTransaction();
-
             if ($type == 'addon') {
                 $item = OrderAddon::findOrFail($id);
                 $transaction = Transaction::where('order_addon_id', $item->id)->first();
@@ -788,39 +847,49 @@ class OrderController extends Controller
                 \Log::info($id) ;
                 $item = Payment::findOrFail($id);
                 $transaction = Transaction::where('payment_id', $item->id)->first();
+            }elseif ($type == 'general_revenue_deposit') {
+                $item = GeneralPayment::findOrFail($id);
+                $transaction = $item->transaction()->first();
+                \Log::info($item);
+                
+            }elseif ($type == 'insurance') {
+                    $item = Order::findOrFail($id);                    
+                    event(new \App\Events\VerificationStatusChanged('insurance', $item, $item->insurance_approved));                    
+                    return redirect()->back()->with('success', __('dashboard.success'));
+                    
             }
             elseif ($type == 'expense') {
                 $item = Expense::findOrFail($id);
                 $transaction = Transaction::where('expense_id', $item->id)->first();
             } elseif ($type == 'warehouse_sales') {
-                \Log::info('Warehouse sales verification');
                 $item = OrderItem::findOrFail($id);
-                \Log::info($item);
                 $transaction = Transaction::where('order_item_id', $item->id)->first();
 
                 \Log::info($transaction);
             } else {
                 return redirect()->back()->with('error', __('dashboard.invalid_type'));
             }
-            \Log::info($item->verified);
             $newVerifiedStatus = !$item->verified;
-            \Log::info($newVerifiedStatus);
-            $item->update(["verified"=>$newVerifiedStatus]);
+                        \Log::info($item->verified);
 
-            $transaction->update(["verified"=>$newVerifiedStatus]);
+            $item->update(["verified"=>$newVerifiedStatus]);
+            \Log::info($item->verified);
+            if ($transaction) {
+                $transaction->update(["verified"=>$newVerifiedStatus]);
+            }
             // Fire event so bank balance is adjusted by listener
             event(new \App\Events\VerificationStatusChanged(match($type) {
                 'addon' => 'addon',
                 'payment' => 'payment',
                 'expense' => 'expense',
-                'warehouse_sales' => 'warehouse_sale',
+                'general_revenue_deposit' => 'general_revenue_deposit', // Map to 'payment' since it's handled the same way
+                'insurance' => 'insurance',
+                'p' => 'warehouse_sales',
                 default => $type,
             }, $item, $newVerifiedStatus));
             
-            \DB::commit();
             return redirect()->back()->with('success', __('dashboard.success'));
         } catch (\Exception $e) {
-            \DB::rollback();
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

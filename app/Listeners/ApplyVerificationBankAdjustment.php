@@ -3,70 +3,100 @@
 namespace App\Listeners;
 
 use App\Events\VerificationStatusChanged;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Models\BankAccount;
 use Illuminate\Support\Facades\DB;
 
-class ApplyVerificationBankAdjustment implements ShouldQueue
+class ApplyVerificationBankAdjustment 
 {
-    use InteractsWithQueue;
-
     /**
-     * Ensure this queued listener runs only after surrounding DB transactions commit.
+     * Handle the verification status changed event.
      */
-    public $afterCommit = true;
-
     public function handle(VerificationStatusChanged $event): void
     {
         $item = $event->item;
-        $action = $event->action; // 'addon' | 'payment' | 'expense' | 'warehouse_sale'
-        // Derive verification state directly from the item
-        $verified = $this->resolveVerified($item);
-
+        $action = $event->action; // 'addon' | 'payment' | 'expense' | 'warehouse_sale' | 'insurance'
+        // Use the verification state from the event, not from the item
+        $verified = $event->verified;
         // Expect models to expose: account_id, total/amount/price
         try {
-            $accountId = $item->account_id ?? null;
-            if (!$accountId) return; // Nothing to adjust
+            $accountId = $item->account_id  ?? null;
+            if (!$accountId && $action !== "insurance") return; 
 
             $amount = $this->resolveAmount($action, $item);
-            if ($amount <= 0) return;
+            if ($amount <= 0 && $action !== "insurance") return;
 
-
-            DB::beginTransaction();
-
-            $account = \App\Models\BankAccount::find($accountId);
-            if (!$account) {
-                DB::rollBack();
-                return;
+            $account = BankAccount::find($accountId);
+            if (!$account && $action !== "insurance") {
+            return;
             }
 
-            if ($action === 'expense') {
+            switch ($action) {
+            case 'expense':
                 if ($verified) {
-                    $account->decrement('balance', $amount);
-                }else {
-                    $account->increment('balance', $amount);
+                $account->decrement('balance', $amount);
+                } else {
+                $account->increment('balance', $amount);
                 }
-            } else {
-                if ($verified) {
-                    $account->increment('balance', $amount);
-                }else {
-                    $account->decrement('balance', $amount);
-                }
-            }
+                break;
 
-            DB::commit();
-        } catch (\Throwable $e) {
-            if (DB::transactionLevel() > 0) {
-                DB::rollBack();
+            case 'insurance':
+                $insurances = $item->payments()->where('statement', 'the_insurance')->get();
+                $newstatus = $verified ? "0" : "1";
+                foreach ($insurances as $insurance) {
+                if (!$insurance->account_id) continue;
+                $bankAccount = BankAccount::find($insurance->account_id);
+                if (!$bankAccount) continue;
+                if ($verified) {
+                    if ($insurance->verified == "1") {
+                    $bankAccount->increment('balance', $insurance->transaction->amount);
+                    }
+                } else {
+                    if ($insurance->verified == "1") {
+                    $bankAccount->decrement('balance', $insurance->transaction->amount);
+                    }
+                }
+                $insurance->update(['verified' => $newstatus]);
+                if ($insurance->transaction) {
+                    $insurance->transaction->update(['verified' => $newstatus]);
+                }
+                }
+                $item->update(['insurance_approved' => $newstatus]);
+                DB::commit();
+                break;
+
+            case 'warehouse_sales':
+                if ($verified) {
+                    if ($item->stock->quantity < $item->quantity) {
+                        throw new \Exception(__('dashboard.insufficient_stock'));
+                    }
+                   $item->stock()->decrement('quantity', $item->quantity);
+                } else {
+                   $item->stock()->increment('quantity', $item->quantity);
+                }
+                if ($verified) {
+                $account->increment('balance', $amount);
+                } else {
+                $account->decrement('balance', $amount);
+                }
+                break;
+
+            case 'payment':
+            case 'addon':
+            case 'general_revenue_deposit':
+                if ($verified) {
+                $account->increment('balance', $amount);
+                } else {
+                $account->decrement('balance', $amount);
+                }
+                break;
             }
-            \Log::error('ApplyVerificationBankAdjustment failed: '.$e->getMessage(), [
-                'action' => $action,
-                'item' => method_exists($item, 'getKey') ? $item->getKey() : null,
-            ]);
+        } catch (\Exception $e) {
+            // Handle exception or log error
+            DB::rollBack();
             throw $e;
         }
-    }
 
+    }
     private function resolveAmount(string $action, $item): float
     {
         // Unify amount resolution across models
@@ -75,10 +105,14 @@ class ApplyVerificationBankAdjustment implements ShouldQueue
                 return (float) ($item->price ?? 0);
             case 'expense':
                 return (float) ($item->price ?? 0);
-            case 'warehouse_sale':
+            case 'general_revenue_deposit':
+                return (float) ($item->price ?? 0);
+            case 'warehouse_sales':
                 return (float) ($item->total_price ?? 0);
             case 'addon':
                 return (float) ($item->price ?? 0);
+            case 'insurance':
+                return (float) ($item->verifiedInsuranceAmount() ?? 0);
             default:
                 return 0.0;
         }

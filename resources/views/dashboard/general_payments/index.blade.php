@@ -10,13 +10,14 @@
         <div class="card card-flush">
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-                <div class="col-4 mt-3">
+                <h3 class="card-title">{{ __('dashboard.general_payments') }}</h3>
+                <div class="col-3 mt-3">
 
                     <a href="{{route('general_payments.create')}}"
                         class="btn btn-primary">{{ __('dashboard.add') }}</a>
                 </div>
                 <!--begin::Card title-->
-                <div class="card-title">
+                <div class="card-title w-100">
                     <form action="" method="GET" class="row g-3 align-items-end">
 
                         <div class="col-md-6">
@@ -24,7 +25,7 @@
                                 {{ __('dashboard.select') }} {{ __('dashboard.customer') }}
                             </label>
                             <select name="customer_id" id="customer_id" class="form-select">
-                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.customer') }}</option>
+                                <option value="">{{ __('dashboard.customer') }}</option>
                                 @foreach($customers as $customer)
                                     <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
                                         {{ $customer->name }}
@@ -33,16 +34,18 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-5 col-md-6">
                             <label for="order_id" class="form-label">
-                                {{ __('dashboard.orders') }}
+                                {{ __('dashboard.order_id') }}
                             </label>
-                            <select name="order_id" id="order_id" class="form-select">
-                                <option value="">{{ __('dashboard.select') }} {{ __('dashboard.orders') }}</option>
-                                @foreach($orders as $order)
-                                    <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>
-                                        #{{ $order->id }} [{{ $order->customer->name }}]
-                                    </option>
+                            <select name="order_id" id="order_id" class="form-select ">
+                                <option value=""> {{ __('dashboard.order_id') }}</option>
+                                @foreach(App\Models\Order::all() as $order)
+                                    @if($order->status == "approved" || $order->status == "delayed")
+                                            <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>
+                                                #{{ $order->id }} [{{ $order->customer->name }}]
+                                            </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -114,7 +117,7 @@
                                 @if($summary->insurance_count)
                                     <div class="d-flex flex-column text-center">
                                         <span class="fw-bold">{{ number_format($summary->insurance_total, 2) }}</span>
-                                        <span class="badge badge-light-primary">{{ $summary->insurance_count }} {{ __('dashboard.Insurance') }}</span>
+                                        <span class="badge badge-light-primary text-center">{{ $summary->insurance_count }} {{ __('dashboard.Insurance') }}</span>
                                     </div>
                                 @else
                                     <span class="text-muted">—</span>
@@ -127,7 +130,7 @@
                                 @if($summary->addons_count)
                                     <div class="d-flex flex-column text-center">
                                         <span class="fw-bold">{{ number_format($summary->addons_total, 2) }}</span>
-                                        <span class="badge badge-light-primary">{{ $summary->addons_count }} {{ __('dashboard.addons') }}</span>
+                                        <span class="badge badge-light-primary text-center">{{ $summary->addons_count }} {{ __('dashboard.addons') }}</span>
                                     </div>
                                 @else
                                     <span class="text-muted">—</span>
@@ -139,7 +142,7 @@
                                 @if($summary->warehouse_count)
                                     <div class="d-flex flex-column text-center">
                                         <span class="fw-bold">{{ number_format($summary->warehouse_total, 2) }}</span>
-                                        <span class="badge badge-light-info">{{ $summary->warehouse_count }} {{ __('dashboard.sales') }}</span>
+                                        <span class="badge badge-light-info ">{{ $summary->warehouse_count }} {{ __('dashboard.sales') }}</span>
                                     </div>
                                 @else
                                     <span class="text-muted">—</span>

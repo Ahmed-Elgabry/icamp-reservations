@@ -10,6 +10,7 @@ use App\Models\Service;
 use App\Models\Customer;
 use App\Models\BankAccount;
 use Illuminate\Http\Request;
+use App\Models\GeneralPayment;
 use App\Http\Controllers\Controller;
 
 class HomeController extends Controller
@@ -52,7 +53,8 @@ class HomeController extends Controller
 
     public function reprots()
     {
-        // الحصول على أكثر نوع المخيم مبيعًا
+ 
+
         $topServices = Service::whereHas('orders', function ($query) {
             $query->where('status', 'completed');
         })
@@ -72,6 +74,22 @@ class HomeController extends Controller
 
         // الحصول على الأرباح
         $totalPayments = Payment::where('verified', '1')->sum('price');
+        // الحصول على المدفوعات العامة من صفحة إضافة الأموال
+        $payments = GeneralPayment::with(['account', 'order.customer', 'transaction'])
+            ->whereHas('transaction', function($query) {
+                $query->where('source', 'add_funds_page');
+            })
+            ->where('verified', true) // Also include by statement type
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $reservations_revenues = \App\Models\Transaction::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('SUM(amount) as total')
+        )
+        ->where('source', 'reservation_payments')
+        ->where('verified', '1')
+        ->groupBy('month')
+        ->get();
 
         // الحصول على المصاريف وبنودها
         $expenses = Expense::select('expense_item_id', DB::raw('SUM(price) as total'))
@@ -84,6 +102,6 @@ class HomeController extends Controller
             ->groupBy('month')
             ->get();
 
-        return view('dashboard.reports', compact('topServices', 'totalPayments', 'bankAccounts', 'expenses', 'monthlyPayments'));
+    return view('dashboard.reports', compact('topServices', 'payments', 'totalPayments', 'bankAccounts', 'expenses', 'monthlyPayments', 'reservations_revenues'));
     }
 }

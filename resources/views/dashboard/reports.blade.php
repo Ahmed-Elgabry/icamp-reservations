@@ -23,7 +23,7 @@
                                         @foreach($topServices as $service)
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 {{ $service->name }}
-                                                <span class="badge badge-primary badge-pill">{{ $service->orders_count }}
+                                                <span class="badge badge-primary badge-pill">{{ $service->completed_orders_count ?? $service->orders_count }}
                                                     @lang('dashboard.sales')</span>
                                             </li>
                                         @endforeach
@@ -40,21 +40,51 @@
                                     <table class="table">
                                         <thead>
                                             <tr>
-                                                <th>@lang('dashboard.account_number')</th>
                                                 <th>@lang('dashboard.name')</th>
                                                 <th>@lang('dashboard.balance')</th>
-                                                <th>@lang('dashboard.notes')</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($bankAccounts as $account)
                                                 <tr>
-                                                    <td>{{ $account->account_number }}</td>
                                                     <td>{{ $account->name }}</td>
-                                                    <td>{{ number_format($account->balance, 2) }}</td>
-                                                    <td>{{ $account->notes ? $account->notes : '___'}}</td>
+                                                    <td>{{ number_format($account->balance, 2) }} {{__("dashboard.AED")}}</td>
                                                 </tr>
                                             @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-success text-white">
+                                    <h4 class="card-title" style="color: white;">مدفوعات</h4>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>@lang('dashboard.payment_id')</th>
+                                                <th>@lang('dashboard.amount')</th>
+                                                <th>@lang('dashboard.date')</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if(isset($payments))
+                                                @foreach ($payments as $payment)
+                                                    <tr>
+                                                        <td>{{ $payment->id }}</td>
+                                                        <td>{{ number_format($payment->price, 2) }} {{__("dashboard.AED")}}</td>
+                                                        <td>{{ $payment->created_at->format('Y-m-d') }}</td>
+                    
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td colspan="4" class="text-center">@lang('dashboard.no_payments_found')</td>
+                                                </tr>
+                                            @endif
                                         </tbody>
                                     </table>
                                 </div>
@@ -82,23 +112,23 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card shadow-sm mb-4">
-                                <div class="card-header bg-warning text-white">
-                                    <h4 class="card-title" style="color: white;">@lang('dashboard.general_payments')</h4>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="monthlyPaymentsChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
                         <div class="col-md-12">
                             <div class="card shadow-sm mb-4">
                                 <div class="card-header bg-warning text-white">
+                                    <h4 class="card-title" style="color: white;">@lang('dashboard.general_payments')</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="monthlyPaymentsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card shadow-sm mb-4">
+                                    <div class="card-header bg-warning text-white">
                                     <h4 class="card-title" style="color: white;">@lang('dashboard.orders_payments')</h4>
                                 </div>
                                 <div class="card-body">
-                                    <canvas id="monthlyPaymentsChart"></canvas>
+                                    <canvas id="reservationsPaymentsChart"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -198,6 +228,38 @@
                     title: {
                         display: true,
                         text: "@lang('dashboard.general_payments')"
+                    }
+                }
+            });
+
+            // Orders payments (reservations revenues) chart
+            var resLabels = {!! json_encode($reservations_revenues->pluck('month')) !!};
+            var resData = {!! json_encode($reservations_revenues->pluck('total')) !!};
+            // Optional: map month numbers to names
+            var monthNames = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+            var resLabelsNamed = (resLabels || []).map(function(m){
+                var i = parseInt(m,10);
+                return monthNames[i-1] || m;
+            });
+            var reservationsCtx = document.getElementById('reservationsPaymentsChart').getContext('2d');
+            new Chart(reservationsCtx, {
+                type: 'bar',
+                data: {
+                    labels: resLabelsNamed,
+                    datasets: [{
+                        label: "@lang('dashboard.orders_payments')",
+                        data: resData,
+                        backgroundColor: '#FF9F40'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: "@lang('dashboard.orders_payments')"
                     }
                 }
             });

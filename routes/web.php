@@ -1252,6 +1252,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.delete', 'dashboard.expenses']
     ]);
 
+    # expenses image download
+    Route::get('expenses/{id}/download-image', [
+        'uses' => 'ExpensesController@downloadImage',
+        'as' => 'expenses.download_image',
+        'title' => ['actions.download', 'dashboard.expenses']
+    ]);
+
     /*------------ end Of expenses ----------*/
     /*------------ start Of Settings----------*/
     Route::get('set-lang/{lang}', [
@@ -1335,6 +1342,15 @@ Route::get('/clear', function () {
 /*------------ start Of general payments ----------*/
 
 Route::resource('general_payments', GeneralPaymentsController::class);
+Route::get('general_payments/{id}/download', [GeneralPaymentsController::class, 'downloadImage'])->name('general_payments.download');
+Route::get('general_payments/{id}/verified', [GeneralPaymentsController::class, 'verified'])->name('general_payments.verified');
+
+// Add funds routes
+Route::get('general_payments/add-funds/create', [GeneralPaymentsController::class, 'createAddFunds'])->name('general_payments.create_add_funds');
+Route::post('general_payments/add-funds/store', [GeneralPaymentsController::class, 'storeAddFunds'])->name('general_payments.store_add_funds');
+Route::put('general_payments/add-funds/update/{id}', [GeneralPaymentsController::class, 'updateAddFunds'])->name('general_payments.update_add_funds');
+
+/*------------ end Of general payments ----------*/
 
 // Custom create route with optional id for terms settings
 Route::get('terms_sittngs/create/{id?}', [TermsSittngController::class, 'create'])

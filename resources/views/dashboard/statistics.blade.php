@@ -2,7 +2,7 @@
 
 @section('content')
 
-<<!-- نافذة منبثقة للفلاتر -->
+<!-- نافذة منبثقة للفلاتر -->
     <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -66,30 +66,63 @@
     <h1 class="text-center" style="font-family: cairo, sans-serif">@lang('dashboard.statistics')</h1>
 
     <div class="dashboard-container">
-        <input id="date-range" type="text">
+    <input id="date-range" type="text" value="{{ ($startDate ?? '') }} — {{ ($endDate ?? '') }}">
         <p>@lang('dashboard.number_of_appointments')</p>
         <div class="stats">
             <div class="stat-item">
-                <h3>{{ number_format($approvedOrders) }}</h3>
-                <p>@lang('dashboard.Approved_appointments')</p>
+                <h3>{{ number_format(($ordersCountByStatus['completed'] ?? 0)) }}</h3>
+                <p>@lang('dashboard.completed_orders')</p>
             </div>
             <div class="stat-item">
-                <h3>{{ number_format($paidOrders) }}</h3>
-                <p>@lang('dashboard.Pending_appointments')</p>
+                <h3>{{ number_format(($ordersCountByStatus['approved'] ?? 0) + ($ordersCountByStatus['delayed'] ?? 0)) }}</h3>
+                <p>@lang('dashboard.verified_orders')</p>
             </div>
             <div class="stat-item">
-                <h3>{{ number_format($orders) }}</h3>
-                <p>@lang('dashboard.Total_appointments')</p>
+                <h3>{{ number_format(($ordersCountByStatus['pending_and_show_price'] ?? 0) + ($ordersCountByStatus['pending_and_Initial_reservation'] ?? 0)) }}</h3>
+                <p>@lang('dashboard.pending_orders')</p>
             </div>
             <div class="stat-item">
-                <h3>AED {{ number_format($payments->sum('amount'), 2, ',', '.') }}</h3>
-                <p>@lang('dashboard.Aedpayments')</p>
+                <h3>{{ number_format(($ordersCountByStatus['canceled'] ?? 0)) }}</h3>
+                <p>@lang('dashboard.cancelled_orders')</p>
+            </div>
+            <div class="stat-item">
+                <h3>{{ number_format($reservation_revenues) }}</h3>
+                <p>@lang('dashboard.reservations_revenues')</p>
+            </div>
+            <div class="stat-item">
+                <h3> {{ number_format($general_revenues, 2, ',', '.') }}{{__('dashboard.AED')}}</h3>
+                <p>@lang('dashboard.general_payments')</p>
             </div>
         </div>
 
         <div class="chart-container">
             <canvas id="revenueChart"></canvas>
         </div>
+        <!-- ملخص يومي اختياري -->
+        @if(isset($revenues_by_day) && count($revenues_by_day))
+        <div class="table-responsive w-100 mt-4">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>اليوم</th>
+                        <th>الإيرادات العامة (AED)</th>
+                        <th>إيرادات الحجوزات (AED)</th>
+                        <th>الإجمالي (AED)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($revenues_by_day as $row)
+                        <tr>
+                            <td>{{ $row['day'] ?? $row->day }}</td>
+                            <td>{{ number_format(($row['general_total'] ?? $row->general_total) ?? 0, 2) }}</td>
+                            <td>{{ number_format(($row['reservation_total'] ?? $row->reservation_total) ?? 0, 2) }}</td>
+                            <td>{{ number_format(($row['total'] ?? $row->total) ?? 0, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
     </div>
 
     <div class="dashboard-container" style="margin-top: 20px; margin-bottom: 50px;">
@@ -109,8 +142,9 @@
                     <th>@lang('dashboard.service')</th>
                     <th>@lang('dashboard.orders')</th>
                     <th>@lang('dashboard.approved')</th>
-                    <th>@lang('dashboard.pending')</th>
-                    <th>@lang('dashboard.rejected')</th>
+                    <th>@lang('dashboard.pending_and_show_price')</th>
+                    <th>@lang('dashboard.pending_and_Initial_reservation')</th>
+                    <th>@lang('dashboard.delayed')</th>
                     <th>@lang('dashboard.canceled')</th>
                     <th>@lang('dashboard.completed')</th>
                     <th>@lang('dashboard.customers')</th>
@@ -138,8 +172,9 @@
                         </td>
                         <td>{{ $service->orders->count() }}</td>
                         <td>{{ $service->orders->where('status', 'approved')->count() }}</td>
-                        <td>{{ $service->orders->where('status', 'pending')->count() }}</td>
-                        <td>{{ $service->orders->where('status', 'rejected')->count() }}</td>
+                        <td>{{ $service->orders->where('status', 'pending_and_show_price')->count() }}</td>
+                        <td>{{ $service->orders->where('status', 'pending_and_Initial_reservation')->count() }}</td>
+                        <td>{{ $service->orders->where('status', 'delayed')->count() }}</td>
                         <td>{{ $service->orders->where('status', 'canceled')->count() }}</td>
                         <td>{{ $service->orders->where('status', 'completed')->count() }}</td>
                         <td>{{ $service->orders->pluck('customer')->unique('id')->count() }}</td>
@@ -162,47 +197,53 @@
                 }
             });
         });
-        const today = new Date();
-        const last7DaysStart = new Date(today);
-        last7DaysStart.setDate(today.getDate() - 7);
+        // إعداد بيانات الرسم البياني من الخادم
+        const revenuesByDay = @json($revenues_by_day ?? []);
+        const labels = revenuesByDay.map(r => r.day);
+        const generalData = revenuesByDay.map(r => Number(r.general_total ?? 0));
+        const reservationData = revenuesByDay.map(r => Number(r.reservation_total ?? 0));
+        const totalData = revenuesByDay.map(r => Number(r.total ?? 0));
 
-        function formatDate(date) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('ar-EG', options);
-        }
-
-        const dateRangeInput = document.getElementById('date-range');
-        dateRangeInput.value = `${formatDate(today)} - ${formatDate(last7DaysStart)}`;
-
-        const getDatesArray = (start, end) => {
-            const dates = [];
-            let currentDate = new Date(start);
-            while (currentDate <= end) {
-                dates.push(currentDate.toISOString().split('T')[0]);
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            return dates;
-        };
-
-        const labels = getDatesArray(last7DaysStart, today);
         const ctx = document.getElementById('revenueChart').getContext('2d');
         const revenueChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'الإيرادات (AED)',
-                    data: Array(labels.length).fill(0),
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
+                datasets: [
+                    {
+                        label: 'الإيرادات العامة (AED)',
+                        data: generalData,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35
+                    },
+                    {
+                        label: 'إيرادات الحجوزات (AED)',
+                        data: reservationData,
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35
+                    },
+                    {
+                        label: 'الإجمالي (AED)',
+                        data: totalData,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.15)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                stacked: false,
                 scales: {
                     y: {
                         title: {
@@ -215,24 +256,24 @@
                         },
                         ticks: {
                             callback: function (value) {
-                                return value.toLocaleString();
+                                try { return Number(value).toLocaleString(); } catch (e) { return value; }
                             }
                         }
+                    },
+                    x: {
+                        ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 },
                     }
                 },
                 plugins: {
                     legend: {
                         position: 'top',
-                        labels: {
-                            font: {
-                                size: 14
-                            }
-                        }
+                        labels: { font: { size: 14 } }
                     },
                     tooltip: {
                         callbacks: {
                             label: function (tooltipItem) {
-                                return `الإيرادات: AED ${tooltipItem.raw.toLocaleString()}`;
+                                const v = Number(tooltipItem.raw || 0).toLocaleString();
+                                return `${tooltipItem.dataset.label}: AED ${v}`;
                             }
                         }
                     }
@@ -243,7 +284,7 @@
 
     <style>
         body {
-            font-family: 'Cairo', sans-serif;
+            /* font-family: 'Cairo', sans-serif; */
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;

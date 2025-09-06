@@ -22,6 +22,8 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id')->nullable();
             $table->unsignedBigInteger('order_addon_id')->nullable();
             $table->unsignedBigInteger('payment_id')->nullable();
+            $table->unsignedBigInteger('expense_id')->nullable();
+            $table->unsignedBigInteger('general_payment_id')->nullable();
             $table->unsignedBigInteger('stock_id')->nullable();
             $table->date('date')->nullable();
             $table->decimal('amount', 10, 2); // Transaction amount
@@ -31,11 +33,13 @@ return new class extends Migration
             
             // Foreign key constraints
             $table->unsignedBigInteger('account_id')->nullable(); // ID of the sender account
-            $table->foreign('stock_id')->references('id')->on('stocks')->onDelete('set null');
-            $table->foreign('order_addon_id')->references('id')->on('order_addons')->onDelete('set null');
-            $table->foreign('account_id')->references('id')->on('bank_accounts')->onDelete('set null');
-            $table->foreign('receiver_id')->references('id')->on('bank_accounts')->onDelete('set null');
-            $table->foreign('payment_id')->references('id')->on('payments')->onDelete('set null');
+            $table->foreign('stock_id')->references('id')->on('stocks')->onDelete('cascade');
+            $table->foreign('expense_id')->references('id')->on('expenses')->onDelete('cascade');
+            $table->foreign('general_payment_id')->references('id')->on('general_payments')->onDelete('cascade');
+            $table->foreign('order_addon_id')->references('id')->on('order_addons')->onDelete('cascade');
+            $table->foreign('account_id')->references('id')->on('bank_accounts')->onDelete('cascade');
+            $table->foreign('receiver_id')->references('id')->on('bank_accounts')->onDelete('cascade');
+            $table->foreign('payment_id')->references('id')->on('payments')->onDelete('cascade');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
 

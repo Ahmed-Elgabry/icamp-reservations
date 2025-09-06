@@ -144,21 +144,21 @@
                                 <!--end::Time From-->
 
                                 <!--begin::Payments-->
-                                @php $totalPrice = ($order->price + $order->deposit + $order->insurance_amount + $order->addons->sum('price')) @endphp
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format($order->verified_payments_sum) }}
+                                        {{ number_format( $order->verifiedPayments()->sum("price")) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
-                                    {{ number_format($totalPrice) }}
+                                    {{ number_format($order->price + $order->insurance_amount) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
                                         @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
                                         @else
-                                            {{ number_format($totalPrice - $order->payments->sum('price')) }}
+                                        {{ number_format(($order->price + $order->insurance_amount) - $order->verifiedPayments()->sum("price")) }}
+
                                         @endif
                                     </span>
                                 </td>
@@ -180,11 +180,17 @@
                                 <!--begin::Order Status-->
 
                                 <td>
-                                    <span @class(['badge text-white' , 'bg-success' => $order->insurance_status == 'returned' , 'bg-danger' => $order->insurance_status == null , 'bg-secondary' => $order->insurance_status == 'confiscated_full' , 'bg-primary' => $order->insurance_status == 'confiscated_partial' ])>
-                                        @if ($order->insurance_status)
-                                            {{ __('dashboard.' . $order->insurance_status) }}
+                                    <span @class(['badge text-white', 'bg-success' => $order->insurance_status == 'returned', 'bg-danger' => $order->insurance_status == null && $order->payments()->where('statement','the_insurance')->sum("price") < 1, 'bg-dark' => $order->insurance_status == null && $order->payments()->where('statement','the_insurance')->sum("price") > 0, 'bg-secondary' => $order->insurance_status == 'confiscated_full', 'bg-primary' => $order->insurance_status == 'confiscated_partial'])>
+                            
+                                        @if ($order->insurance_status != "returned" && $order->payments()->where('statement','the_insurance')->sum("price") > 0)
+                                            {{ __('dashboard.insurance_not_returned') }}
+                                            <!-- this condition should be before the next one becuase how had paid the insurance has insurance so you should check if returned -->
+                                        @elseif ($order->insurance_status)
+                                            {{ __('dashboard.insurance_' . $order->insurance_status) }}
+                                        @elseif($order->payments()->where('statement','the_insurance')->sum("price") > 0)
+                                            {{ __('dashboard.insurance_not_returned') }}
                                         @else
-                                            {{ __('dashboard.no_result') }}
+                                            {{ __('dashboard.insurance_null') }}
                                         @endif
                                     </span>
                                 </td>

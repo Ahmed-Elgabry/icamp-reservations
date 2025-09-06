@@ -1,11 +1,13 @@
 $(document).ready(function(){
-    const t = document.getElementById("kt_ecommerce_add_product_form"),
-    o = document.getElementById("kt_ecommerce_add_product_submit");
+    const t = document.getElementById("kt_ecommerce_add_product_form");
 
     $(document).on('submit','.store',function(e){
         e.preventDefault();
         var $form = $(this);
         var url = $form.attr('action');
+        // Find this form's submit button and use it for indicator
+        var o = $form.find('#kt_ecommerce_add_product_submit')[0] || $form.find('button[type="submit"]')[0] || null;
+
         $.ajax({
             url: url,
             method: 'post',
@@ -18,20 +20,28 @@ $(document).ready(function(){
                 o && (o.disabled = !0);
                 setTimeout((function () {
                     o && o.removeAttribute && o.removeAttribute("data-kt-indicator");
-                    var successMsg = $form.attr('data-success-message') || `${$.localize.data['app']['common']['submitted']}`;
+                    var successMsg = $form.attr('data-success-message') || ($.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] ? $.localize.data['app']['common']['submitted'] : 'Submitted successfully');
                     Swal.fire({
                         text: successMsg,
                         icon: "success",
                         buttonsStyling: !1,
-                        confirmButtonText: `${$.localize.data['app']['common']['got_it']}`,
+                        confirmButtonText: `${$.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] ? $.localize.data['app']['common']['got_it'] : 'OK'}`,
                         customClass: {
                             confirmButton: "btn btn-primary"
                         }
                     }).then((function () {
                         // Emit a success event so pages can react without reload
                         $form.trigger('store:success', [response]);
+                        // Close any parent modal if present
+                        try {
+                            var $modal = $form.closest('.modal');
+                            if ($modal && $modal.length) {
+                                var modalInst = bootstrap.Modal.getInstance($modal[0]) || new bootstrap.Modal($modal[0]);
+                                modalInst.hide();
+                            }
+                        } catch (e) {}
                         // Optional redirect if attribute provided
-                        const redirect = t && t.getAttribute ? t.getAttribute("data-kt-redirect") : null;
+                        const redirect = ($form.attr('data-kt-redirect')) || (t && t.getAttribute ? t.getAttribute("data-kt-redirect") : null);
                         if (redirect) {
                             window.location = redirect;
                         } else {
@@ -41,11 +51,39 @@ $(document).ready(function(){
                 }), 2e3);
             },
             error: function (xhr) {
+                var fallbackGeneral = ($.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] && $.localize.data['app']['common']['general_error']) || 'An error occurred';
+                var msg = fallbackGeneral;
+                try {
+                    if (xhr && xhr.responseJSON) {
+                        if (xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON.errors && typeof xhr.responseJSON.errors === 'object') {
+                            var errs = [];
+                            Object.keys(xhr.responseJSON.errors).forEach(function(k){
+                                var v = xhr.responseJSON.errors[k];
+                                if (Array.isArray(v)) { errs = errs.concat(v); } else if (v) { errs.push(v); }
+                            });
+                            if (errs.length) { msg = errs.join('\n'); }
+                        }
+                    } else if (xhr && xhr.responseText) {
+                        try {
+                            var parsed = JSON.parse(xhr.responseText);
+                            if (parsed && (parsed.message || parsed.error)) {
+                                msg = parsed.message || parsed.error;
+                            } else {
+                                msg = xhr.responseText;
+                            }
+                        } catch (e) {
+                            msg = xhr.responseText;
+                        }
+                    }
+                } catch (e) {}
+
                 Swal.fire({
-                    html: `${$.localize.data['app']['common']['general_error']}`,
-                    icon: `${$.localize.data['app']['common']['error']}`,
+                    html: msg,
+                    icon: "error",
                     buttonsStyling: !1,
-                    confirmButtonText: `${$.localize.data['app']['common']['got_it']}`,
+                    confirmButtonText: `${$.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] ? $.localize.data['app']['common']['got_it'] : 'OK'}`,
                     customClass: {
                         confirmButton: "btn btn-primary"
                     }
@@ -55,31 +93,33 @@ $(document).ready(function(){
                 $form.find('input').removeClass('border-danger');
                 $form.find('textarea').removeClass('border-danger');
 
-                $.each(xhr.responseJSON.errors, function(key,value) {
+                var respErrors = (xhr && xhr.responseJSON && xhr.responseJSON.errors && typeof xhr.responseJSON.errors === 'object') ? xhr.responseJSON.errors : null;
+                if (respErrors) $.each(respErrors, function(key,value) {
                     var ar_item  =  key.includes('.ar') ?  key.replace(".ar", "[ar]") : key;
                     var en_item  =  key.includes('.en') ?  key.replace(".en", "[en]") : key;
+                    var valText = Array.isArray(value) ? value.join(' ') : value;
                     if(ar_item != en_item) {
                         $form.find('input[name="' + ar_item + '"]').addClass('border-danger');
-                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                         $form.find('input[name="' + en_item + '"]').addClass('border-danger');
-                        $form.find('input[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                        
-                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
+                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
     
                         $form.find('textarea[name="' + ar_item + '"]').addClass('border-danger');
-                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                         $form.find('textarea[name="' + en_item + '"]').addClass('border-danger');
-                        $form.find('textarea[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                     } else {
                         $form.find('input[name="' + ar_item + '"]').addClass('border-danger');
-                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                         
-                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
+                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
     
                         $form.find('textarea[name="' + ar_item + '"]').addClass('border-danger');
-                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                     }
                 });
 

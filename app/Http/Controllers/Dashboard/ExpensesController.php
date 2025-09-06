@@ -111,8 +111,17 @@ class ExpensesController extends Controller
 
         $expenseItems = ExpenseItem::all();
         $bankAccounts = BankAccount::all();
+        
+        // Get recent expenses (last 10 expenses)
+        $recentExpenses = Expense::with(['expenseItem', 'account'])
+            ->whereHas('transaction', function($q) {
+                $q->where('source', 'general_expenses');
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
 
-        return view('dashboard.expenses.create', compact('expenseItems', 'bankAccounts'));
+        return view('dashboard.expenses.create', compact('expenseItems', 'bankAccounts', 'recentExpenses'));
     }
 
     /**
@@ -129,27 +138,24 @@ class ExpensesController extends Controller
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
-            'payment_method' => 'nullable|string',
-            'image' => 'nullable|image',
+            'payment_method' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'date' => 'nullable|date',
             'order_id' => 'nullable|exists:orders,id',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:1000',
+            'source' => 'required|string',
         ]);
+
 
         DB::beginTransaction();
         
         try {
-            $date = $request->date ? $request->date : date('y-m-d');
-            $bankAccount = BankAccount::findOrFail($request->account_id);
-            if($request->statement !== "reservation_expenses"){
-                $bankAccount->update([
-                    'balance' => $bankAccount->balance - $request->price
-                ]);
-            }
-
+            $date = $request->date ? $request->date : date('Y-m-d');            
+            // Handle image upload
+            $imagePath = null;
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('expenses', 'public');
-            }
+                $imagePath = $request->file('image')->store('expenses', 'public');
+             }
 
             $expense = Expense::create([
                 'expense_item_id' => $request->expense_item_id,
@@ -157,11 +163,12 @@ class ExpensesController extends Controller
                 'price' => $request->price,
                 'payment_method' => $request->payment_method,
                 'date' => $date,
-                'statement' => $request->statement,
+                'statement' => $request->statement ?? 'general_expenses',
                 'notes' => $request->notes,
-                'image' => $path ?? null,
+                'image' => $imagePath, // Store as 'image' field
+                'image_path' => $imagePath, // Also store as 'image_path' for compatibility
                 'order_id' => $request->order_id,
-                'source' => $request->source,
+                'source' => $request->source
             ]);
             
             Transaction::create([
@@ -170,29 +177,32 @@ class ExpensesController extends Controller
                 'order_id' => $request->order_id,
                 'type' => 'debit',
                 'date' => $date,
-                'description' => 'Expense: ' . $request->statement,
+                'description' => 'Expense: ' . ($request->statement ?? 'general_expenses'),
                 'source' => $request->source,
-                "expense_id"=>$expense->id
+                'expense_id' => $expense->id
             ]);
 
             DB::commit();
 
-            // that mean he is get form orders page
-            if (!$request->date) {
-                return back()->withSuccess(__('dashboard.success'));
+            // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.expense_created_successfully')
+                ], 200);
             }
 
-            return response()->json(['message' => 'Expense created successfully']);
-            
+            return redirect()->back()->with('success', __('dashboard.expense_created_successfully'));
+
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Expense store transaction failed: ' . $e->getMessage());
             
-            if (!$request->date) {
-                return back()->withErrors(['error' => 'Expense creation failed']);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Expense creation failed'], 500);
             }
             
-            return response()->json(['message' => 'Expense creation failed'], 500);
+            return back()->withInput()->withErrors(['error' => 'Expense creation failed: ' . $e->getMessage()]);
         }
     }
 
@@ -204,8 +214,17 @@ class ExpensesController extends Controller
 
         $expenseItems = ExpenseItem::all();
         $bankAccounts = BankAccount::all();
+        
+        // Get recent expenses (last 10 expenses)
+        $recentExpenses = Expense::with(["transaction", 'expenseItem', 'account'])
+            ->whereHas('transaction', function($q) {
+                $q->where('source', 'general_expenses');
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
 
-        return view('dashboard.expenses.create', compact('expenseItems', 'expense', 'bankAccounts'));
+        return view('dashboard.expenses.create', compact('expenseItems', 'expense', 'bankAccounts', 'recentExpenses'));
     }
 
     /**
@@ -224,31 +243,44 @@ class ExpensesController extends Controller
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
-            'payment_method' => 'nullable|string',
+            'payment_method' => 'required|string',
             'source' => 'required|string',
             'statement' => 'nullable|string',
             'date' => 'nullable|date',
-            'image' => 'nullable|image',
-            'notes' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'notes' => 'nullable|string|max:1000',
         ]);
         
         DB::beginTransaction();
         
         try {
             $data['date'] = $request->date ? $request->date : $expense->date;
-            if ($request->statement !== "reservation_expenses") {
+
+            // Handle bank account balance update if expense is verified
+            if ( $expense->verified) {
                 $bankAccount = BankAccount::findOrFail($request->account_id);
+                // Calculate the difference and update the balance accordingly
                 $bankAccount->update([
-                    'balance' => ($bankAccount->balance + $expense->price) - $data['price']
+                    'balance' => ($bankAccount->balance + $expense->price) 
                 ]);
-            }            
-            if ($request->hasFile('image')) {
-                if ($expense->image) {
-                    \Storage::disk('public')->delete($expense->image);
-                }
-                $data['image'] = $request->file('image')->store('expenses', 'public');
             }
             
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($expense->image && \Storage::disk('public')->exists($expense->image)) {
+                    \Storage::disk('public')->delete($expense->image);
+                }
+                if ($expense->image_path && \Storage::disk('public')->exists($expense->image_path)) {
+                    \Storage::disk('public')->delete($expense->image_path);
+                }
+                
+                // Store new image
+                $imagePath = $request->file('image')->store('expenses', 'public');
+                $data['image'] = $imagePath;
+                $data['image_path'] = $imagePath;
+            }
+            $data["verified"] = 0 ; // Reset verified status on update
             $expense->update($data);
             
             Transaction::where('expense_id', $expense->id)->update([
@@ -256,27 +288,31 @@ class ExpensesController extends Controller
                 'amount' => $request->price,
                 'type' => 'debit',
                 'date' => $data['date'],
-                'description' => 'Expense: ' . $request->statement,
+                'description' => 'Expense: ' . ($request->statement ?? 'general_expenses'),
                 'source' => $request->source,
             ]);
             
             DB::commit();
-            
-            if (!$request->date) {
-                return back()->withSuccess(__('dashboard.success'));
+
+            // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.expense_updated_successfully')
+                ], 200);
             }
-            
-            return response()->json(['message' => 'Expense updated successfully']);
-            
+
+            return redirect()->back()->with('success', __('dashboard.expense_updated_successfully'));
+
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Expense update transaction failed: ' . $e->getMessage());
             
-            if (!$request->date) {
-                return back()->withErrors(['error' => 'Expense update failed']);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Expense update failed'], 500);
             }
             
-            return response()->json(['message' => 'Expense update failed'], 500);
+            return back()->withInput()->withErrors(['error' => 'Expense update failed: ' . $e->getMessage()]);
         }
     }
 
@@ -294,9 +330,17 @@ class ExpensesController extends Controller
         DB::beginTransaction();
         
         try {
-            if($expense->statement !== "reservation_expenses"){
-                $bankAccount = BankAccount::findOrFail($expense->account_id);
-                $bankAccount->increment('balance', $expense->price);
+            if ($expense->verified) {
+                    $bankAccount = BankAccount::findOrFail($expense->account_id);
+                    $bankAccount->increment('balance', $expense->price);
+            }
+
+            // Delete image files if they exist
+            if ($expense->image && \Storage::disk('public')->exists($expense->image)) {
+                \Storage::disk('public')->delete($expense->image);
+            }
+            if ($expense->image_path && \Storage::disk('public')->exists($expense->image_path)) {
+                \Storage::disk('public')->delete($expense->image_path);
             }
 
             $expense->delete();
@@ -309,5 +353,33 @@ class ExpensesController extends Controller
             \Log::error('Expense destroy transaction failed: ' . $e->getMessage());
             return response()->json(["success" => false, "message" => "Delete failed"], 500);
         }
+    }
+
+    /**
+     * Download expense image attachment.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function downloadImage($id)
+    {
+        $expense = Expense::findOrFail($id);
+        
+        // Check if user has permission to view this expense
+        $this->authorize('view', $expense);
+        
+        $imagePath = $expense->image ?? $expense->image_path;
+        
+        if (!$imagePath) {
+            abort(404, 'Image not found');
+        }
+        
+        $filePath = storage_path('app/public/' . $imagePath);
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found');
+        }
+        
+        return response()->download($filePath);
     }
 }
