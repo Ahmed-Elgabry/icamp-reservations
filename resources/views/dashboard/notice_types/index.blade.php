@@ -14,12 +14,14 @@
                 </a>
             </div>
         </div>
-        <div class="card-body pt-0">
+        <div class="card-body pt-0 table-responsive">
             <table class="table align-middle table-row-dashed fs-6 gy-5">
                 <thead>
                 <tr>
                     <th>@lang('dashboard.name')</th>
                     <th>@lang('dashboard.status')</th>
+                    <th>@lang('dashboard.created_date')</th>
+                    <th>@lang('dashboard.created_time')</th>
                     <th>@lang('dashboard.actions')</th>
                 </tr>
                 </thead>
@@ -32,6 +34,8 @@
                                     {{ $type->is_active ? __('dashboard.active') : __('dashboard.inactive') }}
                                 </span>
                         </td>
+                        <td>{{ $type->created_at->format('Y-m-d') }}</td>
+                        <td>{{ $type->created_at->format('h:i A') }}</td>
                         <td>
                             <a href="{{ route('notice-types.edit', $type->id) }}" class="btn btn-sm btn-light">
                                 <i class="fas fa-edit"></i>
@@ -39,7 +43,7 @@
                             <form action="{{ route('notice-types.destroy', $type->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.are_you_sure')')">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">>
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

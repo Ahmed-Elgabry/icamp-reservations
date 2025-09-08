@@ -67,6 +67,8 @@ class ApplyVerificationBankAdjustment
             case 'warehouse_sales':
                 if ($verified) {
                     if ($item->stock->quantity < $item->quantity) {
+                        $item->verified  = false ; 
+                        $item->transaction = false ;
                         throw new \Exception(__('dashboard.insufficient_stock'));
                     }
                    $item->stock()->decrement('quantity', $item->quantity);

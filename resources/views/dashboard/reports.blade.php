@@ -232,15 +232,10 @@
                 }
             });
 
-            // Orders payments (reservations revenues) chart
-            var resLabels = {!! json_encode($reservations_revenues->pluck('month')) !!};
-            var resData = {!! json_encode($reservations_revenues->pluck('total')) !!};
-            // Optional: map month numbers to names
-            var monthNames = ['1','2','3','4','5','6','7','8','9','10','11','12'];
-            var resLabelsNamed = (resLabels || []).map(function(m){
-                var i = parseInt(m,10);
-                return monthNames[i-1] || m;
-            });
+            // Orders payments (reservations revenues) chart - last up to 7 transactions by ID
+            var resLabels = {!! json_encode($reservations_revenues->pluck('id')) !!};
+            var resData = {!! json_encode($reservations_revenues->pluck('price')) !!}.map(function(v){ return Number(v); });
+            var resLabelsNamed = (resLabels || []).map(function(id){ return '#' + id; });
             var reservationsCtx = document.getElementById('reservationsPaymentsChart').getContext('2d');
             new Chart(reservationsCtx, {
                 type: 'bar',

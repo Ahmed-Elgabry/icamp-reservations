@@ -195,7 +195,8 @@
                                 <th class="">{{ __('dashboard.verified') }}</th>
                                 <th class="">{{ __('dashboard.attached') }}</th>
                                 <th class="">{{ __('dashboard.notes') }}</th>
-                                <th class="">{{ __('dashboard.created_at') }}</th>
+                                <th class="">{{ __('dashboard.date') }}</th>
+                                <th class="">{{ __('dashboard.time') }}</th>
                                 <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                             </tr>
                             <!--end::Table row-->
@@ -249,9 +250,8 @@
                                     <td data-kt-ecommerce-category-filter="category_name">
                                         {{$expense->notes}}
                                     </td>
-                                    <td>
-                                        {{$expense->created_at->diffForHumans() }}
-                                    </td>
+                                    <td>{{ $expense->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ $expense->created_at->format('h:i A') }}</td>
                                     <!--end::Expense Item-->
                                     <!--begin::Action-->
                                     <td class="text-end">

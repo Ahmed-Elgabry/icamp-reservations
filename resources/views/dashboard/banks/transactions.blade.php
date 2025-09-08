@@ -1,7 +1,7 @@
 @php
 $pageTitle = "transactions";
 @endphp
-@section('pageTitle' , __('dashboard.transactions'))
+@section('pageTitle' , __('dashboard.all_transactions'))
 
 @extends('dashboard.layouts.app')
 @section('content')
@@ -117,3 +117,7 @@ $pageTitle = "transactions";
 <!--end::Post-->
 					
 @endsection
+
+@push('js')
+<script src="{{asset('dashboard/custom/js/dataTable.js')}}"></script>
+@endpush

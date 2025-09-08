@@ -43,12 +43,14 @@
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_task_type_table">
                         <!--begin::Table head-->
                         <thead>
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="min-w-100px">@lang('dashboard.task_type_name')</th>
-                            <th class="min-w-150px">@lang('dashboard.task_type_description')</th>
-                            <th class="min-w-100px">@lang('dashboard.task_type_status')</th>
-                            <th class="min-w-100px">@lang('dashboard.tasks') @lang('dashboard.count')</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="min-w-100px fw-bolder">@lang('dashboard.task_type_name')</th>
+                            <th class="min-w-150px fw-bolder">@lang('dashboard.task_type_description')</th>
+                            <th class="min-w-100px fw-bolder">@lang('dashboard.task_type_status')</th>
+                            <th class="min-w-100px fw-bolder">@lang('dashboard.tasks') @lang('dashboard.count')</th>
+                            <th class="fw-bolder">@lang('dashboard.created_date')</th>
+                            <th class="fw-bolder">@lang('dashboard.created_time')</th>
+                            <th class="text-end min-w-70px fw-bolder">@lang('dashboard.actions')</th>
                         </tr>
                         </thead>
                         <!--end::Table head-->
@@ -66,6 +68,8 @@
                                 </span>
                                 </td>
                                 <td>{{ $taskType->tasks_count ?? $taskType->tasks()->count() }}</td>
+                                <td>{{ $taskType->created_at->format('Y-m-d') }}</td>
+                                <td>{{ $taskType->created_at->format('h:i A') }}</td>
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                         @lang('dashboard.actions')

@@ -59,16 +59,16 @@
 
                     <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
                         <thead>
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th>{{ __('dashboard.addon_type') }}</th>
-                            <th>{{ __('dashboard.addon_price') }}</th>
-                            <th>{{ __('dashboard.quantity') }}</th>
-                            <th>{{ __('dashboard.total_price') }}</th>
-                            <th>{{ __('dashboard.payment_method') }}</th>
-                            <th>{{ __('dashboard.bank_account') }}</th>
-                            <th>{{ __('dashboard.verified') }}</th>
-                            <th>{{ __('dashboard.notes') }}</th>
-                            <th>{{ __('dashboard.actions') }}</th>
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="fw-bolder">{{ __('dashboard.addon_type') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.addon_price') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.quantity') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.total_price') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.payment_method') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.bank_account') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.verified') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.notes') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.actions') }}</th>
                         </tr>
                         </thead>
                         <tbody class="fw-bold text-gray-600">
@@ -116,7 +116,7 @@
                                            <form action="{{ route('orders.removeAddon', $orderAddon->pivot->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn">
+                                                <button type="submit" class="btn" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                                     {{ __('dashboard.delete') }}
                                                 </button>
                                             </form>
@@ -152,8 +152,8 @@
                                                 <input type="hidden" name="order_id" value="{{ $order->id }}">
                                                 <input type="hidden" name="source" value="reservation_addon">
                                                 <div class="form-group">
-                                                    <label for="addon_id">{{ __('dashboard.addon_type') }}</label>
-                                                    <select name="addon_id" id="edit_addon_id_{{ $orderAddon->pivot->id }}" class="form-control select2">
+                                                    <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
+                                                    <select name="addon_id" id="edit_addon_id_{{ $orderAddon->pivot->id }}" class="form-control select2" required>
                                                         <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
                                                         @foreach ($addons as $addon)
                                                             <option value="{{ $addon->id }}" data-price="{{ $addon->price }}" {{ $orderAddon->id == $addon->id ? 'selected' : '' }}>{{ $addon->name }}</option>
@@ -162,7 +162,7 @@
                                                 </div>
                                                 <div class="form-group mt-3">
                                                     <label for="edit_service_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.addon_price') }}</label>
-                                                    <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->price }}" readonly>
+                                                    <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->price }}" >
                                                 </div>
                                                 <div class="form-group mt-3">
                                                     <label for="edit_count_{{ $orderAddon->id }}">{{ __('dashboard.quantity') }}</label>
@@ -227,8 +227,8 @@
                     <form id="addAddonForm" action="{{ route('ordersStore.addons', $order->id) }}" method="POST">
                         @csrf
                         <div class="form-group">
-                            <label for="addon_id">{{ __('dashboard.addon_type') }}</label>
-                            <select name="addon_id" id="addon_id" class="form-control">
+                            <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
+                            <select name="addon_id" id="addon_id" class="form-control" required>
                                 <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
                                 @foreach ($addons as $addon)
                                     <option value="{{ $addon->id }}" data-price="{{ $addon->price }}">{{ $addon->name }}</option>
@@ -237,7 +237,7 @@
                         </div>
                         <div class="form-group mt-3">
                             <label for="addon_price">{{ __('dashboard.addon_price') }}</label>
-                            <input type="number" step="0.01" name="addon_price" id="addon_price" class="form-control" value="0" readonly>
+                            <input type="number" step="0.01" name="addon_price" id="addon_price" class="form-control" value="0" >
                         </div>
                         <div class="form-group mt-3">
                             <label for="count">{{ __('dashboard.quantity') }}</label>
@@ -306,6 +306,24 @@
                 let totalPrice = count * servicePrice;
                 $('#price').val(totalPrice.toFixed(2)); // Keep the total price logic
             }
+
+            // Form validation before submission - now handled globally
+            // But keep this for custom addon-specific validation if needed
+            $('#addAddonForm').on('submit', function(e) {
+                // Validate that user has selected an addon (not the default empty option)
+                let selectedAddon = $('#addon_id').val();
+                if (!selectedAddon || selectedAddon === '') {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: '{{ __("dashboard.error") }}',
+                        text: '{{ __("dashboard.please_select_addon") }}',
+                        confirmButtonText: '{{ __("dashboard.ok") }}'
+                    });
+                    return false;
+                }
+                return true;
+            });
         });
 
         $(document).ready(function() {
@@ -333,6 +351,27 @@
                 let totalPrice = (count * servicePrice).toFixed(2);
                 $('#edit_price_' + addonId).val(totalPrice); // Update the total price logic
             }
+
+            // Validation for edit forms - now handled globally
+            // But keep this for custom addon-specific validation if needed
+            $(document).on('submit', 'form[id^="editAddonForm-"]', function(e) {
+                // Validate that user has selected an addon (not the default empty option)
+                let formId = $(this).attr('id');
+                let addonId = formId.split('-')[1];
+                let selectedAddon = $('#edit_addon_id_' + addonId).val();
+                
+                if (!selectedAddon || selectedAddon === '') {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: '{{ __("dashboard.error") }}',
+                        text: '{{ __("dashboard.please_select_addon") }}',
+                        confirmButtonText: '{{ __("dashboard.ok") }}'
+                    });
+                    return false;
+                }
+                return true;
+            });
         });
 
         $(document).on('click', '.receipt-link', function(e) {

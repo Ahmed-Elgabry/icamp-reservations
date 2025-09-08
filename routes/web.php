@@ -1273,6 +1273,76 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => 'dashboard.calender'
     ]);
     /*------------ end Of Settings ----------*/
+
+    /*------------ start Of general payments ----------*/
+    Route::get('general_payments', [
+        'uses' => 'GeneralPaymentsController@index',
+        'as' => 'general_payments.index',
+        'title' => 'dashboard.general_payments',
+        'type' => 'parent',
+        'child' => ['general_payments.create', 'general_payments.store', 'general_payments.edit', 'general_payments.update', 'general_payments.destroy', 'general_payments.verified', 'general_payments.download']
+    ]);
+
+    Route::get('general_payments/create', [
+        'uses' => 'GeneralPaymentsController@create',
+        'as' => 'general_payments.create',
+        'title' => ['actions.add', 'dashboard.general_payments']
+    ]);
+
+    Route::post('general_payments', [
+        'uses' => 'GeneralPaymentsController@store',
+        'as' => 'general_payments.store',
+        'title' => ['actions.add', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/edit', [
+        'uses' => 'GeneralPaymentsController@edit',
+        'as' => 'general_payments.edit',
+        'title' => ['actions.edit', 'dashboard.general_payments']
+    ]);
+
+    Route::put('general_payments/{id}', [
+        'uses' => 'GeneralPaymentsController@update',
+        'as' => 'general_payments.update',
+        'title' => ['actions.edit', 'dashboard.general_payments']
+    ]);
+
+    Route::delete('general_payments/{id}', [
+        'uses' => 'GeneralPaymentsController@destroy',
+        'as' => 'general_payments.destroy',
+        'title' => ['actions.delete', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/download', [
+        'uses' => 'GeneralPaymentsController@downloadImage',
+        'as' => 'general_payments.download',
+        'title' => ['actions.download', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/verified', [
+        'uses' => 'GeneralPaymentsController@verified',
+        'as' => 'general_payments.verified',
+        'title' => ['actions.verified', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/add-funds/create', [
+        'uses' => 'GeneralPaymentsController@createAddFunds',
+        'as' => 'general_payments.create_add_funds',
+        'title' => ['actions.add_funds', 'dashboard.general_payments']
+    ]);
+
+    Route::post('general_payments/add-funds/store', [
+        'uses' => 'GeneralPaymentsController@storeAddFunds',
+        'as' => 'general_payments.store_add_funds',
+        'title' => ['actions.add_funds', 'dashboard.general_payments']
+    ]);
+
+    Route::put('general_payments/add-funds/update/{id}', [
+        'uses' => 'GeneralPaymentsController@updateAddFunds',
+        'as' => 'general_payments.update_add_funds',
+        'title' => ['actions.update_funds', 'dashboard.general_payments']
+    ]);
+    /*------------ end Of general payments ----------*/
 });
 
 /*** update route if i added new routes  */
@@ -1339,18 +1409,7 @@ Route::get('/clear', function () {
     Artisan::call('storage:link');
     return response()->json(['status' => 'success', 'code' => 1000000000]);
 });
-/*------------ start Of general payments ----------*/
-
-Route::resource('general_payments', GeneralPaymentsController::class);
-Route::get('general_payments/{id}/download', [GeneralPaymentsController::class, 'downloadImage'])->name('general_payments.download');
-Route::get('general_payments/{id}/verified', [GeneralPaymentsController::class, 'verified'])->name('general_payments.verified');
-
-// Add funds routes
-Route::get('general_payments/add-funds/create', [GeneralPaymentsController::class, 'createAddFunds'])->name('general_payments.create_add_funds');
-Route::post('general_payments/add-funds/store', [GeneralPaymentsController::class, 'storeAddFunds'])->name('general_payments.store_add_funds');
-Route::put('general_payments/add-funds/update/{id}', [GeneralPaymentsController::class, 'updateAddFunds'])->name('general_payments.update_add_funds');
-
-/*------------ end Of general payments ----------*/
+// General payments routes are now defined inside the dashboard middleware group above
 
 // Custom create route with optional id for terms settings
 Route::get('terms_sittngs/create/{id?}', [TermsSittngController::class, 'create'])

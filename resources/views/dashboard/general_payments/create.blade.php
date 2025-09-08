@@ -22,7 +22,7 @@
             <div id="kt_account_settings_profile_details" class="collapse show">
                 <form id="kt_ecommerce_add_product_form"
                     data-kt-redirect="{{  isset($payment) ? route('general_payments.edit', $payment->id) : route('general_payments.create') }}"
-                    action="{{ isset($payment) ? route('accounts.update', $payment->id) : route('accounts.store') }}"
+                    action="{{ isset($payment) ? route('general_payments.update', $payment->id) : route('general_payments.store') }}"
                     method="post" enctype="multipart/form-data" class="form d-flex flex-column flex-lg-row store">
                     @csrf
                     @if(isset($payment)) @method('PUT') @endif
@@ -34,7 +34,7 @@
                                 <label
                                     class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.amount') }}</label>
                                 <div class="col-lg-12">
-                                    <input step="0.01" type="number" name="amount" id="amount"
+                                    <input step="0.01" type="number" name="price" id="amount"
                                         value="{{ isset($payment) ? $payment->amount : '' }}"
                                         class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
                                 </div>
@@ -78,8 +78,8 @@
                                 <select name="order_id" id="order_id"
                                 class="form-select form-select-lg form-select-solid mb-3 mb-lg-0">
                                     <option value="">{{ __('dashboard.select_order') }}</option>
-                                    @foreach($orders as $order)
-                                        @if ($order->status == "approved")
+                                    @foreach(App\Models\Order::all() as $order)
+                                        @if ($order->status == "approved" || $order->status == "delayed" || $order->status == "completed")
                                             <option value="{{ $order->id }}" 
                                             {{ isset($payment) && $payment->order_id == $order->id ? 'selected' : '' }}>
                                             {{ __('dashboard.order') }} #{{$order->id }} - {{ optional($order->customer)->first_name ?? '' }} {{ optional($order->customer)->last_name ?? '' }}</option>
@@ -206,9 +206,9 @@
                                 <td>
                                     {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                                     @if($payment->verified)
-                                        <a href="{{ route('general_payments.verified', $payment->id) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                        <a href="{{ route('order.verified', ['Id' => $payment->id, 'type' => 'general_revenue_deposit']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                     @else
-                                        <a href="{{ route('general_payments.verified', $payment->id) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                        <a href="{{ route('order.verified', ['Id' => $payment->id, 'type' => 'general_revenue_deposit']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                                     @endif
                                 </td>
                                 <!--begin::Attached-->
@@ -241,28 +241,29 @@
                                     </a>
                                     <!--begin::Menu-->
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
-                                        @if($payment->order_id)
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('general_payments.print', $payment->id) }}" class="menu-link px-3" target="_blank">
-                                                {{ __('dashboard.receipt') }}
-                                            </a>
-                                        </div>
-                                        @endif
-                                        @if($payment->image_path)
-                                        <div class="menu-item px-3">
-                                            <a href="{{ route('general_payments.download', $payment->id) }}" class="menu-link px-3">
-                                                <i class="fas fa-download"></i> {{ __('dashboard.download_image') }}
-                                            </a>
-                                        </div>
-                                        @endif
                                         @can('general_payments.edit')
                                         <div class="menu-item px-3">
-                                            <a href="{{ route('general_payments.edit', $payment->id) }}" class="menu-link px-3">{{ __('actions.edit') }}</a>
+                                            <a href="#"
+                                               class="menu-link px-3 btn-edit-general-payment"
+                                               data-id="{{ $payment->id }}"
+                                               data-price="{{ $payment->price }}"
+                                               data-date="{{ $payment->date ?? optional($payment->created_at)->format('Y-m-d') }}"
+                                               data-account-id="{{ $payment->account_id }}"
+                                               data-order-id="{{ $payment->order_id }}"
+                                               data-description="{{ $payment->notes }}"
+                                               data-payment-method="{{ $payment->payment_method }}"
+                                               data-statement="{{ $payment->statement }}">
+                                                {{ __('actions.edit') }}
+                                            </a>
                                         </div>
                                         @endcan
                                         @can('general_payments.destroy')
-                                        <div class="menu-item px-3">
-                                            <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('general_payments.destroy', $payment->id)}}" data-id="{{$payment->id}}"> @lang('dashboard.delete')</a>
+                                        <div class="menu-item px-6 py-0">
+                                            <form class="d-inline store px-3" method="POST" action="{{ route('general_payments.destroy', $payment->id) }}" data-kt-redirect="{{ url()->full() }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="menu-link px-3 btn btn-link p-0 m-0 align-baseline" onclick="return confirm('@lang('dashboard.confirm_delete')')">@lang('dashboard.delete')</button>
+                                            </form>
                                         </div>
                                         @endcan
                                     </div>
@@ -309,6 +310,66 @@
 @endsection
 
 @push('js')
+    <!-- Edit General Payment Modal -->
+    <div class="modal fade" id="editGeneralPaymentModal" tabindex="-1" aria-labelledby="editGeneralPaymentLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editGeneralPaymentLabel">@lang('actions.edit')</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editGeneralPaymentForm" class="form d-flex flex-column  store" method="POST" enctype="multipart/form-data" data-kt-redirect="{{ url()->full() }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="row g-5">
+                            <div class="col-md-6">
+                                <label class="form-label required">{{ __('dashboard.amount') }}</label>
+                                <input type="number" step="0.01" name="price" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">{{ __('dashboard.date') }}</label>
+                                <input type="date" name="date" class="form-control" required>
+                                <input type="hidden" name="source" value="general_revenue_deposit">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">{{ __('dashboard.bank_account') }}</label>
+                                <select name="account_id" class="form-select" required>
+                                    <option value="">{{ __('dashboard.choose_bank_account') }}</option>
+                                    @foreach($bankAccounts as $bankAccount)
+                                        <option value="{{ $bankAccount->id }}">{{ $bankAccount->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ __('dashboard.order_number') }} <span class="text-muted">(optional)</span></label>
+                                <select name="order_id" class="form-select">
+                                    <option value="">{{ __('dashboard.select_order') }}</option>
+                                    @foreach(App\Models\Order::all() as $order)
+                                        @if ($order->status == "approved" || $order->status == "delayed" || $order->status == "completed")
+                                            <option value="{{ $order->id }}">{{ __('dashboard.order') }} #{{$order->id }} - {{ optional($order->customer)->first_name ?? '' }} {{ optional($order->customer)->last_name ?? '' }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{{ __('dashboard.upload_or_take_image') }}</label>
+                                <input type="file" name="image" class="form-control" accept="image/*" capture="environment">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{{ __('dashboard.notes') }}</label>
+                                <textarea name="description" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('dashboard.close') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('dashboard.save_changes') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
         $(document).ready(function() {
             // Initialize Select2 for receiver dropdown
@@ -336,6 +397,30 @@
                         return "{{ __('dashboard.search') }}...";
                     }
                 }
+            });
+
+            // Edit in modal: wire up click to populate and open the modal
+            $(document).on('click', '.btn-edit-general-payment', function(e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                var price = $(this).data('price');
+                var date = $(this).data('date');
+                var accountId = $(this).data('account-id');
+                var orderId = $(this).data('order-id');
+                var description = $(this).data('description');
+
+                var form = $('#editGeneralPaymentForm');
+                // Use named route for update to avoid hardcoded paths
+                var action = "{{ route('general_payments.update', ':id') }}".replace(':id', id);
+                form.attr('action', action);
+                form.find('input[name="price"]').val(price);
+                form.find('input[name="date"]').val(date);
+                form.find('select[name="account_id"]').val(accountId).trigger('change');
+                form.find('select[name="order_id"]').val(orderId).trigger('change');
+                form.find('textarea[name="description"]').val(description);
+
+                var modal = new bootstrap.Modal(document.getElementById('editGeneralPaymentModal'));
+                modal.show();
             });
         });
 

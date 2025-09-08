@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="utf-8">
-    <title>تم التوقيع - حجز {{ $order->id }}</title>
+    <title>@lang('dashboard.signature_completed_title', ['id' => $order->id])</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,6 +58,28 @@
             font-size: 18px;
             color: var(--muted);
             font-weight: 600
+        }
+
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            z-index: 1000;
+        }
+
+        .language-switcher button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .language-switcher button:hover {
+            background: var(--primary-600);
         }
 
         .card {
@@ -179,10 +201,17 @@
 
 <body>
 
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <button onclick="changeLanguage('{{ app()->getLocale() == 'ar' ? 'en' : 'ar' }}')">
+            {{ app()->getLocale() == 'ar' ? __('dashboard.switch_to_english') : __('dashboard.switch_to_arabic') }}
+        </button>
+    </div>
+
     <div class="shell">
         <div class="brand">
             <img src="{{ asset('images/logo.png') }}" alt="Logo">
-            <h1>نظام الإدارة</h1>
+            <h1>@lang('dashboard.management_system')</h1>
         </div>
 
         <div class="card">
@@ -193,7 +222,7 @@
                         <path d="M7 12.5l3.2 3.2L17 8.9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                             stroke-linejoin="round" />
                     </svg>
-                    تم التوقيع بنجاح
+                    @lang('dashboard.signature_success')
                 </span>
             </div>
 
@@ -201,20 +230,27 @@
                 <div class="sig-box">
                     <img src="{{ Storage::url($order->signature_path) }}" alt="Signature">
                     <div class="row">
-                        <a class="btn btn-primary" href="{{ Storage::url($order->signature_path) }}" download>تنزيل
-                            التوقيع</a>
-                        <a class="btn btn-outline" target="_blank" href="{{ Storage::url($order->signature_path) }}">فتح
-                            الصورة</a>
+                        <a class="btn btn-primary" href="{{ Storage::url($order->signature_path) }}" download>@lang('dashboard.download_signature')</a>
+                        <a class="btn btn-outline" target="_blank" href="{{ Storage::url($order->signature_path) }}">@lang('dashboard.open_image')</a>
                     </div>
                 </div>
 
                 <div class="meta">
-                    <div class="item"><span class="label">رقم الحجز</span><span>#{{ $order->id }}</span></div>
-                    <div class="item"><span class="label">تاريخ التوقيع</span><span>{{ $order->signature }}</span></div>
+                    <div class="item"><span class="label">@lang('dashboard.reservation_number')</span><span>#{{ $order->id }}</span></div>
+                    <div class="item"><span class="label">@lang('dashboard.signature_date')</span><span>{{ $order->signature }}</span></div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Language switching function
+        function changeLanguage(locale) {
+            const url = new URL(window.location);
+            url.searchParams.set('lang', locale);
+            window.location.href = url.toString();
+        }
+    </script>
 
 </body>
 

@@ -116,7 +116,7 @@
                                                     <form action="{{ route('equipment-directories.media.destroy', $media) }}"
                                                           method="POST" class="mt-2 text-center">
                                                         @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                                             <i class="fas fa-trash"></i> @lang('dashboard.delete')
                                                         </button>
                                                     </form>

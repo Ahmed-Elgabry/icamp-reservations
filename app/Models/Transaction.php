@@ -65,7 +65,21 @@ class Transaction extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+    // Define the expense relationship
+    public function expense()
+    {
+        return $this->belongsTo(Expense::class , 'expense_id');
+    }
 
+    public function orderAddon()
+    {
+        return $this->belongsTo(OrderAddon::class, 'order_addon_id');
+    }
+
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class, 'order_item_id');
+    }
     public function order()
     {
         return $this->belongsTo(Order::class,'order_id');

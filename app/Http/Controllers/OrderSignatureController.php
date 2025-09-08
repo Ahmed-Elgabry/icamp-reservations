@@ -10,8 +10,19 @@ use Illuminate\Support\Str;
 
 class OrderSignatureController extends Controller
 {
-    public function show(Order $order)
+    public function show(Order $order, Request $request)
     {
+        // Handle language switching
+        if ($request->has('lang')) {
+            $locale = $request->get('lang');
+            if (in_array($locale, ['ar', 'en'])) {
+                app()->setLocale($locale);
+                session(['locale' => $locale]);
+            }
+        } else if (session('locale')) {
+            app()->setLocale(session('locale'));
+        }
+        
         if ($order->signature_path) {
             return view('signature.already', compact('order'));
         }

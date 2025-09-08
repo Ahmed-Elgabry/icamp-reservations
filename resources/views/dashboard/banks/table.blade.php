@@ -1,5 +1,5 @@
 <!--begin::Table-->
-
+<div class="table-responsive">
 <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
 
     <!--begin::Table head-->
@@ -8,9 +8,9 @@
 
         <!--begin::Table row-->
 
-        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
+        <tr class="text-start text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
 
-            <th class="w-10px pe-2">
+            <th class="w-10px pe-2 text-center">
 
                 <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
 
@@ -21,30 +21,31 @@
                 </div>
 
             </th>
-            <th class="">{{ __('dashboard.process') }}</th>
+            <th class="text-center fw-bolder">{{ __('dashboard.process') }}</th>
 
-            <th class="">{{ __('dashboard.date') }}</th>
+            <th class="text-center fw-bolder">{{ __('dashboard.date') }}</th>
+            <th class="text-center fw-bolder">{{ __('dashboard.time') }}</th>
             @if(isset($pageTitle))
                     @if($pageTitle === "transactions")
-                        <th class="">{{ __('dashboard.bank_account') }}</th>
+                        <th class="text-center fw-bolder">{{ __('dashboard.bank_account') }}</th>
                     @endif
             @else
-                <th class="">{{ __('dashboard.transfer_from') }}</th>
+                <th class="text-center fw-bolder">{{ __('dashboard.transfer_from') }}</th>
             @endif
     
 
-            <th class="">{{ __('dashboard.receiver') }}</th>
+            <th class="text-center fw-bolder">{{ __('dashboard.receiver') }}</th>
 
-            <th class="">{{ __('dashboard.price') }}</th>
+            <th class="text-center fw-bolder">{{ __('dashboard.price') }}</th>
 
-            <th class="">{{ __('dashboard.source') }}</th>
+            <th class="text-center fw-bolder">{{ __('dashboard.source') }}</th>
 
-            <!-- <th class="">{{ __('dashboard.notes') }}</th> -->
 
-            <th class="">{{ __('dashboard.orders') }}</th>
+            <th class="text-center fw-bolder">{{ __('dashboard.orders') }}</th>
+
             @if(isset($pageTitle))
                     @if($pageTitle === "transactions")
-                        <th class="text-end min-w-70px">{{ __('dashboard.actions') }}</th>
+                        <th class="text-end min-w-70px fw-bolder">{{ __('dashboard.actions') }}</th>
                     @endif
             @endif
 
@@ -71,7 +72,7 @@
 
             <!--begin::Checkbox-->
 
-            <td>
+            <td class="text-center">
 
                 <div class="form-check form-check-sm form-check-custom form-check-solid ">
 
@@ -83,7 +84,7 @@
 
             <!--end::Checkbox-->
 
-            <td>
+            <td class="text-center">
                 @if($transaction->type == 'transfer')
                     <span class="badge" style="background-color: orange; color: white;">{{ __("dashboard.transfer") }}</span>
                    
@@ -97,10 +98,12 @@
             </td>
             
             <!--begin::Date-->
-            <td><a href="{{ $transaction->editRoute }}">{{ $transaction->created_at }}</a></td>
+            <td class="text-center"><a href="{{ $transaction->editRoute }}">{{ $transaction->created_at->format('Y-m-d') }}</a></td>
+            <!--begin::Time-->
+            <td class="text-center">{{ $transaction->created_at->format('h:i A') }}</td>
             @isset($pageTitle)
                 @if($pageTitle === "transactions")
-                <td>
+                <td class="text-center">
                     
                     @if($transaction->account)
                     <span>
@@ -145,7 +148,7 @@
                 @endif
             @endisset
 
-            <td>
+            <td class="text-center">
                 @if($transaction->senderAccount)
                 <span class="badge  badge-primary">
                             <a href="{{ $transaction->senderAccount ? route('bank-accounts.show', $transaction->senderAccount->id) : '#' }}" class="text-light">
@@ -153,7 +156,7 @@
                             </a>
                 </span>
                 @endif
-            <td>
+            <td class="text-center">
 
                 @if($transaction->receiver)
                 <span class="badge  badge-primary">
@@ -177,85 +180,85 @@
 
             </td>
 
-            <td data-kt-ecommerce-category-filter="category_name">{{ $transaction->amount }} </td>
+            <td class="text-center fw-bold" data-kt-ecommerce-category-filter="category_name">{{ $transaction->amount }} </td>
 
-            <td>
+            <td class="text-center">
                 @if($transaction->type == 'transfer')
 
                         {{__('dashboard.transfer')}}     
                 @else     
-                {{__('dashboard.' . $transaction->source)}}
+                {{__('dashboard.' . $transaction->source)}}-{{ $transaction->payment?->statement ?? $transaction->orderAddon?->addon?->name ?? $transaction->orderItem?->stock?->name ?? $transaction->expense?->statement }}
                 @endif
 
             </td>
 
             <!-- <td>{{ $transaction->description }}</td> -->
 
-            <td>{{ $transaction->order_id ? $transaction->order_id : '' }}</td>
+            <td class="text-center">{{ $transaction->order_id ? $transaction->order_id : '' }}</td>
             @if(isset($pageTitle))
-            @if($pageTitle === "transactions")
-                <td class="text-end">
+                @if($pageTitle === "transactions")
+                    <td class="text-end">
 
-                    <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click"
+                        <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click"
 
-                                data-kt-menu-placement="bottom-end">
-            
-                                @lang('dashboard.actions')
-            
-                                <!--begin::Svg Icon | path: icons/duotune/arrows/arr072.svg-->
-            
-                                <span class="svg-icon svg-icon-5 m-0">
-            
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            
-                                        <path
-            
-                                            d="M11.4343 12.7344L7.25 8.55005C6.83579 8.13583 6.16421 8.13584 5.75 8.55005C5.33579 8.96426 5.33579 9.63583 5.75 10.05L11.2929 15.5929C11.6834 15.9835 12.3166 15.9835 12.7071 15.5929L18.25 10.05C18.6642 9.63584 18.6642 8.96426 18.25 8.55005C17.8358 8.13584 17.1642 8.13584 16.75 8.55005L12.5657 12.7344C12.2533 13.0468 11.7467 13.0468 11.4343 12.7344Z"
-            
-                                            fill="currentColor" />
-            
-                                    </svg>
-            
-                                </span>
-            
-                                <!--end::Svg Icon--></a>
-            
-                            <!--begin::Menu-->
-            
-                            <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
-            
-                                data-kt-menu="true">
-            
-                                @can('payments.edit')
-            
-                                    <div class="menu-item px-3">
-            
-                                        <a href="{{ $transaction->editRoute }}" class="menu-link px-3">@lang('dashboard.edit')</a>
-            
-                                    </div>
-            
-                                @endcan
-            
-                                @can('payments.destroy')
-            
-                                    <div class="menu-item px-3">
-            
-                                        <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row"
-            
-                                            data-url="{{  $transaction->destroyRoute }}"
-            
-                                            data-id="{{$transaction->id}}">@lang('dashboard.delete')</a>
-            
-                                    </div>
-            
-                                @endcan
-            
-                            </div>
-            
-                            <!--end::Menu-->
-            
-                        </td>
-                    @endif
+                                    data-kt-menu-placement="bottom-end">
+                
+                                    @lang('dashboard.actions')
+                
+                                    <!--begin::Svg Icon | path: icons/duotune/arrows/arr072.svg-->
+                
+                                    <span class="svg-icon svg-icon-5 m-0">
+                
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                
+                                            <path
+                
+                                                d="M11.4343 12.7344L7.25 8.55005C6.83579 8.13583 6.16421 8.13584 5.75 8.55005C5.33579 8.96426 5.33579 9.63583 5.75 10.05L11.2929 15.5929C11.6834 15.9835 12.3166 15.9835 12.7071 15.5929L18.25 10.05C18.6642 9.63584 18.6642 8.96426 18.25 8.55005C17.8358 8.13584 17.1642 8.13584 16.75 8.55005L12.5657 12.7344C12.2533 13.0468 11.7467 13.0468 11.4343 12.7344Z"
+                
+                                                fill="currentColor" />
+                
+                                        </svg>
+                
+                                    </span>
+                
+                                    <!--end::Svg Icon--></a>
+                
+                                <!--begin::Menu-->
+                
+                                <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
+                
+                                    data-kt-menu="true">
+                
+                                    @can('payments.edit')
+                
+                                        <div class="menu-item px-3">
+                
+                                            <a href="{{ $transaction->editRoute }}" class="menu-link px-3">@lang('dashboard.edit')</a>
+                
+                                        </div>
+                
+                                    @endcan
+                
+                                    @can('payments.destroy')
+                
+                                        <div class="menu-item px-3">
+                
+                                            <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row"
+                
+                                                data-url="{{  $transaction->destroyRoute }}"
+                
+                                                data-id="{{$transaction->id}}">@lang('dashboard.delete')</a>
+                
+                                        </div>
+                
+                                    @endcan
+                
+                                </div>
+                
+                                <!--end::Menu-->
+                
+                            </td>
+                @endif
             @endif
 
             <!--end::Action=-->
@@ -271,3 +274,5 @@
     <!--end::Table body-->
 
 </table>
+</div>
+<!--end::Table-->
