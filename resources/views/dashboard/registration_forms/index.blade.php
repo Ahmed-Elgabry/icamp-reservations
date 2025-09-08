@@ -31,14 +31,15 @@
                         <div class="table-responsive">
                             <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
                                 <thead>
-                                    <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                                        <th class="min-w-120px">{{ __('dashboard.form_no') }}</th>
-                                        <th class="min-w-180px">{{ __('dashboard.mobile_phone') }}</th>
-                                        <th class="min-w-200px">{{ __('dashboard.full_name') }}</th>
-                                        <th class="min-w-210px">{{ __('dashboard.email') }}</th>
-                                        <th class="min-w-80px text-center">{{ __('dashboard.view') }}</th>
-                                        <th class="min-w-80px text-center">{{ __('dashboard.date') }}</th>
-                                        <th class="text-end min-w-180px">{{ __('dashboard.actions') }}</th>
+                                    <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                                        <th class="min-w-120px fw-bolder">{{ __('dashboard.form_no') }}</th>
+                                        <th class="min-w-180px fw-bolder">{{ __('dashboard.mobile_phone') }}</th>
+                                        <th class="min-w-200px fw-bolder">{{ __('dashboard.full_name') }}</th>
+                                        <th class="min-w-210px fw-bolder">{{ __('dashboard.email') }}</th>
+                                        <th class="min-w-80px text-center fw-bolder">{{ __('dashboard.view') }}</th>
+                                        <th class="min-w-80px text-center fw-bolder">@lang('dashboard.created_date')</th>
+                                        <th class="min-w-80px text-center fw-bolder">@lang('dashboard.created_time')</th>
+                                        <th class="text-end min-w-180px fw-bolder">{{ __('dashboard.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="fw-bold text-gray-600" id="rfTableBody">
@@ -113,7 +114,10 @@
                                                 </button>
                                             </td>
                                             <td class="text-center">
-                                                {{ $dateStr .' / '. $slotLabel}}
+                                                {{ $rf->created_at->format('Y-m-d') }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ $rf->created_at->format('h:i A') }}
                                             </td>
                                             <td class="text-end">
                                                 <div class="btn-group" role="group">
@@ -144,7 +148,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted py-10">{{ __('dashboard.no_data') }}
+                                            <td colspan="8" class="text-center text-muted py-10">{{ __('dashboard.no_data') }}
                                             </td>
                                         </tr>
                                     @endforelse

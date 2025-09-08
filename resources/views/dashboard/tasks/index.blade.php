@@ -45,13 +45,15 @@
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_task_table">
                         <!--begin::Table head-->
                         <thead>
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="min-w-100px">@lang('dashboard.title')</th>
-                            <th class="min-w-100px">@lang('dashboard.task_type')</th>
-                            <th class="min-w-100px">@lang('dashboard.assigned_to')</th>
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="min-w-100px fw-bolder">@lang('dashboard.title')</th>
+                            <th class="min-w-100px fw-bolder">@lang('dashboard.task_type')</th>
+                            <th class="min-w-100px fw-bolder">@lang('dashboard.assigned_to')</th>
                             <th class="min-w-100px">@lang('dashboard.due_date')</th>
                             <th class="min-w-100px">@lang('dashboard.priority')</th>
                             <th class="min-w-100px">@lang('dashboard.task_status')</th>
+                            <th class="">@lang('dashboard.created_date')</th>
+                            <th class="">@lang('dashboard.created_time')</th>
                             <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                         </tr>
                         </thead>
@@ -82,6 +84,8 @@
                                     {{ str_replace('_', ' ', ucfirst( __('dashboard.' . $task->status) )) }}
                                 </span>
                                 </td>
+                                <td>{{ $task->created_at->format('Y-m-d') }}</td>
+                                <td>{{ $task->created_at->format('h:i A') }}</td>
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                         @lang('dashboard.actions')
@@ -106,7 +110,7 @@
                                             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="menu-link px-3 bg-transparent border-0 w-100 text-start" data-kt-task-filter="delete_row" data-url="{{ route('tasks.destroy', $task->id) }}" data-id="{{ $task->id }}">
+                                                <button type="submit" class="menu-link px-3 bg-transparent border-0 w-100 text-start" data-kt-task-filter="delete_row" data-url="{{ route('tasks.destroy', $task->id) }}" data-id="{{ $task->id }}" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                                     @lang('dashboard.delete')
                                                 </button>
                                             </form>

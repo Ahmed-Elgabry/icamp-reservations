@@ -60,16 +60,18 @@
                     <!--begin::Table head-->
                     <thead>
                         <!--begin::Table row-->
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="w-10px pe-2">
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="w-10px pe-2 text-center">
                                 <div class="form-check form-check-sm form-check-custom form-check-solid me-3" >
                                     <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                                 </div>
                             </th>
-                            <th class="">@lang('dashboard.name')</th>
-                            <th class="">@lang('dashboard.number_of_times')</th>
-                            <th class="">@lang('dashboard.notes')</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                            <th class="fw-bolder">@lang('dashboard.name')</th>
+                            <th class="fw-bolder">@lang('dashboard.number_of_times')</th>
+                            <th class="fw-bolder">@lang('dashboard.notes')</th>
+                            <th class="fw-bolder">@lang('dashboard.created_date')</th>
+                            <th class="fw-bolder">@lang('dashboard.created_time')</th>
+                            <th class="text-end min-w-70px fw-bolder">@lang('dashboard.actions')</th>
                         </tr>
                         <!--end::Table row-->
                     </thead>
@@ -94,6 +96,8 @@
                                 </td>
                                 <td>{{$item->expenses->count() }} </td>
                                 <td>{{$item->description}} </td>
+                                <td>{{ $item->created_at->format('Y-m-d') }}</td>
+                                <td>{{ $item->created_at->format('h:i A') }}</td>
                            
                                 <!--begin::Action=-->
                                 <td class="text-end">

@@ -1,6 +1,65 @@
 $(document).ready(function(){
     const t = document.getElementById("kt_ecommerce_add_product_form");
 
+    // Global Delete Confirmation Function
+    window.confirmDelete = function(deleteUrl, csrfToken) {
+        // Check if Swal is available
+        if (typeof Swal === 'undefined') {
+            alert('SweetAlert is not loaded!');
+            return;
+        }
+        
+        // Get localized text from global translations object or fallback to English
+        const confirmTitle = (window.deleteTranslations && window.deleteTranslations.confirm_delete) || 'Confirm Delete';
+        const confirmText = (window.deleteTranslations && window.deleteTranslations.delete_warning_message) || 'Are you sure you want to delete this item? This action cannot be undone.';
+        const confirmButton = (window.deleteTranslations && window.deleteTranslations.yes_delete) || 'Yes, Delete';
+        const cancelButton = (window.deleteTranslations && window.deleteTranslations.cancel) || 'Cancel';
+        
+        Swal.fire({
+            title: confirmTitle,
+            text: confirmText,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: confirmButton,
+            cancelButtonText: cancelButton,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Create and submit delete form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = deleteUrl;
+                form.style.display = 'none';
+                
+                // Add CSRF token
+                const csrfTokenField = document.createElement('input');
+                csrfTokenField.type = 'hidden';
+                csrfTokenField.name = '_token';
+                csrfTokenField.value = csrfToken || $('meta[name="csrf-token"]').attr('content') || '';
+                form.appendChild(csrfTokenField);
+                
+                // Add DELETE method
+                const methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.name = '_method';
+                methodField.value = 'DELETE';
+                form.appendChild(methodField);
+                
+                // Add redirect back to current page
+                const redirectField = document.createElement('input');
+                redirectField.type = 'hidden';
+                redirectField.name = 'redirect_back';
+                redirectField.value = window.location.href;
+                form.appendChild(redirectField);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    };
+
     $(document).on('submit','.store',function(e){
         e.preventDefault();
         var $form = $(this);

@@ -425,11 +425,17 @@ class OrderController extends Controller
     }
 
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $order = $this->orderRepository->findOne($id);
         $this->authorize('delete', $order);
         $this->orderRepository->forceDelete($id);
+        
+        // Check if redirect_back parameter is present
+        if ($request->has('redirect_back')) {
+            return redirect($request->redirect_back)->with('success', __('dashboard.deleted_successfully'));
+        }
+        
         return response()->json();
     }
 

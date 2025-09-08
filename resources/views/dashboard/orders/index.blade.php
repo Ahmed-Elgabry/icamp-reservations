@@ -56,98 +56,95 @@
             <div class="card-body pt-0">
                 {{$orders->links()}}
                 <!--begin::Table-->
-                <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
-                    <!--begin::Table head-->
-                    <thead>
-                        <!--begin::Table row-->
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="">@lang('dashboard.sequence')</th>
-                            <th class="">@lang('dashboard.reservation_number')</th>
-                            <th class="">@lang('dashboard.date')</th>
-                            <th class="">@lang('dashboard.service')</th>
-                            <th class="">@lang('dashboard.customer')</th>
-                            <th class="">@lang('dashboard.Duration of hours')</th>
-                            <th class="">@lang('dashboard.time_from')</th>
-                            <th class="">@lang('dashboard.paied')</th>
-                            <th class="">@lang('dashboard.status')</th>
-                            @if (request('status') == 'delayed')
-                                <th>@lang('dashboard.old_date_vs_new_date')</th>
-                                <th>@lang('dashboard.delayed_reson')</th>
-                            @endif
-                            <th class="">@lang('dashboard.insurance_status')</th>
-                            <th class="">@lang('dashboard.rate link')</th>
-                            <th class="">@lang('dashboard.created_by')</th>
-                            <th class="">@lang('dashboard.Agree_to_the_terms')</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
-                        </tr>
-                        <!--end::Table row-->
-                    </thead>
-                    <!--end::Table head-->
-
-                    <!--begin::Table body-->
-                    <tbody class="fw-bold text-gray-600">
-                        @foreach ($orders as $order)
+                <div class="table-responsive">
+                    <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
+                        <!--begin::Table head-->
+                        <thead>
                             <!--begin::Table row-->
-                            <tr data-id="{{$order->id}}">
-                                <td>{{ $orders->firstItem() + $loop->index }}</td>
-                                <td>
-                                        @can('bookings.show')
-                                        <a href="{{ route('orders.edit', $order->id) }}" class="badge bg-primary">{{ $order->id }}</a>
-                                        @else
-                                        <span>{{$order->id }}</span>
-                                        @endcan
-                                        
-                                    </td>
-                                <!--begin::Order Date-->
-                                <td>
-                                    <span >{{$order->date }}</span>
-                                </td>
-                                <!--end::Order Date-->
+                            <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                                <th class="fw-bolder">@lang('dashboard.sequence')</th>
+                                <th class="fw-bolder">@lang('dashboard.reservation_number')</th>
+                                <th class="fw-bolder">@lang('dashboard.customer')</th>
+                                <th class="fw-bolder">@lang('dashboard.service')</th>
+                                <th class="fw-bolder">@lang('dashboard.Duration of hours')</th>
+                                <th class="fw-bolder">@lang('dashboard.time_from')</th>
+                                <th class="fw-bolder">@lang('dashboard.paied')</th>
+                                <th class="fw-bolder">@lang('dashboard.status')</th>
+                                @if (request('status') == 'delayed')
+                                    <th>@lang('dashboard.old_date_vs_new_date')</th>
+                                    <th>@lang('dashboard.delayed_reson')</th>
+                                @endif
+                                <th class="">@lang('dashboard.insurance_status')</th>
+                                <th class="">@lang('dashboard.rate link')</th>
+                                <th class="">@lang('dashboard.created_by')</th>
+                                <th class="">@lang('dashboard.Agree_to_the_terms')</th>
+                                <!-- <th class="">@lang('dashboard.date')</th> -->
+                                <th class="">@lang('dashboard.created_date')</th>
+                                <th class="">@lang('dashboard.created_time')</th>
+                                <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                            </tr>
+                            <!--end::Table row-->
+                        </thead>
+                        <!--end::Table head-->
 
-                                <!--begin::Services-->
-                                <td>
-                                    <span>
-                                        <ul>
-                                            @foreach($order->services as $service)
-                                                <li>{{$service->name}}</li>
-                                            @endforeach
-                                        </ul>
-                                    </span>
-                                </td>
-                                <!--end::Services-->
-
-                                <!--begin::Customer Name-->
-                                <td>
-                                    <div class="d-flex">
-                                        <div class="ms-5">
+                        <!--begin::Table body-->
+                        <tbody class="fw-bold text-gray-600">
+                            @foreach ($orders as $order)
+                                <!--begin::Table row-->
+                                <tr data-id="{{$order->id}}">
+                                    <td>{{ $orders->firstItem() + $loop->index }}</td>
+                                    <td>
                                             @can('bookings.show')
-                                                <a href="{{ route('orders.show', $order->id) }}"
-                                                    class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
-                                                    {{$order->customer->name}}
-                                                </a>
+                                            <a href="{{ route('orders.edit', $order->id) }}" class="badge bg-primary">{{ $order->id }}</a>
                                             @else
-                                                <span class="text-gray-800 fs-5 fw-bolder mb-1">
-                                                    {{$order->customer->name}}
-                                                </span>
+                                            <span>{{$order->id }}</span>
                                             @endcan
+                                            
+                                        </td>
+
+                                    <!--begin::Customer Name-->
+                                    <td>
+                                        <div class="d-flex">
+                                            <div class="ms-5">
+                                                @can('bookings.show')
+                                                    <a href="{{ route('orders.show', $order->id) }}"
+                                                        class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
+                                                        {{$order->customer->name}}
+                                                    </a>
+                                                @else
+                                                        {{$order->customer->name}}
+                                                    </span>
+                                                @endcan
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <!--end::Customer Name-->
+                                    </td>
+                                    <!--end::Customer Name-->
 
-                                <!--begin::Order Hours-->
-                                <td>{{ $order->addHoursCount() }}</td>
-                                <!--end::Order Hours-->
+                                    <!--begin::Services-->
+                                    <td>
+                                        <span>
+                                            <ul>
+                                                @foreach($order->services as $service)
+                                                    <li>{{$service->name}}</li>
+                                                @endforeach
+                                            </ul>
+                                        </span>
+                                    </td>
+                                    <!--end::Services-->
 
-                                <!--begin::Time From-->
-                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
-                                <!--end::Time From-->
+                                    <!--begin::Order Hours-->
+                                    <td>{{ $order->addHoursCount() }}</td>
+                                    <!--end::Order Hours-->
+
+                                    <!--begin::Time From-->
+                                    <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
+                                    <!--end::Time From-->
 
                                 <!--begin::Payments-->
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format( $order->verifiedPayments()->sum("price")) }}
+                                        {{ number_format( $order->payments()->where('statement', 'the_insurance')->sum("price")) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
                                     {{ number_format($order->price + $order->insurance_amount) }}
@@ -157,7 +154,7 @@
                                         @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
                                         @else
-                                        {{ number_format(($order->price + $order->insurance_amount) - $order->verifiedPayments()->sum("price")) }}
+                                        {{ number_format(($order->price + $order->insurance_amount) - $order->payments()->where('statement', 'the_insurance')->sum("price")) }}
 
                                         @endif
                                     </span>
@@ -165,6 +162,7 @@
                                 <!--end::Payments-->
 
                                 <!--begin::Order Status-->
+
                                 <td>{{ __('dashboard.' . $order->status) }}</td>
                                 <!--end::Order Status-->
 
@@ -180,18 +178,31 @@
                                 <!--begin::Order Status-->
 
                                 <td>
-                                    <span @class(['badge text-white', 'bg-success' => $order->insurance_status == 'returned', 'bg-danger' => $order->insurance_status == null && $order->payments()->where('statement','the_insurance')->sum("price") < 1, 'bg-dark' => $order->insurance_status == null && $order->payments()->where('statement','the_insurance')->sum("price") > 0, 'bg-secondary' => $order->insurance_status == 'confiscated_full', 'bg-primary' => $order->insurance_status == 'confiscated_partial'])>
-                            
-                                        @if ($order->insurance_status != "returned" && $order->payments()->where('statement','the_insurance')->sum("price") > 0)
-                                            {{ __('dashboard.insurance_not_returned') }}
-                                            <!-- this condition should be before the next one becuase how had paid the insurance has insurance so you should check if returned -->
-                                        @elseif ($order->insurance_status)
-                                            {{ __('dashboard.insurance_' . $order->insurance_status) }}
-                                        @elseif($order->payments()->where('statement','the_insurance')->sum("price") > 0)
-                                            {{ __('dashboard.insurance_not_returned') }}
-                                        @else
+                                    <span 
+                                        @class([
+                                            'badge text-white',
+                                            'bg-success' => $order->insurance_status === 'returned',
+                                            'bg-dark' => $order->insurance_status === 'confiscated_full',
+                                            'bg-warning' => $order->insurance_status === 'confiscated_partial',
+                                            'bg-danger' => $order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") < 1,
+                                            'bg-info' => $order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") > 1,
+                                        ])
+                                    >
+                                    @if($order->payments()->where('statement', 'the_insurance')->where('verified', "1")->exists())
+                                        @if($order->insurance_status === 'returned')
+                                            {{ __('dashboard.insurance_returned_note') }}
+                                        @elseif($order->insurance_status === 'confiscated_full')
+                                            {{ __('dashboard.insurance_confiscated_full') }}
+                                        @elseif($order->insurance_status === 'confiscated_partial')
+                                            {{ __('dashboard.insurance_confiscated_partial') }}
+                                        @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") < 1)
                                             {{ __('dashboard.insurance_null') }}
+                                        @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") > 1)
+                                            {{ __('dashboard.insurance_not_returned') }}
                                         @endif
+                                    @else
+                                        {{ __('dashboard.no_insurance_payment_verified') }}
+                                    @endif
                                     </span>
                                 </td>
                                 <!--begin::Order Status-->
@@ -216,17 +227,31 @@
                                 </td>
                                 <!--end::Created By-->
 
-                                <!--begin::Agree_to_the_terms-->
-                                <td>
-                                    @if($order->signature_path)
-                                        {{ __('dashboard.Done_agree_to_the_terms') }}
-                                    @else
-                                        {{ __('dashboard.no') }}
-                                    @endif
-                                </td>
-                                <!--end::Agree_to_the_terms-->
+                                    <!--begin::Agree_to_the_terms-->
+                                    <td>
+                                        @if($order->signature_path)
+                                            {{ __('dashboard.Done_agree_to_the_terms') }}
+                                        @else
+                                            {{ __('dashboard.no') }}
+                                        @endif
+                                    </td>
+                                    <!--end::Agree_to_the_terms-->
 
-                                <!--begin::Actions-->
+                                    <!--begin::Order Date-->
+                                    <!-- <td>
+                                        <span>{{$order->date }}</span>
+                                    </td> -->
+                                    <!--end::Order Date-->
+
+                                    <!--begin::Created Date-->
+                                    <td>{{ $order->created_at->format('Y-m-d') }}</td>
+                                    <!--end::Created Date-->
+
+                                    <!--begin::Created Time-->
+                                    <td>{{ $order->created_at->format('h:i A') }}</td>
+                                    <!--end::Created Time-->
+
+                                    <!--begin::Actions-->
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary"
                                         data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -261,9 +286,8 @@
                                         @can('bookings.destroy')
                                             <div class="menu-item px-3">
                                                 <a href="#" class="menu-link px-3"
-                                                    data-kt-ecommerce-category-filter="delete_row"
-                                                    data-url="{{route('orders.destroy', $order->id)}}"
-                                                    data-id="{{$order->id}}">{{__('dashboard.delete')}}</a>
+                                                    onclick="confirmDelete('{{route('orders.destroy', $order->id)}}', '{{ csrf_token() }}')"
+                                                    >{{__('dashboard.delete')}}</a>
                                             </div>
                                         @endcan
 
@@ -274,9 +298,10 @@
                             <!--end::Table row-->
                         @endforeach
 
-                    </tbody>
-                    <!--end::Table body-->
-                </table>
+                        </tbody>
+                        <!--end::Table body-->
+                    </table>
+                </div>
                 <!--end::Table-->
             </div>
             <!--end::Card body-->

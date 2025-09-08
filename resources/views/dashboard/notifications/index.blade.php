@@ -56,15 +56,17 @@
                     <!--begin::Table head-->
                     <thead>
                         <!--begin::Table row-->
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="w-10px pe-2">
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="w-10px pe-2 text-center">
                                 <div class="form-check form-check-sm form-check-custom form-check-solid me-3" >
                                     <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                                 </div>
                             </th>
-                            <th class="min-w-250px">@lang('dashboard.sender_name')</th>
-                            <th class="min-w-150px">@lang('dashboard.notification')</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                            <th class="min-w-250px fw-bolder">@lang('dashboard.sender_name')</th>
+                            <th class="min-w-150px fw-bolder">@lang('dashboard.notification')</th>
+                            <th class="fw-bolder">@lang('dashboard.created_date')</th>
+                            <th class="fw-bolder">@lang('dashboard.created_time')</th>
+                            <th class="text-end min-w-70px fw-bolder">@lang('dashboard.actions')</th>
                         </tr>
                         <!--end::Table row-->
                     </thead>
@@ -107,6 +109,8 @@
                                     <div class="text-muted fs-7 fw-bolder">{{$notification->data['body_'.lang()]}}</div>
                                     <!--end::Badges-->
                                 </td>
+                                <td>{{ $notification->created_at->format('Y-m-d') }}</td>
+                                <td>{{ $notification->created_at->format('h:i A') }}</td>
                                 <!--end::Type=-->
                                 <!--begin::Action=-->
                                 <td class="text-end">

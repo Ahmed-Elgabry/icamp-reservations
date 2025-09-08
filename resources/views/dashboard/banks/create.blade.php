@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.app')
-@section('pageTitle' , __('dashboard.bank-accounts'))
+@section('pageTitle' , __('dashboard.add_bank_accounts'))
 @section('content')
 <!-------------->
 <div class="post d-flex flex-column-fluid" id="kt_post">

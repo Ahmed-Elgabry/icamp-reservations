@@ -1,5 +1,6 @@
 @extends('dashboard.layouts.app')
 
+@section('pageTitle', __('dashboard.statistics'))
 @section('content')
 
 <!-- نافذة منبثقة للفلاتر -->
@@ -100,7 +101,7 @@
         </div>
         <!-- ملخص يومي اختياري -->
         @if(isset($revenues_by_day) && count($revenues_by_day))
-        <div class="table-responsive w-100 mt-4">
+        <div class="table-responsive  mt-4">
             <table class="table table-sm table-bordered">
                 <thead>
                     <tr>

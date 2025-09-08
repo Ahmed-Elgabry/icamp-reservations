@@ -112,8 +112,9 @@
                                     @if($payment->insurance_status == 'confiscated_partial')
                                         <a href="#"
                                         data-kt-ecommerce-category-filter="search"
-                                        class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
-                                    >{{$payment->price - $payment->transaction->amount }}</a>
+                                        class="text-gray-800  fs-7 fw-bolder mb-1"  >{{__("dashboard.remaining :priceAferConfiscation", ['priceAferConfiscation' => $payment->price - $payment->transaction->amount])}}
+                                    {{__("dashboard.from")}} {{$payment->price}}
+                                    </a>
                                     @else
                                          <a href="#"
                                         data-kt-ecommerce-category-filter="search"
@@ -144,9 +145,19 @@
                         @endif
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
-                            @if($payment->isInsuranceReturned())
-                                <br><span class="badge badge-success">{{ __('dashboard.insurance_returned_note') }}</span>
-                            @endif
+                                @if($payment->statement == 'the_insurance' && $payment->verified == "1")
+                                    @if($order->insurance_status === 'returned')
+                                        <br><span class="badge badge-success">{{ __('dashboard.insurance_returned_note') }}</span>
+                                    @elseif($order->insurance_status === 'confiscated_full' )
+                                        <br><span class="badge badge-dark">{{ __('dashboard.insurance_confiscated_full') }}</span>
+                                    @elseif($payment->insurance_status == 'confiscated_partial')
+                                        <br><span class="badge badge-warning">{{ __('dashboard.insurance_confiscated_partial') }}</span>
+                                    @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") < 1)
+                                        <br><span class="badge badge-danger">{{ __('dashboard.insurance_null') }}</span>
+                                    @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") > 1)
+                                        <br><span class="badge badge-info">{{ __('dashboard.insurance_not_returned') }}</span>
+                                    @endif
+                                @endif
                         </td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}

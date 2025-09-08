@@ -1,5 +1,6 @@
 @extends('dashboard.layouts.app')
 
+@section('pageTitle', __('dashboard.create_user'))
 @section('content')
 
 

@@ -51,7 +51,7 @@
                 </a>
                 <form action="{{ route('violation-types.destroy', $violationType) }}" method="POST">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                         <i class="fas fa-trash me-2"></i>@lang('dashboard.delete')
                     </button>
                 </form>

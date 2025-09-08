@@ -360,10 +360,10 @@ class GeneralPaymentsController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'order_id' => 'required|exists:orders,id',
+            'order_id' => 'nullable|exists:orders,id',
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric',
-            'payment_method' => 'required|string',
+            'payment_method' => 'nullable|string',
             'statement' => 'nullable',
             'notes' => 'nullable|string',
             "image" => "nullable|image|mimes:jpeg,png,jpg,gif"
@@ -384,7 +384,12 @@ class GeneralPaymentsController extends Controller
             'order_id' => $request->order_id,
         ]);
 
-
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.success')
+                ], 200);
+            }
         return back()->withSuccess(__('dashboard.success'));
 
     }
@@ -415,11 +420,22 @@ class GeneralPaymentsController extends Controller
         $validatedData = $request->validate([
             'price' => 'required|numeric',
             'account_id' => 'required|exists:bank_accounts,id',
-            'payment_method' => 'required|string',
-            'statement' => 'required',
+            'payment_method' => 'nullable|string',
+            'statement' => 'nullable',
             'notes' => 'nullable|string',
-            'order_id' => 'required|exists:orders,id',
+            'order_id' => 'nullable|exists:orders,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
+
+        // If a new image is uploaded, replace the old one
+        if ($request->hasFile('image')) {
+            if ($payment->image_path) {
+                \Storage::disk('public')->delete($payment->image_path);
+            }
+            $imagePath = $request->file('image')->store('general_payments', 'public');
+            $validatedData['image_path'] = $imagePath;
+        }
+
         if ($payment->verified) {
             $bankAccount = BankAccount::find($payment->account_id);
             $bankAccount->update([
@@ -428,6 +444,17 @@ class GeneralPaymentsController extends Controller
         }
         $validatedData['verified'] = 0;
         $payment->update($validatedData);
+        $validatedData['type'] = "deposit";
+        $validatedData['amount'] = $validatedData['price'];
+        $payment->transaction()->update([
+            $validatedData
+        ]);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+            'success' => true,
+            'message' => __('dashboard.success')
+            ], 200);
+        }
         return back()->withSuccess(__('dashboard.success'));
 
     }
@@ -447,7 +474,12 @@ class GeneralPaymentsController extends Controller
                 'balance' => $bankAccount->balance - $payment->price
             ]);
         }
+        // Delete image if it exists
+        if ($payment->image_path) {
+            \Storage::disk('public')->delete($payment->image_path);
+        }
         $payment->delete();
+        $payment->transaction()->delete();
         return response()->json();
     }
 

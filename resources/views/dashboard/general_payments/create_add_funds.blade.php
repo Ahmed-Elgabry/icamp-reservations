@@ -20,7 +20,7 @@
             <div id="kt_account_settings_profile_details" class="collapse show">
                 <form id="kt_ecommerce_add_product_form"
                 data-kt-redirect="{{  isset($payment) ? route('payments.edit',$payment->id) : (isset($bankAccount) ? route('payments.create', $bankAccount->id) : route('general_payments.create_add_funds')) }}"
-                action="{{ isset($payment) ? route('accounts.update', $payment->id) : route('general_payments.store_add_funds') }}"
+                action="{{ isset($payment) ? route('general_payments.update_add_funds', $payment->id) : route('general_payments.store_add_funds') }}"
                 method="post" enctype="multipart/form-data"
                 class="form d-flex flex-column flex-lg-row store">
                 @csrf 
@@ -166,7 +166,8 @@
                             <th class="">{{ __('dashboard.verified') }}</th>
                             <th class="">{{ __('dashboard.attached') }}</th>
                             <th class="">{{ __('dashboard.description') }}</th>
-                            <th class="">{{ __('dashboard.created_at') }}</th>
+                            <th class="">{{ __('dashboard.date') }}</th>
+                            <th class="">{{ __('dashboard.time') }}</th>
                             <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                         </tr>
                         <!--end::Table row-->
@@ -222,8 +223,10 @@
                                     <td data-kt-ecommerce-category-filter="category_name">
                                         {{ $payment->description ?? $payment->notes ?? '-' }}
                                     </td>
-                                    <!--begin::Created At-->
-                                    <td>{{ $payment->created_at->diffForHumans() }}</td>
+                                    <!--begin::Date-->
+                                    <td>{{ $payment->created_at->format('Y-m-d') }}</td>
+                                    <!--begin::Time-->
+                                    <td>{{ $payment->created_at->format('h:i A') }}</td>
                                     <!--begin::Actions-->
                                     <td class="text-end">
                                         <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -265,7 +268,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="9" class="text-center text-muted">{{ __('dashboard.no_data_found') }}</td>
+                                <td colspan="10" class="text-center text-muted">{{ __('dashboard.no_data_found') }}</td>
                             </tr>
                         @endif
                     </tbody>
@@ -707,7 +710,7 @@
                                 // Check if table is empty
                                 const table = $('#kt_ecommerce_category_table');
                                 if (table.find('tbody tr').length === 0) {
-                                    table.find('tbody').html('<tr><td colspan="9" class="text-center text-muted">{{ __("dashboard.no_data_found") }}</td></tr>');
+                                    table.find('tbody').html('<tr><td colspan="10" class="text-center text-muted">{{ __("dashboard.no_data_found") }}</td></tr>');
                                 }
                             });
                         },

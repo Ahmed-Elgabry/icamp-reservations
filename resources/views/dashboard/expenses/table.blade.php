@@ -52,23 +52,23 @@
                     <!--begin::Table head-->
                     <thead>
                         <!--begin::Table row-->
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="w-10px pe-2">
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="w-10px pe-2 text-center">
                                 <div class="form-check form-check-sm form-check-custom form-check-solid me-3" >
                                     <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                                 </div>
                             </th>
-                            <th class="">@lang('dashboard.date')</th>
-                            <th class="">@lang('dashboard.price')</th>
-                            <th class="">@lang('dashboard.source')</th>
-                            <th class="">@lang('dashboard.payment_method')</th>
+                            <th class="fw-bolder">@lang('dashboard.date')</th>
+                            <th class="fw-bolder">@lang('dashboard.price')</th>
+                            <th class="fw-bolder">@lang('dashboard.source')</th>
+                            <th class="fw-bolder">@lang('dashboard.payment_method')</th>
                             @isset($pageTitle) 
                                @if($pageTitle == 'add_expenses')
-                                    <th class="">@lang('dashboard.verified')</th>
-                                    <th class="">@lang('dashboard.attached')</th>
+                                    <th class="fw-bolder">@lang('dashboard.verified')</th>
+                                    <th class="fw-bolder">@lang('dashboard.attached')</th>
                                @endif
                             @endisset
-                            <th class="">@lang('dashboard.notes')</th>
+                            <th class="fw-bolder">@lang('dashboard.notes')</th>
                         </tr>
                         <!--end::Table row-->
                     </thead>

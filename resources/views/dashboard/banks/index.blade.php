@@ -56,16 +56,16 @@
                     <!--begin::Table head-->
                     <thead>
                         <!--begin::Table row-->
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="w-10px pe-2">
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="w-10px pe-2 text-center">
                                 <div class="form-check form-check-sm form-check-custom form-check-solid me-3" >
                                     <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                                 </div>
                             </th>
-                            <th class="">{{ __('dashboard.name') }}</th>
-                            <th class="">{{ __('dashboard.balance') }}</th>
-                            <th class="">{{ __('dashboard.notes') }}</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                            <th class="fw-bolder">{{ __('dashboard.name') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.balance') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.notes') }}</th>
+                            <th class="text-end min-w-70px fw-bolder">@lang('dashboard.actions')</th>
                         </tr>
                         <!--end::Table row-->
                     </thead>

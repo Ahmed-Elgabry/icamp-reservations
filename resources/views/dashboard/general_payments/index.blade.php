@@ -22,7 +22,7 @@
 
                         <div class="col-md-6">
                             <label for="customer_id" class="form-label">
-                                {{ __('dashboard.select') }} {{ __('dashboard.customer') }}
+                             {{ __('dashboard.customer') }}
                             </label>
                             <select name="customer_id" id="customer_id" class="form-select">
                                 <option value="">{{ __('dashboard.customer') }}</option>
@@ -41,7 +41,7 @@
                             <select name="order_id" id="order_id" class="form-select ">
                                 <option value=""> {{ __('dashboard.order_id') }}</option>
                                 @foreach(App\Models\Order::all() as $order)
-                                    @if($order->status == "approved" || $order->status == "delayed")
+                                    @if($order->status == "approved" || $order->status == "delayed" || $order->status == "completed")
                                             <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>
                                                 #{{ $order->id }} [{{ $order->customer->name }}]
                                             </option>
@@ -87,13 +87,14 @@
                 <!--begin::Table-->
                 <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
                     <thead>
-                        <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                            <th class="text-nowrap">{{ __('dashboard.orders') }}</th>
-                            <th class="text-nowrap">{{ __('dashboard.Insurance') }}</th>
-                            <th class="text-nowrap">{{ __('dashboard.addons') }}</th>
-                            <th class="text-nowrap">{{ __('dashboard.warehouse_sales') }}</th>
-                            <th class="text-nowrap">{{ __('dashboard.total') }}</th>
-                            <th class="text-nowrap">{{ __('dashboard.created_at') }}</th>
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="text-nowrap fw-bolder">{{ __('dashboard.orders') }}</th>
+                            <th class="text-nowrap fw-bolder">{{ __('dashboard.Insurance') }}</th>
+                            <th class="text-nowrap fw-bolder">{{ __('dashboard.addons') }}</th>
+                            <th class="text-nowrap fw-bolder">{{ __('dashboard.warehouse_sales') }}</th>
+                            <th class="text-nowrap fw-bolder">{{ __('dashboard.total') }}</th>
+                            <th class="text-nowrap fw-bolder">@lang('dashboard.created_date')</th>
+                            <th class="text-nowrap fw-bolder">@lang('dashboard.created_time')</th>
                         </tr>
                     </thead>
 
@@ -157,11 +158,14 @@
 
                             {{-- Created At --}}
                             <td class="text-muted">
-                                {{ $summary->latest_date ? \Carbon\Carbon::parse($summary->latest_date)->diffForHumans() : '—' }}
+                                {{ $summary->latest_date ? \Carbon\Carbon::parse($summary->latest_date)->format('Y-m-d') : '—' }}
+                            </td>
+                            <td class="text-muted">
+                                {{ $summary->latest_date ? \Carbon\Carbon::parse($summary->latest_date)->format('h:i A') : '—' }}
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="text-center text-muted py-10">— {{ __('dashboard.no_results') }} —</td></tr>
+                        <tr><td colspan="7" class="text-center text-muted py-10">— {{ __('dashboard.no_results') }} —</td></tr>
                     @endforelse
                     </tbody>
                 </table>

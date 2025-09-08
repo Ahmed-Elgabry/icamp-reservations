@@ -99,7 +99,6 @@ class PaymentsController extends Controller
             $dateTo = Carbon::parse($request->date_to)->endOfDay();
             $query->whereBetween('created_at', [$dateFrom, $dateTo]);
         }
-
         $payments = $query->where('verified', "1")->get();
 
         $orders = Order::whereNot('insurance_status', 'returned')->get();
@@ -112,17 +111,20 @@ class PaymentsController extends Controller
         $this->authorize('create', Payment::class);
         $selectedBank = $bankAccount ? BankAccount::findOrFail($bankAccount) : null;
         $bankAccounts = BankAccount::all();
-        $recentPayments = GeneralPayment::with(['account', 'transaction'])
+        
+        // Fetch recent account charges instead of general payments
+        $recentAccountCharges = GeneralPayment::with(['account', 'transaction'])
             ->whereHas('transaction', function ($q) {
-            $q->where('source', 'add_payment');
+                $q->where('source', 'account_charge');
             })
             ->latest()
             ->limit(10)
             ->get();
+            
         return view('dashboard.payments.create', [
             'bankAccount' => $selectedBank,
             'bankAccounts' => $bankAccounts,
-            'recentPayments' => $recentPayments
+            'recentAccountCharges' => $recentAccountCharges
         ]);
     }
 
@@ -244,33 +246,63 @@ public function moneyTransfer(Request $request)
             'account_id' => 'required|exists:bank_accounts,id',
             'date' => 'nullable|date',
             'description' => 'nullable|string',
-            'photo' => 'nullable|image',
+            'payment_method' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
         DB::beginTransaction();
         
         try {
-            // Handle optional replacement photo
-            if ($request->hasFile('photo')) {
-                $path = $request->file('photo')->store('payments/photos', 'public');
-                $validatedData['photo_path'] = $path;
+            // Handle optional replacement image
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('payments/images', 'public');
+                $validatedData['image_path'] = $path;
             }
+            
+            // Get the current general payment record to update it too
+            $generalPayment = GeneralPayment::where('id', $payment->general_payment_id)
+                ->orWhereHas('transaction', function($q) use ($id) {
+                    $q->where('id', $id);
+                })
+                ->first();
             
             // return money to the accounts
             // back money to the sender account_id
             // first remove money send from the previous transaction and then add amount will be handle in the varification
             if ($payment->verified) {
-                BankAccount::where('id', $account_id)->update(['balance' => $payment->amount ]);
+                $oldAccount = BankAccount::find($account_id);
+                if ($oldAccount) {
+                    $oldAccount->increment('balance', $disccountFormAccount);
+                }
             }
+            
             $validatedData['verified'] = 0;
+            $validatedData['price'] = $validatedData['amount']; // Sync price with amount
+            
+            // Update the transaction
             $payment->update($validatedData);
+            
+            // Update the general payment if it exists
+            if ($generalPayment) {
 
-            // send money to
+                $generalPaymentData['price'] = $validatedData['amount'];
+                $generalPayment->update($generalPaymentData);
+            }
+
+            // send money to new receiver account
             if ($request->filled('receiver_id')) {
-                $transfareTo = BankAccount::find($request->receiver_id);
-                $transfareTo->update([
-                    'balance' => $transfareTo->balance + $amount
-                ]);
+                $newAccount = BankAccount::find($request->receiver_id);
+                if ($newAccount) {
+                    $newAccount->increment('balance', $amount);
+                }
+                
+                // If receiver changed, remove money from old receiver
+                if ($receiver && $receiver != $request->receiver_id) {
+                    $oldReceiver = BankAccount::find($receiver);
+                    if ($oldReceiver) {
+                        $oldReceiver->decrement('balance', $paymentAmount);
+                    }
+                }
             }
 
             DB::commit();

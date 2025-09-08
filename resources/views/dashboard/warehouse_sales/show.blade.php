@@ -56,7 +56,8 @@
               <th>{{ __('dashboard.bank_account') }}</th>
               <th>{{ __('dashboard.verified') }}</th>
               <th>{{ __('dashboard.notes') }}</th>
-              <th>{{ __('dashboard.created_at') }}</th>
+              <th>{{ __('dashboard.created_date') }}</th>
+              <th>{{ __('dashboard.created_time') }}</th>
               <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
             </tr>
           </thead>
@@ -78,7 +79,8 @@
                     @endif
               </td>
               <td>{{ $item?->notes }}</td>
-              <td>{{ $item?->created_at->format('Y-m-d h:i A') }}</td>
+              <td>{{ $item?->created_at->format('Y-m-d') }}</td>
+              <td>{{ $item?->created_at->format('h:i A') }}</td>
               <td class="text-end">
                 <a href="#" class="btn btn-sm btn-light btn-active-light-primary"
                    data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -108,7 +110,7 @@
                       @csrf @method('DELETE')
                     </form>
                     <a href="#" class="menu-link px-3 text-danger"
-                       onclick="event.preventDefault(); if(confirm('@lang('dashboard.delete')')) document.getElementById('delete-form-{{ $item->id }}').submit();">
+                       onclick="confirmDelete('{{ route('warehouse_sales.destroy', $item->id) }}', '{{ csrf_token() }}')">
                       @lang('dashboard.delete')
                     </a>
                   </div>

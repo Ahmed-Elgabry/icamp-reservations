@@ -82,14 +82,14 @@ class HomeController extends Controller
             ->where('verified', true) // Also include by statement type
             ->orderBy('created_at', 'desc')
             ->get();
-        $reservations_revenues = \App\Models\Transaction::select(
-            DB::raw('MONTH(created_at) as month'),
-            DB::raw('SUM(amount) as total')
-        )
-        ->where('source', 'reservation_payments')
-        ->where('verified', '1')
-        ->groupBy('month')
-        ->get();
+        // Latest up to 7 reservation payment transactions
+        $reservations_revenues = \App\Models\Payment::whereNot('statement', 'the_insurance')
+            ->where('verified', '1')
+            ->orderBy('id', 'desc')
+            ->limit(7)
+            ->get(['id','price','created_at'])
+            ->reverse() // oldest first for chart
+            ->values();
 
         // الحصول على المصاريف وبنودها
         $expenses = Expense::select('expense_item_id', DB::raw('SUM(price) as total'))

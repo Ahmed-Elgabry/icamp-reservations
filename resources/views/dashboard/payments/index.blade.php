@@ -30,7 +30,7 @@
                             <select name="order_id" id="order_id" class="form-control">
                                 <option value=""> {{ __('dashboard.order_id') }}</option>
                                 @foreach(App\Models\Order::all() as $order)
-                                    @if($order->status == "approved" || $order->status == "delayed")
+                                    @if($order->status == "approved" || $order->status == "delayed" || $order->status == "completed")
                                     <option value="{{ $order->id }}" {{ request('order_id') == $order->id ? 'selected' : '' }}>{{ $order->id }} [{{$order->customer->name }}]</option>
                                     @endif
                                 @endforeach
@@ -67,17 +67,18 @@
                 <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
                     <!--begin::Table head-->
                     <thead>
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="w-10px pe-2">
+                        <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <th class="w-10px pe-2 text-center">
                                 <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
                                     <input class="form-check-input" id="checkedAll" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                                 </div>
                             </th>
-                            <th>{{ __('dashboard.price') }}</th>
-                            <th class="">{{ __('dashboard.orders') }}</th>
-                            <th class="">{{ __('dashboard.statement') }}</th>
-                            <th class="">{{ __('dashboard.notes') }}</th>
-                            <th class="">{{ __('dashboard.created_at') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.price') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.orders') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.statement') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.notes') }}</th>
+                            <th class="fw-bolder">@lang('dashboard.created_date')</th>
+                            <th class="fw-bolder">@lang('dashboard.created_time')</th>
                         </tr>
                     </thead>
                     <!--end::Table head-->
@@ -110,9 +111,8 @@
                                 <td data-kt-ecommerce-category-filter="category_name">
                                     {{$payment->notes}}
                                 </td>
-                                <td>
-                                    {{$payment->created_at->diffForHumans() }}
-                                </td>
+                                <td>{{ $payment->created_at->format('Y-m-d') }}</td>
+                                <td>{{ $payment->created_at->format('h:i A') }}</td>
                                 <!--end::Category=-->
                                 <!--begin::Action=-->
                                 <!-- <td class="text-end">-->

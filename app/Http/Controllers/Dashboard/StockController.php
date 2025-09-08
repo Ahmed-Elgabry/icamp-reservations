@@ -19,10 +19,10 @@ class StockController extends Controller
             'quantity_min' => request()->query('quantity_min'),
             'quantity_max' => request()->query('quantity_max'),
             'quantity' => request()->query('quantity'),
+            'higher_selling' => request()->query('higher_selling'),
         ];
 
         $stocks = Stock::filter($filters)
-            ->orderBy('created_at', 'desc')
             ->get();
 
         $lowStock = $stocks->filter(function ($stock) {
