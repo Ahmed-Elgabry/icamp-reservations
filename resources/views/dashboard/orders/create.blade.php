@@ -95,7 +95,7 @@
 
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6 required">
-                                    @lang('dashboard.service_price')
+                                    @lang('dashboard.camp_price')
                                 </label>
                                 <div class="col-lg-8">
                                     <input type="number" name="price" id="price"
@@ -655,7 +655,7 @@
                 }
 
                 const rfId = url.searchParams.get('rf_id');
-                if (window.Swal) {
+                if (window.Swal && rfId) {
                     Swal.fire({
                         title: isRTL ? 'تم سحب البيانات' : 'Prefilled',
                         text: rfId

@@ -37,7 +37,6 @@ return [
     'total_price' => 'السعر الكلي',
     'registration_forms' => ' استمارات تسجيل البيانات',
     'sequence' => 'التسلسل',
-        'registration_forms'        => 'استمارات التسجيل',
     'registration_form'         => 'استمارة تسجيل',
     'search_rf_placeholder'     => 'ابحث برقم الاستمارة أو الهاتف المتحرك أو الاسم أو البريد',
 
@@ -183,7 +182,7 @@ return [
     'deposit' => 'عربون',
     'paied' => 'المدفوع',
     'add_report_item' => 'أضافة عنصر تقرير جديد',
-    'service_price' => 'مبلغ المخبم',
+    'service_price' => 'مبلغ الاضافة',
     'insurance_amount' => 'مبلغ التأمين',
     'out of' => 'من أصل',
     'rows' => 'صفوف',
@@ -245,18 +244,17 @@ return [
     'search' => 'بحث',
     'reset' => 'أستعادة',
     'selling_price' => 'سعر البيع',
+    'camp_price' => 'مبلغ المخيم',
     'quantity' => 'الكمية',
     'accept_terms' => 'موافقة الشروط والأحكام',
     'amounts' => 'الكميات',
     'stock-quantities' => 'الكميات',
-    'notes' => 'ملاحظات',
     'success' => 'عملية ناجحة',
     'created_at' => 'تاريخ الاضافة',
     'activities' => 'الانشطة',
     'cash' => 'نقدا',
     'visa' => 'تحويل بنكي',
     'services' => 'أنواع المخيمات',
-    'price' => 'المبلغ',
     'invoice' => 'فاتورة',
     'days' => 'الايام',
     'count' => 'الكمية',
@@ -561,7 +559,7 @@ return [
     'task_updated_successfully' => 'تم تحديث المهمة بنجاح',
     'task_deleted_successfully' => 'تم حذف المهمة بنجاح',
     'task_status_updated' => 'تم تحديث حالة المهمة',
-    
+
     // Task Types
     'task_types' => 'أنواع المهام',
     'task_type' => 'نوع المهمة',
@@ -1159,7 +1157,7 @@ return [
     'people_count' => 'عدد الأشخاص',
     'client_notes' => 'ملاحظات العميل',
     'service' => 'نوع مخيم',
-    
+
     // Survey Email
     'survey_email_title' => 'تقييم نوع المخيم',
     'survey_email_greeting' => 'عميلنا العزيز',

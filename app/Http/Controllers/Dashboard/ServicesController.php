@@ -95,7 +95,6 @@ class ServicesController extends Controller
 
         } catch (\Exception $e) {
             \DB::rollBack();
-            \Log::error('Error creating service: '.$e->getMessage());
             return response()->json([
                 'errors' => ['server' => $e->getMessage()]
             ], 500);
@@ -325,11 +324,8 @@ class ServicesController extends Controller
                 }
             }
 
-            $cur = $current->ordered_count;
-            $nbr = $neighbor->ordered_count;
-
-            $current->ordered_count = $nbr;
-            $neighbor->ordered_count = $cur;
+            $current->ordered_count = $neighbor->ordered_count;
+            $neighbor->ordered_count = $current->ordered_count;
 
             $current->save();
             $neighbor->save();

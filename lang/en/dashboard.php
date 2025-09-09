@@ -350,6 +350,7 @@ return [
     'description' => 'Description',
     'desc_requirments' => 'Add a description for :page_title for better presentation.',
     'RS' => 'AED',
+    'camp_price' => 'Camp price',
     'payment_remaining' => 'The remaining invoice amount must be paid upon receiving the camp.',
     'security_deposit' => 'The agreed security deposit mentioned in the invoice must be paid upon receiving the camp, and it will be refunded within 24 hours after ensuring the camp equipment is in good condition.',
     'terms1' => 'Terms and conditions apply.',
@@ -615,7 +616,7 @@ return [
     'task_created_successfully' => 'Task created successfully',
     'task_updated_successfully' => 'Task updated successfully',
     'task_deleted_successfully' => 'Task deleted successfully',
-    
+
     // Task Types
     'task_types' => 'Task Types',
     'task_type' => 'Task Type',

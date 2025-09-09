@@ -58,23 +58,22 @@ class WarehousesalesController extends Controller
             'account_id' => 'required|exists:bank_accounts,id',
             'notes' => 'nullable|string|max:255'
         ]);
-
-        $item = OrderItem::findOrFail($id);
-        $stock = Stock::findOrFail($item->stock_id);
-        if ($stock->quantity + $item->quantity > $data['quantity']) {
+        $item = OrderItem::with('stock')->findOrFail($id);
+        if (($item->stock->quantity + $item->quantity) < $data['quantity']) {
             return redirect()->back()->withErrors(['error' => __('dashboard.insufficient_stock')]);
         }
-        $stock->increment('quantity',$data['quantity']);
+        $item->stock->decrement('quantity',$data['quantity']);
         $item->update($data);
 
-        return redirect()->back()->with('success', __('dashboard.item_updated_successfully'));
+        return redirect()->back()->with('success', __('dashboard.success'));
     }
 
     public function destroy($id)
     {
-        $item = OrderItem::findOrFail($id);
+        $item = OrderItem::with('stock')->findOrFail($id);
+        if ($item->quantity > 0) $item->stock->increment('quantity',$item->quantity);
         $item->delete();
 
-        return redirect()->back()->with('success', __('dashboard.item_deleted_successfully'));
+        return redirect()->back()->with('success', __('dashboard.success'));
     }
 }
