@@ -20,7 +20,7 @@
             <div id="kt_account_settings_profile_details" class="collapse show">
                 <form id="kt_ecommerce_add_product_form"
                 data-kt-redirect="{{  isset($payment) ? route('payments.edit',$payment->id) : (isset($bankAccount) ? route('payments.create', $bankAccount->id) : route('payments.create')) }}"
-                action="{{ isset($payment) ? route('accounts.update', $payment->id) : route('accounts.store') }}"
+                action="{{ isset($payment) ? route('general-accounts.update', $payment->id) : route('general-accounts.store') }}"
                 method="post" enctype="multipart/form-data"
                 class="form d-flex flex-column flex-lg-row store">
                 @csrf 
@@ -54,16 +54,17 @@
                             <div class="col-6">
                                 <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.amount') }}</label>
                                 <div class="col-lg-12">
-                                    <input step="0.01" type="number" name="amount" id="amount" value="{{ isset($payment) ? $payment->amount : '' }}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
+                                    <input step="0.01" type="number" name="price" id="amount" value="{{ isset($payment) ? $payment->amount : '' }}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.date') }}</label>
                                 <div class="col-lg-12">
-                                    <input type="date" name="date" id="date" value="{{ isset($payment) ? $payment->date : date('Y-m-d') }}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
+                                    <input type="datetime-local" name="date" id="date" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
                                 </div>
                             </div>
                         </div>
+
 
 
                         <!-- Notes input -->
@@ -178,12 +179,12 @@
                                     {{ $charge->description ?? $charge->notes ?? '-' }}
                                 </td>
                                 <!--begin::Date-->
-                                    <td>{{ $charge->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($charge->date ?? $charge->created_at)->format('Y-m-d') }}</td>
                                     <!--begin::Time-->
-                                    <td>{{ $charge->created_at->format('h:i A') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($charge->date ?? $charge->created_at)->format('h:i A') }}</td>
                                 <!--begin::Actions-->
                                 <td class="text-end">
-                                    <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                    <a class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                     {{ __('dashboard.actions') }}
                                     <!--begin::Svg Icon | path: icons/duotune/arrows/arr072.svg-->
                                     <span class="svg-icon svg-icon-5 m-0">
@@ -203,13 +204,22 @@
                                         @endif
                                         @can('payments.edit')
                                         <div class="menu-item px-3">
-                                            <a  class="menu-link px-3" onclick="openEditChargeModal({{ $charge->id }}, '{{ $charge->amount }}', '{{ $charge->date }}', '{{ $charge->payment_method }}', '{{ $charge->description }}', '{{ $charge->account_id }}')">{{ __('actions.edit') }}</a>
+                                            <a  class="menu-link px-3 edit-charge-link"
+                                               data-id="{{ $charge->id }}"
+                                               data-price="{{ $charge->price }}"
+                                               data-date="{{ \Carbon\Carbon::parse($charge->date ?? $charge->created_at)->format('Y-m-d') }}"
+                                               data-time="{{ \Carbon\Carbon::parse($charge->date ?? $charge->created_at)->format('H:i') }}"
+                                               data-method="{{ e($charge->payment_method) }}"
+                                               data-description="{{ e($charge->description ?? $charge->notes ?? '') }}"
+                                               data-account-id="{{ $charge->account_id }}">
+                                                {{ __('actions.edit') }}
+                                            </a>
                                         </div>
                                         @endcan
                                         @can('payments.destroy')
                                         <!--begin::Menu item-->
                                         <div class="menu-item px-3">
-                                            <a href="#" class="menu-link px-3" onclick="confirmDelete('{{route('general_payments.destroy', $charge->id)}}', '{{ csrf_token() }}')"> @lang('dashboard.delete')</a>
+                                            <a class="menu-link px-3" onclick="confirmDelete('{{route('general_payments.destroy', $charge->id)}}', '{{ csrf_token() }}')"> @lang('dashboard.delete')</a>
                                         </div>
                                         @endcan
                                     <!--end::Menu item-->
@@ -247,34 +257,20 @@
                 @method('PUT')
                 <div class="modal-body">
                     <!-- Bank Account Selection -->
+                            <input type="hidden" name="account_id" id="editChargeAccountId" value="{{ $bankAccount->id ?? '' }}">
+                            <input type="hidden" name="payment_method" id="editChargePaymentMethod" value="">
+                      <!-- Amount and Date Row -->
                     <div class="row mb-3">
-                        <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.bank_account') }}</label>
-                        <div class="col-lg-12">
-                            <select name="account_id" id="editChargeAccountId" class="form-select form-select-lg form-select-solid" required>
-                                <option value="" disabled>{{ __('dashboard.choose') }}</option>
-                                @if(isset($bankAccounts) && count($bankAccounts))
-                                    @foreach($bankAccounts as $account)
-                                        <option value="{{ $account->id }}">
-                                            {{ $account->name }}
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Amount and Date Row -->
-                    <div class="row mb-3">
-                        <div class="col-6">
+                        <div class="col-4">
                             <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.amount') }}</label>
                             <div class="col-lg-12">
-                                <input step="0.01" type="number" name="amount" id="editChargeAmount" class="form-control form-control-lg form-control-solid" required>
+                                <input step="0.01" type="number" name="price" id="editChargeAmount" class="form-control form-control-lg form-control-solid" required>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-8">
                             <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.date') }}</label>
                             <div class="col-lg-12">
-                                <input type="date" name="date" id="editChargeDate" class="form-control form-control-lg form-control-solid" required>
+                                <input type="datetime-local" name="date" id="editChargeDate" class="form-control form-control-lg form-control-solid" required>
                             </div>
                         </div>
                     </div>
@@ -297,7 +293,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('dashboard.cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" id="edit_charge_submit" class="btn btn-primary">
                         <span class="indicator-label">{{ __('dashboard.save_changes') }}</span>
                         <span class="indicator-progress d-none">{{ __('dashboard.please_wait') }}
                             <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
@@ -326,11 +322,39 @@
                     <i class="fas fa-download"></i> @lang('dashboard.save_changes')
                 </a>
             </div>
-        </div>
+    </div>
 @endsection
+
+@push('css')
+<style>
+/* Keep the submit button label visible and hide the progress spinner/text on this page */
+#kt_ecommerce_add_product_submit .indicator-label, #edit_charge_submit .indicator-label { display: inline-block !important; }
+#kt_ecommerce_add_product_submit .indicator-progress, #edit_charge_submit .indicator-progress { display: none !important; }
+/* Even if the theme toggles data-kt-indicator, keep our label visible */
+#kt_ecommerce_add_product_submit[data-kt-indicator="on"] .indicator-label,
+#edit_charge_submit[data-kt-indicator="on"] .indicator-label { display: inline-block !important; }
+</style>
+@endpush
 
 @push('js')
     <script>
+        // Normalize any date string to YYYY-MM-DD for input[type="date"] controls
+        function toYmd(dateLike) {
+            if (!dateLike) return '';
+            // If already in YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateLike)) return dateLike;
+            // Try to parse common formats
+            const d = new Date(dateLike);
+            if (!isNaN(d.getTime())) {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            }
+            // Fallback: attempt to split by space or T to first token
+            const token = String(dateLike).split(/[ T]/)[0];
+            return /^\d{4}-\d{2}-\d{2}$/.test(token) ? token : '';
+        }
         // Initialize Select2 only when the element exists and is a <select>
         $(function () {
             var $receiver = $('#receiver_id');
@@ -345,15 +369,20 @@
         });
 
         // Function to open edit charge modal
-        function openEditChargeModal(id, amount, date, paymentMethod, description, accountId) {
-            $('#editChargeAmount').val(amount);
-            $('#editChargeDate').val(date);
+    function openEditChargeModal(id, price, date, time, paymentMethod, description, accountId) {
+            $('#editChargeAmount').val(price);
+            // Compose datetime-local value (YYYY-MM-DDTHH:MM)
+            const ymd = toYmd(date);
+            const hhmm = time ? String(time).slice(0,5) : '00:00';
+            const dtLocal = ymd ? `${ymd}T${hhmm}` : '';
+            $('#editChargeDate').val(dtLocal);
             $('#editChargePaymentMethod').val(paymentMethod);
             $('#editChargeDescription').val(description);
             $('#editChargeAccountId').val(accountId);
             
-            // Set the form action URL
-            $('#editChargeForm').attr('action', '/dashboard/accounts/' + id);
+            // Set the form action URL to the new named route using a template
+            const updateUrlTemplate = @json(route('general-accounts.update', ['id' => '___ID___']));
+            $('#editChargeForm').attr('action', updateUrlTemplate.replace('___ID___', id));
             
             // Show the modal
             $('#editChargeModal').modal('show');
@@ -380,6 +409,21 @@
                     confirmButtonText: '{{ __("dashboard.ok") }}'
                 });
             }
+        });
+
+        // Open edit modal from data-* attributes (safer than inline onclick)
+        $(document).on('click', '.edit-charge-link', function(e) {
+            e.preventDefault();
+            const $el = $(this);
+            openEditChargeModal(
+                $el.data('id'),
+                $el.data('price'),
+                $el.data('date'),
+                $el.data('time'),
+                $el.data('method'),
+                $el.data('description'),
+                $el.data('account-id')
+            );
         });
 
         // Edit form will be handled by sending-forms.js since it has the 'store' class

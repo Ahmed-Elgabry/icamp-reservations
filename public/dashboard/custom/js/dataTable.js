@@ -91,22 +91,41 @@ var KTAppEcommerceCategories = function () {
     };
     return {
         init: function () {
-            (t = document.querySelector("#kt_ecommerce_category_table")) && ((e = $(t).DataTable({
-                info: !1,
-                order: [],
-                pageLength: 10,
-                columnDefs: [{
-                    orderable: !1,
-                    targets: 0
-                }, {
-                    orderable: !1,
-                    targets: 3
-                }]
-            })).on("draw", (function () {
-                n()
-            })), document.querySelector('[data-kt-ecommerce-category-filter="search"]').addEventListener("keyup", (function (t) {
-                e.search(t.target.value).draw()
-            })), n())
+            t = document.querySelector("#kt_ecommerce_category_table");
+            if (!t) return;
+
+            // If a DataTable already exists on this element, reuse it to avoid reinitialization errors
+            if ($.fn.DataTable && $.fn.DataTable.isDataTable(t)) {
+                e = $(t).DataTable();
+            } else if ($.fn.DataTable) {
+                e = $(t).DataTable({
+                    info: !1,
+                    order: [],
+                    pageLength: 10,
+                    retrieve: true, // safely return existing instance if created elsewhere
+                    columnDefs: [
+                        { orderable: !1, targets: 0 },
+                        { orderable: !1, targets: 3 }
+                    ]
+                });
+            } else {
+                return;
+            }
+
+            // Prevent attaching multiple draw handlers
+            if (e.off) { e.off('draw'); }
+            if (e.on) { e.on('draw', function () { n(); }); }
+
+            // Bind search once if the search input exists
+            var searchEl = document.querySelector('[data-kt-ecommerce-category-filter="search"]');
+            if (searchEl && !searchEl.dataset.dtBound) {
+                searchEl.addEventListener("keyup", function (ev) {
+                    e.search(ev.target.value).draw();
+                });
+                searchEl.dataset.dtBound = '1';
+            }
+
+            n();
         }
     }
 }();

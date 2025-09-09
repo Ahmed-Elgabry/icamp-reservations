@@ -228,13 +228,12 @@
                         @csrf
                         <div class="form-group">
                             <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
-                            <select name="addon_id" id="addon_id" class="form-control border-danger" required>
+                            <select name="addon_id" id="addon_id" class="form-control" required>
                                 <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
                                 @foreach ($addons as $addon)
                                     <option value="{{ $addon->id }}" data-price="{{ $addon->price }}">{{ $addon->name }}</option>
                                 @endforeach
                             </select>
-                            <span class="text-danger small">{{ __('dashboard.required') }}</span>
                         </div>
                         <div class="form-group mt-3">
                             <label for="addon_price">{{ __('dashboard.addon_price') }}</label>
@@ -299,8 +298,8 @@
                 }
             });
 
-            // Update total price when count or price is changed
-            $('#count, #price').on('input', function() {
+            // Update total price when count or addon price is changed (do not override manual total typing)
+            $('#count, #addon_price').on('input', function() {
                 updateTotalPrice();
             });
 
@@ -349,6 +348,12 @@
 
             // Update total price when count changes
             $(document).on('keyup', 'input[id^="edit_count_"]', function() {
+                let addonId = $(this).attr('id').split('_').pop();
+                updateTotalPriceEdit(addonId);
+            });
+
+            // Update total price when service price is manually edited in edit modal
+            $(document).on('input', 'input[id^="edit_service_price_"]', function(){
                 let addonId = $(this).attr('id').split('_').pop();
                 updateTotalPriceEdit(addonId);
             });

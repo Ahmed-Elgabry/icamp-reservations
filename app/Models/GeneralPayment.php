@@ -9,7 +9,7 @@ class GeneralPayment extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $fillable = ['account_id' , 'order_id' , 'price' ,'payment_method','statement','notes', "verified","account_id", "image_path"];
+    protected $fillable = ['account_id' , 'order_id' , 'price' ,'payment_method','statement','notes', "verified","account_id", "date", "image_path"];
 
     public function order()
     {

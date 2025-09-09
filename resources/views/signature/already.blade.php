@@ -41,11 +41,20 @@
             width: min(880px, 100%);
         }
 
+        /* Top bar: logo on the left, language switcher on the right */
+        .brand-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
         .brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 0;
         }
 
         .brand img {
@@ -201,17 +210,19 @@
 
 <body>
 
-    <!-- Language Switcher -->
-    <div class="language-switcher">
-        <button onclick="changeLanguage('{{ app()->getLocale() == 'ar' ? 'en' : 'ar' }}')">
-            {{ app()->getLocale() == 'ar' ? __('dashboard.switch_to_english') : __('dashboard.switch_to_arabic') }}
-        </button>
-    </div>
-
+    
     <div class="shell">
-        <div class="brand">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo">
-            <h1>@lang('dashboard.management_system')</h1>
+        <div class="brand-row">
+            <div class="brand">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo">
+                <h1>@lang('dashboard.management_system')</h1>
+            </div>
+            <!-- Language Switcher -->
+            <div class="language-switcher">
+                <button onclick="changeLanguage('{{ app()->getLocale() == 'ar' ? 'en' : 'ar' }}')">
+                    {{ app()->getLocale() == 'ar' ? __('dashboard.switch_to_english') : __('dashboard.switch_to_arabic') }}
+                </button>
+            </div>
         </div>
 
         <div class="card">

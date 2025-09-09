@@ -131,7 +131,7 @@
                                                     <div class="timeline-content m-0">
                                                         <span class="fs-8 fw-boldest text-success text-uppercase">
                                                             <a href="{{ route('orders.show', $order->id) }}">
-                                                                {{ $order->customer->name }} - {{ $order->status }}
+                                                                {{ $order->customer->name }} - {{__("dashboard.".$order->status)}}
                                                             </a>
                                                         </span>
                                                         <span class="fw-bold text-gray-400 d-block"> @lang('dashboard.date'): {{ $order->date }}</span>

@@ -865,6 +865,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.add', 'dashboard.accounts']
     ]);
 
+    // New routes to handle account charges via GeneralPaymentsController
+    Route::post('general-accounts/store', [
+        'uses' => 'GeneralPaymentsController@storeAccountCharge',
+        'as' => 'general-accounts.store',
+        'act-as' => 'payments.create',
+        'title' => ['actions.add', 'dashboard.accounts']
+    ]);
+
     # accounts update
     Route::get('accounts/{id}/edit', [
         'uses' => 'PaymentsController@accountsEdit',
@@ -879,6 +887,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'accounts.update',
         'act-as' => 'payments.edit',
         'title' => ['actions.edit', 'dashboard.payments']
+    ]);
+
+    // New route to update account charges via GeneralPaymentsController
+    Route::put('general-accounts/{id}', [
+        'uses' => 'GeneralPaymentsController@updateAccountCharge',
+        'as' => 'general-accounts.update',
+        'act-as' => 'payments.edit',
+        'title' => ['actions.edit', 'dashboard.accounts']
     ]);
 
     # payments store
