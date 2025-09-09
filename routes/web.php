@@ -1301,10 +1301,16 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.edit', 'dashboard.general_payments']
     ]);
 
+    Route::get('general_payments/{id}/show', [
+        'uses' => 'GeneralPaymentsController@show',
+        'as' => 'general_payments.show',
+        'title' => ['actions.show', 'dashboard.general_payments']
+    ]);
+
     Route::put('general_payments/{id}', [
         'uses' => 'GeneralPaymentsController@update',
         'as' => 'general_payments.update',
-        'title' => ['actions.edit', 'dashboard.general_payments']
+        'title' => ['actions.edit', 'dashboard.general_paaddon.bladeyments']
     ]);
 
     Route::delete('general_payments/{id}', [

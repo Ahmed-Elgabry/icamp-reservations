@@ -119,7 +119,6 @@
                                 </div>
                             </th>
                             <th class="fw-bolder">{{ __('dashboard.amount') }}</th>
-                            <th class="fw-bolder">{{ __('dashboard.payment_method') }}</th>
                             <th class="fw-bolder">{{ __('dashboard.bank_account') }}</th>
                             <th class="fw-bolder">{{ __('dashboard.verified') }}</th>
                             <th class="fw-bolder">{{ __('dashboard.attached') }}</th>
@@ -150,8 +149,6 @@
                                         </div>
                                     </div>
                                 </td>
-                                <!--begin::Payment Method-->
-                                <td class="text-center">{{ $charge->payment_method ? __('dashboard.'. $charge->payment_method) : __('dashboard.not_specified') }}</td>
                                 <!--begin::Bank Account-->
                                 <td class="text-center">{{ $charge->account->name ?? '-' }}</td>
                                 <!--begin::Verification-->
@@ -181,9 +178,9 @@
                                     {{ $charge->description ?? $charge->notes ?? '-' }}
                                 </td>
                                 <!--begin::Date-->
-                                    <td>{{ $payment->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ $charge->created_at->format('Y-m-d') }}</td>
                                     <!--begin::Time-->
-                                    <td>{{ $payment->created_at->format('h:i A') }}</td>
+                                    <td>{{ $charge->created_at->format('h:i A') }}</td>
                                 <!--begin::Actions-->
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -212,7 +209,7 @@
                                         @can('payments.destroy')
                                         <!--begin::Menu item-->
                                         <div class="menu-item px-3">
-                                            <a  class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('general_payments.destroy', $charge->id)}}" data-id="{{$charge->id}}"> @lang('dashboard.delete')</a>
+                                            <a href="#" class="menu-link px-3" onclick="confirmDelete('{{route('general_payments.destroy', $charge->id)}}', '{{ csrf_token() }}')"> @lang('dashboard.delete')</a>
                                         </div>
                                         @endcan
                                     <!--end::Menu item-->
@@ -279,20 +276,6 @@
                             <div class="col-lg-12">
                                 <input type="date" name="date" id="editChargeDate" class="form-control form-control-lg form-control-solid" required>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Method -->
-                    <div class="row mb-3">
-                        <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.payment_method') }}</label>
-                        <div class="col-lg-12">
-                            <select name="payment_method" id="editChargePaymentMethod" class="form-select form-select-lg form-select-solid">
-                                @foreach(paymentMethod() as $paymentSelect)
-                                    <option value="{{ $paymentSelect }}">
-                                        {{ __('dashboard.'. $paymentSelect) }}
-                                    </option>
-                                @endforeach
-                            </select>
                         </div>
                     </div>
 
@@ -400,5 +383,74 @@
         });
 
         // Edit form will be handled by sending-forms.js since it has the 'store' class
+
+        // Delete confirmation function for this page
+        window.confirmDelete = function(deleteUrl, csrfToken) {
+            // Check if Swal is available, if not use basic confirm
+            if (typeof Swal === 'undefined') {
+                if (confirm('{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}')) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+                return;
+            }
+            
+            Swal.fire({
+                title: '{{ __("dashboard.confirm_delete") ?? "Confirm Delete" }}',
+                text: '{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '{{ __("dashboard.yes_delete") ?? "Yes, Delete" }}',
+                cancelButtonText: '{{ __("dashboard.cancel") ?? "Cancel" }}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        };
     </script>
 @endpush

@@ -1400,9 +1400,16 @@ return [
 
     // Order status statistics
     'pending_and_show_price_count' => 'عدد الحجوزات المعلقة - عرض السعر',
-    'pending_and_initial_reservation_count' => 'عدد الحجوزات المعلقة - حجز مبدئي',
-    'approved_count' => 'عدد الحجوزات المعتمدة',
-    'canceled_count' => 'عدد الحجوزات الملغاة',
-    'delayed_count' => 'عدد الحجوزات المؤجلة',
-    'completed_count' => 'عدد الحجوزات المكتملة',
+    "order_status.pending_and_show_price" => ' الحجوزات المعلقة - عرض السعر',
+    "order_status.completed" => 'الحجوزات المكتملة',
+    "order_status.pending_and_Initial_reservation" => ' الحجوزات المعلقة - حجز مبدئي',
+    "pending_and_initial_reservation" => 'عدد الحجوزات المعلقة - حجز مبدئي',
+    "order_status.approved" => ' الحجوزات المعتمدة',
+    "order_status.canceled" => 'الحجوزات الملغاة',
+    "order_status.delayed" => 'الحجوزات المؤجلة',
+
+    "order_status.approved_count" => 'عدد الحجوزات المعتمدة',
+    "order_status.canceled_count" => 'عدد الحجوزات الملغاة',
+    "order_status.delayed_count" => 'عدد الحجوزات المؤجلة',
+    "order_status.completed_count" => 'عدد الحجوزات المكتملة',
 ];

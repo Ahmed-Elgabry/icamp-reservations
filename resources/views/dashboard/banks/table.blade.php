@@ -26,7 +26,7 @@
             <th class="text-center fw-bolder">{{ __('dashboard.date') }}</th>
             <th class="text-center fw-bolder">{{ __('dashboard.time') }}</th>
             @if(isset($pageTitle))
-                    @if($pageTitle === "transactions")
+                    @if($pageTitle ===  __('dashboard.all_transactions'))
                         <th class="text-center fw-bolder">{{ __('dashboard.bank_account') }}</th>
                     @endif
             @else

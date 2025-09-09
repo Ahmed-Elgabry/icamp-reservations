@@ -153,7 +153,7 @@
                                                 <input type="hidden" name="source" value="reservation_addon">
                                                 <div class="form-group">
                                                     <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
-                                                    <select name="addon_id" id="edit_addon_id_{{ $orderAddon->pivot->id }}" class="form-control select2" required>
+                                                    <select name="addon_id" id="edit_addon_id_{{ $orderAddon->pivot->id }}" class="form-control select2 " required>
                                                         <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
                                                         @foreach ($addons as $addon)
                                                             <option value="{{ $addon->id }}" data-price="{{ $addon->price }}" {{ $orderAddon->id == $addon->id ? 'selected' : '' }}>{{ $addon->name }}</option>
@@ -174,7 +174,7 @@
                                                 </div>
                                                 <div class="mb-5 fv-row col-md-12">
                                                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                                                    <select name="payment_method" id="" class="form-select" required>
+                                                    <select name="payment_method" id="" class="form-select " required>
                                                         @foreach(paymentMethod() as $paymentSelect)
                                                             <option @selected($orderAddon->pivot->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                                         @endforeach
@@ -182,7 +182,7 @@
                                                 </div>
                                                 <div class="mb-5 fv-row col-md-12">
                                                     <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                                                    <select name="account_id" id="account_id" class="form-select" required>
+                                                    <select name="account_id" id="account_id" class="form-select " required>
                                                         @foreach($bankAccounts as $bankAccount)
                                                             <option @selected($orderAddon->pivot->account_id === $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                                         @endforeach
@@ -228,12 +228,13 @@
                         @csrf
                         <div class="form-group">
                             <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
-                            <select name="addon_id" id="addon_id" class="form-control" required>
+                            <select name="addon_id" id="addon_id" class="form-control border-danger" required>
                                 <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
                                 @foreach ($addons as $addon)
                                     <option value="{{ $addon->id }}" data-price="{{ $addon->price }}">{{ $addon->name }}</option>
                                 @endforeach
                             </select>
+                            <span class="text-danger small">{{ __('dashboard.required') }}</span>
                         </div>
                         <div class="form-group mt-3">
                             <label for="addon_price">{{ __('dashboard.addon_price') }}</label>
@@ -250,7 +251,7 @@
         
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                            <select name="payment_method" id="" class="form-select" required>
+                            <select name="payment_method" id="" class="form-select " required>
                                 @foreach(paymentMethod() as $paymentSelect)
                                     <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                 @endforeach
@@ -258,7 +259,7 @@
                         </div>
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                            <select name="account_id" id="account_id" class="form-select" required>
+                            <select name="account_id" id="account_id" class="form-select " required>
                                 @foreach($bankAccounts as $bankAccount)
                                     <option value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                 @endforeach
@@ -289,8 +290,13 @@
             // Update service price field when addon is selected
             $('#addon_id').on('change', function() {
                 let price = $(this).find(':selected').data('price');
-        $('#addon_price').val(price ?? 0); // Display the service price in the correct field
+                $('#addon_price').val(price ?? 0); // Display the service price in the correct field
                 updateTotalPrice();
+                
+                // Clear custom validity when a valid option is selected
+                if (this.value) {
+                    this.setCustomValidity('');
+                }
             });
 
             // Update total price when count or price is changed
@@ -313,14 +319,14 @@
                 // Validate that user has selected an addon (not the default empty option)
                 let selectedAddon = $('#addon_id').val();
                 if (!selectedAddon || selectedAddon === '') {
+                    // Set custom validity message and trigger HTML5 validation
+                    document.getElementById('addon_id').setCustomValidity('{{ __("dashboard.please_select_addon") }}');
+                    document.getElementById('addon_id').reportValidity();
                     e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: '{{ __("dashboard.error") }}',
-                        text: '{{ __("dashboard.please_select_addon") }}',
-                        confirmButtonText: '{{ __("dashboard.ok") }}'
-                    });
                     return false;
+                } else {
+                    // Clear custom validity if valid option is selected
+                    document.getElementById('addon_id').setCustomValidity('');
                 }
                 return true;
             });
@@ -334,6 +340,11 @@
                 let addonId = $(this).attr('id').split('_').pop();
                 $('#edit_service_price_' + addonId).val(price); // Display the service price in the new field
                 updateTotalPriceEdit(addonId);
+                
+                // Clear custom validity when a valid option is selected
+                if (this.value) {
+                    this.setCustomValidity('');
+                }
             });
 
             // Update total price when count changes
@@ -361,14 +372,14 @@
                 let selectedAddon = $('#edit_addon_id_' + addonId).val();
                 
                 if (!selectedAddon || selectedAddon === '') {
+                    // Set custom validity message and trigger HTML5 validation
+                    document.getElementById('edit_addon_id_' + addonId).setCustomValidity('{{ __("dashboard.please_select_addon") }}');
+                    document.getElementById('edit_addon_id_' + addonId).reportValidity();
                     e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: '{{ __("dashboard.error") }}',
-                        text: '{{ __("dashboard.please_select_addon") }}',
-                        confirmButtonText: '{{ __("dashboard.ok") }}'
-                    });
                     return false;
+                } else {
+                    // Clear custom validity if valid option is selected
+                    document.getElementById('edit_addon_id_' + addonId).setCustomValidity('');
                 }
                 return true;
             });

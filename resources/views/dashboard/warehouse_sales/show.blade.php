@@ -136,6 +136,7 @@
                         <label class="required form-label">{{ __('dashboard.items') }}</label>
                         <select name="stock_id" class="form-control js-stock"
                                 data-initial="{{ $item->stock_id }}" required>
+                          <option value="">{{ __('dashboard.select') }}</option>
                           @foreach($stocks as $stock)
                             <option value="{{ $stock->id }}" data-price="{{ $stock->selling_price }}"
                               @selected($stock->id == $item->stock_id)>{{ $stock->name }}</option>
@@ -158,6 +159,7 @@
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
                             <select name="account_id" id="" class="form-select" required>
+                                <option value="">{{ __('dashboard.select') }}</option>
                                 @foreach($bankAccounts as $id => $name)
                                     <option @selected($item->account_id == $id) value="{{$id}}">{{ $name }}</option>
                                 @endforeach
@@ -167,6 +169,7 @@
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                             <select name="payment_method" id="" class="form-select" required>
+                                <option value="">{{ __('dashboard.select') }}</option>
                                 @foreach(paymentMethod() as $paymentSelect)
                                     <option @selected($item->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                 @endforeach
@@ -210,6 +213,7 @@
                   <div class="mb-5 fv-row col-md-12">
                     <label class="required form-label">{{ __('dashboard.items') }}</label>
                     <select name="stock_id" class="form-control js-stock" required>
+                      <option value="">{{ __('dashboard.select') }}</option>
                       @foreach($stocks as $stock)
                         <option value="{{ $stock->id }}" data-price="{{ $stock->selling_price }}">{{ $stock->name }}</option>
                       @endforeach
@@ -233,6 +237,7 @@
                   <div class="mb-5 fv-row col-md-12">
                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                     <select name="payment_method" id="" class="form-select" required>
+                        <option value="">{{ __('dashboard.select') }}</option>
                         @foreach(paymentMethod() as $paymentSelect)
                             <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                             @endforeach
@@ -242,6 +247,7 @@
                   <div class="mb-5 fv-row col-md-12">
                           <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
                           <select name="account_id" id="" class="form-select" required>
+                              <option value="">{{ __('dashboard.select') }}</option>
                               @foreach($bankAccounts as $id => $name)
                                   <option value="{{$id}}">{{ $name }}</option>
                               @endforeach
@@ -327,6 +333,87 @@
               text: '{{ __("dashboard.warehouse_not_verified_receipt_error") }}',
               confirmButtonText: '{{ __("dashboard.ok") }}'
           });
+      }
+  });
+
+  // Add warehouse sales form validation
+  $('#saveCountDetails').on('submit', function(e) {
+      let stockSelect = $(this).find('select[name="stock_id"]')[0];
+      let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
+      let accountSelect = $(this).find('select[name="account_id"]')[0];
+      
+      // Validate stock selection
+      if (!stockSelect.value || stockSelect.value === '') {
+          stockSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          stockSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          stockSelect.setCustomValidity('');
+      }
+      
+      // Validate payment method selection
+      if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
+          paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          paymentMethodSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          paymentMethodSelect.setCustomValidity('');
+      }
+      
+      // Validate account selection
+      if (!accountSelect.value || accountSelect.value === '') {
+          accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          accountSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          accountSelect.setCustomValidity('');
+      }
+  });
+
+  // Edit warehouse sales form validation
+  $('form[id^="editCountForm"]').on('submit', function(e) {
+      let stockSelect = $(this).find('select[name="stock_id"]')[0];
+      let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
+      let accountSelect = $(this).find('select[name="account_id"]')[0];
+      
+      // Validate stock selection
+      if (!stockSelect.value || stockSelect.value === '') {
+          stockSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          stockSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          stockSelect.setCustomValidity('');
+      }
+      
+      // Validate payment method selection
+      if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
+          paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          paymentMethodSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          paymentMethodSelect.setCustomValidity('');
+      }
+      
+      // Validate account selection
+      if (!accountSelect.value || accountSelect.value === '') {
+          accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          accountSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          accountSelect.setCustomValidity('');
+      }
+  });
+
+  // Clear validation when user selects a valid option
+  $(document).on('change', 'select[name="stock_id"], select[name="payment_method"], select[name="account_id"]', function() {
+      if (this.value && this.value !== '') {
+          this.setCustomValidity('');
       }
   });
 </script>

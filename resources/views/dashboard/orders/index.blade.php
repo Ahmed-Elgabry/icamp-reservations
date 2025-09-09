@@ -143,6 +143,7 @@
                                 <!--begin::Payments-->
                                 <td>
                                     <span class="text-success">
+                                        {{ddd($order->payments()->where('statement', 'the_insurance'))}}
                                         {{ __('dashboard.paied') }}
                                         {{ number_format( $order->payments()->where('statement', 'the_insurance')->sum("price")) }}
                                     </span>
@@ -445,6 +446,78 @@
                 stopScanning();
             });
         });
+    </script>
+
+    <!-- Fix delete functionality -->
+    <script>
+        // Override confirmDelete function specifically for this page
+        window.confirmDelete = function(deleteUrl, csrfToken) {
+            // Check if Swal is available, if not use basic confirm
+            if (typeof Swal === 'undefined') {
+                if (confirm('{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}')) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+                return;
+            }
+            
+            Swal.fire({
+                title: '{{ __("dashboard.confirm_delete") ?? "Confirm Delete" }}',
+                text: '{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '{{ __("dashboard.yes_delete") ?? "Yes, Delete" }}',
+                cancelButtonText: '{{ __("dashboard.cancel") ?? "Cancel" }}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        };
     </script>
 @endpush
 
