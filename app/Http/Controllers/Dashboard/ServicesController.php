@@ -15,7 +15,11 @@ class ServicesController extends Controller
     // Display a listing of services
     public function index()
     {
-        $this->authorize('viewAny', Service::class);
+        // Allow access if user has either services.index OR camp-types.index permission
+        if (!auth()->user()->can('services.index') && !auth()->user()->can('camp-types.index')) {
+            abort(403, 'Unauthorized');
+        }
+        
         $services = Service::orderBy('created_at', 'desc')->get();
         return view('dashboard.services.index', compact('services'));
     }
@@ -23,7 +27,11 @@ class ServicesController extends Controller
     // Show the form for creating a new service
     public function create()
     {
-        $this->authorize('create', Service::class);
+        // Allow access if user has either services.create OR camp-types.create permission
+        if (!auth()->user()->can('services.create') && !auth()->user()->can('camp-types.create')) {
+            abort(403, 'Unauthorized');
+        }
+        
         $stocks = Stock::all();
         return view('dashboard.services.create', compact('stocks'));
     }
@@ -31,7 +39,10 @@ class ServicesController extends Controller
     // Store a newly created service in the database
     public function store(Request $request)
     {
-        $this->authorize('create', Service::class);
+        // Allow access if user has either services.create OR camp-types.create permission
+        if (!auth()->user()->can('services.create') && !auth()->user()->can('camp-types.create')) {
+            abort(403, 'Unauthorized');
+        }
 
         try {
             $validatedData = $request->validate([
@@ -50,7 +61,7 @@ class ServicesController extends Controller
                 'reports_counts' => 'nullable|array',
                 'reports_counts.*' => 'required|integer|min:1',
                 'reports_images' => 'nullable|array',
-                'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
                 'report_orders' => 'nullable|array',
                 'report_orders.*' => 'nullable|integer',
                 'set_qty' => 'nullable|integer'
@@ -112,7 +123,11 @@ class ServicesController extends Controller
     public function edit($service)
     {
         $service = Service::findOrFail($service);
-        $this->authorize('update', $service);
+        // Allow access if user has either services.edit OR camp-types.edit permission
+        if (!auth()->user()->can('services.edit') && !auth()->user()->can('camp-types.edit')) {
+            abort(403, 'Unauthorized');
+        }
+        
         $stocks = Stock::all();
         $reports = ServiceReport::where('service_id', $service->id)
                                     ->orderBy('ordered_count')
@@ -141,7 +156,7 @@ class ServicesController extends Controller
             'report_orders'  => 'nullable|array',
             'report_orders.*'=> 'nullable|integer',
             'images'         => 'nullable|array',
-            'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2040',
             'set_qty'       => 'nullable|integer'
         ]);
 

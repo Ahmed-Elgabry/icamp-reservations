@@ -14,6 +14,19 @@
 
         <!--begin::Category-->
         <div class="card card-flush">
+             <!-- customer information -->
+                  <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <!--begin::Card title-->
@@ -64,10 +77,12 @@
                             <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                         </div>
                     </th>
+                    <td>{{__('dashboard.statement') }}</td>
                     <th>{{ __('dashboard.price') }}</th>
                     <th class="">{{ __('dashboard.payment_method') }}</th>
-                    <th class="">{{ __('dashboard.verified') }}</th>
+                    <th class="">{{ __('dashboard.debit') }} {{ __('dashboard.from') }}</th>
                     <th class="">{{ __('dashboard.notes') }}</th>
+                    <th class="">{{ __('dashboard.verified') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
                     <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                 </tr>
@@ -86,6 +101,7 @@
                             </div>
                         </td>
                         <!--begin::Category=-->
+                        <td>{{$payment->statement}}</td>
                         <td>
                             <div class="d-flex">
                                 <!--end::Thumbnail-->
@@ -102,15 +118,18 @@
                             {{$payment->payment_method ? __('dashboard.' . $payment->payment_method) : __('dashboard.not_specified')}}
                         </td>
                         <td>
+                            {{$payment->account ? $payment->account->name :""}}
+                        </td>
+                        <td  data-kt-ecommerce-category-filter="category_name" >
+                            {{$payment->notes}}
+                        </td>
+                        <td>
                             {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                             @if($payment->verified)
                                 <a href="{{ route('order.verified' , [$payment->id , 'expense']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                             @else
                                 <a href="{{ route('order.verified' , [$payment->id , 'expense']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                             @endif
-                        </td>
-                        <td  data-kt-ecommerce-category-filter="category_name" >
-                            {{$payment->notes}}
                         </td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}
@@ -163,6 +182,11 @@
                                 @csrf
                                 @method('PUT')
                                 <!--begin::Card body-->
+                                 <div class="mb-5 fv-row col-md-12">
+                                    <label class="required form-label">{{ __('dashboard.statement') }}</label>
+                                    <input name="statement" id="" class="form-control" value="{{ $payment->statement }}" required>
+                                </div>
+                                <input type="hidden" value="reservation_expenses" name="source">
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>
                                     <input type="number" name="price" id="price" value="{{   $payment->price }}"
@@ -181,7 +205,7 @@
                                 </div>
 
                                 <div class="mb-5 fv-row col-md-12">
-                                <label for="account_id" class="required">{{ __('dashboard.bank_account') }}</label>
+                                <label for="account_id" class="required">{{ __('dashboard.debit') }}{{ __('dashboard.from') }}</label>
                                 <select name="account_id" id="account_id" class="form-control" required>
                                     <option value="">{{ __('dashboard.choose_bank_account') }}</option>
                                     @foreach($bankAccounts as $bank)
@@ -228,7 +252,11 @@
             @csrf
             <!--begin::Input group-->
             <input type="hidden" value="{{ $order->id }}" name="order_id">
-
+            <input type="hidden" value="reservation_expenses" name="source">
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.statement') }}</label>
+                <input name="statement" id="" class="form-control" required>
+            </div>
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.price') }}</label>
                 <input type="number" name="price" id="price" value="{{   old('price') }}"
@@ -247,7 +275,7 @@
             </div>
 
             <div class="mb-5 fv-row col-md-12">
-                <label for="account_id" class="required">{{ __('dashboard.bank_account') }}</label>
+                <label for="account_id" class="required">{{ __('dashboard.debit') }}{{ __('dashboard.from') }}</label>
                 <select name="account_id" id="account_id" class="form-control" required>
                     <option value="">{{ __('dashboard.choose_bank_account') }}</option>
                     @foreach($bankAccounts as $bank)

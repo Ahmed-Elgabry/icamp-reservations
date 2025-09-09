@@ -54,7 +54,7 @@
                                                 <!--begin::Input group-->
                                                 <div class="mb-5 fv-row col-md-12">
                                                     <label class=" form-label">ملاحظات</label>
-                                                    <input type="text" name="notes" value="{{ isset($expenseItem) ? $expenseItem->notes :  old('notes') }}"
+                                                    <input type="text" name="description" value="{{ isset($expenseItem) ? $expenseItem->notes :  old('notes') }}"
                                                         class="form-control mb-2" placeholder="" />
                                                 </div>
                                                 <!--end::Input group-->

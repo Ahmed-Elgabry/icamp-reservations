@@ -16,9 +16,11 @@
                    class="btn btn-success me-2" title="@lang('dashboard.export_pdf')">
                     <i class="fas fa-file-pdf"></i> @lang('dashboard.export_pdf')
                 </a>
+                @if(Gate::allows('equipment.create'))
                 <a href="{{ route('equipment-directories.items.create', $equipmentDirectory) }}" class="btn btn-primary">
                     @lang('dashboard.add_item')
                 </a>
+                @endif
                 <a href="{{ route('equipment-directories.index') }}" class="btn btn-secondary ms-2">
                     @lang('dashboard.back_to_directories')
                 </a>
@@ -72,10 +74,13 @@
                             </span>
                             </td>
                             <td>
+                                @if(Gate::allows('equipment.edit'))
                                 <a href="{{ route('equipment-directories.items.edit', [$equipmentDirectory,$item]) }}"
                                    class="btn btn-sm btn-primary" title="@lang('dashboard.edit')">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                @endif
+                                @if(Gate::allows('equipment.destroy'))
                                 <form action="{{ route('equipment-directories.items.destroy',  [$equipmentDirectory,$item]) }}"
                                       method="POST" class="d-inline">
                                     @csrf @method('DELETE')
@@ -85,6 +90,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
 
@@ -110,7 +116,7 @@
                                                     <form action="{{ route('equipment-directories.media.destroy', $media) }}"
                                                           method="POST" class="mt-2 text-center">
                                                         @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                                             <i class="fas fa-trash"></i> @lang('dashboard.delete')
                                                         </button>
                                                     </form>

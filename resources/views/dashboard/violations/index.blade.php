@@ -8,9 +8,11 @@
                 <h3>@lang('dashboard.violations')</h3>
             </div>
             <div class="card-toolbar">
-                <a href="{{ route('violations.create') }}" class="btn btn-primary">
-                    @lang('dashboard.create_violation')
-                </a>
+                @can('violations.create')
+                    <a href="{{ route('violations.create') }}" class="btn btn-primary">
+                        @lang('dashboard.create_violation')
+                    </a>
+                @endcan
             </div>
         </div>
         <div class="card-body pt-0">
@@ -57,56 +59,67 @@
                     </div>
                 </form>
             </div>
-
-            <table class="table align-middle table-row-dashed fs-6 gy-5">
-                <thead class="text-gray-400 fw-bolder">
-                <tr>
-                    <th>@lang('dashboard.employee')</th>
-                    <th>@lang('dashboard.violation_type')</th>
-                    <th>@lang('dashboard.violation_date')</th>
-                    <th>@lang('dashboard.violation_time')</th>
-                    <th>@lang('dashboard.violation_place')</th>
-                    <th>@lang('dashboard.action_taken')</th>
-                    <th>@lang('dashboard.actions')</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($violations as $violation)
+            <div class="table-responsive">
+                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                    <thead class="text-gray-400 fw-bolder">
                     <tr>
-                        <td>{{ $violation->employee->name }}</td>
-                        <td>{{ $violation->type->name }}</td>
-                        <td>{{ $violation->violation_date ? $violation->violation_date->format('Y-m-d') : '-' }}</td>
-                        <td>{{ $violation->violation_time ?? '-' }}</td>
-                        <td>{{ Str::limit($violation->violation_place, 30) ?? '-' }}</td>
-                        <td>
-                            <span class="badge badge-light-{{
-                                $violation->action_taken === 'warning' ? 'warning' :
-                                ($violation->action_taken === 'allowance' ? 'success' : 'danger')
-                            }}">
-                                @lang('dashboard.' . $violation->action_taken)
-                                @if($violation->action_taken === 'deduction')
-                                    ({{ $violation->deduction_amount }})
-                                @endif
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('violations.show', $violation) }}" class="btn btn-sm btn-info">
-                                @lang('dashboard.view')
-                            </a>
-                            <a href="{{ route('violations.edit', $violation) }}" class="btn btn-sm btn-warning">
-                                @lang('dashboard.edit')
-                            </a>
-                            <form action="{{ route('violations.destroy', $violation) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
-                                    @lang('dashboard.delete')
-                                </button>
-                            </form>
-                        </td>
+                        <th>@lang('dashboard.employee')</th>
+                        <th>@lang('dashboard.violation_type')</th>
+                        <th>@lang('dashboard.violation_date')</th>
+                        <th>@lang('dashboard.violation_time')</th>
+                        <th>@lang('dashboard.violation_place')</th>
+                        <th>@lang('dashboard.action_taken')</th>
+                        <th>@lang('dashboard.created_date')</th>
+                        <th>@lang('dashboard.created_time')</th>
+                        <th>@lang('dashboard.actions')</th>
                     </tr>
-                @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    @foreach($violations as $violation)
+                        <tr>
+                            <td>{{ $violation->employee->name }}</td>
+                            <td>{{ $violation->type->name }}</td>
+                            <td>{{ $violation->violation_date ? $violation->violation_date->format('Y-m-d') : '-' }}</td>
+                            <td>{{ $violation->violation_time ?? '-' }}</td>
+                            <td>{{ Str::limit($violation->violation_place, 30) ?? '-' }}</td>
+                            <td>
+                                <span class="badge badge-light-{{
+                                    $violation->action_taken === 'warning' ? 'warning' :
+                                    ($violation->action_taken === 'allowance' ? 'success' : 'danger')
+                                }}">
+                                    @lang('dashboard.' . $violation->action_taken)
+                                    @if($violation->action_taken === 'deduction')
+                                        ({{ $violation->deduction_amount }})
+                                    @endif
+                                </span>
+                            </td>
+                            <td>{{ $violation->created_at->format('Y-m-d') }}</td>
+                            <td>{{ $violation->created_at->format('h:i A') }}</td>
+                            <td>
+                                @can('violations.show')
+                                    <a href="{{ route('violations.show', $violation) }}" class="btn btn-sm btn-info">
+                                        @lang('dashboard.view')
+                                    </a>
+                                @endcan
+                                @can('violations.edit')
+                                    <a href="{{ route('violations.edit', $violation) }}" class="btn btn-sm btn-warning">
+                                        @lang('dashboard.edit')
+                                    </a>
+                                @endcan
+                                @can('violations.destroy')
+                                    <form action="{{ route('violations.destroy', $violation) }}" method="POST" class="d-inline">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
+                                            @lang('dashboard.delete')
+                                        </button>
+                                    </form>
+                                @endcan
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 @endsection

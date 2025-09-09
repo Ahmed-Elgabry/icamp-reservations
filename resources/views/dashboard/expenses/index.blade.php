@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.app')
-@section('pageTitle' , __('dashboard.expenses'))
+@section('pageTitle' , __('dashboard.all_expenses'))
 
 @section('content')
 

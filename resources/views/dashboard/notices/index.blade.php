@@ -33,7 +33,8 @@
                                 <th>@lang('dashboard.notice_type')</th>
                                 <th>@lang('dashboard.notice')</th>
                                 <th>@lang('dashboard.notice_created_by')</th>
-                                <th>@lang('dashboard.date')</th>
+                                <th>@lang('dashboard.created_date')</th>
+                                <th>@lang('dashboard.created_time')</th>
                                 <th class="text-end">@lang('dashboard.actions')</th>
                             </tr>
                             </thead>
@@ -51,7 +52,8 @@
                                     <td>{{  $notice->type ? $notice->type->name : '-'  }}</td>
                                     <td>{{ Str::limit($notice->notice, 70) }}</td>
                                     <td>{{ $notice->creator->name }}</td>
-                                    <td>{{ $notice->created_at->format('Y-m-d H:i') }}</td>
+                                    <td>{{ $notice->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ $notice->created_at->format('h:i A') }}</td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-light btn-show-notice"
                                                 data-notice-id="{{ $notice->id }}"

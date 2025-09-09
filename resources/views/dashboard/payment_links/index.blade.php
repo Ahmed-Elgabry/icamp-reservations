@@ -50,7 +50,8 @@
                                     <th class="min-w-120px">{{ __('dashboard.request_id') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.checkout_id') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.checkout_key') }}</th>
-                                    <th class="min-w-120px">{{ __('dashboard.date_time') }}</th>
+                                    <th class="min-w-120px">@lang('dashboard.created_date')</th>
+                                    <th class="min-w-120px">@lang('dashboard.created_time')</th>
                                     <th class="min-w-100px">{{ __('dashboard.status') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.actions') }}</th>
                                 </tr>
@@ -148,7 +149,12 @@
                                         
                                         <td>
                                             <span class="text-dark fw-bolder text-h6 d-block fs-6">
-                                                {{ $paymentLink->created_at->format('Y-m-d H:i') }}
+                                                {{ $paymentLink->created_at->format('Y-m-d') }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-dark fw-bolder text-h6 d-block fs-6">
+                                                {{ $paymentLink->created_at->format('h:i A') }}
                                             </span>
                                         </td>
                                         <td>

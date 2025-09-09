@@ -51,6 +51,16 @@ class Stock extends Model
             ->withPivot('quantity');
     }
 
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     public function activities()
     {
         return $this->hasMany(StockActivity::class);
@@ -69,6 +79,11 @@ class Stock extends Model
         $builder->when(isset($filters['quantity']) && $filters['quantity'] !== '', function ($builder, $value) {
             $builder->where('quantity', 'like', "%{$value}%");
         });
+        $builder->when(isset($filters['higher_selling']) && $filters['higher_selling'], function ($builder) {
+            $builder->withSum('orderItems as order_items_total', 'order_items.quantity')
+                ->orderBy('order_items_total', 'desc');
+        });
     }
 
 }
+                                                                                                                              

@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="utf-8">
-    <title>توقيع الحجز رقم {{ $order->id }}</title>
+    <title>{{ env('APP_NAME')}} | @lang('dashboard.signature_title', ['id' => $order->id])</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,6 +65,28 @@
             font-size: 18px;
             color: var(--muted);
             font-weight: 600;
+        }
+
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            z-index: 1000;
+        }
+
+        .language-switcher button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .language-switcher button:hover {
+            background: var(--primary-600);
         }
 
         .card {
@@ -171,7 +193,19 @@
             background: var(--danger);
             color: #fff;
         }
+        .d-flex {
+            display : flex;
+        }
+        .justify-content-between {
+            justify-content : space-between ; 
+        }
+        .align-items-center {
+            align-items :center
+        }
 
+        .t-left {
+            text-align :left ;
+        }
         .footer {
             padding: 14px 20px;
             border-top: 1px solid var(--border);
@@ -205,32 +239,66 @@
             border-radius: 8px;
             margin-bottom: 16px;
         }
+
+    .text-center { text-align: center; }
     </style>
 </head>
 
 <body>
 
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <button onclick="changeLanguage('{{ app()->getLocale() == 'ar' ? 'en' : 'ar' }}')">
+            {{ app()->getLocale() == 'ar' ? __('dashboard.switch_to_english') : __('dashboard.switch_to_arabic') }}
+        </button>
+    </div>
+
     <div class="shell">
         <div class="brand">
             <img src="{{ asset('images/logo.png') }}" alt="Logo">
-            <h1>نظام الإدارة</h1>
+            <h1>@lang('dashboard.management_system')</h1>
         </div>
 
         @if ($terms)
-            <div class="alert alert-warning">
-                <strong>تنبيه:</strong> {{ $terms?->commercial_license }}
+            <div class="alert alert-warning justify-content-between align-items-center  d-flex" style="direction: rtl;">
+                <div style="margin-bottom: 8px;">
+                    <strong>تنبيه</strong> {!! $terms?->commercial_license_ar !!}
+                </div>
+                @if($terms?->commercial_license_en)
+                    <div class = "t-left" >
+                        <strong>:Notice</strong> {!! $terms?->commercial_license_en !!}
+                    </div>
+                @endif
             </div>
         @endif
 
         <div class="card">
             <div class="header">
                 <div>
-                    <h2 class="title">التوقيع للموافقة</h2>
-                    <p class="subtitle">رقم الحجز: {{ $order->id }}</p>
+                    <h2 class="title">@lang('dashboard.signature_for_approval')</h2>
+                   
+                                <div class="d-block">
+                                    <div class="border rounded p-3 bg-light-subtle">
+                                        <div class="row g-3 small">
+                                            <div class="col-md-4 text-center">
+                                                <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                                                <div class="fw-bold">{{ $order->id }}</div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                                                <div class="fw-bold">{{ $order->customer->name }}</div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <div class="fw-semibold text-muted">{{ __('dashboard.phone')}}</div>
+                                                <div class="fw-bold">{{ $order->customer->phone }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                 </div>
                 <div class="row" style="margin:0">
-                    <button id="undo" class="btn-ghost" type="button">تراجع</button>
-                    <button id="clear" class="btn-danger" type="button">مسح</button>
+                    <button id="undo" class="btn-ghost" type="button">@lang('dashboard.undo')</button>
+                    <button id="clear" class="btn-danger" type="button">@lang('dashboard.clear')</button>
                 </div>
             </div>
 
@@ -243,22 +311,22 @@
                     <div class="canvas-box">
                         <canvas id="signature"></canvas>
                     </div>
-                    <div class="hint">استخدم الماوس أو الإصبع لرسم توقيعك بوضوح.</div>
+                    <div class="hint">@lang('dashboard.signature_hint')</div>
                 </div>
 
                 <form id="sig-form" method="POST" action="{{ route('signature.store', $order) }}">
                     @csrf
                     <input type="hidden" name="signature" id="signature-input">
                     <div class="row">
-                        <button type="submit" class="btn-primary">إرسال التوقيع</button>
-                        <button id="download" type="button" class="btn-ghost">تنزيل PNG</button>
+                        <button type="submit" class="btn-primary">@lang('dashboard.submit_signature')</button>
+                        <button id="download" type="button" class="btn-ghost">@lang('dashboard.download_png')</button>
                     </div>
                 </form>
             </div>
 
             <div class="footer">
-                <span class="hint">بالإرسال، تؤكد أن هذا توقيعك القانوني.</span>
-                <span class="hint">لدعم فني: تواصل مع المسؤول.</span>
+                <span class="hint">@lang('dashboard.signature_confirmation')</span>
+                <span class="hint">@lang('dashboard.technical_support')</span>
             </div>
         </div>
     </div>
@@ -294,16 +362,23 @@
             if (data.length) { data.pop(); signaturePad.fromData(data); }
         });
         dlB.addEventListener('click', () => {
-            if (signaturePad.isEmpty()) { alert('لا يوجد توقيع للتنزيل'); return; }
+            if (signaturePad.isEmpty()) { alert('@lang('dashboard.no_signature_to_download')'); return; }
             const url = signaturePad.toDataURL('image/png');
             const a = document.createElement('a'); a.href = url; a.download = 'signature-order-{{ $order->id }}.png';
             document.body.appendChild(a); a.click(); a.remove();
         });
 
         form.addEventListener('submit', (e) => {
-            if (signaturePad.isEmpty()) { e.preventDefault(); alert('من فضلك ارسم توقيعك أولاً.'); return; }
+            if (signaturePad.isEmpty()) { e.preventDefault(); alert('@lang('dashboard.please_draw_signature')'); return; }
             input.value = signaturePad.toDataURL('image/png');
         });
+
+        // Language switching function
+        function changeLanguage(locale) {
+            const url = new URL(window.location);
+            url.searchParams.set('lang', locale);
+            window.location.href = url.toString();
+        }
     </script>
 </body>
 

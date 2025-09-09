@@ -1,5 +1,6 @@
 @extends('dashboard.layouts.app')
 
+@section('pageTitle', __('dashboard.dashboard'))
 @section('content')
 
 
@@ -23,7 +24,7 @@
                 <a href="{{ route('customers.create') }}" class="btn btn-sm btn-light">
                     @lang('dashboard.create_title', ['page_title' => __('dashboard.customers')])
                 </a>
-                @endcan 
+                @endcan
                 <!--end::Secondary button-->
                 <!--begin::Primary button-->
                 @can('orders.create')
@@ -31,7 +32,7 @@
                      @lang('dashboard.create_title', ['page_title' => __('dashboard.orders')])
                 </a>
                 <!--end::Primary button-->
-                @endcan 
+                @endcan
             </div>
             <!--end::Actions-->
         </div>
@@ -46,7 +47,7 @@
 
             <div class="row">
                 <!-- Customers Count -->
-                @can('orders.index')
+                @can('bookings.index')
                 <div class="col-md-4">
                     <a href="{{route('customers.index') }}">
                         <div class="card">
@@ -57,9 +58,9 @@
                         </div>
                     </a>
                 </div>
-                @endcan 
+                @endcan
 
-                @can('orders.index')
+                @can('bookings.index')
                     <div class="col-md-4">
                         <a href="{{route('orders.index') }}">
                             <div class="card">
@@ -82,14 +83,14 @@
                             </a>
                         </div>
                     @endforeach
-                @endcan 
+                @endcan
 
             </div>
 
             <div class="row mt-10">
 
 
-                @can('orders.index')
+                @can('bookings.index')
                 <div class="col-6 mb-xl-10">
                     <!--begin::List widget for Orders-->
                     <div class="card card-flush h-xl-100">
@@ -130,7 +131,7 @@
                                                     <div class="timeline-content m-0">
                                                         <span class="fs-8 fw-boldest text-success text-uppercase">
                                                             <a href="{{ route('orders.show', $order->id) }}">
-                                                                {{ $order->customer->name }} - {{ $order->status }}
+                                                                {{ $order->customer->name }} - {{__("dashboard.".$order->status)}}
                                                             </a>
                                                         </span>
                                                         <span class="fw-bold text-gray-400 d-block"> @lang('dashboard.date'): {{ $order->date }}</span>

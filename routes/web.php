@@ -47,7 +47,8 @@ Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
 Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
     ->name('signature.store');
 
-
+Route::delete('/sign/{order}', [OrderSignatureController::class, 'destroy'])
+    ->name('signature.destroy');
 
 // Auth::routes();
 Route::group(['middleware' => ['web']], function () {
@@ -55,7 +56,31 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('admin-login', [LoginController::class, 'login'])->name('admin-login');
 });
 
+// Temporary route to check user permissions (outside check-role middleware)
+Route::get('check-permissions', function () {
+    if (!auth()->check()) {
+        return 'Please login first';
+    }
+
+    $user = auth()->user();
+    $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+
+    echo "<h3>User: " . $user->name . " (ID: " . $user->id . ")</h3>";
+    echo "<h3>All Permissions (" . count($permissions) . "):</h3>";
+    foreach ($permissions as $permission) {
+        echo "- " . $permission . "<br>";
+    }
+
+    echo "<br><h3>Specific Checks:</h3>";
+    echo "Has notices.index: " . ($user->hasPermissionTo('notices.index') ? 'YES' : 'NO') . "<br>";
+    echo "Can access notices.index: " . (Gate::allows('notices.index') ? 'YES' : 'NO') . "<br>";
+
+    return '';
+})->middleware('auth');
+
 Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'namespace' => 'Dashboard'], function () {
+
+
 
     Route::get('logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('edit-profile', [AdminController::class, 'editProfile'])->name('edit-profile');
@@ -186,7 +211,6 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'customers.index',
         'title' => 'dashboard.customers',
         'type' => 'parent',
-        'middleware' => ['auth', 'permission:customers.index'],
         'child' => ['customers.store', 'customers.edit', 'customers.update', 'customers.destroy', 'customers.deleteAll']
     ]);
 
@@ -516,7 +540,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'orders.index',
         'title' => 'dashboard.orders',
         'type' => 'parent',
-        'middleware' => ['auth', 'permission:orders.index'],
+        'middleware' => ['auth'],
         'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes', 'orders.registeration-forms', 'orders.registeration-forms.edit', 'orders.registeration-forms.destroy', 'orders.registeration-forms.fetch', 'orders.registeration-forms.fetch', 'orders.customers.check']
     ]);
 
@@ -823,9 +847,8 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payments.index',
         'title' => 'dashboard.payments',
         'type' => 'parent',
-        'child' => ['payments.create', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
+        'child' => ['payments.create', 'payments.transfer', 'money-transfer', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
     ]);
-
     # payments store
     Route::get('transactions', [
         'uses' => 'PaymentsController@transactions',
@@ -838,6 +861,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::post('accounts/store', [
         'uses' => 'PaymentsController@accountsStore',
         'as' => 'accounts.store',
+        'act-as' => 'payments.create',
+        'title' => ['actions.add', 'dashboard.accounts']
+    ]);
+
+    // New routes to handle account charges via GeneralPaymentsController
+    Route::post('general-accounts/store', [
+        'uses' => 'GeneralPaymentsController@storeAccountCharge',
+        'as' => 'general-accounts.store',
         'act-as' => 'payments.create',
         'title' => ['actions.add', 'dashboard.accounts']
     ]);
@@ -858,12 +889,35 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.edit', 'dashboard.payments']
     ]);
 
+    // New route to update account charges via GeneralPaymentsController
+    Route::put('general-accounts/{id}', [
+        'uses' => 'GeneralPaymentsController@updateAccountCharge',
+        'as' => 'general-accounts.update',
+        'act-as' => 'payments.edit',
+        'title' => ['actions.edit', 'dashboard.accounts']
+    ]);
+
     # payments store
-    Route::get('payments/create', [
+    Route::get('payments/create/{bankAccount?}', [
         'uses' => 'PaymentsController@create',
         'as' => 'payments.create',
         'title' => ['actions.add', 'dashboard.payments']
     ]);
+    
+        Route::get('payments/transfer', [
+        'uses' => 'PaymentsController@transfer',
+        'as' => 'payments.transfer',
+        'title' => ['actions.add', 'dashboard.payments']
+    ]);
+    
+    
+    Route::post('payments/money-transfer', [
+        'uses' => 'PaymentsController@moneyTransfer',
+        'as' => 'money-transfer',
+        // 'title' => ['actions.add', 'dashboard.payments']
+    ]);
+
+
     # payments show
     Route::get('payments/{id}/show', [
         'uses' => 'PaymentsController@show',
@@ -1134,16 +1188,16 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # expense-items update
-    Route::get('expense-items/{id}/edit', [
-        'uses' => 'ExpenseItemsController@edit',
-        'as' => 'expense-items.edit',
-        'title' => ['actions.edit', 'dashboard.expense-items']
-    ]);
-
-    # expense-items update
     Route::put('expense-items/{id}', [
         'uses' => 'ExpenseItemsController@update',
         'as' => 'expense-items.update',
+        'title' => ['actions.edit', 'dashboard.expense-items']
+    ]);
+
+    # expense-items edit
+    Route::get('expense-items/{id}/edit', [
+        'uses' => 'ExpenseItemsController@edit',
+        'as' => 'expense-items.edit',
         'title' => ['actions.edit', 'dashboard.expense-items']
     ]);
 
@@ -1164,11 +1218,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'child' => ['expenses.create', 'expenses.edit', 'expenses.destroy']
     ]);
 
-    # expenses store
+    # expenses export
     Route::get('expenses/export', [
         'uses' => 'ExpensesController@export',
         'as' => 'expenses.export',
-        'title' => ['actions.add', 'dashboard.expenses']
+        'title' => ['actions.export', 'dashboard.expenses']
     ]);
 
     # expenses store
@@ -1193,24 +1247,32 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # expenses update
-    Route::get('expenses/{id}/edit', [
-        'uses' => 'ExpensesController@edit',
-        'as' => 'expenses.edit',
-        'title' => ['actions.edit', 'dashboard.expenses']
-    ]);
-
-    # expenses update
     Route::put('expenses/{id}', [
         'uses' => 'ExpensesController@update',
         'as' => 'expenses.update',
         'title' => ['actions.edit', 'dashboard.expenses']
     ]);
 
+    # expenses edit
+    Route::get('expenses/{id}/edit', [
+        'uses' => 'ExpensesController@edit',
+        'as' => 'expenses.edit',
+        'title' => ['actions.edit', 'dashboard.expenses']
+    ]);
+
+
     # expenses delete
     Route::delete('expenses/{id}', [
         'uses' => 'ExpensesController@destroy',
         'as' => 'expenses.destroy',
         'title' => ['actions.delete', 'dashboard.expenses']
+    ]);
+
+    # expenses image download
+    Route::get('expenses/{id}/download-image', [
+        'uses' => 'ExpensesController@downloadImage',
+        'as' => 'expenses.download_image',
+        'title' => ['actions.download', 'dashboard.expenses']
     ]);
 
     /*------------ end Of expenses ----------*/
@@ -1227,6 +1289,82 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => 'dashboard.calender'
     ]);
     /*------------ end Of Settings ----------*/
+
+    /*------------ start Of general payments ----------*/
+    Route::get('general_payments', [
+        'uses' => 'GeneralPaymentsController@index',
+        'as' => 'general_payments.index',
+        'title' => 'dashboard.general_payments',
+        'type' => 'parent',
+        'child' => ['general_payments.create', 'general_payments.store', 'general_payments.edit', 'general_payments.update', 'general_payments.destroy', 'general_payments.verified', 'general_payments.download']
+    ]);
+
+    Route::get('general_payments/create', [
+        'uses' => 'GeneralPaymentsController@create',
+        'as' => 'general_payments.create',
+        'title' => ['actions.add', 'dashboard.general_payments']
+    ]);
+
+    Route::post('general_payments', [
+        'uses' => 'GeneralPaymentsController@store',
+        'as' => 'general_payments.store',
+        'title' => ['actions.add', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/edit', [
+        'uses' => 'GeneralPaymentsController@edit',
+        'as' => 'general_payments.edit',
+        'title' => ['actions.edit', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/show', [
+        'uses' => 'GeneralPaymentsController@show',
+        'as' => 'general_payments.show',
+        'title' => ['actions.show', 'dashboard.general_payments']
+    ]);
+
+    Route::put('general_payments/{id}', [
+        'uses' => 'GeneralPaymentsController@update',
+        'as' => 'general_payments.update',
+        'title' => ['actions.edit', 'dashboard.general_paaddon.bladeyments']
+    ]);
+
+    Route::delete('general_payments/{id}', [
+        'uses' => 'GeneralPaymentsController@destroy',
+        'as' => 'general_payments.destroy',
+        'title' => ['actions.delete', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/download', [
+        'uses' => 'GeneralPaymentsController@downloadImage',
+        'as' => 'general_payments.download',
+        'title' => ['actions.download', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/verified', [
+        'uses' => 'GeneralPaymentsController@verified',
+        'as' => 'general_payments.verified',
+        'title' => ['actions.verified', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/add-funds/create', [
+        'uses' => 'GeneralPaymentsController@createAddFunds',
+        'as' => 'general_payments.create_add_funds',
+        'title' => ['actions.add_funds', 'dashboard.general_payments']
+    ]);
+
+    Route::post('general_payments/add-funds/store', [
+        'uses' => 'GeneralPaymentsController@storeAddFunds',
+        'as' => 'general_payments.store_add_funds',
+        'title' => ['actions.add_funds', 'dashboard.general_payments']
+    ]);
+
+    Route::put('general_payments/add-funds/update/{id}', [
+        'uses' => 'GeneralPaymentsController@updateAddFunds',
+        'as' => 'general_payments.update_add_funds',
+        'title' => ['actions.update_funds', 'dashboard.general_payments']
+    ]);
+    /*------------ end Of general payments ----------*/
 });
 
 /*** update route if i added new routes  */
@@ -1293,11 +1431,15 @@ Route::get('/clear', function () {
     Artisan::call('storage:link');
     return response()->json(['status' => 'success', 'code' => 1000000000]);
 });
-/*------------ start Of general payments ----------*/
+// General payments routes are now defined inside the dashboard middleware group above
 
-Route::resource('general_payments', GeneralPaymentsController::class);
-
+// Custom create route with optional id for terms settings
+Route::get('terms_sittngs/create/{id?}', [TermsSittngController::class, 'create'])
+    ->name('terms_sittngs.create')
+    ->middleware(['auth']);
+// Other resource routes (excluding create) remain
 Route::resource('terms_sittngs', TermsSittngController::class)
+    ->except(['create'])
     ->middleware(['auth']);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);
@@ -1411,7 +1553,7 @@ Route::group(['middleware' => ['auth']], function () {
 // Equipment Directories
 Route::resource('equipment-directories', EquipmentDirectoryController::class)
     ->except(['show'])
-    ->middleware(['auth', 'permission:equipment-directories.index|equipment-directories.create|equipment-directories.edit|equipment-directories.destroy']);
+    ->middleware(['auth']);
 
 // Directory Items
 Route::prefix('equipment-directories/{equipmentDirectory}/items')->middleware('auth')->group(function () {
@@ -1503,6 +1645,8 @@ Route::get('/generate-order-numbers', function () {
         'total_errors' => count($errors)
     ]);
 });
+
+
 Route::post('orders/{id}/send-email', [OrderController::class, 'sendEmail'])->name('orders.sendEmail');
 Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);

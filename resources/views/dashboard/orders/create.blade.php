@@ -3,11 +3,12 @@
 @section('pageTitle', __('dashboard.orders'))
 
 @section('content')
-    <div class="post d-flex flex-column-fluid" id="kt_post">
-        <div id="kt_content_container" class="container-xxl">
 
-            @include('dashboard.orders.nav')
-
+<div class="post d-flex flex-column-fluid" id="kt_post">
+    <div id="kt_content_container" class="container-xxl">
+            @if (isset($order))
+                @include('dashboard.orders.nav')
+            @endif
             <div class="card mb-5 mb-xl-10">
                 <div class="card-header border-0 d-flex align-items-center justify-content-between">
                     <div class="card-title m-0">
@@ -109,7 +110,7 @@
                                     <label class="col-lg-4 col-form-label fw-bold fs-6 required">@lang('dashboard.addons')</label>
                                     <div class="col-lg-8">
                                         <input type="number" class="form-control form-control-lg form-control-solid"
-                                               value="{{ $addonsPrice ?? 0 }}" readonly>
+                                               value="{{ $addonsPrice ?? 0 }}" >
                                     </div>
                                 </div>
                             @endif
@@ -134,7 +135,7 @@
                             </div>
 
                             <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.notes')</label>
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
                                 <div class="col-lg-8">
                                 <textarea name="notes" class="form-control form-control-lg form-control-solid"
                                           placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
@@ -239,10 +240,10 @@
 
                             @if (isset($order) && $order->status == 'canceled')
                                 <div class="row mb-6">
-                                    <label class="col-lg-4 col-form-label fw-bold fs-6">رد المبالغ المدفوعه ؟</label>
+                                    <label class="col-lg-4 col-form-label fw-bold fs-6">رد المبالغ المدفوعه ؟ <span class="text-danger">*</span></label>
                                     <div class="col-lg-8">
-                                        <select name="refunds" class="form-select form-select-lg form-select-solid">
-                                            <option value="">-- Select --</option>
+                                        <select name="refunds" class="form-select form-select-lg form-select-solid" required>
+                                            <option value="">{{ __('dashboard.choose') }} {{ __('dashboard.refund_option') }}</option>
                                             <option value="1" {{ isset($order) && $order->refunds == '1' ? 'selected' : '' }}>Yes</option>
                                             <option value="0" {{ isset($order) && $order->refunds == '0' ? 'selected' : '' }}>No</option>
                                         </select>
@@ -267,29 +268,6 @@
                                     </div>
                                 </div>
                             @endif
-
-                            @isset($order)
-                                <div class="row mb-6">
-                                    <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.Customer_Signature')</label>
-                                    <div class="col-lg-8 d-flex flex-column gap-3">
-                                        @if(isset($order->signature_path))
-                                            <div class="text-success fw-bold">{{ $order?->signature }}</div>
-                                            <img src="{{ Storage::url($order->signature_path) }}" alt="Signature" style="max-height:80px;">
-                                        @else
-                                            <div class="input-group">
-                                                <input type="text" class="form-control"
-                                                       value="{{ route('signature.show', $order) }}" readonly
-                                                       onclick="this.select();document.execCommand('copy');">
-                                                <button type="button" class="btn btn-outline-secondary"
-                                                        onclick="navigator.clipboard.writeText('{{ route('signature.show', $order) }}')">
-                                                    Copy Link
-                                                </button>
-                                            </div>
-                                            <small class="text-muted">@lang('dashboard.desc_Customer_Signature')</small>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endisset
 
                             <div class="d-flex justify-content-end gap-2">
                                 @if(isset($order))
@@ -522,9 +500,11 @@
                 });
                 $('#price').val(total.toFixed(2));
             }
-            $('#service_id').on('change', recalcPrice);
-            recalcPrice();
-
+            // Recalculate only on user-initiated changes (ignore programmatic .trigger('change'))
+            $('#service_id').on('change', function(e){
+                if (!e.originalEvent) return; // skip programmatic changes
+                recalcPrice();
+            });
             $('#btnRetrieveRf').on('click', ()=>{
                 const el = document.getElementById('retrieveRfModal');
                 bootstrap.Modal.getOrCreateInstance(el).show();
@@ -592,6 +572,8 @@
 
                 if (Array.isArray(payload.service_ids)) {
                     $('#service_id').val(payload.service_ids.map(String)).trigger('change');
+                    // Recalc after programmatic selection from retrieved form
+                    recalcPrice();
                 }
 
                 if (payload.date)      $('input[name="date"]').val(payload.date);

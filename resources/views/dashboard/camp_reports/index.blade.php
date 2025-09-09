@@ -11,24 +11,26 @@
                 </div>
             </div>
             <div class="card-toolbar">
-                <a href="{{ route('camp-reports.export') }}" class="btn btn-success me-2">
-                    <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
-                </a>
+                @can('camp-reports.export')
+                    <a href="{{ route('camp-reports.export') }}" class="btn btn-success me-2">
+                        <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
+                    </a>
+                @endcan
                 <a href="{{ route('camp-reports.create') }}" class="btn btn-primary">
                     @lang('dashboard.create_report')
                 </a>
             </div>
         </div>
 
-        <div class="card-body pt-0">
+        <div class="card-body pt-0 table-responsive">
             <table class="table align-middle table-row-dashed fs-6 gy-5">
                 <thead>
-                <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                    <th>@lang('dashboard.report_date')</th>
-                    <th>@lang('dashboard.service')</th>
-                    <th>@lang('dashboard.camp_name')</th>
-                    <th>@lang('dashboard.report_created_by')</th>
-                    <th>@lang('dashboard.actions')</th>
+                <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                    <th class="fw-bolder">@lang('dashboard.report_date')</th>
+                    <th class="fw-bolder">@lang('dashboard.service')</th>
+                    <th class="fw-bolder">@lang('dashboard.camp_name')</th>
+                    <th class="fw-bolder">@lang('dashboard.report_created_by')</th>
+                    <th class="fw-bolder">@lang('dashboard.actions')</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -47,7 +49,7 @@
                             </a>
                             <form action="{{ route('camp-reports.destroy', $report) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                     @lang('dashboard.delete')
                                 </button>
                             </form>

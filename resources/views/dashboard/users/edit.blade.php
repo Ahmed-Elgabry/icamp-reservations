@@ -1,4 +1,5 @@
 @extends('dashboard.layouts.app')
+@section('pageTitle', __('dashboard.edit_user'))
 
 @section('content')
 

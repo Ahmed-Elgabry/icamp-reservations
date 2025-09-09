@@ -37,13 +37,13 @@
                 <!--begin::Card toolbar-->
                 <div class="card-toolbar">
                     <!--begin::Add customer-->
-                    @can('orders.create')
+                    @can('bookings.create')
                         <a href="{{ route('orders.create')}}"
                             class="btn btn-primary">@lang('dashboard.create_title', ['page_title' => __('dashboard.orders')])</a>
                     @endcan
                     <!--end::Add customer-->
                     <span class="w-5px h-2px"></span>
-                    @can('orders.deleteAll')
+                    @can('bookings.destroy')
                         <button type="button" data-route="{{route('orders.deleteAll')}}"
                             class="btn btn-danger delete_all_button">
                             <i class="feather icon-trash"></i>@lang('dashboard.delete_selected')</button>
@@ -56,103 +56,117 @@
             <div class="card-body pt-0">
                 {{$orders->links()}}
                 <!--begin::Table-->
-                <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
-                    <!--begin::Table head-->
-                    <thead>
-                        <!--begin::Table row-->
-                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
-                            <th class="">@lang('dashboard.sequence')</th>
-                            <th class="">@lang('dashboard.reservation_number')</th>
-                            <th class="">@lang('dashboard.date')</th>
-                            <th class="">@lang('dashboard.service')</th>
-                            <th class="">@lang('dashboard.customer')</th>
-                            <th class="">@lang('dashboard.Duration of hours')</th>
-                            <th class="">@lang('dashboard.time_from')</th>
-                            <th class="">@lang('dashboard.paied')</th>
-                            <th class="">@lang('dashboard.status')</th>
-                            @if (request('status') == 'delayed')
-                                <th>@lang('dashboard.old_date_vs_new_date')</th>
-                                <th>@lang('dashboard.delayed_reson')</th>
-                            @endif
-                            <th class="">@lang('dashboard.insurance_status')</th>
-                            <th class="">@lang('dashboard.rate link')</th>
-                            <th class="">@lang('dashboard.created_by')</th>
-                            <th class="">@lang('dashboard.Agree_to_the_terms')</th>
-                            <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
-                        </tr>
-                        <!--end::Table row-->
-                    </thead>
-                    <!--end::Table head-->
-
-                    <!--begin::Table body-->
-                    <tbody class="fw-bold text-gray-600">
-                        @foreach ($orders as $order)
+                <div class="table-responsive">
+                    <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
+                        <!--begin::Table head-->
+                        <thead>
                             <!--begin::Table row-->
-                            <tr data-id="{{$order->id}}">
-                                <td>{{ $orders->firstItem() + $loop->index }}</td>
-                                <td> <span class="badge bg-primary">{{ $order->id }}</span></td>
+                            <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                                <th class="fw-bolder">@lang('dashboard.sequence')</th>
+                                <th class="fw-bolder">@lang('dashboard.reservation_number')</th>
+                                <th class="fw-bolder">@lang('dashboard.customer')</th>
+                                <th class="fw-bolder">@lang('dashboard.service')</th>
+                                <th class="fw-bolder">@lang('dashboard.Duration of hours')</th>
+                                <th class="fw-bolder">@lang('dashboard.time_from')</th>
+                                <th class="fw-bolder">@lang('dashboard.paied')</th>
+                                <th class="fw-bolder">@lang('dashboard.status')</th>
+                                @if (request('status') == 'delayed')
+                                    <th>@lang('dashboard.old_date_vs_new_date')</th>
+                                    <th>@lang('dashboard.delayed_reson')</th>
+                                @endif
+                                <th class="">@lang('dashboard.insurance_status')</th>
+                                <th class="">@lang('dashboard.rate link')</th>
+                                <th class="">@lang('dashboard.created_by')</th>
+                                <th class="">@lang('dashboard.Agree_to_the_terms')</th>
+                                <!-- <th class="">@lang('dashboard.date')</th> -->
+                                <th class="">@lang('dashboard.created_date')</th>
+                                <th class="">@lang('dashboard.created_time')</th>
+                                <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
+                            </tr>
+                            <!--end::Table row-->
+                        </thead>
+                        <!--end::Table head-->
 
-                                <!--begin::Order Date-->
-                                <td>
-                                    <a href="{{ route('orders.edit', $order->id) }}">{{$order->date }}</a>
-                                </td>
-                                <!--end::Order Date-->
+                        <!--begin::Table body-->
+                        <tbody class="fw-bold text-gray-600">
+                            @foreach ($orders as $order)
+                                <!--begin::Table row-->
+                                <tr data-id="{{$order->id}}">
+                                    <td>{{ $orders->firstItem() + $loop->index }}</td>
+                                    <td>
+                                            @can('bookings.show')
+                                            <a href="{{ route('orders.edit', $order->id) }}" class="badge bg-primary">{{ $order->id }}</a>
+                                            @else
+                                            <span>{{$order->id }}</span>
+                                            @endcan
+                                            
+                                        </td>
 
-                                <!--begin::Services-->
-                                <td>
-                                    <a href="{{ route('orders.edit', $order->id) }}">
-                                        <ul>
-                                            @foreach($order->services as $service)
-                                                <li>{{$service->name}}</li>
-                                            @endforeach
-                                        </ul>
-                                    </a>
-                                </td>
-                                <!--end::Services-->
-
-                                <!--begin::Customer Name-->
-                                <td>
-                                    <div class="d-flex">
-                                        <div class="ms-5">
-                                            <a href="{{ route('orders.edit', $order->id) }}"
-                                                class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
-                                                {{$order->customer->name}}
-                                            </a>
+                                    <!--begin::Customer Name-->
+                                    <td>
+                                        <div class="d-flex">
+                                            <div class="ms-5">
+                                                @can('bookings.show')
+                                                    <a href="{{ route('orders.show', $order->id) }}"
+                                                        class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1">
+                                                        {{$order->customer->name}}
+                                                    </a>
+                                                @else
+                                                        {{$order->customer->name}}
+                                                    </span>
+                                                @endcan
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <!--end::Customer Name-->
+                                    </td>
+                                    <!--end::Customer Name-->
 
-                                <!--begin::Order Hours-->
-                                <td>{{ $order->addHoursCount() }}</td>
-                                <!--end::Order Hours-->
+                                    <!--begin::Services-->
+                                    <td>
+                                        <span>
+                                            <ul>
+                                                @foreach($order->services as $service)
+                                                    <li>{{$service->name}}</li>
+                                                @endforeach
+                                            </ul>
+                                        </span>
+                                    </td>
+                                    <!--end::Services-->
 
-                                <!--begin::Time From-->
-                                <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
-                                <!--end::Time From-->
+                                    <!--begin::Order Hours-->
+                                    <td>{{ $order->addHoursCount() }}</td>
+                                    <!--end::Order Hours-->
 
+                                    <!--begin::Time From-->
+                                    <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
+                                    <!--end::Time From-->
+                                        @php
+                                            $totalPaid = $order->payments()->where('statement', 'the_insurance')->sum("price");
+                                            $totalPrice = $order->price + $order->insurance_amount;
+                                            $remaining = $totalPrice - $totalPaid;
+                                        @endphp
                                 <!--begin::Payments-->
-                                @php $totalPrice = ($order->price + $order->deposit + $order->insurance_amount + $order->addons->sum('price')) @endphp
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format($order->verified_payments_sum) }}
+                                        {{ number_format( $totalPaid ) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
                                     {{ number_format($totalPrice) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
-                                        @if ($order->insurance_status == 'returned')
+                                        <!-- @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
-                                        @else
-                                            {{ number_format($totalPrice - $order->payments->sum('price')) }}
-                                        @endif
+                                        @else -->
+                                        {{ number_format(($order->price + $order->insurance_amount) - $totalPaid) }}
+
+                                        <!-- @endif -->
                                     </span>
                                 </td>
                                 <!--end::Payments-->
 
                                 <!--begin::Order Status-->
+
                                 <td>{{ __('dashboard.' . $order->status) }}</td>
                                 <!--end::Order Status-->
 
@@ -168,12 +182,31 @@
                                 <!--begin::Order Status-->
 
                                 <td>
-                                    <span @class(['badge text-white' , 'bg-success' => $order->insurance_status == 'returned' , 'bg-danger' => $order->insurance_status == null , 'bg-secondary' => $order->insurance_status == 'confiscated_full' , 'bg-primary' => $order->insurance_status == 'confiscated_partial' ])>
-                                        @if ($order->insurance_status)
-                                            {{ __('dashboard.' . $order->insurance_status) }}
-                                        @else
-                                            {{ __('dashboard.no_result') }}
+                                    <span 
+                                        @class([
+                                            'badge text-white',
+                                            'bg-success' => $order->insurance_status === 'returned',
+                                            'bg-dark' => $order->insurance_status === 'confiscated_full',
+                                            'bg-warning' => $order->insurance_status === 'confiscated_partial',
+                                            'bg-danger' => $order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") < 1,
+                                            'bg-info' => $order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") > 1,
+                                        ])
+                                    >
+                                    @if($order->payments()->where('statement', 'the_insurance')->where('verified', "1")->exists())
+                                        @if($order->insurance_status === 'returned')
+                                            {{ __('dashboard.insurance_returned_note') }}
+                                        @elseif($order->insurance_status === 'confiscated_full')
+                                            {{ __('dashboard.insurance_confiscated_full') }}
+                                        @elseif($order->insurance_status === 'confiscated_partial')
+                                            {{ __('dashboard.insurance_confiscated_partial') }}
+                                        @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") < 1)
+                                            {{ __('dashboard.insurance_null') }}
+                                        @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") > 1)
+                                            {{ __('dashboard.insurance_not_returned') }}
                                         @endif
+                                    @else
+                                        {{ __('dashboard.no_insurance_payment_verified') }}
+                                    @endif
                                     </span>
                                 </td>
                                 <!--begin::Order Status-->
@@ -198,17 +231,31 @@
                                 </td>
                                 <!--end::Created By-->
 
-                                <!--begin::Agree_to_the_terms-->
-                                <td>
-                                    @if($order->signature_path)
-                                        {{ __('dashboard.Done_agree_to_the_terms') }}
-                                    @else
-                                        {{ __('dashboard.no') }}
-                                    @endif
-                                </td>
-                                <!--end::Agree_to_the_terms-->
+                                    <!--begin::Agree_to_the_terms-->
+                                    <td>
+                                        @if($order->signature_path)
+                                            {{ __('dashboard.Done_agree_to_the_terms') }}
+                                        @else
+                                            {{ __('dashboard.no') }}
+                                        @endif
+                                    </td>
+                                    <!--end::Agree_to_the_terms-->
 
-                                <!--begin::Actions-->
+                                    <!--begin::Order Date-->
+                                    <!-- <td>
+                                        <span>{{$order->date }}</span>
+                                    </td> -->
+                                    <!--end::Order Date-->
+
+                                    <!--begin::Created Date-->
+                                    <td>{{ $order->created_at->format('Y-m-d') }}</td>
+                                    <!--end::Created Date-->
+
+                                    <!--begin::Created Time-->
+                                    <td>{{ $order->created_at->format('h:i A') }}</td>
+                                    <!--end::Created Time-->
+
+                                    <!--begin::Actions-->
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-light btn-active-light-primary"
                                         data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -226,19 +273,25 @@
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
                                         data-kt-menu="true">
 
-                                        @can('orders.edit')
+                                        @can('bookings.show')
+                                            <div class="menu-item px-3">
+                                                <a href="{{route('orders.show', $order->id)}}"
+                                                    class="menu-link px-3">{{__('dashboard.show')}}</a>
+                                            </div>
+                                        @endcan
+
+                                        @can('bookings.edit')
                                             <div class="menu-item px-3">
                                                 <a href="{{route('orders.edit', $order->id)}}"
                                                     class="menu-link px-3">{{__('dashboard.edit')}}</a>
                                             </div>
                                         @endcan
 
-                                        @can('orders.destroy')
+                                        @can('bookings.destroy')
                                             <div class="menu-item px-3">
                                                 <a href="#" class="menu-link px-3"
-                                                    data-kt-ecommerce-category-filter="delete_row"
-                                                    data-url="{{route('orders.destroy', $order->id)}}"
-                                                    data-id="{{$order->id}}">{{__('dashboard.delete')}}</a>
+                                                    onclick="confirmDelete('{{route('orders.destroy', $order->id)}}', '{{ csrf_token() }}')"
+                                                    >{{__('dashboard.delete')}}</a>
                                             </div>
                                         @endcan
 
@@ -249,9 +302,10 @@
                             <!--end::Table row-->
                         @endforeach
 
-                    </tbody>
-                    <!--end::Table body-->
-                </table>
+                        </tbody>
+                        <!--end::Table body-->
+                    </table>
+                </div>
                 <!--end::Table-->
             </div>
             <!--end::Card body-->
@@ -395,6 +449,78 @@
                 stopScanning();
             });
         });
+    </script>
+
+    <!-- Fix delete functionality -->
+    <script>
+        // Override confirmDelete function specifically for this page
+        window.confirmDelete = function(deleteUrl, csrfToken) {
+            // Check if Swal is available, if not use basic confirm
+            if (typeof Swal === 'undefined') {
+                if (confirm('{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}')) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+                return;
+            }
+            
+            Swal.fire({
+                title: '{{ __("dashboard.confirm_delete") ?? "Confirm Delete" }}',
+                text: '{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '{{ __("dashboard.yes_delete") ?? "Yes, Delete" }}',
+                cancelButtonText: '{{ __("dashboard.cancel") ?? "Cancel" }}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        };
     </script>
 @endpush
 
