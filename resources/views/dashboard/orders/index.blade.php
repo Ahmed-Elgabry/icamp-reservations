@@ -139,24 +139,28 @@
                                     <!--begin::Time From-->
                                     <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
                                     <!--end::Time From-->
-
+                                        @php
+                                            $totalPaid = $order->payments()->where('statement', 'the_insurance')->sum("price");
+                                            $totalPrice = $order->price + $order->insurance_amount;
+                                            $remaining = $totalPrice - $totalPaid;
+                                        @endphp
                                 <!--begin::Payments-->
                                 <td>
                                     <span class="text-success">
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format( $order->payments()->where('statement', 'the_insurance')->sum("price")) }}
+                                        {{ number_format( $totalPaid ) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
-                                    {{ number_format($order->price + $order->insurance_amount) }}
+                                    {{ number_format($totalPrice) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
-                                        @if ($order->insurance_status == 'returned')
+                                        <!-- @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
-                                        @else
-                                        {{ number_format(($order->price + $order->insurance_amount) - $order->payments()->where('statement', 'the_insurance')->sum("price")) }}
+                                        @else -->
+                                        {{ number_format(($order->price + $order->insurance_amount) - $totalPaid) }}
 
-                                        @endif
+                                        <!-- @endif -->
                                     </span>
                                 </td>
                                 <!--end::Payments-->
@@ -445,6 +449,78 @@
                 stopScanning();
             });
         });
+    </script>
+
+    <!-- Fix delete functionality -->
+    <script>
+        // Override confirmDelete function specifically for this page
+        window.confirmDelete = function(deleteUrl, csrfToken) {
+            // Check if Swal is available, if not use basic confirm
+            if (typeof Swal === 'undefined') {
+                if (confirm('{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}')) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+                return;
+            }
+            
+            Swal.fire({
+                title: '{{ __("dashboard.confirm_delete") ?? "Confirm Delete" }}',
+                text: '{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '{{ __("dashboard.yes_delete") ?? "Yes, Delete" }}',
+                cancelButtonText: '{{ __("dashboard.cancel") ?? "Cancel" }}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create and submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = deleteUrl;
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfTokenField = document.createElement('input');
+                    csrfTokenField.type = 'hidden';
+                    csrfTokenField.name = '_token';
+                    csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
+                    form.appendChild(csrfTokenField);
+                    
+                    // Add DELETE method
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    form.appendChild(methodField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        };
     </script>
 @endpush
 

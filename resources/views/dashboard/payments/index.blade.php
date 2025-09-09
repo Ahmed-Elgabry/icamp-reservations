@@ -102,7 +102,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                           <td>
                                     <a href="{{ route('payments.show', $payment->order_id) }}">
                                         {{ $payment->order_id }} [{{$payment->order->customer->name }}]
                                     </a>

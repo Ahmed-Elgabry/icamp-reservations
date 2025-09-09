@@ -240,7 +240,7 @@ class GeneralPaymentsController extends Controller
             'description' => 'nullable|string',
             'source' => 'required|string',
             'order_id' => 'required|exists:orders,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
         ]);
 
         DB::beginTransaction();
@@ -272,6 +272,110 @@ class GeneralPaymentsController extends Controller
         }
     }
 
+    // New: store a bank account charge (deposit) using GeneralPaymentsController
+    public function storeAccountCharge(Request $request)
+    {
+        $validatedData = $request->validate([
+            'price' => 'required|numeric|min:0',
+            'account_id' => 'required|exists:bank_accounts,id',
+            'date' => 'nullable|date',
+            'time' => 'nullable|string',
+            'description' => 'nullable|string',
+            "date" => 'nullable|date',
+            'source' => 'nullable|string',
+            'order_id' => 'nullable|exists:orders,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // If a time is supplied, merge it into the date field as datetime
+            if (!empty($validatedData['date']) && $request->filled('time')) {
+                $validatedData['date'] = Carbon::parse($validatedData['date'] . ' ' . $request->input('time'))->toDateTimeString();
+            }
+            $validatedData['type'] = 'deposit';
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('general_payments', 'public');
+                $validatedData['image_path'] = $imagePath;
+            }
+            $validatedData["amount"] = $validatedData["price"] ;
+            $payment = GeneralPayment::create($validatedData);
+            $transaction = $payment->transaction()->create($validatedData);
+
+            DB::commit();
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true ,'message' => __('dashboard.success')]);
+            }
+            return redirect()->back()->with('success', __('dashboard.success'));
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('storeAccountCharge failed: '.$e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['message' => __('dashboard.error_occurred')], 500);
+            }
+            return redirect()->back()->with('error', __('dashboard.error_occurred'));
+        }
+    }
+
+    // New: update a bank account charge using GeneralPaymentsController
+    public function updateAccountCharge(Request $request, $id)
+    {
+        
+        $validated = $request->validate([
+            'price' => 'required|numeric|min:0',
+            'account_id' => 'required|exists:bank_accounts,id',
+            'date' => 'nullable|date',
+            'time' => 'nullable|string',
+            'description' => 'nullable|string',
+            'order_id' => 'nullable|exists:orders,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $payment = GeneralPayment::findOrFail($id);
+            $transaction = $payment->transaction();
+            $updateData = $validated;
+            $updateData['verified'] = 0;
+            $updateData['notes'] = $validated["description"];
+
+            // Merge provided time into date if present
+            if (!empty($updateData['date']) && $request->filled('time')) {
+                $updateData['date'] = Carbon::parse($updateData['date'] . ' ' . $request->input('time'))->toDateTimeString();
+            }
+
+            if ($request->hasFile('image')) {
+                if ($payment->image_path) {
+                    \Storage::disk('public')->delete($payment->image_path);
+                }
+                $updateData['image_path'] = $request->file('image')->store('general_payments', 'public');
+            }
+
+            // Adjust original account balance if previously verified (reverse it)
+            if ($payment->verified && $payment ->account_id) {
+                BankAccount::where('id', $payment->account_id)
+                    ->decrement('balance', (float)$payment->price);
+            }
+            $payment->update($updateData);
+            $updateData["amount"] = $updateData["price"] ;
+            unset($updateData["price"], $updateData["image"] , $updateData["notes"] , $updateData["time"]);
+            $transaction->update($updateData);
+
+            DB::commit();                                                                                                                                                                                                                                                                                                                                                               
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => __('dashboard.success')]);
+            }
+            return redirect()->back()->with('success', __('dashboard.success'));
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('updateAccountCharge failed: '.$e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $e->getMessage()], 500);
+            }
+            return redirect()->back()->with('error', __('dashboard.error_occurred'));
+        }
+    }
+
     public function accountsUpdate(Request $request, $id)
     {
         $payment = GeneralPayment::findOrFail($id);
@@ -289,7 +393,7 @@ class GeneralPaymentsController extends Controller
             'date' => 'nullable|date',
             'description' => 'nullable|string',
             'order_id' => 'required|exists:orders,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
         ]);
 
         DB::beginTransaction();
@@ -480,7 +584,8 @@ class GeneralPaymentsController extends Controller
         }
         $payment->delete();
         $payment->transaction()->delete();
-        return response()->json();
+
+        return redirect()->back()->with('success',true);
     }
 
 
@@ -577,7 +682,7 @@ class GeneralPaymentsController extends Controller
             'account_id' => 'required|exists:bank_accounts,id',
             'order_id' => 'nullable|exists:orders,id',
             'description' => 'nullable|string|max:1000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
             'payment_method' => 'nullable|string',
             'source' => 'required|string',
         ]);
@@ -604,9 +709,8 @@ class GeneralPaymentsController extends Controller
                 'payment_method' => $request->payment_method,
                 'date' => $request->date,
                 'verified' => false, // Default to unverified
-            ]);
 
-            \Log::info('General payment created with ID: ' . $payment->id);
+            ]);
 
             // Create corresponding transaction
             $transaction = Transaction::create([

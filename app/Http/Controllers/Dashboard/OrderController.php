@@ -276,9 +276,12 @@ class OrderController extends Controller
 
         $order = Order::create($validatedData);
 
+        // Distribute the provided total price evenly across selected services
         $servicesData = [];
-        foreach ($request->service_ids as $index => $serviceId) {
-            $servicesData[$serviceId] = ['price' => Service::findOrFail($serviceId)->price];
+        $serviceCount = max(count($request->service_ids ?? []), 1);
+        $perServicePrice = (float) $request->price / $serviceCount;
+        foreach ($request->service_ids as $serviceId) {
+            $servicesData[$serviceId] = ['price' => $perServicePrice];
         }
 
         $order->services()->attach($servicesData);
@@ -395,21 +398,19 @@ class OrderController extends Controller
             $validatedData['receipt_notes'] = $request->receipt_notes;
 
             $order->fill($validatedData);
-
-            $totalPrice = 0;
-            foreach ($request->service_ids as $serviceId) {
-                $service = Service::findOrFail($serviceId);
-                $totalPrice += $service->price;
-            }
-            $order->price = $totalPrice;
+            // Set total price directly from request instead of recalculating from services
+            $order->price = $request->price;
             $service_ids = array_map('intval', $request->service_ids);
             \DB::table('order_service')->where('order_id', $order->id)->delete();
 
+            // Distribute the provided total price evenly across selected services
+            $serviceCount = max(count($service_ids), 1);
+            $perServicePrice = (float) $request->price / $serviceCount;
             foreach ($service_ids as $serviceId) {
                 \DB::table('order_service')->insert([
                     'order_id' => $order->id,
                     'service_id' => $serviceId,
-                    'price' => Service::findOrFail($serviceId)->price
+                    'price' => $perServicePrice,
                 ]);
             }
 
@@ -767,7 +768,7 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'pre_login_image' => 'required|array',
-            'pre_login_image.*' => 'mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'pre_login_image.*' => 'mimes:jpeg,png,jpg,gif,svg|max:20480'
         ]);
 
         $uploadedFiles = [];

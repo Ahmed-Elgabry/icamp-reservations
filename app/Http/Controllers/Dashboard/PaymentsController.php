@@ -233,7 +233,6 @@ public function moneyTransfer(Request $request)
 
     public function accountsUpdate(Request $request, $id)
     {
-        $payment = Transaction::findOrFail($id);
         $account_id = $payment->account_id;
         $receiver = $payment->receiver_id;
         $disccountFormAccount = $payment->amount;
@@ -259,35 +258,18 @@ public function moneyTransfer(Request $request)
                 $validatedData['image_path'] = $path;
             }
             
-            // Get the current general payment record to update it too
-            $generalPayment = GeneralPayment::where('id', $payment->general_payment_id)
-                ->orWhereHas('transaction', function($q) use ($id) {
-                    $q->where('id', $id);
-                })
-                ->first();
-            
-            // return money to the accounts
-            // back money to the sender account_id
-            // first remove money send from the previous transaction and then add amount will be handle in the varification
+            $payment = GeneralPayment::findOrFail($id);
             if ($payment->verified) {
                 $oldAccount = BankAccount::find($account_id);
                 if ($oldAccount) {
                     $oldAccount->increment('balance', $disccountFormAccount);
                 }
             }
-            
             $validatedData['verified'] = 0;
+            $payment->transaction()->update($validatedData);
             $validatedData['price'] = $validatedData['amount']; // Sync price with amount
-            
-            // Update the transaction
             $payment->update($validatedData);
-            
-            // Update the general payment if it exists
-            if ($generalPayment) {
 
-                $generalPaymentData['price'] = $validatedData['amount'];
-                $generalPayment->update($generalPaymentData);
-            }
 
             // send money to new receiver account
             if ($request->filled('receiver_id')) {
@@ -306,6 +288,7 @@ public function moneyTransfer(Request $request)
             }
 
             DB::commit();
+            
             return response()->json(['message' => 'Update successful'], 200);
             
         } catch (\Exception $e) {

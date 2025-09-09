@@ -220,6 +220,7 @@
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.statement') }}</label>
                                     <select name="statement" id="" class="form-select" required>
+                                        <option value="">{{ __('dashboard.select') }}</option>
                                         @foreach(statements() as $statement)
                                             <option {{$payment->statement == $statement ? 'selected' : ''}} value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
                                         @endforeach
@@ -292,6 +293,9 @@
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.statement') }}</label>
                 <select name="statement" id="" class="form-select" required>
+                                                        
+                    <option value="">{{ __('dashboard.select') }}</option>
+
                     @foreach(statements() as $statement)
                         <option value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
                     @endforeach
@@ -361,5 +365,39 @@
                 });
             }
         });
+
+        // Add payment form validation
+        $('#saveCountDetails').on('submit', function(e) {
+            let statementSelect = $(this).find('select[name="statement"]')[0];
+            if (!statementSelect.value || statementSelect.value === '') {
+                statementSelect.setCustomValidity('{{ __("dashboard.required") }}');
+                statementSelect.reportValidity();
+                e.preventDefault();
+                return false;
+            } else {
+                statementSelect.setCustomValidity('');
+            }
+        });
+
+        // Edit payment form validation
+        $('form[id^="editCountForm"]').on('submit', function(e) {
+            let statementSelect = $(this).find('select[name="statement"]')[0];
+            if (!statementSelect.value || statementSelect.value === '') {
+                statementSelect.setCustomValidity('{{ __("dashboard.required") }}');
+                statementSelect.reportValidity();
+                e.preventDefault();
+                return false;
+            } else {
+                statementSelect.setCustomValidity('');
+            }
+        });
+
+        // Clear validation when user selects a valid option
+        $(document).on('change', 'select[name="statement"]', function() {
+            if (this.value && this.value !== '') {
+                this.setCustomValidity('');
+            }
+        });
+        
     </script>
 @endpush

@@ -69,8 +69,8 @@
         /* Mobile toggle button */
         .mobile-toggle-btn {
             position: fixed;
-            top: 20px;
-            right: 4px;
+            top: 660px;
+            right: 15px;
             z-index: 1060;
             width: 50px;
             height: 50px;

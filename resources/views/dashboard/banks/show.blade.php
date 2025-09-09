@@ -37,7 +37,7 @@
 
                         <div class="form-group">
 
-                            <label for="">أسم الحساب</label>
+                            <label for="" class="fw-bolder">أسم الحساب</label>
 
                            <p>{{$bank->name}} </p>
 
@@ -49,7 +49,7 @@
 
                         <div class="form-group">
 
-                            <label for="end_date">الرصيد:</label>
+                            <label for="end_date" class="fw-bolder">الرصيد:</label>
 
                             <p>{{$bank->balance}} </p>
 
@@ -61,7 +61,7 @@
 
                         <div class="form-group">
 
-                            <label for="end_date">رقم الحساب:</label>
+                            <label for="end_date" class="fw-bolder">رقم الحساب:</label>
 
                             <p>{{$bank->account_number}}</p>
 

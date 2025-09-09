@@ -139,7 +139,7 @@ class ExpensesController extends Controller
             'account_id' => 'required|exists:bank_accounts,id',
             'price' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
             'date' => 'nullable|date',
             'order_id' => 'nullable|exists:orders,id',
             'notes' => 'nullable|string|max:1000',
@@ -247,7 +247,7 @@ class ExpensesController extends Controller
             'source' => 'required|string',
             'statement' => 'nullable|string',
             'date' => 'nullable|date',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
             'notes' => 'nullable|string|max:1000',
         ]);
         

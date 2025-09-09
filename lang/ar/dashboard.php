@@ -170,7 +170,8 @@ return [
     'price' => 'سعر محدد',
     'price_fillter' => 'فتح فلاتر السعر',
     'filter_orders_by_price' => 'تصفية الطلبات حسب السعر',
-    'stop_cqamera' => 'ايقاف الكاميرا',
+    'orders' => 'الحجوزات',
+    'stop_camera' => 'ايقاف الكاميرا',
     'Insurance' => 'التأمينات',
     'take_picture' => 'التقاط صورة',
     'The_following_products_contain_less_than_6_of:' => 'المنتجات التالية تحتوي على كميات أقل من 6 : ',
@@ -271,7 +272,7 @@ return [
     'characters' => 'الكلمات',
     'terms' => ' الأحكام والشروط',
     'stocks' => 'المخزون',
-    'filter_higher_selling' => 'تصفية حسب العناصر الأكثر مبيعاً',
+    'filter_higher_selling' => 'تصفية حسب العناصر الأكثر استهلاكا',
     
     'latest_payments' => 'أحدث المدفوعات',
     'view_all' => 'عرض الكل',
@@ -1400,9 +1401,24 @@ return [
 
     // Order status statistics
     'pending_and_show_price_count' => 'عدد الحجوزات المعلقة - عرض السعر',
-    'pending_and_initial_reservation_count' => 'عدد الحجوزات المعلقة - حجز مبدئي',
-    'approved_count' => 'عدد الحجوزات المعتمدة',
-    'canceled_count' => 'عدد الحجوزات الملغاة',
-    'delayed_count' => 'عدد الحجوزات المؤجلة',
-    'completed_count' => 'عدد الحجوزات المكتملة',
+    "order_status.pending_and_show_price" => ' الحجوزات المعلقة - عرض السعر',
+    "order_status.completed" => 'الحجوزات المكتملة',
+    "order_status.pending_and_Initial_reservation" => ' الحجوزات المعلقة - حجز مبدئي',
+    "pending_and_initial_reservation" => 'عدد الحجوزات المعلقة - حجز مبدئي',
+    "order_status.approved" => ' الحجوزات المعتمدة',
+    "order_status.canceled" => 'الحجوزات الملغاة',
+    "order_status.delayed" => 'الحجوزات المؤجلة',
+
+    "order_status.approved_count" => 'عدد الحجوزات المعتمدة',
+    "order_status.canceled_count" => 'عدد الحجوزات الملغاة',
+    "order_status.delayed_count" => 'عدد الحجوزات المؤجلة',
+    "order_status.completed_count" => 'عدد الحجوزات المكتملة',
+
+    "completed" => 'مكتمل',
+    "pending_and_Initial_reservation" => 'معلق - حجز مبدئي',
+    "pending_and_show_price" => 'معلق - عرض السعر',
+    "approved" => 'معتمد',  
+    "canceled" => 'ملغي',
+    "delayed" => 'مؤجل',
+
 ];

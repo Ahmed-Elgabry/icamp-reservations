@@ -1,7 +1,7 @@
 @php
-$pageTitle = "transactions";
+$pageTitle =  __('dashboard.all_transactions');
 @endphp
-@section('pageTitle' , __('dashboard.all_transactions'))
+@section('pageTitle' , $pageTitle)
 
 @extends('dashboard.layouts.app')
 @section('content')

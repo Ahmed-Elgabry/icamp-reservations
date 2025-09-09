@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->enum('verified', [0, 1])->default(0);
             $table->string('image_path')->nullable();
+            $table->dateTime('date')->nullable();
 
             $table->unsignedBigInteger('account_id')->nullable(); // ID of the sender account
             $table->foreign('account_id')->references('id')->on('bank_accounts')->onDelete('set null');

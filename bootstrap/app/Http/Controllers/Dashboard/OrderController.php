@@ -754,7 +754,7 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'pre_login_image' => 'required|array',
-            'pre_login_image.*' => 'mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'pre_login_image.*' => 'mimes:jpeg,png,jpg,gif,svg|max:20480'
         ]);
 
         $uploadedFiles = [];

@@ -268,7 +268,7 @@ class GeneralPaymentsController extends Controller
             'description' => 'nullable|string',
             'source' => 'required|string',
             'order_id' => 'required|exists:orders,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
         ]);
 
         DB::beginTransaction();
@@ -317,7 +317,7 @@ class GeneralPaymentsController extends Controller
             'date' => 'nullable|date',
             'description' => 'nullable|string',
             'order_id' => 'required|exists:orders,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
         ]);
 
         DB::beginTransaction();
@@ -550,7 +550,7 @@ class GeneralPaymentsController extends Controller
             'account_id' => 'required|exists:bank_accounts,id',
             'order_id' => 'nullable|exists:orders,id',
             'description' => 'nullable|string|max:1000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
             'payment_method' => 'nullable|string',
             'source' => 'required|string',
         ]);

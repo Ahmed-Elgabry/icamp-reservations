@@ -59,6 +59,7 @@
                                 </div>
                             </th>
                             <th class="fw-bolder">@lang('dashboard.date')</th>
+                            <th class="fw-bolder">@lang('dashboard.time')</th>
                             <th class="fw-bolder">@lang('dashboard.price')</th>
                             <th class="fw-bolder">@lang('dashboard.source')</th>
                             <th class="fw-bolder">@lang('dashboard.payment_method')</th>
@@ -84,7 +85,8 @@
                                     <input class="form-check-input checkSingle" type="checkbox" value="1" id="{{$expense->id}}"/>
                                 </div>
                             </td>
-                            <td>{{$expense->date }} </td>
+                            <td>{{ \Carbon\Carbon::parse($expense->date)->format('Y-m-d') }}</td>
+                            <td>{{ $expense->created_at->format('h:i A') }}</td>
                             <td>{{$expense->price}} </td>
                             @if($expense->source === 'reservation_expenses')
                                 <td>{{ __('dashboard.reservations') }}-{{ optional($expense->order)->id  }} </td>
