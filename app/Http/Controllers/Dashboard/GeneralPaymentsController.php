@@ -550,10 +550,11 @@ class GeneralPaymentsController extends Controller
         $payment->update($validatedData);
         $validatedData['type'] = "deposit";
         $validatedData['amount'] = $validatedData['price'];
-        $payment->transaction()->update([
+        unset($validatedData['price']);
+        $payment->transaction()->update(
             $validatedData
-        ]);
-        if ($request->ajax() || $request->wantsJson()) {
+        );
+        if ($request->ajax() || $request->wantsJson()) { 
             return response()->json([
             'success' => true,
             'message' => __('dashboard.success')

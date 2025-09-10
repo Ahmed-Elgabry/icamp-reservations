@@ -89,8 +89,8 @@
 
 		/* Enhanced Table Header Styling */
 		table thead tr {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-			box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+			background: linear-gradient(135deg, #8B4513 0%, #D2B48C 100%) !important; /* Dark brown gradient */
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
 		}
 
 		table thead th {
@@ -157,7 +157,7 @@
 		--primary-brown: #8B4513 !important;
 		--secondary-brown: #A0522D !important;
 		--light-brown: #D2B48C !important;
-		--dark-brown: #654321 !important;
+		--dark-brown: #644220ff !important;
 		--cream: #F5F5DC !important;
 	}
 

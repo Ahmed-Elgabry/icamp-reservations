@@ -11,10 +11,6 @@
             --bs-primary: #2563eb;
             --bs-secondary: #6b7280;
         }
-        body {
-            background-color: #f9fafb;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
 
         /* Mobile-first responsive layout */
         .main-container {

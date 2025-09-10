@@ -136,6 +136,7 @@
 
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
                                 <div class="col-lg-8">
                                 <textarea name="notes" class="form-control form-control-lg form-control-solid"
                                           placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
@@ -505,6 +506,11 @@
                 if (!e.originalEvent) return; // skip programmatic changes
                 recalcPrice();
             });
+            // Recalculate only on user-initiated changes (ignore programmatic .trigger('change'))
+            $('#service_id').on('change', function(e){
+                if (!e.originalEvent) return; // skip programmatic changes
+                recalcPrice();
+            });
             $('#btnRetrieveRf').on('click', ()=>{
                 const el = document.getElementById('retrieveRfModal');
                 bootstrap.Modal.getOrCreateInstance(el).show();
@@ -570,9 +576,13 @@
                 $('#rf_id').val(payload.rf_id || '');
                 $('input[name="people_count"]').val(payload.people_count || '');
 
-                if (Array.isArray(payload.service_ids)) {
+                // Set price from database if it exists, otherwise calculate from service IDs
+                if (payload.price) {
+                    $('#price').val(payload.price);
+                } else {
                     $('#service_id').val(payload.service_ids.map(String)).trigger('change');
                     // Recalc after programmatic selection from retrieved form
+                    recalcPrice();
                     recalcPrice();
                 }
 
@@ -584,9 +594,9 @@
                 const $cust = $('select[name="customer_id"]');
                 const c = payload.customer;
                 if (c && c.id) {
-                    const exists = $cust.find('option[value="'+c.id+'"]').length > 0;
+                    const exists = $cust.find(`option[value="${c.id}"]`).length > 0;
                     if (!exists) {
-                        const opt = new Option(c.name || (c.email || c.phone || ('#'+c.id)), c.id, true, true);
+                        const opt = new Option(c.name || (c.email || c.phone || `#${c.id}`), c.id, true, true);
                         $(opt).attr('data-phone', c.phone || '').attr('data-email', c.email || '');
                         $cust.append(opt);
                     }
@@ -595,10 +605,15 @@
 
                 $('#service_id').trigger('change');
 
-                if (window.Swal) Swal.fire({ icon:'success', title: @json(__('dashboard.loaded_ok')) });
+                if (window.Swal) Swal.fire({ icon: 'success', title: @json(__('dashboard.loaded_ok')) });
                 const m = bootstrap.Modal.getInstance(document.getElementById('retrieveRfModal'));
                 m && m.hide();
             }
+
+            // Add event listener to recalculate price on service ID change
+            $('#service_id').on('change', function () {
+                recalcPrice();
+            });
 
             (function linkPrefill(){
                 const url = new URL(window.location.href);

@@ -1,7 +1,5 @@
 @extends('dashboard.layouts.app')
-
 @section('pageTitle' , __('dashboard.transfer_between_accounts'))
-
 @section('content')
 
 <!-------------->

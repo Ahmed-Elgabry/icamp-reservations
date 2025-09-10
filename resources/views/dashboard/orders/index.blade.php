@@ -61,7 +61,7 @@
                         <!--begin::Table head-->
                         <thead>
                             <!--begin::Table row-->
-                            <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0">
                                 <th class="fw-bolder">@lang('dashboard.sequence')</th>
                                 <th class="fw-bolder">@lang('dashboard.reservation_number')</th>
                                 <th class="fw-bolder">@lang('dashboard.customer')</th>

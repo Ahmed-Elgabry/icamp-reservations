@@ -262,11 +262,11 @@
         @if ($terms)
             <div class="alert alert-warning justify-content-between align-items-center  d-flex" style="direction: rtl;">
                 <div style="margin-bottom: 8px;">
-                    <strong>تنبيه</strong> {!! $terms?->commercial_license_ar !!}
+                    <strong>الشروط والأحكام</strong> {!! $terms?->commercial_license_ar !!}
                 </div>
                 @if($terms?->commercial_license_en)
                     <div class = "t-left" >
-                        <strong>:Notice</strong> {!! $terms?->commercial_license_en !!}
+                        <strong>:Terms and Conditions</strong> {!! $terms?->commercial_license_en !!}
                     </div>
                 @endif
             </div>
