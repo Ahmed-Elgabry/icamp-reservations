@@ -356,7 +356,7 @@
 
             Swal.fire({
                 icon: 'warning',
-                title: status === 'decrement' ? "@lang('dashboard.decrement_label')" : "@lang('dashboard.increment_label')" ,
+                title: status === 'decrement' ? "@lang('dashboard.increment_label')" : "@lang('dashboard.decrement_label')" ,
                 html: status === 'decrement' ? html : '',
                 showCancelButton: true,
                 confirmButtonText: "@lang('dashboard.confirm')",
