@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <div class="card-header border-0 cursor-pointer">
-                    
+
                     <h3 class="card-title fw-bolder m-0 mt-4">
                         <a href="{{ route('orders.edit', $order->id) }}">
                             @lang('dashboard.report') {{ $order->customer->name }}
@@ -202,10 +202,10 @@
                                                 <label>{{ $stock->name }}</label>
                                             </div>
                                             <div class="col-2 col-md-2">
-                                                <input type="number"  name="count_stock[{{ $stock->pivot->id }}]"
-                                                    min="0"
+                                                <input type="text"  name="count_stock[{{ $stock->pivot->id }}]"
                                                     class="form-control text-muted"
-                                                    value="{{ $stock->pivot->count ?? '' }}">
+                                                    value="{{ $stock->pivot->count ?? '' }}"
+                                                    disabled>
                                             </div>
 
                                             <div class="col-2 col-md-2 m-auto">
