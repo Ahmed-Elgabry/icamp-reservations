@@ -37,7 +37,7 @@ class Registrationform extends Model
     protected static function booted()
     {
         static::creating(function ($model) {
-            $model->request_code = 'REQ' . strtoupper(uniqid());
+            $model->request_code = 'REQ' . strtoupper(\Str::random(8));
             Notification::send(User::whereUser_type(1)->get(), new NewRegistrationformsNotification($model));
         });
     }
