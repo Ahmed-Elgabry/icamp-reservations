@@ -61,7 +61,7 @@
                         <!--begin::Table head-->
                         <thead>
                             <!--begin::Table row-->
-                            <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
+                            <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0">
                                 <th class="fw-bolder">@lang('dashboard.sequence')</th>
                                 <th class="fw-bolder">@lang('dashboard.reservation_number')</th>
                                 <th class="fw-bolder">@lang('dashboard.customer')</th>
@@ -139,25 +139,28 @@
                                     <!--begin::Time From-->
                                     <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
                                     <!--end::Time From-->
-
+                                        @php
+                                            $totalPaid = $order->payments()->where('statement', 'the_insurance')->sum("price");
+                                            $totalPrice = $order->price + $order->insurance_amount;
+                                            $remaining = $totalPrice - $totalPaid;
+                                        @endphp
                                 <!--begin::Payments-->
                                 <td>
                                     <span class="text-success">
-                                        {{ddd($order->payments()->where('statement', 'the_insurance'))}}
                                         {{ __('dashboard.paied') }}
-                                        {{ number_format( $order->payments()->where('statement', 'the_insurance')->sum("price")) }}
+                                        {{ number_format( $totalPaid ) }}
                                     </span>
                                     {{ __('dashboard.out of') }}
-                                    {{ number_format($order->price + $order->insurance_amount) }}
+                                    {{ number_format($totalPrice) }}
 
                                     <span class="text-danger">
                                         {{ __('dashboard.remaining') }}
-                                        @if ($order->insurance_status == 'returned')
+                                        <!-- @if ($order->insurance_status == 'returned')
                                             {{ number_format($order->insurance_amount) }}
-                                        @else
-                                        {{ number_format(($order->price + $order->insurance_amount) - $order->payments()->where('statement', 'the_insurance')->sum("price")) }}
+                                        @else -->
+                                        {{ number_format(($order->price + $order->insurance_amount) - $totalPaid) }}
 
-                                        @endif
+                                        <!-- @endif -->
                                     </span>
                                 </td>
                                 <!--end::Payments-->

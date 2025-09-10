@@ -1,0 +1,33 @@
+.error {
+    --bs-text-opacity: 1;
+    color: rgba(var(--bs-danger-rgb), var(--bs-text-opacity)) !important ;
+    border-color:#f1416c!important
+}
+.permissionCard {
+    border: 0 !important;
+    margin-bottom: 13px !important;
+}
+
+.role-title {
+    background: #009ef7 !important;
+    padding: 12px !important;
+    border-radius: 7px !important;
+    /* margin-bottom: 10px; */
+}
+
+.list-unstyled {
+    padding: 10px !important;
+    height: 300px !important;
+    /* scroll-behavior: smooth; */
+    overflow: auto !important;
+}
+
+.selectP {
+    margin-right: 10px !important;
+    margin-top: 11px !important;
+}
+
+.title_lable {
+    color: #17191a !important;
+
+}

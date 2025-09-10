@@ -117,6 +117,7 @@ class PaymentsController extends Controller
             ->whereHas('transaction', function ($q) {
                 $q->where('source', 'account_charge');
             })
+            ->where("account_id" , $bankAccount)
             ->latest()
             ->limit(10)
             ->get();

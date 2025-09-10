@@ -11,10 +11,6 @@
             --bs-primary: #2563eb;
             --bs-secondary: #6b7280;
         }
-        body {
-            background-color: #f9fafb;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
 
         /* Mobile-first responsive layout */
         .main-container {
@@ -69,8 +65,8 @@
         /* Mobile toggle button */
         .mobile-toggle-btn {
             position: fixed;
-            top: 20px;
-            right: 4px;
+            top: 660px;
+            right: 15px;
             z-index: 1060;
             width: 50px;
             height: 50px;
