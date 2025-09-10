@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 @props(['order' => null])
-@section('pageTitle', __('dashboard.orders'))
+@section('pageTitle', __('dashboard.order_data'))
 
 @section('content')
 

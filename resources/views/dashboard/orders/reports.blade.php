@@ -75,31 +75,33 @@
 
                         <div class="row report-item">
                             @foreach ($reports as $index => $report)
-                                <div class="col-md-6 mt-2">
+                                <div class="col-md-12 mt-2">
                                     <div class="single-item">
-                                        <div class="row">
-                                            <div class="col-1 col-md-1">
-                                                {{ $index + 1 }}
-                                            </div>
-                                            <div class="col-1 col-md-1">
-                                                @if ($latest = $report->image)
-                                                    <a href="{{ asset($report->image) }}" target="_blank">
-                                                        <img src="{{ asset($latest) }}" alt="{{ $report->name }}"
-                                                            class="report-image">
-                                                    </a>
-                                                @else
-                                                    <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}"
-                                                        alt="{{ $report->name }}" class="report-image">
-                                                @endif
+                                        <div class="row justify-content-between gap-15">
+                                            <div class="col-1 col-md-1 d-flex flex-column">
+                                                <div class="d-flex flex-row gap-15">
+                                                    <div class="col-1 col-md-1">
+                                                        {{ $index + 1 }}
+                                                    </div>
+                                                    @if ($latest = $report->image)
+                                                        <a href="{{ asset($report->image) }}" target="_blank">
+                                                            <img src="{{ asset($latest) }}" alt="{{ $report->name }}"
+                                                                class="report-image">
+                                                        </a>
+                                                    @else
+                                                        <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}"
+                                                            alt="{{ $report->name }}" class="report-image">
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <label>{{ $report->name }}</label>
+                                                </div>
                                             </div>
 
-                                            <div class="col-2 col-md-2">
-                                                <label>{{ $report->name }}</label>
-                                            </div>
 
                                             <div class="col-2 col-md-2">
                                                 <input type="number"  name="ordered_count[{{ $report->id }}]" min="0"
-                                                    max="{{ $report->count }}" class="form-control text-muted"
+                                                    max="{{ $report->count }}" class="form-control text-muted p-0"
                                                     value="{{ $report->count }}"
                                                     @readonly(true)>
                                             </div>
@@ -108,7 +110,7 @@
                                                 <input type="number"
                                                     min="0" max="{{ $report->count }}"
                                                     name="set_qty[{{ $report->id }}]"
-                                                    class="form-control"
+                                                    class="form-control p-0"
                                                     value="{{ ($report->set_qty == 0) ? $report->count : $report->set_qty }}">
                                             </div>
 
@@ -180,13 +182,13 @@
 
                         <div class="row report-item">
                             @foreach ($service->stocks as $index => $stock)
-                                <div class="col-md-6 mt-2">
+                                <div class="col-md-12 mt-2">
                                     <div class="single-item">
                                         <div class="row">
                                             <div class="col-1 col-md-1">
                                                 {{ $index + 1 }}
                                             </div>
-                                            <div class="col-2 col-md-2">
+                                            <div class="col-2 col-md-2 d-flex flex-column">
                                                 @if ($latest = $stock->image)
                                                     <a href="{{ asset($stock->image) }}" target="_blank">
                                                         <img src="{{ asset($latest) }}" alt="{{ $stock->name }}"
@@ -196,10 +198,10 @@
                                                     <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}"
                                                         alt="{{ $stock->name }}" class="report-image">
                                                 @endif
-                                            </div>
 
                                             <div class="col-1 col-md-1 text-center">
                                                 <label>{{ $stock->name }}</label>
+                                            </div>
                                             </div>
                                             <div class="col-2 col-md-2">
                                                 <input type="text"  name="count_stock[{{ $stock->pivot->id }}]"

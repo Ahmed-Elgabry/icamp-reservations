@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('pageTitle' , __('dashboard.orders'))
+@section('pageTitle' , __('dashboard.addons'))
 @section('content')
 
     <!--begin::Post-->

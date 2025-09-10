@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('pageTitle', __('dashboard.payment_links_index'))
+@section('pageTitle', __('dashboard.payment_links_show'))
 
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
