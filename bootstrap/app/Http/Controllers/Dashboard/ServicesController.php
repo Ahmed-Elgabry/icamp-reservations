@@ -61,7 +61,7 @@ class ServicesController extends Controller
                 'reports_counts' => 'nullable|array',
                 'reports_counts.*' => 'required|integer|min:1',
                 'reports_images' => 'nullable|array',
-                'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
                 'report_orders' => 'nullable|array',
                 'report_orders.*' => 'nullable|integer',
                 'set_qty' => 'nullable|integer'
@@ -157,7 +157,7 @@ class ServicesController extends Controller
             'report_orders'  => 'nullable|array',
             'report_orders.*'=> 'nullable|integer',
             'images'         => 'nullable|array',
-            'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20480',
             'set_qty'       => 'nullable|integer'
         ]);
 

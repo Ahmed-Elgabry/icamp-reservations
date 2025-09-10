@@ -136,6 +136,7 @@
 
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
                                 <div class="col-lg-8">
                                 <textarea name="notes" class="form-control form-control-lg form-control-solid"
                                           placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
@@ -505,6 +506,11 @@
                 if (!e.originalEvent) return; // skip programmatic changes
                 recalcPrice();
             });
+            // Recalculate only on user-initiated changes (ignore programmatic .trigger('change'))
+            $('#service_id').on('change', function(e){
+                if (!e.originalEvent) return; // skip programmatic changes
+                recalcPrice();
+            });
             $('#btnRetrieveRf').on('click', ()=>{
                 const el = document.getElementById('retrieveRfModal');
                 bootstrap.Modal.getOrCreateInstance(el).show();
@@ -575,6 +581,8 @@
                     $('#price').val(payload.price);
                 } else {
                     $('#service_id').val(payload.service_ids.map(String)).trigger('change');
+                    // Recalc after programmatic selection from retrieved form
+                    recalcPrice();
                     recalcPrice();
                 }
 
