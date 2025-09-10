@@ -50,10 +50,7 @@ return [
     'addon_price' => 'مبلغ الإضافة',
     'registration_forms' => ' استمارات تسجيل البيانات',
     'sequence' => 'التسلسل',
-<<<<<<< HEAD
-=======
     'registration_forms'        => 'استمارات التسجيل',
->>>>>>> 5fa1d9a87f0328506b67c49ae156657a04679a85
     'registration_form'         => 'استمارة تسجيل',
     'search_rf_placeholder'     => 'ابحث برقم الاستمارة أو الهاتف المتحرك أو الاسم أو البريد',
 
@@ -626,10 +623,6 @@ return [
     'task_updated_successfully' => 'تم تحديث المهمة بنجاح',
     'task_deleted_successfully' => 'تم حذف المهمة بنجاح',
     'task_status_updated' => 'تم تحديث حالة المهمة',
-<<<<<<< HEAD
-
-=======
->>>>>>> 5fa1d9a87f0328506b67c49ae156657a04679a85
     // Task Types
     'task_types' => 'أنواع المهام',
     'task_type' => 'نوع المهمة',
@@ -1320,10 +1313,6 @@ return [
     'people_count' => 'عدد الأشخاص',
     'client_notes' => 'ملاحظات العميل',
     'service' => 'نوع مخيم',
-<<<<<<< HEAD
-
-=======
->>>>>>> 5fa1d9a87f0328506b67c49ae156657a04679a85
     // Survey Email
     'survey_email_title' => 'تقييم نوع المخيم',
     'survey_email_greeting' => 'عميلنا العزيز',
