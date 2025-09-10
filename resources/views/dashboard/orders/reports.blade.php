@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('pageTitle', __('dashboard.orders'))
+@section('pageTitle', __('dashboard.reports'))
 
 @section('content')
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">

@@ -1,4 +1,3 @@
-
 @section('pageTitle' , __('dashboard.payments'))
 @extends('dashboard.layouts.app')
 @section('content')
@@ -238,20 +237,22 @@
                                 </div>
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                                    <select name="payment_method" id="" class="form-select" required>
+                                    <select name="payment_method" id="edit_payment_method_{{$payment->id}}" class="form-select" required>
+                                        <option value="">{{ __('dashboard.select_payment_method') }}</option>
                                         @foreach(paymentMethod() as $paymentSelect)
                                             <option {{$payment->payment_method == $paymentSelect ? 'selected' : ''}} value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                         @endforeach
                                     </select>
-                                </div>
-                                <div class="mb-5 fv-row col-md-12">
-                                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                                    <select name="account_id" id="" class="form-select" required>
+                                 </div>
+                                 <div class="mb-5 fv-row col-md-12">
+                                     <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                                    <select name="account_id" id="edit_account_id_{{$payment->id}}" class="form-select" required>
+                                        <option value="">{{ __('dashboard.select_bank_account') }}</option>
                                         @foreach($bankAccounts as $bankAccount)
                                             <option {{$payment->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                         @endforeach
                                     </select>
-                                </div>
+                                 </div>
 
                                 <!--begin::Input group-->
                                 <div class="mb-5 fv-row col-md-12">
@@ -309,7 +310,8 @@
             </div>
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                <select name="payment_method" id="" class="form-select" required>
+                <select name="payment_method" id="payment_method" class="form-select" required>
+                    <option value="">{{ __('dashboard.select_payment_method') }}</option>
                     @foreach(paymentMethod() as $paymentSelect)
                         <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                     @endforeach
@@ -317,7 +319,8 @@
             </div>
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                <select name="account_id" id="" class="form-select" required>
+                <select name="account_id" id="account_id" class="form-select" required>
+                    <option value="">{{ __('dashboard.select_bank_account') }}</option>
                     @foreach($bankAccounts as $bankAccount)
                         <option {{old('account_id') == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                     @endforeach
@@ -377,27 +380,76 @@
             } else {
                 statementSelect.setCustomValidity('');
             }
-        });
++
++            // Validate payment method
++            let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
++            if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
++                paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                paymentMethodSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                paymentMethodSelect.setCustomValidity('');
++            }
++
++            // Validate bank account
++            let accountSelect = $(this).find('select[name="account_id"]')[0];
++            if (!accountSelect.value || accountSelect.value === '') {
++                accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                accountSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                accountSelect.setCustomValidity('');
++            }
+         });
 
-        // Edit payment form validation
-        $('form[id^="editCountForm"]').on('submit', function(e) {
-            let statementSelect = $(this).find('select[name="statement"]')[0];
-            if (!statementSelect.value || statementSelect.value === '') {
-                statementSelect.setCustomValidity('{{ __("dashboard.required") }}');
-                statementSelect.reportValidity();
-                e.preventDefault();
-                return false;
-            } else {
-                statementSelect.setCustomValidity('');
-            }
-        });
+         // Edit payment form validation
+         $('form[id^="editCountForm"]').on('submit', function(e) {
+             let statementSelect = $(this).find('select[name="statement"]')[0];
+             if (!statementSelect.value || statementSelect.value === '') {
+                 statementSelect.setCustomValidity('{{ __("dashboard.required") }}');
+                 statementSelect.reportValidity();
+                 e.preventDefault();
+                 return false;
+             } else {
+                 statementSelect.setCustomValidity('');
+             }
++
++            // Validate payment method inside edit form
++            let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
++            if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
++                paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                paymentMethodSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                paymentMethodSelect.setCustomValidity('');
++            }
++
++            // Validate account inside edit form
++            let accountSelect = $(this).find('select[name="account_id"]')[0];
++            if (!accountSelect.value || accountSelect.value === '') {
++                accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                accountSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                accountSelect.setCustomValidity('');
++            }
+         });
 
-        // Clear validation when user selects a valid option
-        $(document).on('change', 'select[name="statement"]', function() {
-            if (this.value && this.value !== '') {
-                this.setCustomValidity('');
-            }
-        });
+         // Clear validation when user selects a valid option
+-        $(document).on('change', 'select[name="statement"]', function() {
+-            if (this.value && this.value !== '') {
+-                this.setCustomValidity('');
+-            }
+-        });
++        $(document).on('change', 'select[name="statement"], select[name="payment_method"], select[name="account_id"]', function() {
++            if (this.value && this.value !== '') {
++                this.setCustomValidity('');
++            }
++        });
         
     </script>
 @endpush

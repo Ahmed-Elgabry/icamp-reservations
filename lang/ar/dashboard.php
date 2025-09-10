@@ -244,8 +244,8 @@ return [
     'order_details' => 'تفاصيل الطلب',
     'scan_qr_code_to_pay' => 'يرجي مسح رمز الاستجابة',
     'order_id' => 'رقم الحجز',
-    'order_date_rev' => 'تاريخ الطلب',
-    'rate_order' => 'تقييم الطلب',
+    'order_date_rev' => 'تاريخ الحجز',
+    'rate_order' => 'تقييم الحجز',
     'thankyou' => 'شكرا لك',
     'review_placeholder' => 'اكتب تقييمك هنا...',
     'send_review' => 'أرسل تقييمك',
@@ -273,8 +273,10 @@ return [
     'terms' => ' الأحكام والشروط',
     'stocks' => 'المخزون',
     'filter_higher_selling' => 'تصفية حسب العناصر الأكثر استهلاكا',
-
+    
     'latest_payments' => 'أحدث المدفوعات',
+    'select_payment_method' => "اختر طريقة الدفع",
+    'select_bank_account' => "اختر الحساب البنكي",
     'view_all' => 'عرض الكل',
     'order' => 'الطلب',
     'amount' => 'المبلغ',
@@ -289,17 +291,18 @@ return [
     'search' => 'بحث',
     'reset' => 'أستعادة',
     'selling_price' => 'سعر البيع',
-    'camp_price' => 'مبلغ المخيم',
     'quantity' => 'الكمية',
     'accept_terms' => 'موافقة الشروط والأحكام',
     'amounts' => 'الكميات',
     'stock-quantities' => 'الكميات',
+    'notes' => 'ملاحظات',
     'success' => 'عملية ناجحة',
     'created_at' => 'تم الاضافه في',
     'activities' => 'الانشطة',
     'cash' => 'نقدا',
     'visa' => 'تحويل بنكي',
     'services' => 'أنواع المخيمات',
+    'price' => 'المبلغ',
     'invoice' => 'فاتورة',
     'days' => 'الايام',
     'count' => 'الكمية',
@@ -567,6 +570,7 @@ return [
     'sms_providers' => 'مزودي الرسائل',
     'account_settings' => 'اعدادات الحساب',
     'sign_out' => 'تسجيل الخروج',
+    'sign_in' => 'تسجيل الدخول',
     'confirm_title'   => 'تأكيد الخصم',
     'confirm_html'    => 'هل تريد خصم :qty من المخزون؟',
     'warehouse'       => 'المخزن',
@@ -1104,7 +1108,7 @@ return [
     'Reservation_info' => 'بيانات الحجز',
     'reservation_expenses' => 'الحجوزات - المصاريف',
     'add_expenses' => 'إضافة مصاريف',
-    "recent_expenses" => "المصاريف حديثة",
+    "recent_expenses" => "المصاريف حديثة", 
     "insurance_returned" => 'تم رد التأمين',
     "insurance_null" => "لا يوجد تأمين مدفوع",
     "insurance_not_returned" => 'لم يتم رد التأمين',
@@ -1119,6 +1123,9 @@ return [
     'reservation_addon' => 'الحجوزات - الإضافات',
     'warehouse_sale' => 'مبيعات المخزن',
     "reservation_payments"=>"الحجوزات - مدفوعات",
+    'reservation_revenues'  => "إيرادات الحجوزات",
+    'general_revenue' => 'إيرادات عامه',
+    'add_revenue' => 'إضافة إيرادات',
     'insurances' => 'الحجوزات - المدفوعات',
     'quote_note_1' => 'لضمان تأكيد الحجز،يتم دفع العربون المتفق عليه في عرض السعر،ويعتبر جزء من قيمة مبلغ المخيم.',
     'quote_note_2' => 'يتم استكمال سداد باقي الخدمة عند استلام المخيم.',
@@ -1168,7 +1175,7 @@ return [
     'create_survey' => 'البناء',
     'survey_builder' => 'بناء الاستبيان',
     'survey_results' => 'الإجابات',
-
+    
     // Survey Builder Translation Keys
     'add_question' => 'إضافة سؤال',
     'text_field' => 'نص',
@@ -1217,7 +1224,7 @@ return [
     'enter_help_text_en' => 'Additional help text in English',
     'option_label_ar' => 'تسمية الخيار بالعربية',
     'option_label_en' => 'Option label in English',
-
+    
     // Default question labels
     'default_text_question' => 'سؤال نصي',
     'default_textarea_question' => 'منطقة نص',
@@ -1293,7 +1300,7 @@ return [
     'single_choice' => 'اختيار واحد',
     'multiple_choice' => 'اختيار متعدد',
     'dropdown_list' => 'قائمة منسدلة',
-
+    
 
     'question_text' => 'نص السؤال',
     'question_type' => 'نوع السؤال',
@@ -1351,7 +1358,7 @@ return [
     'attached' => 'مرفق',
     'select_order' => 'اختر الحجز',
     'AED' => ' درهم ',
-
+    
     // Signature page translations
     'signature_title' => 'توقيع الحجز رقم :id',
     'management_system' => 'نظام الإدارة',
@@ -1367,7 +1374,7 @@ return [
     'please_draw_signature' => 'من فضلك ارسم توقيعك أولاً.',
     'warning' => 'تنبيه:',
     'notice' => 'Notice:',
-
+    
     // Already signed page translations
     'signature_completed_title' => 'تم التوقيع - حجز :id',
     'signature_success' => 'تم التوقيع بنجاح',
@@ -1375,11 +1382,11 @@ return [
     'open_image' => 'فتح الصورة',
     'reservation_number' => 'رقم الحجز',
     'signature_date' => 'تاريخ التوقيع',
-
+    
     // Language switcher translations
     'switch_to_arabic' => 'العربية',
     'switch_to_english' => 'English',
-
+    
     // Additional page titles
     'create_user' => 'إنشاء مستخدم',
     'edit_user' => 'تعديل مستخدم',
@@ -1416,7 +1423,7 @@ return [
     "completed" => 'مكتمل',
     "pending_and_Initial_reservation" => 'معلق - حجز مبدئي',
     "pending_and_show_price" => 'معلق - عرض السعر',
-    "approved" => 'معتمد',
+    "approved" => 'معتمد',  
     "canceled" => 'ملغي',
     "delayed" => 'مؤجل',
 

@@ -1,4 +1,4 @@
-@section('pageTitle', __('dashboard.payments'))
+@section('pageTitle', __('dashboard.reservation_revenues'))
 @extends('dashboard.layouts.app')
 
 @section('content')

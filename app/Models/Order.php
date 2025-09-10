@@ -224,6 +224,14 @@ class Order extends Model
         $warehouseSales = $this->verifiedWarehouseSalesAmount();
         return $this->price - $deposit + $insurances + $addons + $warehouseSales;
      }
+    //  totalPaidAmount is the total of payments that is paid
+     public function totalPaidAmount() {
+        $totalPayment = $this->payments()->sum('price');
+        $totalWareHouse = OrderItem::where("order_id", $this->id)->sum('total_price');
+        $addons = $this->addons()->sum('order_addon.price');
+
+        return $totalPayment + $totalWareHouse + $addons;
+     }
      public function verifiedItems() {
         return $this->items(OrderItem::class)->where('verified', true);
      } 

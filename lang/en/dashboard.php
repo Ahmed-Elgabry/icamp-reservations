@@ -115,6 +115,8 @@ return [
     'no' => 'No',
     'showall' => 'Show All',
     'reservation_revenue' => 'Reservation Revenue',
+    'general_revenue' => 'General Revenue',
+    'add_revenue' => 'Add Revenue',
     'financial_system' => 'Financial System',
     'unverifyed' => 'Unverified',
     'mark' => 'Mark',
@@ -366,7 +368,6 @@ return [
     'description' => 'Description',
     'desc_requirments' => 'Add a description for :page_title for better presentation.',
     'RS' => 'AED',
-    'camp_price' => 'Camp price',
     'payment_remaining' => 'The remaining invoice amount must be paid upon receiving the camp.',
     'security_deposit' => 'The agreed security deposit mentioned in the invoice must be paid upon receiving the camp, and it will be refunded within 24 hours after ensuring the camp equipment is in good condition.',
     'terms1' => 'Terms and conditions apply.',
@@ -432,6 +433,7 @@ return [
     'select_role' => 'Select Employee Role',
     'select_language' => 'Select Language',
     'sign_in_to_dashboard' => 'Sign in to Dashboard',
+    'sign_in' => 'Sign In',
     'profile_details' => 'Profile Details',
     'deactivate_account' => 'Deactivate Account',
     'deactivate_desc' => "<h4 class='text-gray-900 fw-bolder'>You are deactivating the account</h4>
@@ -1169,7 +1171,7 @@ return [
     'create_survey' => 'Create Survey',
     'survey_builder' => 'Survey Builder',
     'survey_results' => 'Results',
-
+    
     // Survey Builder Translation Keys
     'add_question' => 'Add Question',
     'text_field' => 'Text',
@@ -1218,7 +1220,7 @@ return [
     'enter_help_text_en' => 'Additional help text in English',
     'option_label_ar' => 'Option label in Arabic',
     'option_label_en' => 'Option label in English',
-
+    
     // Default question labels
     'default_text_question' => 'Text Question',
     'default_textarea_question' => 'Textarea Question',
@@ -1326,7 +1328,7 @@ return [
     'save_changes' => 'Save Changes',
     'settings_updated_successfully' => 'Settings updated successfully.',
     'none' => 'None',
-
+    
     // Missing keys from Arabic translation
     'mark_all_not_completed' => 'Mark All Incomplete',
     'Duration of hours' => 'Duration in Hours',
@@ -1652,7 +1654,7 @@ return [
     'attached' => 'Attached',
     'select_order' => 'Select Order',
     'AED' => 'AED',
-
+    
     // Signature page translations
     'signature_title' => 'Reservation Signature #:id',
     'management_system' => 'Management System',
@@ -1668,7 +1670,7 @@ return [
     'please_draw_signature' => 'Please draw your signature first.',
     'warning' => 'Warning:',
     'notice' => 'Notice:',
-
+    
     // Already signed page translations
     'signature_completed_title' => 'Signed - Reservation :id',
     'signature_success' => 'Successfully Signed',
@@ -1676,11 +1678,11 @@ return [
     'open_image' => 'Open Image',
     'reservation_number' => 'Reservation Number',
     'signature_date' => 'Signature Date',
-
+    
     // Language switcher translations
     'switch_to_arabic' => 'العربية',
     'switch_to_english' => 'English',
-
+    
     // Additional page titles
     'create_user' => 'Create User',
     'edit_user' => 'Edit User',
@@ -1696,9 +1698,9 @@ return [
     'updated_date' => 'Updated Date',
     'updated_time' => 'Updated Time',
     'date_time' => 'Date & Time',
+    
 
-
-
+    
     // Order status statistics
     'pending_and_show_price_count' => 'Pending Orders - Show Price Count',
     "order_status.pending_and_show_price_count" => 'Pending Orders - Show Price Count',

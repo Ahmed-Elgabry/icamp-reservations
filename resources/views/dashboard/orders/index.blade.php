@@ -140,7 +140,7 @@
                                     <td>{{ $order->time_from ? \Carbon\Carbon::createFromFormat('H:i:s', $order->time_from)->format('h:i A') : '' }}</td>
                                     <!--end::Time From-->
                                         @php
-                                            $totalPaid = $order->payments()->where('statement', 'the_insurance')->sum("price");
+                                            $totalPaid = $order->totalPaidAmount();
                                             $totalPrice = $order->price + $order->insurance_amount;
                                             $remaining = $totalPrice - $totalPaid;
                                         @endphp

@@ -174,7 +174,8 @@
                                                 </div>
                                                 <div class="mb-5 fv-row col-md-12">
                                                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                                                    <select name="payment_method" id="" class="form-select " required>
+                                                    <select name="payment_method" id="edit_payment_method_{{ $orderAddon->pivot->id }}" class="form-select " required>
+                                                        <option value="">{{__('dashboard.select_payment_method')}}</option>
                                                         @foreach(paymentMethod() as $paymentSelect)
                                                             <option @selected($orderAddon->pivot->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                                         @endforeach
@@ -182,7 +183,8 @@
                                                 </div>
                                                 <div class="mb-5 fv-row col-md-12">
                                                     <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                                                    <select name="account_id" id="account_id" class="form-select " required>
+                                                    <select name="account_id" id="edit_account_id_{{ $orderAddon->pivot->id }}" class="form-select " required>
+                                                        <option value="">{{__('dashboard.select_bank_account')}}</option>
                                                         @foreach($bankAccounts as $bankAccount)
                                                             <option @selected($orderAddon->pivot->account_id === $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                                         @endforeach
@@ -250,7 +252,9 @@
         
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                            <select name="payment_method" id="" class="form-select " required>
+                            <select name="payment_method" id="payment_method" class="form-select " required>
+                                <option value="">{{__('dashboard.select_payment_method')}}</option>
+
                                 @foreach(paymentMethod() as $paymentSelect)
                                     <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                 @endforeach
@@ -259,6 +263,7 @@
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
                             <select name="account_id" id="account_id" class="form-select " required>
+                                <option value="">{{__('dashboard.select_bank_account')}}</option>
                                 @foreach($bankAccounts as $bankAccount)
                                     <option value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                 @endforeach
@@ -291,118 +296,149 @@
                 let price = $(this).find(':selected').data('price');
                 $('#addon_price').val(price ?? 0); // Display the service price in the correct field
                 updateTotalPrice();
-                
+
                 // Clear custom validity when a valid option is selected
                 if (this.value) {
                     this.setCustomValidity('');
                 }
             });
 
-            // Update total price when count or addon price is changed (do not override manual total typing)
-            $('#count, #addon_price').on('input', function() {
-                updateTotalPrice();
-            });
-
-            function updateTotalPrice() {
-                let count = parseFloat($('#count').val());
-                let servicePrice = parseFloat($('#addon_price').val()); // Get the service price from the correct field
-                count = isNaN(count) ? 0 : count;
-                servicePrice = isNaN(servicePrice) ? 0 : servicePrice;
-                let totalPrice = count * servicePrice;
-                $('#price').val(totalPrice.toFixed(2)); // Keep the total price logic
-            }
-
-            // Form validation before submission - now handled globally
-            // But keep this for custom addon-specific validation if needed
-            $('#addAddonForm').on('submit', function(e) {
-                // Validate that user has selected an addon (not the default empty option)
-                let selectedAddon = $('#addon_id').val();
-                if (!selectedAddon || selectedAddon === '') {
-                    // Set custom validity message and trigger HTML5 validation
-                    document.getElementById('addon_id').setCustomValidity('{{ __("dashboard.please_select_addon") }}');
-                    document.getElementById('addon_id').reportValidity();
-                    e.preventDefault();
-                    return false;
-                } else {
-                    // Clear custom validity if valid option is selected
-                    document.getElementById('addon_id').setCustomValidity('');
-                }
-                return true;
-            });
-        });
-
-        $(document).ready(function() {
-            // Update service price when addon changes
-            $(document).on('change', 'select[id^="edit_addon_id_"]', function() {
-                let selectedAddon = $(this).find(':selected');
-                let price = parseFloat(selectedAddon.data('price'));
-                let addonId = $(this).attr('id').split('_').pop();
-                $('#edit_service_price_' + addonId).val(price); // Display the service price in the new field
-                updateTotalPriceEdit(addonId);
-                
-                // Clear custom validity when a valid option is selected
+            // Clear custom validity when payment method or account is changed
+            $('#payment_method, #account_id').on('change', function() {
                 if (this.value) {
                     this.setCustomValidity('');
                 }
             });
 
-            // Update total price when count changes
-            $(document).on('keyup', 'input[id^="edit_count_"]', function() {
-                let addonId = $(this).attr('id').split('_').pop();
-                updateTotalPriceEdit(addonId);
-            });
+             // Update total price when count or addon price is changed (do not override manual total typing)
+             $('#count, #addon_price').on('input', function() {
+                 updateTotalPrice();
+             });
 
-            // Update total price when service price is manually edited in edit modal
-            $(document).on('input', 'input[id^="edit_service_price_"]', function(){
-                let addonId = $(this).attr('id').split('_').pop();
-                updateTotalPriceEdit(addonId);
-            });
+             function updateTotalPrice() {
+                 let count = parseFloat($('#count').val());
+                 let servicePrice = parseFloat($('#addon_price').val()); // Get the service price from the correct field
+                 count = isNaN(count) ? 0 : count;
+                 servicePrice = isNaN(servicePrice) ? 0 : servicePrice;
+                 let totalPrice = count * servicePrice;
+                 $('#price').val(totalPrice.toFixed(2)); // Keep the total price logic
+             }
 
-            // Function to update total price
-            function updateTotalPriceEdit(addonId) {
-                let count = parseFloat($('#edit_count_' + addonId).val());
-                let servicePrice = parseFloat($('#edit_service_price_' + addonId).val()); // Get the service price from the new field
-                count = isNaN(count) ? 0 : count;
-                servicePrice = isNaN(servicePrice) ? 0 : servicePrice;
-                let totalPrice = (count * servicePrice).toFixed(2);
-                $('#edit_price_' + addonId).val(totalPrice); // Update the total price logic
-            }
+             // Form validation before submission - now handled globally
+             // But keep this for custom addon-specific validation if needed
+             $('#addAddonForm').on('submit', function(e) {
+                 // Validate that user has selected an addon (not the default empty option)
+                 let selectedAddon = $('#addon_id').val();
+                 if (!selectedAddon || selectedAddon === '') {
+                     // Set custom validity message and trigger HTML5 validation
+                     document.getElementById('addon_id').setCustomValidity('{{ __("dashboard.please_select_addon") }}');
+                     document.getElementById('addon_id').reportValidity();
+                     e.preventDefault();
+                     return false;
+                 } else {
+                     // Clear custom validity if valid option is selected
+                     document.getElementById('addon_id').setCustomValidity('');
+                 }
 
-            // Validation for edit forms - now handled globally
-            // But keep this for custom addon-specific validation if needed
-            $(document).on('submit', 'form[id^="editAddonForm-"]', function(e) {
-                // Validate that user has selected an addon (not the default empty option)
-                let formId = $(this).attr('id');
-                let addonId = formId.split('-')[1];
-                let selectedAddon = $('#edit_addon_id_' + addonId).val();
-                
-                if (!selectedAddon || selectedAddon === '') {
-                    // Set custom validity message and trigger HTML5 validation
-                    document.getElementById('edit_addon_id_' + addonId).setCustomValidity('{{ __("dashboard.please_select_addon") }}');
-                    document.getElementById('edit_addon_id_' + addonId).reportValidity();
+                // Validate payment method
+                let paymentMethod = $('#payment_method').val();
+                if (!paymentMethod || paymentMethod === '') {
+                    document.getElementById('payment_method').setCustomValidity('{{ __("dashboard.please_select_required_fields") }}');
+                    document.getElementById('payment_method').reportValidity();
                     e.preventDefault();
                     return false;
                 } else {
-                    // Clear custom validity if valid option is selected
-                    document.getElementById('edit_addon_id_' + addonId).setCustomValidity('');
+                    document.getElementById('payment_method').setCustomValidity('');
                 }
-                return true;
+
+                // Validate bank account
+                let accountId = $('#account_id').val();
+                if (!accountId || accountId === '') {
+                    document.getElementById('account_id').setCustomValidity('{{ __("dashboard.please_select_required_fields") }}');
+                    document.getElementById('account_id').reportValidity();
+                    e.preventDefault();
+                    return false;
+                } else {
+                    document.getElementById('account_id').setCustomValidity('');
+                }
+                 return true;
+             });
+         });
+
+         $(document).ready(function() {
+             // Update service price when addon changes
+             $(document).on('change', 'select[id^="edit_addon_id_"]', function() {
+                 let selectedAddon = $(this).find(':selected');
+                 let price = parseFloat(selectedAddon.data('price')) || 0;
+                 let addonId = $(this).attr('id').split('_').pop();
+                 $('#edit_service_price_' + addonId).val(price); // Display the service price in the new field
+                 if (typeof updateTotalPriceEdit === 'function') {
+                     updateTotalPriceEdit(addonId);
+                 }
+
+                 // Clear custom validity when a valid option is selected
+                 if (this.value) {
+                     this.setCustomValidity('');
+                 }
+             });
+
+            // Clear custom validity for required selects inside edit forms when changed
+            $(document).on('change', 'form[id^="editAddonForm-"] select[required]', function() {
+                if (this.value) this.setCustomValidity('');
             });
-        });
+         });
 
-        $(document).on('click', '.receipt-link', function(e) {
-            e.preventDefault();
-
-            if ($(this).data('verified') == '1') {
-                window.open($(this).data('url'), '_blank');
-            } else {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '{{ __("dashboard.error") }}',
-                    text: '{{ __("dashboard.addon_not_verified_receipt_error") }}',
-                    confirmButtonText: '{{ __("dashboard.ok") }}'
+         // Validation for edit forms - now handled globally
+         // But keep this for custom addon-specific validation if needed
+         $(document).on('submit', 'form[id^="editAddonForm-"]', function(e) {
+                // Validate required selects inside the edit form first so browser shows HTML5 messages
+                let form = this;
+                let invalid = false;
+                $(form).find('select[required]').each(function() {
+                    if (!this.value) {
+                        this.setCustomValidity('{{ __("dashboard.please_select_required_fields") }}');
+                        this.reportValidity();
+                        invalid = true;
+                        return false; // break each
+                    } else {
+                        this.setCustomValidity('');
+                    }
                 });
-            }
-        });
-    </script>
+                if (invalid) {
+                    e.preventDefault();
+                    return false;
+                }
+                 // Validate that user has selected an addon (not the default empty option)
+                 let formId = $(this).attr('id');
+                 let addonId = formId.split('-')[1];
+                 let selectedAddon = $('#edit_addon_id_' + addonId).val();
+                 
+                 if (!selectedAddon || selectedAddon === '') {
+                     // Set custom validity message and trigger HTML5 validation
+                     document.getElementById('edit_addon_id_' + addonId).setCustomValidity('{{ __("dashboard.please_select_addon") }}');
+                     document.getElementById('edit_addon_id_' + addonId).reportValidity();
+                     e.preventDefault();
+                     return false;
+                 } else {
+                     // Clear custom validity if valid option is selected
+                     document.getElementById('edit_addon_id_' + addonId).setCustomValidity('');
+                 }
+                 return true;
+             });
+         
+         $(document).on('click', '.receipt-link', function(e) {
+             e.preventDefault();
+
+             if ($(this).data('verified') == '1') {
+                 window.open($(this).data('url'), '_blank');
+             } else {
+                 Swal.fire({
+                     icon: 'warning',
+                     title: '{{ __("dashboard.error") }}',
+                     text: '{{ __("dashboard.addon_not_verified_receipt_error") }}',
+                     confirmButtonText: '{{ __("dashboard.ok") }}'
+                 });
+             }
+         });
+     </script>
 @endpush

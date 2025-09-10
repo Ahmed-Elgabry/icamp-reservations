@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('pageTitle', __('dashboard.edit_time_and_image'))
+@section('pageTitle', __('dashboard.sign_in'))
 @section('content')
 
 <!--begin::Post-->

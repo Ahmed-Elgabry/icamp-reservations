@@ -67,27 +67,6 @@
             font-weight: 600;
         }
 
-        .language-switcher {
-            position: absolute;
-            top: 20px;
-            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
-            z-index: 1000;
-        }
-
-        .language-switcher button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s ease;
-        }
-
-        .language-switcher button:hover {
-            background: var(--primary-600);
-        }
 
         .card {
             background: var(--card);
@@ -246,13 +225,6 @@
 
 <body>
 
-    <!-- Language Switcher -->
-    <div class="language-switcher">
-        <button onclick="changeLanguage('{{ app()->getLocale() == 'ar' ? 'en' : 'ar' }}')">
-            {{ app()->getLocale() == 'ar' ? __('dashboard.switch_to_english') : __('dashboard.switch_to_arabic') }}
-        </button>
-    </div>
-
     <div class="shell">
         <div class="brand">
             <img src="{{ asset('images/logo.png') }}" alt="Logo">
@@ -297,6 +269,9 @@
                                 </div>
                 </div>
                 <div class="row" style="margin:0">
+                    <button onclick="changeLanguage('{{ app()->getLocale() == 'ar' ? 'en' : 'ar' }}')">
+                            {{ app()->getLocale() == 'ar' ? __('dashboard.switch_to_english') : __('dashboard.switch_to_arabic') }}
+                    </button>
                     <button id="undo" class="btn-ghost" type="button">@lang('dashboard.undo')</button>
                     <button id="clear" class="btn-danger" type="button">@lang('dashboard.clear')</button>
                 </div>
