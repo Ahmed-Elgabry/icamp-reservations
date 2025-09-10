@@ -89,7 +89,7 @@
 
 		/* Enhanced Table Header Styling */
 		table thead tr {
-			background: linear-gradient(135deg, #8B4513 0%, #D2B48C 100%) !important; /* Dark brown gradient */
+			background: linear-gradient(135deg, #ce6316ce 0%, #b16e17ff 100%) !important; /* Dark brown gradient */
 			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
 		}
 
