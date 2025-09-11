@@ -103,8 +103,8 @@
                             <hr>
                             <h3>@lang('dashboard.report')</h3>
 
-                            <div id="reports-section">
-                                    <div class="row align-reports-center reports-item-row mb-2">
+                <div id="reports-section">
+                    <div class="row align-reports-center reports-header-row mb-2">
                                         <div class="col-1 text-center">
                                             {{ __('dashboard.sequence') }}
                                         </div>
@@ -319,20 +319,20 @@
     }
 
     function renumberReportRows() {
-        $('.reports-item-row').each(function (i) {
+        $('#reports-section .reports-item-row').each(function (i) {
             $(this).find('.row-number').text(i + 1);
         });
     }
 
     function refreshReportMoveButtons() {
-        const $rows = $('.reports-item-row');
+        const $rows = $('#reports-section .reports-item-row');
         $rows.find('.move-up, .move-down').prop('disabled', false);
         $rows.first().find('.move-up').prop('disabled', true);
         $rows.last().find('.move-down').prop('disabled', true);
     }
 
     function updateReportOrders() {
-        $('.reports-item-row').each(function (i) {
+        $('#reports-section .reports-item-row').each(function (i) {
             $(this).find('input[name="report_orders[]"]').val(i + 1);
         });
     }
@@ -380,7 +380,7 @@
         });
 
         $('#add-report-item').on('click', function () {
-            const newIndex = $('.reports-item-row').length + 1;
+            const newIndex = $('#reports-section .reports-item-row').length + 1;
             const newRow = `
             <div class="row align-reports-center reports-item-row mb-2" data-index="${newIndex}">
                 <div class="col-1">
@@ -405,7 +405,10 @@
                 </div>
                 <input type="hidden" name="report_orders[]" value="${newIndex}">
             </div>`;
-            $('#reports-section').append(newRow);
+            // append after header (if present) so header stays at top
+            const $section = $('#reports-section');
+            const $rows = $section.find('.reports-item-row');
+            if ($rows.length) $rows.last().after(newRow); else $section.append(newRow);
             attachProgressListeners();
             renumberReportRows();
             refreshReportMoveButtons();
@@ -421,7 +424,8 @@
 
         $(document).on('click', '.move-up', function () {
             const $row = $(this).closest('.reports-item-row');
-            const $prev = $row.prev('.reports-item-row');
+            // find previous report row, skipping header
+            const $prev = $row.prevAll('.reports-item-row').first();
             if ($prev.length) {
                 $row.insertBefore($prev);
                 renumberReportRows();
@@ -432,7 +436,8 @@
 
         $(document).on('click', '.move-down', function () {
             const $row = $(this).closest('.reports-item-row');
-            const $next = $row.next('.reports-item-row');
+            // find next report row, skipping header
+            const $next = $row.nextAll('.reports-item-row').first();
             if ($next.length) {
                 $row.insertAfter($next);
                 renumberReportRows();
@@ -506,14 +511,14 @@
         }
 
         function renumberReportRows() {
-            $('.reports-item-row').each(function (i) {
+            $('#reports-section .reports-item-row').each(function (i) {
             $(this).find('.row-number').text(i + 1);
             $(this).find('input[name="report_orders[]"]').val(i + 1);
             });
         }
 
         function refreshReportMoveButtons() {
-            const $rows = $('.reports-item-row');
+            const $rows = $('#reports-section .reports-item-row');
             $rows.find('.js-report-move[data-direction="up"], .js-report-move[data-direction="down"]').prop('disabled', false);
             $rows.first().find('.js-report-move[data-direction="up"]').prop('disabled', true);
             $rows.last().find('.js-report-move[data-direction="down"]').prop('disabled', true);
@@ -536,10 +541,10 @@
             data: { direction: dir },
             success: function () {
                 if (dir === 'up') {
-                const $prev = $row.prev('.reports-item-row');
+                const $prev = $row.prevAll('.reports-item-row').first();
                 if ($prev.length) $row.insertBefore($prev);
                 } else {
-                const $next = $row.next('.reports-item-row');
+                const $next = $row.nextAll('.reports-item-row').first();
                 if ($next.length) $row.insertAfter($next);
                 }
                 renumberReportRows();
