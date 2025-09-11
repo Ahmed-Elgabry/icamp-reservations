@@ -78,7 +78,7 @@
                                 <div class="col-md-12 mt-2">
                                     <div class="single-item">
                                         <div class="row justify-content-between gap-15">
-                                            <div class="d-flex flex-row gap-5 w-auto">
+                                            <div class="d-flex flex-row gap-5 col-3">
                                                 <div>
                                                     {{ $index + 1 }}
                                                 </div>
