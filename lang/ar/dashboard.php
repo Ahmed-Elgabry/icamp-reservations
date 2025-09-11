@@ -946,6 +946,7 @@ return [
     'qr_code_placeholder' => 'سيتم إنشاء رمز QR هنا',
     'back_to_order' => 'العودة للحجز',
     'view_payment_links' => 'عرض روابط الدفع',
+    'payment_links_show' => 'عرض رابط الدفع',
     'create_new_payment_link' => 'إنشاء رابط دفع جديد',
     'create_another_payment_link' => 'إنشاء رابط دفع آخر',
     'view_all_payment_links' => 'عرض جميع روابط الدفع',

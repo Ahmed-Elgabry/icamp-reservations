@@ -78,11 +78,11 @@
                                 <div class="col-md-12 mt-2">
                                     <div class="single-item">
                                         <div class="row justify-content-between gap-15">
-                                            <div class="col-1 col-md-1 d-flex flex-column">
-                                                <div class="d-flex flex-row gap-15">
-                                                    <div class="col-1 col-md-1">
-                                                        {{ $index + 1 }}
-                                                    </div>
+                                            <div class="d-flex flex-row gap-5 w-auto">
+                                                <div>
+                                                    {{ $index + 1 }}
+                                                </div>
+                                                <div class="col-1 col-md-1 d-flex flex-column">
                                                     @if ($latest = $report->image)
                                                         <a href="{{ asset($report->image) }}" target="_blank">
                                                             <img src="{{ asset($latest) }}" alt="{{ $report->name }}"
@@ -92,9 +92,9 @@
                                                         <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}"
                                                             alt="{{ $report->name }}" class="report-image">
                                                     @endif
-                                                </div>
-                                                <div>
-                                                    <label>{{ $report->name }}</label>
+                                                    <div>
+                                                        <label>{{ $report->name }}</label>
+                                                    </div>
                                                 </div>
                                             </div>
 

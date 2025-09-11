@@ -1,1 +1,0 @@
-<?php /**PATH C:\my projects\icamp-reservations\resources\views/dashboard/layouts/footer.blade.php ENDPATH**/ ?>
