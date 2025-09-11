@@ -1499,7 +1499,7 @@ return [
     'mark_all_completed' => 'Mark All Completed',
     'logout' => 'Sign Out',
     "camp_price" => 'Camp Price',
-
+    "available" => 'Available',       
     'This customer has already been served the selected services on this date' => 'This customer has already been served the selected services on this date',
     'has already been served the selected services on this date' => 'Services already booked on the same date',
     'hours' => 'Number of Hours',
