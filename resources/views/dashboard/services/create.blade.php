@@ -119,7 +119,7 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($reports as $index => $report)
-                                                <tr data-index="{{ $index }}">
+                                                <tr data-index="{{ $index }}" class="reports-item-row">
                                                     <td class="text-center">
                                                         <span class="row-number">{{ $index + 1 }}</span>
                                                     </td>
