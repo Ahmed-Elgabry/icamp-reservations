@@ -50,237 +50,131 @@
                             <button type="submit" class="btn btn-primary">@lang('dashboard.save_changes')</button>
                         </div>
 
-                        <div class="row mt-10 d-none d-md-flex">
-                            <div class="col-md-6">
-                                <div class="row">
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.normal_items') }}</div>
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row">
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.normal_items') }}</div>
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row report-item">
-                            @foreach ($reports as $index => $report)
-                                <div class="col-md-12 mt-2">
-                                    <div class="single-item">
-                                        <div class="row justify-content-between gap-15">
-                                            <div class="d-flex flex-row gap-5 col-3">
-                                                <div>
-                                                    {{ $index + 1 }}
-                                                </div>
-                                                <div class="col-1 col-md-1 d-flex flex-column">
-                                                    @if ($latest = $report->image)
-                                                        <a href="{{ asset($report->image) }}" target="_blank">
-                                                            <img src="{{ asset($latest) }}" alt="{{ $report->name }}"
-                                                                class="report-image">
-                                                        </a>
-                                                    @else
-                                                        <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}"
-                                                            alt="{{ $report->name }}" class="report-image">
-                                                    @endif
-                                                    <div>
-                                                        <label>{{ $report->name }}</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="col-2 col-md-2">
-                                                <input type="number"  name="ordered_count[{{ $report->id }}]" min="0"
-                                                    max="{{ $report->count }}" class="form-control text-muted p-0"
-                                                    value="{{ $report->count }}"
-                                                    @readonly(true)>
-                                            </div>
-
-                                            <div class="col-2 col-md-2">
-                                                <input type="number"
-                                                    min="0" max="{{ $report->count }}"
-                                                    name="set_qty[{{ $report->id }}]"
-                                                    class="form-control p-0"
-                                                    value="{{ ($report->set_qty == 0) ? $report->count : $report->set_qty }}">
-                                            </div>
-
-                                            <div class="col-12 col-md-4 mb-3">
-                                                <div class="card p-3 shadow-sm border">
-
-                                                    <div class="btn-group w-100" role="group" aria-label="Report Status">
-                                                        <input type="radio" class="btn-check reports-check"
-                                                            name="reports[{{ $report->id }}]"
-                                                            id="completed-{{ $report->id }}"
-                                                            value="completed"
-                                                            data-report="{{ $report->id }}"
-                                                            {{ $report && $report->is_completed ? 'checked' : '' }}>
-                                                        <label class="btn btn-outline-success" for="completed-{{ $report->id }}">
-                                                            <i class="fa fa-check me-1"></i> @lang('dashboard.completed')
-                                                        </label>
-
-                                                        <input type="radio" class="btn-check reports-check-not"
-                                                            name="reports[{{ $report->id }}]"
-                                                            id="not-completed-{{ $report->id }}"
-                                                            value="not_completed"
-                                                            data-report="{{ $report->id }}"
-                                                            {{ $report && !$report->is_completed ? 'checked' : '' }}>
-                                                        <label class="btn btn-outline-danger" for="not-completed-{{ $report->id }}">
-                                                            <i class="fa fa-times me-1"></i> @lang('dashboard.not_completed')
-                                                        </label>
-                                                    </div>
-
-                                                    <div class="incomplete-reason mt-3 col-12"
-                                                        data-report="{{ $report->id }}"
-                                                        @if($report && $report->is_completed) style="display:none" @endif>
-                                                        <label class="form-label">@lang('dashboard.not_completed_reason')</label>
-                                                        <textarea class="form-control" rows="2"
-                                                                name="not_completed_reason[{{ $report->id }}]"
-                                                                data-report="{{ $report->id }}">{{ $report ? $report->not_completed_reason : '' }}</textarea>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div class="row mt-10 d-none d-md-flex">
-                            <div class="col-md-6">
-                                <div class="row">
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.items_from_stocks') }}</div>
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row">
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.serial') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.items_from_stocks') }}</div>
-                                    <div class="col-1 small-text text-center">{{ __('dashboard.item') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.requested_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.placed_qty') }}</div>
-                                    <div class="col-2 small-text text-center">{{ __('dashboard.completion_status') }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row report-item">
-                            @foreach ($service->stocks as $index => $stock)
-                                <div class="col-md-12 mt-2">
-                                    <div class="single-item">
-                                        <div class="row">
-                                            <div class="col-1 col-md-1">
-                                                {{ $index + 1 }}
-                                            </div>
-                                            <div class="col-2 col-md-2 d-flex flex-column">
-                                                @if ($latest = $stock->image)
-                                                    <a href="{{ asset($stock->image) }}" target="_blank">
-                                                        <img src="{{ asset($latest) }}" alt="{{ $stock->name }}"
-                                                            class="report-image">
+                        <div class="table-responsive report-item">
+                            <table class="table table-bordered align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">@lang('dashboard.serial')</th>
+                                        <th class="text-center">@lang('dashboard.image')</th>
+                                        <th>@lang('dashboard.item')</th>
+                                        <th class="text-center">@lang('dashboard.requested_qty')</th>
+                                        <th class="text-center">@lang('dashboard.placed_qty')</th>
+                                        <th class="text-center">@lang('dashboard.completion_status')</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($reports as $index => $report)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td class="text-center">
+                                                @if ($latest = $report->image)
+                                                    <a href="{{ asset($report->image) }}" target="_blank">
+                                                        <img src="{{ asset($latest) }}" alt="{{ $report->name }}" class="report-image">
                                                     </a>
                                                 @else
-                                                    <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}"
-                                                        alt="{{ $stock->name }}" class="report-image">
+                                                    <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}" alt="{{ $report->name }}" class="report-image">
                                                 @endif
+                                            </td>
+                                            <td>
+                                                <div>{{ $report->name }}</div>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" name="ordered_count[{{ $report->id }}]" min="0" max="{{ $report->count }}" class="form-control text-muted" value="{{ $report->count }}" readonly>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" name="set_qty[{{ $report->id }}]" min="0" max="{{ $report->count }}" class="form-control" value="{{ ($report->set_qty == 0) ? $report->count : $report->set_qty }}">
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column gap-2">
+                                                    <div class="btn-group w-100" role="group" aria-label="Report Status">
+                                                        <input type="radio" class="btn-check reports-check" name="reports[{{ $report->id }}]" id="completed-{{ $report->id }}" value="completed" data-report="{{ $report->id }}" {{ $report && $report->is_completed ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-success" for="completed-{{ $report->id }}"><i class="fa fa-check me-1"></i> @lang('dashboard.completed')</label>
 
-                                            <div class="col-1 col-md-1 text-center">
-                                                <label>{{ $stock->name }}</label>
-                                            </div>
-                                            </div>
-                                            <div class="col-2 col-md-2">
-                                                <input type="text"  name="count_stock[{{ $stock->pivot->id }}]"
-                                                    class="form-control text-muted"
-                                                    value="{{ $stock->pivot->count ?? '' }}"
-                                                    disabled>
-                                            </div>
-
-                                            <div class="col-2 col-md-2 m-auto">
-                                                <input type="number"
-                                                    value="{{ $stock->pivot->required_qty }}"
-                                                    name="required_qty_stock[{{ $stock->pivot->id }}]"
-                                                    class="form-control">
-                                                    <button type="button"
-                                                            class="btn btn-danger btn-decrement mt-2"
-                                                            data-pivot-id="{{ $stock->pivot->id }}"
-                                                            data-stock-id="{{ $stock->id }}"
-                                                            data-stock-name="{{ $stock->name }}"
-                                                            data-status="decrement">
-                                                        <i class="fa fa-minus"></i>
-                                                    </button>
-                                                    @if ($stock->pivot->latest_activity)
-                                                        <small class="d-block mt-2">
-                                                            <span class="badge rounded-pill {{ $stock->pivot->latest_activity === 'increment' ? 'bg-success' : ($stock->pivot->latest_activity === 'decrement' ? 'bg-danger' : 'bg-secondary') }}">
-                                                                {{ $stock->pivot->latest_activity ? __('dashboard.'.$stock->pivot->latest_activity) : '—' }}
-                                                            </span>
-                                                        </small>
-                                                    @endif
-                                                    <button type="button"
-                                                            class="btn btn-success btn-decrement mt-2"
-                                                            data-pivot-id="{{ $stock->pivot->id }}"
-                                                            data-stock-id="{{ $stock->id }}"
-                                                            data-stock-name="{{ $stock->name }}"
-                                                            data-status="increment">
-                                                            <i class="fa fa-plus"></i>
-                                                    </button>
-
-                                            </div>
-
-                                            <div class="col-12 col-md-4 mb-3">
-                                                <div class="card p-3 shadow-sm border">
-                                                    <div class="btn-group w-100" role="group" aria-label="stock Status">
-                                                        <input type="radio" class="btn-check stock-check"
-                                                            name="stock[{{ $stock->pivot->id }}]"
-                                                            id="completed-stock-{{ $stock->pivot->id }}"
-                                                            value="completed"
-                                                            data-stock="{{ $stock->pivot->id }}"
-                                                            {{ $stock && $stock->pivot->is_completed ? 'checked' : '' }}>
-                                                        <label class="btn btn-outline-success" for="completed-stock-{{ $stock->pivot->id }}">
-                                                            <i class="fa fa-check me-1"></i> @lang('dashboard.completed')
-                                                        </label>
-
-                                                        <input type="radio" class="btn-check stock-check-not"
-                                                            name="stock[{{ $stock->pivot->id }}]"
-                                                            id="not-completed-stock-{{ $stock->pivot->id }}"
-                                                            value="not_completed"
-                                                            data-stock="{{ $stock->pivot->id }}"
-                                                            {{ $stock && !$stock->pivot->is_completed ? 'checked' : '' }}>
-                                                        <label class="btn btn-outline-danger" for="not-completed-stock-{{ $stock->pivot->id }}">
-                                                            <i class="fa fa-times me-1"></i> @lang('dashboard.not_completed')
-                                                        </label>
-
+                                                        <input type="radio" class="btn-check reports-check-not" name="reports[{{ $report->id }}]" id="not-completed-{{ $report->id }}" value="not_completed" data-report="{{ $report->id }}" {{ $report && !$report->is_completed ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-danger" for="not-completed-{{ $report->id }}"><i class="fa fa-times me-1"></i> @lang('dashboard.not_completed')</label>
                                                     </div>
 
-                                                    <div class="incomplete-reason mt-3 col-12"
-                                                        data-stock="{{ $stock->pivot->id }}"
-                                                        @if($stock && $stock->pivot->is_completed) style="display:none" @endif>
-                                                        <label class="form-label">@lang('dashboard.not_completed_reason')</label>
-                                                        <textarea class="form-control incomplete-reason" rows="2"
-                                                                name="not_completed_reason_stock[{{ $stock->pivot->id }}]"
-                                                                data-report="{{ $stock->pivot->id }}">{{ $stock ? $stock->pivot->not_completed_reason : '' }}</textarea>
+                                                    <div class="incomplete-reason mt-2" data-report="{{ $report->id }}" @if($report && $report->is_completed) style="display:none" @endif>
+                                                        <label class="form-label small">@lang('dashboard.not_completed_reason')</label>
+                                                        <textarea class="form-control" rows="2" name="not_completed_reason[{{ $report->id }}]">{{ $report ? $report->not_completed_reason : '' }}</textarea>
                                                     </div>
-
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                       
+
+                        <div class="table-responsive report-item">
+                            <table class="table table-bordered align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">@lang('dashboard.serial')</th>
+                                        <th class="text-center">@lang('dashboard.image')</th>
+                                        <th>@lang('dashboard.item')</th>
+                                        <th class="text-center">@lang('dashboard.available')</th>
+                                        <th class="text-center">@lang('dashboard.requested_qty')</th>
+                                        <th class="text-center">@lang('dashboard.completion_status')</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($service->stocks as $index => $stock)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td class="text-center">
+                                                @if ($latest = $stock->image)
+                                                    <a href="{{ asset($stock->image) }}" target="_blank">
+                                                        <img src="{{ asset($latest) }}" alt="{{ $stock->name }}" class="report-image">
+                                                    </a>
+                                                @else
+                                                    <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}" alt="{{ $stock->name }}" class="report-image">
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div>{{ $stock->name }}</div>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="text" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" disabled>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                                    <input type="number" value="{{ $stock->pivot->required_qty }}" name="required_qty_stock[{{ $stock->pivot->id }}]" class="form-control" style="width:80px">
+                                                    <div class="d-flex flex-column">
+                                                        <button type="button" class="btn btn-sm btn-danger btn-decrement" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="decrement"><i class="fa fa-minus"></i></button>
+                                                        @if ($stock->pivot->latest_activity)
+                                                            <small class="d-block mt-1 text-center">
+                                                                <span class="badge rounded-pill {{ $stock->pivot->latest_activity === 'increment' ? 'bg-success' : ($stock->pivot->latest_activity === 'decrement' ? 'bg-danger' : 'bg-secondary') }}">
+                                                                    {{ $stock->pivot->latest_activity ? __('dashboard.'.$stock->pivot->latest_activity) : '—' }}
+                                                                </span>
+                                                            </small>
+                                                        @endif
+                                                        <button type="button" class="btn btn-sm btn-success btn-decrement mt-1" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="increment"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column gap-2">
+                                                    <div class="btn-group w-100" role="group" aria-label="stock Status">
+                                                        <input type="radio" class="btn-check stock-check" name="stock[{{ $stock->pivot->id }}]" id="completed-stock-{{ $stock->pivot->id }}" value="completed" data-stock="{{ $stock->pivot->id }}" {{ $stock && $stock->pivot->is_completed ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-success" for="completed-stock-{{ $stock->pivot->id }}"><i class="fa fa-check me-1"></i> @lang('dashboard.completed')</label>
+
+                                                        <input type="radio" class="btn-check stock-check-not" name="stock[{{ $stock->pivot->id }}]" id="not-completed-stock-{{ $stock->pivot->id }}" value="not_completed" data-stock="{{ $stock->pivot->id }}" {{ $stock && !$stock->pivot->is_completed ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-danger" for="not-completed-stock-{{ $stock->pivot->id }}"><i class="fa fa-times me-1"></i> @lang('dashboard.not_completed')</label>
+                                                    </div>
+
+                                                    <div class="incomplete-reason mt-2" data-stock="{{ $stock->pivot->id }}" @if($stock && $stock->pivot->is_completed) style="display:none" @endif>
+                                                        <label class="form-label small">@lang('dashboard.not_completed_reason')</label>
+                                                        <textarea class="form-control incomplete-reason" rows="2" name="not_completed_reason_stock[{{ $stock->pivot->id }}]" data-report="{{ $stock->pivot->id }}">{{ $stock ? $stock->pivot->not_completed_reason : '' }}</textarea>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
 
                         <div class="form-control">
@@ -333,8 +227,9 @@
             });
         });
 
-       $(document).on('click', '.btn-decrement', function (e) {
-            e.preventDefault();
+      $(document).on('click', '.btn-decrement', function (e) {
+          e.preventDefault();
+          console.log('.btn-decrement clicked (resources)', this);
 
             var $btn       = $(this),
                 pivotId    = $btn.data('pivotId'),
@@ -358,7 +253,7 @@
 
             Swal.fire({
                 icon: 'warning',
-                title: status === 'decrement' ? "@lang('dashboard.decrement_label')" : "@lang('dashboard.increment_label')" ,
+                title: status === 'decrement' ? "@lang('dashboard.increment_label')" : "@lang('dashboard.decrement_label')" ,
                 html: status === 'decrement' ? html : '',
                 showCancelButton: true,
                 confirmButtonText: "@lang('dashboard.confirm')",

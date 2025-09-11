@@ -582,6 +582,8 @@ return [
     'warn_over'       => 'الكمية المطلوبة (:qty) أكبر من المتاح (:available).',
     'decrement_label' => 'خصم من المخزون',
     'increment_label' => 'إرجاع إلى للمخزون',
+    "available" => 'الكميات المتاحة',
+    transfer_between_accounts => 'التحويل بين الحسابات',
     'voice_note' => 'ملاحظة صوتية',
     'start_recording' => 'ابدأ التسجيل',
     'stop_recording' => 'إيقاف التسجيل',
