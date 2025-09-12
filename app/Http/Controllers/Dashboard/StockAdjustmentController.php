@@ -61,11 +61,11 @@ class StockAdjustmentController extends Controller
                 if ($type === 'item_decrement' && $stock->quantity < $qty) {
                     $stock->update(['quantity' => $qty]);
                 } 
-                // elseif ($type === 'item_decrement') {
-                //     $stock->decrement('quantity', $qty);
-                // } elseif ($type === 'item_increment') {
-                //     $stock->increment('quantity', $qty);
-                // }
+                elseif ($type === 'item_decrement') {
+                    $stock->decrement('quantity', $qty);
+                } elseif ($type === 'item_increment') {
+                    $stock->increment('quantity', $qty);
+                }
 
                 // handle image upload if present
                 $imagePath = null;

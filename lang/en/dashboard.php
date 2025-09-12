@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'stock_report_title' => 'Stock Report',
     'mark_all_not_completed' => 'Mark all as not completed',
     'the_insurance' => 'Insurance',
     'Insurance forfeiture refund' => 'Insurance Forfeiture/Refund',

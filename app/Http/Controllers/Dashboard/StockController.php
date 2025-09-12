@@ -160,4 +160,14 @@ class StockController extends Controller
         $stocks = Stock::select('id', 'name', 'quantity')->where('quantity', '>', 0)->get();
         return response()->json($stocks);
     }
+
+    public function stockReport($stock)
+    {
+        $stock = Stock::with('orders')->findOrFail($stock);
+        // $this->authorize('view', $stock);
+        $transactions = $stock->stockAdjustments()->paginate(10);
+
+        return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
+    }
+
 }

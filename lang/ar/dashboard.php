@@ -1435,7 +1435,8 @@ return [
         // Manual item withdrawal translations
     'manual_item_withdrawal_show' => 'عرض سحب عنصر يدوي',
     'manual_item_return_show' => 'عرض إرجاع عنصر يدوي',
-
+    'item_returned' => ' إرجاع ',
+    'item_issued' => ' صرف ',
     'manual_item_withdrawal_and_return' => [
         'title' => 'سحب عنصر يدوي',
         'heading' => ' صرف و إرجاع عنصر من المخزون يدوياً',

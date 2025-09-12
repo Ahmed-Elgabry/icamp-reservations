@@ -1506,7 +1506,8 @@ Route::resource('terms_sittngs', TermsSittngController::class)
     ->middleware(['auth']);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);
-// Route::resource('stocks', StockController::class);
+// Stock report page
+Route::get('stocks/{stock}/report', [\App\Http\Controllers\Dashboard\StockController::class, 'stockReport'])->name('stocks.report');
 
 Route::resource('questions', QuestionController::class);
 Route::post('/questions/{question}/answer', [QuestionController::class, 'storeAnswer'])->name('questions.storeAnswer');

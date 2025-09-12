@@ -143,11 +143,11 @@
                         <td>{{ $adj->quantity }}</td>
                         <td>{{ $adj->type ?? 'item_decrement' }}</td>
                         @if($adj->order_id)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options."."-".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ". __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->custom_reason) }}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options."."-".$adj->reason) }}  {{ " - ". __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->custom_reason) }}</td>
                         @else
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options."."-".$adj->reason) }}</td>
                         @endif
                                                 <td>{{ $adj->note }}</td>
                                                 <td>
