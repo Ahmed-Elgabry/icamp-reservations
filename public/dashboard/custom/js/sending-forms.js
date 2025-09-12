@@ -1,73 +1,184 @@
 $(document).ready(function(){
-    const t = document.getElementById("kt_ecommerce_add_product_form"),
-    o = document.getElementById("kt_ecommerce_add_product_submit");
+    const t = document.getElementById("kt_ecommerce_add_product_form");
+
+    // Global Delete Confirmation Function
+    window.confirmDelete = function(deleteUrl, csrfToken) {
+        // Check if Swal is available
+        if (typeof Swal === 'undefined') {
+            alert('SweetAlert is not loaded!');
+            return;
+        }
+        
+        // Get localized text from global translations object or fallback to English
+        const confirmTitle = (window.deleteTranslations && window.deleteTranslations.confirm_delete) || 'Confirm Delete';
+        const confirmText = (window.deleteTranslations && window.deleteTranslations.delete_warning_message) || 'Are you sure you want to delete this item? This action cannot be undone.';
+        const confirmButton = (window.deleteTranslations && window.deleteTranslations.yes_delete) || 'Yes, Delete';
+        const cancelButton = (window.deleteTranslations && window.deleteTranslations.cancel) || 'Cancel';
+        
+        Swal.fire({
+            title: confirmTitle,
+            text: confirmText,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: confirmButton,
+            cancelButtonText: cancelButton,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Create and submit delete form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = deleteUrl;
+                form.style.display = 'none';
+                
+                // Add CSRF token
+                const csrfTokenField = document.createElement('input');
+                csrfTokenField.type = 'hidden';
+                csrfTokenField.name = '_token';
+                csrfTokenField.value = csrfToken || $('meta[name="csrf-token"]').attr('content') || '';
+                form.appendChild(csrfTokenField);
+                
+                // Add DELETE method
+                const methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.name = '_method';
+                methodField.value = 'DELETE';
+                form.appendChild(methodField);
+                
+                // Add redirect back to current page
+                const redirectField = document.createElement('input');
+                redirectField.type = 'hidden';
+                redirectField.name = 'redirect_back';
+                redirectField.value = window.location.href;
+                form.appendChild(redirectField);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    };
 
     $(document).on('submit','.store',function(e){
         e.preventDefault();
-        var url = $(this).attr('action');
+        var $form = $(this);
+        var url = $form.attr('action');
+        // Find this form's submit button and use it for indicator
+        var o = $form.find('#kt_ecommerce_add_product_submit')[0] || $form.find('button[type="submit"]')[0] || null;
+
         $.ajax({
             url: url,
             method: 'post',
-            data: new FormData($(this)[0]),
+            data: new FormData($form[0]),
             dataType:'json',
             processData: false,
             contentType: false,
             success: function(response){
-                o.setAttribute("data-kt-indicator", "on"), o.disabled = !0, setTimeout((function () {
-                    o.removeAttribute("data-kt-indicator");
+                o && o.setAttribute && o.setAttribute("data-kt-indicator", "on");
+                o && (o.disabled = !0);
+                setTimeout((function () {
+                    o && o.removeAttribute && o.removeAttribute("data-kt-indicator");
+                    var successMsg = $form.attr('data-success-message') || ($.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] ? $.localize.data['app']['common']['submitted'] : 'Submitted successfully');
                     Swal.fire({
-                        text: `${$.localize.data['app']['common']['submitted']}`,
+                        text: successMsg,
                         icon: "success",
                         buttonsStyling: !1,
-                        confirmButtonText: `${$.localize.data['app']['common']['got_it']}`,
+                        confirmButtonText: `${$.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] ? $.localize.data['app']['common']['got_it'] : 'OK'}`,
                         customClass: {
                             confirmButton: "btn btn-primary"
                         }
-                    }).then((function (e) {
-                        o.disabled = !1, window.location = t.getAttribute("data-kt-redirect");
+                    }).then((function () {
+                        // Emit a success event so pages can react without reload
+                        $form.trigger('store:success', [response]);
+                        // Close any parent modal if present
+                        try {
+                            var $modal = $form.closest('.modal');
+                            if ($modal && $modal.length) {
+                                var modalInst = bootstrap.Modal.getInstance($modal[0]) || new bootstrap.Modal($modal[0]);
+                                modalInst.hide();
+                            }
+                        } catch (e) {}
+                        // Optional redirect if attribute provided
+                        const redirect = ($form.attr('data-kt-redirect')) || (t && t.getAttribute ? t.getAttribute("data-kt-redirect") : null);
+                        if (redirect) {
+                            window.location = redirect;
+                        } else {
+                            if (o) o.disabled = !1;
+                        }
                     }))
                 }), 2e3);
             },
             error: function (xhr) {
+                var fallbackGeneral = ($.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] && $.localize.data['app']['common']['general_error']) || 'An error occurred';
+                var msg = fallbackGeneral;
+                try {
+                    if (xhr && xhr.responseJSON) {
+                        if (xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON.errors && typeof xhr.responseJSON.errors === 'object') {
+                            var errs = [];
+                            Object.keys(xhr.responseJSON.errors).forEach(function(k){
+                                var v = xhr.responseJSON.errors[k];
+                                if (Array.isArray(v)) { errs = errs.concat(v); } else if (v) { errs.push(v); }
+                            });
+                            if (errs.length) { msg = errs.join('\n'); }
+                        }
+                    } else if (xhr && xhr.responseText) {
+                        try {
+                            var parsed = JSON.parse(xhr.responseText);
+                            if (parsed && (parsed.message || parsed.error)) {
+                                msg = parsed.message || parsed.error;
+                            } else {
+                                msg = xhr.responseText;
+                            }
+                        } catch (e) {
+                            msg = xhr.responseText;
+                        }
+                    }
+                } catch (e) {}
+
                 Swal.fire({
-                    html: `${$.localize.data['app']['common']['general_error']}`,
-                    icon: `${$.localize.data['app']['common']['error']}`,
+                    html: msg,
+                    icon: "error",
                     buttonsStyling: !1,
-                    confirmButtonText: `${$.localize.data['app']['common']['got_it']}`,
+                    confirmButtonText: `${$.localize && $.localize.data && $.localize.data['app'] && $.localize.data['app']['common'] ? $.localize.data['app']['common']['got_it'] : 'OK'}`,
                     customClass: {
                         confirmButton: "btn btn-primary"
                     }
                 });
 
                 $(".text-danger").remove();
-                $('.store').find('input').removeClass('border-danger');
-                $('.store').find('textarea').removeClass('border-danger');
+                $form.find('input').removeClass('border-danger');
+                $form.find('textarea').removeClass('border-danger');
 
-                $.each(xhr.responseJSON.errors, function(key,value) {
+                var respErrors = (xhr && xhr.responseJSON && xhr.responseJSON.errors && typeof xhr.responseJSON.errors === 'object') ? xhr.responseJSON.errors : null;
+                if (respErrors) $.each(respErrors, function(key,value) {
                     var ar_item  =  key.includes('.ar') ?  key.replace(".ar", "[ar]") : key;
                     var en_item  =  key.includes('.en') ?  key.replace(".en", "[en]") : key;
+                    var valText = Array.isArray(value) ? value.join(' ') : value;
                     if(ar_item != en_item) {
-                        $('.store input[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store input[name="' + en_item + '"]').addClass('border-danger');
-                        $('.store input[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
+                        $form.find('input[name="' + en_item + '"]').addClass('border-danger');
+                        $form.find('input[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                        
-                        $('.store select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
+                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
     
-                        $('.store textarea[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store textarea[name="' + en_item + '"]').addClass('border-danger');
-                        $('.store textarea[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
+                        $form.find('textarea[name="' + en_item + '"]').addClass('border-danger');
+                        $form.find('textarea[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                     } else {
-                        $('.store input[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('input[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('input[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                         
-                        $('.store select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
-                        $('.store select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('select[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
+                        $form.find('select[name="' + en_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
     
-                        $('.store textarea[name="' + ar_item + '"]').addClass('border-danger');
-                        $('.store textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${value}</span>`);
+                        $form.find('textarea[name="' + ar_item + '"]').addClass('border-danger');
+                        $form.find('textarea[name="' + ar_item + '"]').after(`<span class="mt-5 text-danger">${valText}</span>`);
                     }
                 });
 

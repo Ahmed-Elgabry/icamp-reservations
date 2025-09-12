@@ -19,10 +19,10 @@ class StockController extends Controller
             'quantity_min' => request()->query('quantity_min'),
             'quantity_max' => request()->query('quantity_max'),
             'quantity' => request()->query('quantity'),
+            'higher_selling' => request()->query('higher_selling'),
         ];
 
         $stocks = Stock::filter($filters)
-            ->orderBy('created_at', 'desc')
             ->get();
 
         $lowStock = $stocks->filter(function ($stock) {
@@ -47,7 +47,7 @@ class StockController extends Controller
             $validatedData = $request->validate([
                 'name' => 'required|max:255',
                 'description' => 'nullable',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20480',
                 'price' => 'required|numeric',
                 'selling_price' => 'nullable|numeric',
                 'quantity' => 'nullable|integer',

@@ -59,6 +59,22 @@
 	@endif
 
 	<style>
+		/* Global Select Validation Styles */
+		select.is-invalid {
+			border-color: #dc3545 !important;
+			box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+		}
+		
+		select.is-invalid:focus {
+			border-color: #dc3545 !important;
+			box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+		}
+		
+		.form-group label .text-danger {
+			color: #dc3545 !important;
+		}
+		
+		/* Enhanced Table Styling */
 		table th,
 		table td,
 		table td div,
@@ -69,6 +85,66 @@
 		table td div a {
 			text-align: center !important;
 			display: block
+		}
+
+		/* Enhanced Table Header Styling */
+		table thead tr {
+			background: linear-gradient(135deg, #ce6316ce 0%, #b16e17ff 100%) !important; /* Dark brown gradient */
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+		}
+
+		table thead th {
+			font-weight: 900 !important;
+			font-size: 0.875rem !important;
+			color: #ffffff !important;
+			text-transform: uppercase !important;
+			letter-spacing: 0.5px !important;
+			padding: 1rem 0.75rem !important;
+			border: none !important;
+			text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+		}
+
+		/* Alternating row colors for better readability */
+		table tbody tr:nth-child(even) {
+			background-color: #f8f9fa !important;
+		}
+
+		table tbody tr:hover {
+			background-color: #e3f2fd !important;
+			transition: background-color 0.2s ease-in-out !important;
+		}
+
+		/* Enhanced badge styling */
+		.badge {
+			font-size: 0.75rem !important;
+			padding: 0.5rem 0.75rem !important;
+			border-radius: 0.375rem !important;
+			font-weight: 600 !important;
+		}
+
+		/* Money/Amount column styling */
+		td[data-kt-ecommerce-category-filter="category_name"] {
+			font-weight: 700 !important;
+			color: #28a745 !important;
+			font-size: 1rem !important;
+		}
+
+		/* Action buttons styling */
+		.btn-sm {
+			padding: 0.375rem 0.75rem !important;
+			font-size: 0.875rem !important;
+			border-radius: 0.25rem !important;
+		}
+
+		/* Center checkboxes */
+		.form-check-input {
+			margin: 0 auto !important;
+		}
+
+		/* Responsive table improvements */
+		.table-responsive {
+			border-radius: 0.5rem !important;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07) !important;
 		}
 	</style>
 
@@ -81,7 +157,7 @@
 		--primary-brown: #8B4513 !important;
 		--secondary-brown: #A0522D !important;
 		--light-brown: #D2B48C !important;
-		--dark-brown: #654321 !important;
+		--dark-brown: #644220ff !important;
 		--cream: #F5F5DC !important;
 	}
 
@@ -367,6 +443,112 @@
 	<script src="{{asset('dashboard/assets/js/custom/utilities/modals/create-app.js')}}"></script>
 	<script src="{{asset('dashboard/assets/js/custom/utilities/modals/users-search.js')}}"></script>
 	<!--end::Page Custom Javascript-->
+	
+	<!-- Global Delete Confirmation Translations -->
+	<script>
+		// Set global translations for delete confirmation (available on all dashboard pages)
+		window.deleteTranslations = {
+			confirm_delete: '{{ __("dashboard.confirm_delete") }}',
+			delete_warning_message: '{{ __("dashboard.delete_warning_message") }}',
+			yes_delete: '{{ __("dashboard.yes_delete") }}',
+			cancel: '{{ __("dashboard.cancel") }}'
+		};
+	</script>
+	
+	<!-- Global Select Validation Script -->
+	<script>
+	$(document).ready(function() {
+		// Global function to validate select fields with default values
+		window.validateSelectFields = function(form) {
+			let isValid = true;
+			let firstInvalidField = null;
+			
+			// Find all select fields in the form that have required attribute or data-required
+			$(form).find('select[required], select[data-required="true"]').each(function() {
+				let $select = $(this);
+				let value = $select.val();
+				let label = $select.closest('.form-group').find('label').text().replace('*', '').trim();
+				
+				// Check if value is empty or is a default "choose" option
+				if (!value || value === '' || value === '0' || 
+					$select.find('option:selected').text().toLowerCase().includes('{{ strtolower(__("dashboard.choose")) }}') ||
+					$select.find('option:selected').text().toLowerCase().includes('choose') ||
+					$select.find('option:selected').text().toLowerCase().includes('اختر')) {
+					
+					isValid = false;
+					
+					// Mark field as invalid
+					$select.addClass('is-invalid');
+					
+					// Store first invalid field for focus
+					if (!firstInvalidField) {
+						firstInvalidField = $select;
+					}
+				} else {
+					// Remove invalid class if field is now valid
+					$select.removeClass('is-invalid');
+				}
+			});
+			
+			if (!isValid) {
+				// Show validation message
+				Swal.fire({
+					icon: 'warning',
+					title: '{{ __("dashboard.error") }}',
+					text: '{{ __("dashboard.please_select_required_fields") }}',
+					confirmButtonText: '{{ __("dashboard.ok") }}'
+				});
+				
+				// Focus on first invalid field
+				if (firstInvalidField) {
+					firstInvalidField.focus();
+				}
+			}
+			
+			return isValid;
+		};
+		
+		// Auto-apply validation to all forms with class 'validate-selects'
+		$('form.validate-selects').on('submit', function(e) {
+			if (!window.validateSelectFields(this)) {
+				e.preventDefault();
+				return false;
+			}
+		});
+		
+		// Auto-apply validation to forms with select fields that have required attribute
+		$('form').on('submit', function(e) {
+			let $form = $(this);
+			
+			// Skip if form already has validation or is marked to skip
+			if ($form.hasClass('validate-selects') || $form.hasClass('skip-select-validation')) {
+				return;
+			}
+			
+			// Check if form has required select fields
+			if ($form.find('select[required]').length > 0) {
+				if (!window.validateSelectFields(this)) {
+					e.preventDefault();
+					return false;
+				}
+			}
+		});
+		
+		// Remove invalid class when user changes selection
+		$(document).on('change', 'select.is-invalid', function() {
+			let $select = $(this);
+			let value = $select.val();
+			
+			if (value && value !== '' && value !== '0' && 
+				!$select.find('option:selected').text().toLowerCase().includes('{{ strtolower(__("dashboard.choose")) }}') &&
+				!$select.find('option:selected').text().toLowerCase().includes('choose') &&
+				!$select.find('option:selected').text().toLowerCase().includes('اختر')) {
+				$select.removeClass('is-invalid');
+			}
+		});
+	});
+	</script>
+	
 	@yield('scripts')
 
 	@stack('js')

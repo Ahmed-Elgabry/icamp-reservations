@@ -14,11 +14,8 @@ class TermsSittngRequest extends FormRequest
     public function rules()
     {
         return [
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'description' => 'nullable|string|max:3000',
-            'terms' => 'nullable|string|max:3000',
-            'commercial_license' => 'nullable|',
-            'company_name' => 'nullable|string|max:255',
+            'commercial_license_ar' => 'nullable|string',
+            'commercial_license_en' => 'nullable|string',
             'order_id' => 'nullable|integer|exists:orders,id',
             'user_id' => 'nullable|integer|exists:users,id',
         ];

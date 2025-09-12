@@ -32,6 +32,8 @@
                         <th>@lang('dashboard.attendees_count')</th>
                         <th>@lang('dashboard.topics_count')</th>
                         <th>@lang('dashboard.meeting_created_by')</th>
+                        <th>@lang('dashboard.created_date')</th>
+                        <th>@lang('dashboard.created_time')</th>
                         <th>@lang('dashboard.actions')</th>
                     </tr>
                     </thead>
@@ -45,6 +47,8 @@
                             <td>{{ $meeting->attendees->count() }}</td>
                             <td>{{ $meeting->topics->count() }}</td>
                             <td>{{ $meeting->creator->name }}</td>
+                            <td>{{ $meeting->created_at->format('Y-m-d') }}</td>
+                            <td>{{ $meeting->created_at->format('h:i A') }}</td>
                             <td>
                                 @can('meetings.show')
                                     <a href="{{ route('meetings.show', $meeting) }}" class="btn btn-sm btn-info">
@@ -59,7 +63,7 @@
                                 @can('meetings.destroy')
                                     <form action="{{ route('meetings.destroy', $meeting) }}" method="POST" class="d-inline">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                             @lang('dashboard.delete')
                                         </button>
                                     </form>

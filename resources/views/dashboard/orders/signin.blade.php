@@ -1,19 +1,22 @@
 @extends('dashboard.layouts.app')
 
-@section('pageTitle', __('dashboard.edit_time_and_image'))
+@section('pageTitle', __('dashboard.sign_in'))
 @section('content')
 
 <!--begin::Post-->
 <div class="post d-flex flex-column-fluid" id="kt_post">
     <div id="kt_content_container" class="container-xxl">
         @include('dashboard.orders.nav')
+        
         @if ($order->video_note)
             <div class="modal fade" id="deleteVideoNoteModal" tabindex="-1" aria-labelledby="deleteVideoNoteModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteVideoNoteModalLabel">
+                         <!-- customer information -->
+                         <div class="modal-header">
+                             
+                             <h5 class="modal-title" id="deleteVideoNoteModalLabel">
                                 {{ __('dashboard.delete_video_note') }}
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -37,6 +40,18 @@
             </div>
         @endif
         <div class="card card-flush">
+            <div class="pt-5 px-9 gap-2 gap-md-5">
+                <div class="row g-3 small">
+                    <div class="col-md-1 p">
+                        <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                        <div class="fw-bold">{{ $order->id }}</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                        <div class="fw-bold">{{ $order->customer->name }}</div>
+                    </div>
+                </div>
+            </div>
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <h3 class="card-title">{{ __('dashboard.edit_time_and_image') }}</h3>
             </div>

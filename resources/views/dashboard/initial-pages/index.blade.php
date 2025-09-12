@@ -59,6 +59,8 @@
                             </th>
                             <th class="min-w-250px">@lang('dashboard.image')</th>
                             <th class="min-w-150px">@lang('dashboard.order')</th>
+                            <th class="">@lang('dashboard.created_date')</th>
+                            <th class="">@lang('dashboard.created_time')</th>
                             <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                         </tr>
                         <!--end::Table row-->
@@ -101,6 +103,8 @@
                                     <div class="badge badge-light-success">{{__('dashboard.page_order') .$page->order}}</div>
                                     <!--end::Badges-->
                                 </td>
+                                <td>{{ $page->created_at->format('Y-m-d') }}</td>
+                                <td>{{ $page->created_at->format('h:i A') }}</td>
                                 <!--end::Type=-->
                                 <!--begin::Action=-->
                                 <td class="text-end">

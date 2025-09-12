@@ -1,25 +1,15 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>icamp - بناء الاستبيان</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-utilities.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="canonical" href="{{ Request::fullUrl() }}" />
-    <style>
+@section('pageTitle', __('dashboard.survey_builder'))
+
+@extends('dashboard.layouts.app')
+
+@push('css')
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-utilities.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<style>
         :root {
             --bs-primary: #2563eb;
             --bs-secondary: #6b7280;
-        }
-        body {
-            background-color: #f9fafb;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         /* Mobile-first responsive layout */
@@ -75,8 +65,8 @@
         /* Mobile toggle button */
         .mobile-toggle-btn {
             position: fixed;
-            top: 20px;
-            right: 4px;
+            top: 660px;
+            right: 15px;
             z-index: 1060;
             width: 50px;
             height: 50px;
@@ -443,8 +433,16 @@
             }
         </style>
     @endif
-</head>
-<body>
+</style>
+@endpush
+
+@section('content')
+
+<!--begin::Post-->
+<div class="post d-flex flex-column-fluid" id="kt_post">
+    <!--begin::Container-->
+    <div id="kt_content_container" class="container-xxl">
+
 <!-- Mobile backdrop -->
 <div class="mobile-sidebar-backdrop" id="mobileSidebarBackdrop"></div>
 <!-- Mobile toggle button -->
@@ -461,8 +459,8 @@
         <div class="container-fluid p-2">
             <div class="bg-white rounded shadow-sm p-3 d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center flex-grow-1">
-                    <span class="unsaved-indicator me-2" title="تغييرات غير محفوظة"></span>
-                    <input type="text" class="form-control border-0 fw-bold" id="surveyTitleMobile" value="استبيان جديد" placeholder="عنوان الاستبيان">
+                    <span class="unsaved-indicator me-2" title="{{ __('dashboard.unsaved_changes') }}"></span>
+                    <input type="text" class="form-control border-0 fw-bold" id="surveyTitleMobile" value="{{ __('dashboard.new_survey') }}" placeholder="{{ __('dashboard.survey_title') }}">
                 </div>
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm btn-outline-secondary">
@@ -479,120 +477,120 @@
         <!-- Desktop Left Sidebar - Question Types -->
         <div class="col-xl-1 col-lg-2 desktop-sidebar">
             <div class="field-types-column">
-                <div class="sidebar-field" data-type="text" title="حقل نصي">
+                <div class="sidebar-field" data-type="text" title="{{ __('dashboard.text_field') }}">
                     <i class="mdi mdi-format-size mdi-24px text-primary"></i>
-                    <div class="field-type-label">نص</div>
+                    <div class="field-type-label">{{ __('dashboard.text_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="textarea" title="منطقة نص">
+                <div class="sidebar-field" data-type="textarea" title="{{ __('dashboard.textarea_field') }}">
                     <i class="mdi mdi-format-align-left mdi-24px text-primary"></i>
-                    <div class="field-type-label">منطقة نص</div>
+                    <div class="field-type-label">{{ __('dashboard.textarea_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="select" title="قائمة منسدلة">
+                <div class="sidebar-field" data-type="select" title="{{ __('dashboard.dropdown_field') }}">
                     <i class="mdi mdi-chevron-down mdi-24px text-primary"></i>
-                    <div class="field-type-label">قائمة</div>
+                    <div class="field-type-label">{{ __('dashboard.dropdown_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="radio" title="أزرار اختيار">
+                <div class="sidebar-field" data-type="radio" title="{{ __('dashboard.radio_field') }}">
                     <i class="mdi mdi-circle-outline mdi-24px text-primary"></i>
-                    <div class="field-type-label">اختيار</div>
+                    <div class="field-type-label">{{ __('dashboard.radio_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="checkbox" title="خانات اختيار">
+                <div class="sidebar-field" data-type="checkbox" title="{{ __('dashboard.checkbox_field') }}">
                     <i class="mdi mdi-checkbox-outline mdi-24px text-primary"></i>
-                    <div class="field-type-label">خانات</div>
+                    <div class="field-type-label">{{ __('dashboard.checkbox_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="date" title="اختيار التاريخ">
+                <div class="sidebar-field" data-type="date" title="{{ __('dashboard.date_field') }}">
                     <i class="mdi mdi-calendar mdi-24px text-primary"></i>
-                    <div class="field-type-label">تاريخ</div>
+                    <div class="field-type-label">{{ __('dashboard.date_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="datetime" title="التاريخ والوقت">
+                <div class="sidebar-field" data-type="datetime" title="{{ __('dashboard.time_field') }}">
                     <i class="mdi mdi-clock mdi-24px text-primary"></i>
-                    <div class="field-type-label">وقت</div>
+                    <div class="field-type-label">{{ __('dashboard.time_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="number" title="رقم">
+                <div class="sidebar-field" data-type="number" title="{{ __('dashboard.number_field') }}">
                     <i class="mdi mdi-pound mdi-24px text-primary"></i>
-                    <div class="field-type-label">رقم</div>
+                    <div class="field-type-label">{{ __('dashboard.number_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="email" title="البريد الإلكتروني">
+                <div class="sidebar-field" data-type="email" title="{{ __('dashboard.email_field') }}">
                     <i class="mdi mdi-email mdi-24px text-primary"></i>
-                    <div class="field-type-label">بريد</div>
+                    <div class="field-type-label">{{ __('dashboard.email_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="tel" title="رقم الهاتف">
+                <div class="sidebar-field" data-type="tel" title="{{ __('dashboard.phone_field') }}">
                     <i class="mdi mdi-phone mdi-24px text-primary"></i>
-                    <div class="field-type-label">هاتف</div>
+                    <div class="field-type-label">{{ __('dashboard.phone_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="url" title="رابط إلكتروني">
+                <div class="sidebar-field" data-type="url" title="{{ __('dashboard.url_field') }}">
                     <i class="mdi mdi-link mdi-24px text-primary"></i>
-                    <div class="field-type-label">رابط</div>
+                    <div class="field-type-label">{{ __('dashboard.url_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="stars" title="تقييم بالنجوم">
+                <div class="sidebar-field" data-type="stars" title="{{ __('dashboard.stars_field') }}">
                     <i class="mdi mdi-star mdi-24px text-primary"></i>
-                    <div class="field-type-label">نجوم</div>
+                    <div class="field-type-label">{{ __('dashboard.stars_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="rating" title="مقياس تقييم">
+                <div class="sidebar-field" data-type="rating" title="{{ __('dashboard.rating_field') }}">
                     <i class="mdi mdi-thumb-up mdi-24px text-primary"></i>
-                    <div class="field-type-label">تقييم</div>
+                    <div class="field-type-label">{{ __('dashboard.rating_field') }}</div>
                 </div>
             </div>
         </div>
         <!-- Mobile Sidebar -->
         <div class="mobile-sidebar" id="mobileSidebar">
             <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
-                <h5 class="mb-0">إضافة سؤال</h5>
+                <h5 class="mb-0">{{ __('dashboard.add_question') }}</h5>
                 <button class="btn btn-sm btn-light" id="closeMobileSidebar">
                     <i class="mdi mdi-close"></i>
                 </button>
             </div>
             <div class="field-types-grid">
-                <div class="sidebar-field" data-type="text" title="حقل نصي">
+                <div class="sidebar-field" data-type="text" title="{{ __('dashboard.text_field') }}">
                     <i class="mdi mdi-format-size mdi-24px text-primary"></i>
-                    <div class="field-type-label">نص</div>
+                    <div class="field-type-label">{{ __('dashboard.text_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="textarea" title="منطقة نص">
+                <div class="sidebar-field" data-type="textarea" title="{{ __('dashboard.textarea_field') }}">
                     <i class="mdi mdi-format-align-left mdi-24px text-primary"></i>
-                    <div class="field-type-label">منطقة نص</div>
+                    <div class="field-type-label">{{ __('dashboard.textarea_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="select" title="قائمة منسدلة">
+                <div class="sidebar-field" data-type="select" title="{{ __('dashboard.dropdown_field') }}">
                     <i class="mdi mdi-chevron-down mdi-24px text-primary"></i>
-                    <div class="field-type-label">قائمة</div>
+                    <div class="field-type-label">{{ __('dashboard.dropdown_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="radio" title="أزرار اختيار">
+                <div class="sidebar-field" data-type="radio" title="{{ __('dashboard.radio_field') }}">
                     <i class="mdi mdi-circle-outline mdi-24px text-primary"></i>
-                    <div class="field-type-label">اختيار</div>
+                    <div class="field-type-label">{{ __('dashboard.radio_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="checkbox" title="خانات اختيار">
+                <div class="sidebar-field" data-type="checkbox" title="{{ __('dashboard.checkbox_field') }}">
                     <i class="mdi mdi-checkbox-outline mdi-24px text-primary"></i>
-                    <div class="field-type-label">خانات</div>
+                    <div class="field-type-label">{{ __('dashboard.checkbox_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="date" title="اختيار التاريخ">
+                <div class="sidebar-field" data-type="date" title="{{ __('dashboard.date_field') }}">
                     <i class="mdi mdi-calendar mdi-24px text-primary"></i>
-                    <div class="field-type-label">تاريخ</div>
+                    <div class="field-type-label">{{ __('dashboard.date_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="datetime" title="التاريخ والوقت">
+                <div class="sidebar-field" data-type="datetime" title="{{ __('dashboard.time_field') }}">
                     <i class="mdi mdi-clock mdi-24px text-primary"></i>
-                    <div class="field-type-label">وقت</div>
+                    <div class="field-type-label">{{ __('dashboard.time_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="number" title="رقم">
+                <div class="sidebar-field" data-type="number" title="{{ __('dashboard.number_field') }}">
                     <i class="mdi mdi-pound mdi-24px text-primary"></i>
-                    <div class="field-type-label">رقم</div>
+                    <div class="field-type-label">{{ __('dashboard.number_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="email" title="البريد الإلكتروني">
+                <div class="sidebar-field" data-type="email" title="{{ __('dashboard.email_field') }}">
                     <i class="mdi mdi-email mdi-24px text-primary"></i>
-                    <div class="field-type-label">بريد</div>
+                    <div class="field-type-label">{{ __('dashboard.email_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="tel" title="رقم الهاتف">
+                <div class="sidebar-field" data-type="tel" title="{{ __('dashboard.phone_field') }}">
                     <i class="mdi mdi-phone mdi-24px text-primary"></i>
-                    <div class="field-type-label">هاتف</div>
+                    <div class="field-type-label">{{ __('dashboard.phone_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="url" title="رابط إلكتروني">
+                <div class="sidebar-field" data-type="url" title="{{ __('dashboard.url_field') }}">
                     <i class="mdi mdi-link mdi-24px text-primary"></i>
-                    <div class="field-type-label">رابط</div>
+                    <div class="field-type-label">{{ __('dashboard.url_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="stars" title="تقييم بالنجوم">
+                <div class="sidebar-field" data-type="stars" title="{{ __('dashboard.stars_field') }}">
                     <i class="mdi mdi-star mdi-24px text-primary"></i>
-                    <div class="field-type-label">نجوم</div>
+                    <div class="field-type-label">{{ __('dashboard.stars_field') }}</div>
                 </div>
-                <div class="sidebar-field" data-type="rating" title="مقياس تقييم">
+                <div class="sidebar-field" data-type="rating" title="{{ __('dashboard.rating_field') }}">
                     <i class="mdi mdi-thumb-up mdi-24px text-primary"></i>
-                    <div class="field-type-label">تقييم</div>
+                    <div class="field-type-label">{{ __('dashboard.rating_field') }}</div>
                 </div>
             </div>
         </div>
@@ -602,19 +600,19 @@
             <div class="d-none d-md-block p-3">
                 <div class="bg-white rounded shadow-sm mb-4 p-3 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center flex-grow-1">
-                        <span class="unsaved-indicator me-2" title="تغييرات غير محفوظة"></span>
-                        <input type="text" class="form-control form-control-lg border-0 fw-bold" id="surveyTitle" value="استبيان جديد">
+                        <span class="unsaved-indicator me-2" title="{{ __('dashboard.unsaved_changes') }}"></span>
+                        <input type="text" class="form-control form-control-lg border-0 fw-bold" id="surveyTitle" value="{{ __('dashboard.new_survey') }}">
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{{ route('surveys.demo') }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                            <i class="mdi mdi-open-in-new me-1"></i> مشاهدة
+                            <i class="mdi mdi-open-in-new me-1"></i> {{ __('dashboard.preview') }}
                         </a>
                         <a href="{{ url('/') }}" class="btn btn-sm btn-outline-secondary">
-                            <i class="mdi mdi-home-outline me-1"></i> الرئيسية
+                            <i class="mdi mdi-home-outline me-1"></i> {{ __('dashboard.home') }}
                         </a>
                         <div class="vr mx-2"></div>
                         <button class="btn btn-sm btn-primary" id="saveBtn">
-                            <i class="mdi mdi-content-save-outline me-1"></i> حفظ
+                            <i class="mdi mdi-content-save-outline me-1"></i> {{ __('dashboard.save') }}
                         </button>
                     </div>
                 </div>
@@ -650,8 +648,8 @@
                             @else
                                 <div class="text-center text-muted py-5">
                                     <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
-                                    <p class="d-none d-md-block">اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
-                                    <p class="d-md-none">اضغط على زر "+" لإضافة أسئلة للاستبيان</p>
+                                    <p class="d-none d-md-block">{{ __('dashboard.drag_questions_here') }}</p>
+                                    <p class="d-md-none">{{ __('dashboard.tap_plus_to_add') }}</p>
                                 </div>
                             @endif
                         </div>
@@ -664,65 +662,65 @@
             <div class="p-3" style="height: 100vh; overflow-y: auto;">
                 <div class="properties-panel">
                     <div class="p-3 border-bottom">
-                        <h5 class="mb-1">خصائص السؤال</h5>
-                        <p class="text-muted small mb-0" id="fieldTypeLabel">حدد سؤالاً لتحرير خصائصه</p>
+                        <h5 class="mb-1">{{ __('dashboard.question_properties') }}</h5>
+                        <p class="text-muted small mb-0" id="fieldTypeLabel">{{ __('dashboard.select_question_to_edit') }}</p>
                     </div>
                     <div class="p-3" id="propertiesContent">
                         <!-- Properties content will be loaded here -->
                         <div class="mb-3">
-                            <label class="form-label">نص السؤال</label>
+                            <label class="form-label">{{ __('dashboard.question_text') }}</label>
                             <div class="lang-inputs">
                                 <div class="flex-1">
-                                    <div class="lang-label">العربية</div>
-                                    <input type="text" class="form-control" id="fieldLabelAr" placeholder="أدخل نص السؤال بالعربية">
+                                    <div class="lang-label">{{ __('dashboard.arabic') }}</div>
+                                    <input type="text" class="form-control" id="fieldLabelAr" placeholder="{{ __('dashboard.enter_question_text_ar') }}">
                                 </div>
                                 <div class="flex-1">
-                                    <div class="lang-label">English</div>
-                                    <input type="text" class="form-control" id="fieldLabelEn" placeholder="Enter question text in English">
+                                    <div class="lang-label">{{ __('dashboard.english') }}</div>
+                                    <input type="text" class="form-control" id="fieldLabelEn" placeholder="{{ __('dashboard.enter_question_text_en') }}">
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">النص البديل</label>
+                            <label class="form-label">{{ __('dashboard.placeholder_text') }}</label>
                             <div class="lang-inputs">
                                 <div class="flex-1">
-                                    <div class="lang-label">العربية</div>
-                                    <input type="text" class="form-control" id="fieldPlaceholderAr" placeholder="أدخل النص البديل بالعربية">
+                                    <div class="lang-label">{{ __('dashboard.arabic') }}</div>
+                                    <input type="text" class="form-control" id="fieldPlaceholderAr" placeholder="{{ __('dashboard.enter_placeholder_ar') }}">
                                 </div>
                                 <div class="flex-1">
-                                    <div class="lang-label">English</div>
-                                    <input type="text" class="form-control" id="fieldPlaceholderEn" placeholder="Enter placeholder text in English">
+                                    <div class="lang-label">{{ __('dashboard.english') }}</div>
+                                    <input type="text" class="form-control" id="fieldPlaceholderEn" placeholder="{{ __('dashboard.enter_placeholder_en') }}">
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">نص المساعدة</label>
+                            <label class="form-label">{{ __('dashboard.help_text') }}</label>
                             <div class="lang-inputs">
                                 <div class="flex-1">
-                                    <div class="lang-label">العربية</div>
-                                    <textarea class="form-control" id="fieldHelpTextAr" rows="2" placeholder="نص مساعدة إضافي بالعربية"></textarea>
+                                    <div class="lang-label">{{ __('dashboard.arabic') }}</div>
+                                    <textarea class="form-control" id="fieldHelpTextAr" rows="2" placeholder="{{ __('dashboard.enter_help_text_ar') }}"></textarea>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="lang-label">English</div>
-                                    <textarea class="form-control" id="fieldHelpTextEn" rows="2" placeholder="Additional help text in English"></textarea>
+                                    <div class="lang-label">{{ __('dashboard.english') }}</div>
+                                    <textarea class="form-control" id="fieldHelpTextEn" rows="2" placeholder="{{ __('dashboard.enter_help_text_en') }}"></textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">هل الحقل مطلوب؟</label>
+                            <label class="form-label">{{ __('dashboard.is_required') }}</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="fieldRequired">
                                 <label class="form-check-label" for="fieldRequired">
-                                    مطلوب
+                                    {{ __('dashboard.required') }}
                                 </label>
                             </div>
                         </div>
                         <!-- Options Editor (for select, radio, checkbox) -->
                         <div id="optionsEditor" class="mb-3" style="display: none;">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="form-label">الخيارات</label>
+                                <label class="form-label">{{ __('dashboard.options') }}</label>
                                 <button class="btn btn-sm btn-link text-primary p-0" id="addOptionBtn">
-                                    <i class="mdi mdi-plus me-1"></i> إضافة
+                                    <i class="mdi mdi-plus me-1"></i> {{ __('dashboard.add_option') }}
                                 </button>
                             </div>
                             <div id="optionsList" class="space-y-2">
@@ -732,12 +730,12 @@
                         <!-- Rating Settings (for stars, rating) -->
                         <div id="ratingSettings" class="mb-3" style="display: none;">
                             <div class="mb-3">
-                                <label class="form-label">عدد النقاط</label>
+                                <label class="form-label">{{ __('dashboard.rating_points') }}</label>
                                 <input type="number" class="form-control" id="ratingPoints" min="2" max="10" value="5">
                             </div>
                         </div>
                         <div class="mb-3 d-none" >
-                            <label class="form-label">معرف السؤال</label>
+                            <label class="form-label">{{ __('dashboard.question_id') }}</label>
                             <input type="text" class="form-control" id="fieldId" placeholder="question_id">
                         </div>
                     </div>
@@ -751,69 +749,69 @@
     <div class="mobile-properties-handle"></div>
     <div class="p-3 border-bottom">
         <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">خصائص السؤال</h5>
+            <h5 class="mb-0">{{ __('dashboard.question_properties') }}</h5>
             <button class="btn btn-sm btn-light" id="closeMobileProperties">
                 <i class="mdi mdi-close"></i>
             </button>
         </div>
-        <p class="text-muted small mb-0" id="fieldTypeLabelMobile">حدد سؤالاً لتحرير خصائصه</p>
+        <p class="text-muted small mb-0" id="fieldTypeLabelMobile">{{ __('dashboard.select_question_to_edit') }}</p>
     </div>
     <div class="p-3" id="propertiesContentMobile">
         <!-- Properties content will be loaded here -->
         <div class="mb-3">
-            <label class="form-label">نص السؤال</label>
+            <label class="form-label">{{ __('dashboard.question_text') }}</label>
             <div class="lang-inputs">
                 <div class="flex-1">
-                    <div class="lang-label">العربية</div>
-                    <input type="text" class="form-control" id="fieldLabelArMobile" placeholder="أدخل نص السؤال بالعربية">
+                    <div class="lang-label">{{ __('dashboard.arabic') }}</div>
+                    <input type="text" class="form-control" id="fieldLabelArMobile" placeholder="{{ __('dashboard.enter_question_text_ar') }}">
                 </div>
                 <div class="flex-1">
-                    <div class="lang-label">English</div>
-                    <input type="text" class="form-control" id="fieldLabelEnMobile" placeholder="Enter question text in English">
+                    <div class="lang-label">{{ __('dashboard.english') }}</div>
+                    <input type="text" class="form-control" id="fieldLabelEnMobile" placeholder="{{ __('dashboard.enter_question_text_en') }}">
                 </div>
             </div>
         </div>
         <div class="mb-3">
-            <label class="form-label">النص البديل</label>
+            <label class="form-label">{{ __('dashboard.placeholder_text') }}</label>
             <div class="lang-inputs">
                 <div class="flex-1">
-                    <div class="lang-label">العربية</div>
-                    <input type="text" class="form-control" id="fieldPlaceholderArMobile" placeholder="أدخل النص البديل بالعربية">
+                    <div class="lang-label">{{ __('dashboard.arabic') }}</div>
+                    <input type="text" class="form-control" id="fieldPlaceholderArMobile" placeholder="{{ __('dashboard.enter_placeholder_ar') }}">
                 </div>
                 <div class="flex-1">
-                    <div class="lang-label">English</div>
-                    <input type="text" class="form-control" id="fieldPlaceholderEnMobile" placeholder="Enter placeholder text in English">
+                    <div class="lang-label">{{ __('dashboard.english') }}</div>
+                    <input type="text" class="form-control" id="fieldPlaceholderEnMobile" placeholder="{{ __('dashboard.enter_placeholder_en') }}">
                 </div>
             </div>
         </div>
         <div class="mb-3">
-            <label class="form-label">نص المساعدة</label>
+            <label class="form-label">{{ __('dashboard.help_text') }}</label>
             <div class="lang-inputs">
                 <div class="flex-1">
-                    <div class="lang-label">العربية</div>
-                    <textarea class="form-control" id="fieldHelpTextArMobile" rows="2" placeholder="نص مساعدة إضافي بالعربية"></textarea>
+                    <div class="lang-label">{{ __('dashboard.arabic') }}</div>
+                    <textarea class="form-control" id="fieldHelpTextArMobile" rows="2" placeholder="{{ __('dashboard.enter_help_text_ar') }}"></textarea>
                 </div>
                 <div class="flex-1">
-                    <div class="lang-label">English</div>
-                    <textarea class="form-control" id="fieldHelpTextEnMobile" rows="2" placeholder="Additional help text in English"></textarea>
+                    <div class="lang-label">{{ __('dashboard.english') }}</div>
+                    <textarea class="form-control" id="fieldHelpTextEnMobile" rows="2" placeholder="{{ __('dashboard.enter_help_text_en') }}"></textarea>
                 </div>
             </div>
         </div>
         <div class="mb-3">
-            <label class="form-label">هل الحقل مطلوب؟</label>
+            <label class="form-label">{{ __('dashboard.is_required') }}</label>
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="fieldRequiredMobile">
                 <label class="form-check-label" for="fieldRequiredMobile">
-                    مطلوب
+                    {{ __('dashboard.required') }}
                 </label>
             </div>
         </div>
         <!-- Options Editor (for select, radio, checkbox) -->
         <div id="optionsEditorMobile" class="mb-3" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label">الخيارات</label>
+                <label class="form-label">{{ __('dashboard.options') }}</label>
                 <button class="btn btn-sm btn-link text-primary p-0" id="addOptionBtnMobile">
-                    <i class="mdi mdi-plus me-1"></i> إضافة
+                    <i class="mdi mdi-plus me-1"></i> {{ __('dashboard.add_option') }}
                 </button>
             </div>
             <div id="optionsListMobile" class="space-y-2">
@@ -823,12 +821,12 @@
         <!-- Rating Settings (for stars, rating) -->
         <div id="ratingSettingsMobile" class="mb-3" style="display: none;">
             <div class="mb-3">
-                <label class="form-label">عدد النقاط</label>
+                <label class="form-label">{{ __('dashboard.rating_points') }}</label>
                 <input type="number" class="form-control" id="ratingPointsMobile" min="2" max="10" value="5">
             </div>
         </div>
         <div class="mb-3 d-none" >
-            <label class="form-label">معرف السؤال</label>
+            <label class="form-label">{{ __('dashboard.question_id') }}</label>
             <input type="text" class="form-control" id="fieldIdMobile" placeholder="question_id">
         </div>
     </div>
@@ -841,16 +839,40 @@
     <div id="saveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
             <i class="mdi mdi-check-circle text-success me-2"></i>
-            <strong class="me-auto">تم الحفظ</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            <strong class="me-auto">{{ __('dashboard.saved_successfully') }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="{{ __('dashboard.close') }}"></button>
         </div>
         <div class="toast-body">
-            تم حفظ الاستبيان بنجاح.
+            {{ __('dashboard.survey_saved_successfully') }}
         </div>
     </div>
 </div>
+    <!--end::Container-->
+</div>
+<!--end::Post-->
 
+@push('js')
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Translation variables for JavaScript
+    const translations = {
+        duplicate: @json(__('dashboard.duplicate')),
+        move_up: @json(__('dashboard.move_up')),
+        move_down: @json(__('dashboard.move_down')),
+        delete: @json(__('dashboard.delete')),
+        new_survey: @json(__('dashboard.new_survey')),
+        option_1: @json(__('dashboard.option_1')),
+        option_2: @json(__('dashboard.option_2')),
+        select_option: @json(__('dashboard.select_option')),
+        are_you_sure_delete: @json(__('dashboard.are_you_sure_delete')),
+        select_question_to_edit: @json(__('dashboard.select_question_to_edit')),
+        drag_questions_here: @json(__('dashboard.drag_questions_here')),
+        tap_plus_to_add: @json(__('dashboard.tap_plus_to_add')),
+        option_label_ar: @json(__('dashboard.option_label_ar')),
+        option_label_en: @json(__('dashboard.option_label_en'))
+    };
+
     $(document).ready(function() {
         let selectedField = null;
         let fieldIdCounter = {{ isset($survey['fields']) ? collect($survey['fields'])->max('id') ?? 0 : 0 }} + 1;
@@ -938,8 +960,8 @@
             // Add options for fields that support them
             if (type === 'select' || type === 'radio' || type === 'checkbox') {
                 fieldData.options = [
-                    { label: { ar: "الخيار 1", en: "Option 1" }, value: "option1" },
-                    { label: { ar: "الخيار 2", en: "Option 2" }, value: "option2" },
+                    { label: { ar: translations.option_1, en: "Option 1" }, value: "option1" },
+                    { label: { ar: translations.option_2, en: "Option 2" }, value: "option2" },
                 ];
             }
 
@@ -1004,16 +1026,16 @@
             let fieldHtml = `
                 <div dir="rtl" class="form-field ${fieldData.width}" id="${fieldData.id}" data-field-id="${fieldData.id}">
                     <div class="field-actions">
-                        <button class="btn btn-sm btn-light me-1 duplicate-field" title="نسخ">
+                        <button class="btn btn-sm btn-light me-1 duplicate-field" title="${translations.duplicate}">
                             <i class="mdi mdi-content-copy"></i>
                         </button>
-                        <button class="btn btn-sm btn-light me-1 move-up" title="تحريك للأعلى">
+                        <button class="btn btn-sm btn-light me-1 move-up" title="${translations.move_up}">
                             <i class="mdi mdi-arrow-up"></i>
                         </button>
-                        <button class="btn btn-sm btn-light me-1 move-down" title="تحريك للأسفل">
+                        <button class="btn btn-sm btn-light me-1 move-down" title="${translations.move_down}">
                             <i class="mdi mdi-arrow-down"></i>
                         </button>
-                        <button class="btn btn-sm btn-light delete-field" title="حذف">
+                        <button class="btn btn-sm btn-light delete-field" title="${translations.delete}">
                             <i class="mdi mdi-delete text-danger"></i>
                         </button>
                     </div>
@@ -1059,7 +1081,7 @@
                     return `
                         <label class="form-label">${label[currentLang]}${requiredLabel}</label>
                         <select class="form-select" disabled${required}>
-                            <option value="">${currentLang === 'ar' ? 'حدد خيارًا...' : 'Select an option...'}</option>
+                            <option value="">${translations.select_option}</option>
                             ${selectOptions}
                         </select>
                     `;
@@ -1271,11 +1293,11 @@
                         <div class="lang-inputs" style="width: 100%">
                             <div class="flex-1">
                                 <div class="lang-label">العربية</div>
-                                <input type="text" class="form-control form-control-sm option-label-ar" placeholder="تسمية الخيار بالعربية" value="${option.label.ar || ''}">
+                                <input type="text" class="form-control form-control-sm option-label-ar" placeholder="${translations.option_label_ar}" value="${option.label.ar || ''}">
                             </div>
                             <div class="flex-1">
                                 <div class="lang-label">English</div>
-                                <input type="text" class="form-control form-control-sm option-label-en" placeholder="Option label in English" value="${option.label.en || ''}">
+                                <input type="text" class="form-control form-control-sm option-label-en" placeholder="${translations.option_label_en}" value="${option.label.en || ''}">
                             </div>
                         </div>
                         <button class="btn btn-sm btn-link text-danger p-0 delete-option">
@@ -1717,7 +1739,7 @@
 
         // Delete field
         function deleteField(fieldId) {
-            if (confirm("هل أنت متأكد من حذف هذا السؤال؟")) {
+            if (confirm(translations.are_you_sure_delete)) {
                 console.log("Deleting field with ID:", fieldId);
                 console.log("Fields before deletion:", surveyData.fields.map(f => f.id));
 
@@ -1738,8 +1760,8 @@
                 // Clear selection if deleted field was selected
                 if (selectedField === fieldId) {
                     selectedField = null;
-                    $("#fieldTypeLabel").text("حدد سؤالاً لتحرير خصائصه");
-                    $("#fieldTypeLabelMobile").text("حدد سؤالاً لتحرير خصائصه");
+                    $("#fieldTypeLabel").text(translations.select_question_to_edit);
+                    $("#fieldTypeLabelMobile").text(translations.select_question_to_edit);
                     $("#fieldLabelAr").val("");
                     $("#fieldLabelEn").val("");
                     $("#fieldLabelArMobile").val("");
@@ -1763,8 +1785,8 @@
                     $("#formFields").html(`
                         <div class="text-center text-muted py-5">
                             <i class="mdi mdi-drag-variant mdi-48px d-block mb-3"></i>
-                            <p class="d-none d-md-block">اسحب أسئلة من الشريط الجانبي وأفلتها هنا لبناء الاستبيان</p>
-                            <p class="d-md-none">اضغط على زر "+" لإضافة أسئلة للاستبيان</p>
+                            <p class="d-none d-md-block">${translations.drag_questions_here}</p>
+                            <p class="d-md-none">${translations.tap_plus_to_add}</p>
                         </div>
                     `);
                 }
@@ -1911,5 +1933,6 @@
         @endif
     });
 </script>
-</body>
-</html>
+@endpush
+
+@endsection

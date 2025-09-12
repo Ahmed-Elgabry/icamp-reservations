@@ -8,6 +8,19 @@
     @include('dashboard.orders.nav')
 
     <div class="card card-flush">
+      <!-- customer information -->
+                <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
       <div class="card-header align-items-center py-5 gap-2 gap-md-5">
         <div class="card-title">
           <div class="d-flex align-items-center position-relative my-1">
@@ -36,12 +49,15 @@
           <thead>
             <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
               <th>{{ __('dashboard.items') }}</th>
-              <th>{{ __('dashboard.count') }}</th>
+              <th>{{ __('dashboard.item_price') }}</th>
+              <th>{{ __('dashboard.quantity') }}</th>
               <th>{{ __('dashboard.total_amount') }}</th>
               <th>{{ __('dashboard.payment_method') }}</th>
+              <th>{{ __('dashboard.bank_account') }}</th>
               <th>{{ __('dashboard.verified') }}</th>
               <th>{{ __('dashboard.notes') }}</th>
-              <th>{{ __('dashboard.created_at') }}</th>
+              <th>{{ __('dashboard.created_date') }}</th>
+              <th>{{ __('dashboard.created_time') }}</th>
               <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
             </tr>
           </thead>
@@ -49,9 +65,11 @@
           @foreach ($items as $item)
             <tr>
               <td><span class="badge bg-primary">{{ $item?->stock->name }}</span></td>
-              <td>{{ $item?->quantity }}</td>
-              <td class="fw-bold">{{ $item?->total_price }}</td>
+              <td class="fw-bold">{{ $item?->stock->selling_price  % 1 === 0 ? (int) $item?->stock->selling_price : $item?->stock->selling_price }}</td>
+              <td>{{ (int) $item?->quantity }}</td>
+              <td class="fw-bold">{{ $item?->total_price % 1 === 0 ? (int) $item?->total_price : $item?->total_price }}</td>
               <td>{{__('dashboard.'. $item->payment_method )}}</td>
+              <td>{{ $item?->account->name }}</td>
               <td>
                     {{ $item->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                     @if($item->verified)
@@ -61,7 +79,8 @@
                     @endif
               </td>
               <td>{{ $item?->notes }}</td>
-              <td>{{ $item?->created_at->format('Y-m-d h:i A') }}</td>
+              <td>{{ $item?->created_at->format('Y-m-d') }}</td>
+              <td>{{ $item?->created_at->format('h:i A') }}</td>
               <td class="text-end">
                 <a href="#" class="btn btn-sm btn-light btn-active-light-primary"
                    data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -91,7 +110,7 @@
                       @csrf @method('DELETE')
                     </form>
                     <a href="#" class="menu-link px-3 text-danger"
-                       onclick="event.preventDefault(); if(confirm('@lang('dashboard.delete')')) document.getElementById('delete-form-{{ $item->id }}').submit();">
+                       onclick="confirmDelete('{{ route('warehouse_sales.destroy', $item->id) }}', '{{ csrf_token() }}')">
                       @lang('dashboard.delete')
                     </a>
                   </div>
@@ -117,17 +136,18 @@
                         <label class="required form-label">{{ __('dashboard.items') }}</label>
                         <select name="stock_id" class="form-control js-stock"
                                 data-initial="{{ $item->stock_id }}" required>
+                          <option value="">{{ __('dashboard.select') }}</option>
                           @foreach($stocks as $stock)
                             <option value="{{ $stock->id }}" data-price="{{ $stock->selling_price }}"
                               @selected($stock->id == $item->stock_id)>{{ $stock->name }}</option>
                           @endforeach
                         </select>
                       </div>
-
+                      <input type="hidden" value="warehouse_sales" name="source">     
                       <div class="form-group mt-3">
-                        <label>{{ __('dashboard.count') }}</label>
+                        <label>{{ __('dashboard.quantity') }}</label>
                         <input type="number" name="quantity" class="form-control js-qty"
-                               value="{{ $item->quantity }}">
+                               value="{{(int) $item?->quantity }}">
                       </div>
 
                       <div class="form-group mt-3">
@@ -139,6 +159,7 @@
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
                             <select name="account_id" id="" class="form-select" required>
+                                <option value="">{{ __('dashboard.select') }}</option>
                                 @foreach($bankAccounts as $id => $name)
                                     <option @selected($item->account_id == $id) value="{{$id}}">{{ $name }}</option>
                                 @endforeach
@@ -148,6 +169,7 @@
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                             <select name="payment_method" id="" class="form-select" required>
+                                <option value="">{{ __('dashboard.select') }}</option>
                                 @foreach(paymentMethod() as $paymentSelect)
                                     <option @selected($item->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                 @endforeach
@@ -187,17 +209,22 @@
                 <form action="{{ route('warehouse_sales.store') }}" id="saveCountDetails" method="POST">
                   @csrf
                   <input type="hidden" value="{{ $order->id }}" name="order_id">
+                  <input type="hidden" value="warehouse_sales" name="source">
                   <div class="mb-5 fv-row col-md-12">
                     <label class="required form-label">{{ __('dashboard.items') }}</label>
                     <select name="stock_id" class="form-control js-stock" required>
+                      <option value="">{{ __('dashboard.select') }}</option>
                       @foreach($stocks as $stock)
                         <option value="{{ $stock->id }}" data-price="{{ $stock->selling_price }}">{{ $stock->name }}</option>
                       @endforeach
                     </select>
                   </div>
-
+                 <div class="form-group mt-3">
+                    <label>{{ __('dashboard.item_price') }}</label>
+                    <input type="number" step="0.01" disabled class="form-control js-total" value="{{ $stock->selling_price }}">
+                  </div>
                   <div class="form-group mt-3">
-                    <label>{{ __('dashboard.count') }}</label>
+                    <label>{{ __('dashboard.quantity') }}</label>
                     <input type="number" name="quantity" class="form-control js-qty" value="1">
                   </div>
 
@@ -206,24 +233,26 @@
                     <input type="number" step="0.01" name="total_price" class="form-control js-total" value="0">
                   </div>
 
+                  
                   <div class="mb-5 fv-row col-md-12">
-                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                    <select name="account_id" id="" class="form-select" required>
-                        @foreach($bankAccounts as $id => $name)
-                            <option value="{{$id}}">{{ $name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="mb-5 fv-row col-md-12">
                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                     <select name="payment_method" id="" class="form-select" required>
+                        <option value="">{{ __('dashboard.select') }}</option>
                         @foreach(paymentMethod() as $paymentSelect)
                             <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
+                            @endforeach
+                          </select>
+                  </div>
+                        
+                  <div class="mb-5 fv-row col-md-12">
+                          <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                          <select name="account_id" id="" class="form-select" required>
+                              <option value="">{{ __('dashboard.select') }}</option>
+                              @foreach($bankAccounts as $id => $name)
+                                  <option value="{{$id}}">{{ $name }}</option>
+                              @endforeach
+                          </select>
+                      </div>
                   <div class="mb-5 fv-row col-md-12">
                     <label class="form-label">{{ __('dashboard.notes') }}</label>
                     <textarea name="notes" class="form-control mb-2">{{ old('notes') }}</textarea>
@@ -304,6 +333,87 @@
               text: '{{ __("dashboard.warehouse_not_verified_receipt_error") }}',
               confirmButtonText: '{{ __("dashboard.ok") }}'
           });
+      }
+  });
+
+  // Add warehouse sales form validation
+  $('#saveCountDetails').on('submit', function(e) {
+      let stockSelect = $(this).find('select[name="stock_id"]')[0];
+      let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
+      let accountSelect = $(this).find('select[name="account_id"]')[0];
+      
+      // Validate stock selection
+      if (!stockSelect.value || stockSelect.value === '') {
+          stockSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          stockSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          stockSelect.setCustomValidity('');
+      }
+      
+      // Validate payment method selection
+      if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
+          paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          paymentMethodSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          paymentMethodSelect.setCustomValidity('');
+      }
+      
+      // Validate account selection
+      if (!accountSelect.value || accountSelect.value === '') {
+          accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          accountSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          accountSelect.setCustomValidity('');
+      }
+  });
+
+  // Edit warehouse sales form validation
+  $('form[id^="editCountForm"]').on('submit', function(e) {
+      let stockSelect = $(this).find('select[name="stock_id"]')[0];
+      let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
+      let accountSelect = $(this).find('select[name="account_id"]')[0];
+      
+      // Validate stock selection
+      if (!stockSelect.value || stockSelect.value === '') {
+          stockSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          stockSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          stockSelect.setCustomValidity('');
+      }
+      
+      // Validate payment method selection
+      if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
+          paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          paymentMethodSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          paymentMethodSelect.setCustomValidity('');
+      }
+      
+      // Validate account selection
+      if (!accountSelect.value || accountSelect.value === '') {
+          accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
+          accountSelect.reportValidity();
+          e.preventDefault();
+          return false;
+      } else {
+          accountSelect.setCustomValidity('');
+      }
+  });
+
+  // Clear validation when user selects a valid option
+  $(document).on('change', 'select[name="stock_id"], select[name="payment_method"], select[name="account_id"]', function() {
+      if (this.value && this.value !== '') {
+          this.setCustomValidity('');
       }
   });
 </script>

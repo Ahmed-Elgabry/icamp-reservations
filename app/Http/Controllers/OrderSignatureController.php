@@ -10,8 +10,19 @@ use Illuminate\Support\Str;
 
 class OrderSignatureController extends Controller
 {
-    public function show(Order $order)
+    public function show(Order $order, Request $request)
     {
+        // Handle language switching
+        if ($request->has('lang')) {
+            $locale = $request->get('lang');
+            if (in_array($locale, ['ar', 'en'])) {
+                app()->setLocale($locale);
+                session(['locale' => $locale]);
+            }
+        } else if (session('locale')) {
+            app()->setLocale(session('locale'));
+        }
+        
         if ($order->signature_path) {
             return view('signature.already', compact('order'));
         }
@@ -38,10 +49,33 @@ class OrderSignatureController extends Controller
         Storage::disk('public')->put($path, $image);
 
         $order->update([
-            'signature_path'      => $path,
+            'signature_path'=> $path,
             'signature' => now()
         ]);
 
         return redirect()->back()->with('success' , __('dashboard.success'));
     }
+
+    public function destroy(Order $order)
+    {
+        // Delete signature image from storage if present
+        if ($order->signature_path && Storage::disk('public')->exists($order->signature_path)) {
+            Storage::disk('public')->delete($order->signature_path);
+        }
+
+        // Clear signature fields on the order
+        $order->update([
+            'signature_path' => null,
+            'signature' => null,
+        ]);
+
+        // If the request is AJAX/JSON (used by sending-forms.js), return JSON
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['message' => __('dashboard.success')]);
+        }
+
+        // Fallback to redirect for normal requests
+        return redirect()->back()->with('success', __('dashboard.success'));
+    }
+    
 }

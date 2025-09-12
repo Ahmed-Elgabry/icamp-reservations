@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('addon_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('transaction_id')->nullable()->after('description');
+            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('set null');
             $table->text('description')->nullable();
             $table->integer('count');
             $table->decimal('price', 8, 2);

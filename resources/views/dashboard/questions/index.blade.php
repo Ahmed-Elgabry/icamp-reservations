@@ -43,7 +43,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Are you sure you want to delete this question?');">@lang('dashboard.delete')</button>
+                                        onclick="return confirm('@lang('dashboard.confirm_delete')');">@lang('dashboard.delete')</button>
                                 </form>
                             @endcan
                         </div>

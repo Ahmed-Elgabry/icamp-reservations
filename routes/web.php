@@ -47,7 +47,8 @@ Route::get('/sign/{order}', [OrderSignatureController::class, 'show'])
 Route::post('/sign/{order}', [OrderSignatureController::class, 'store'])
     ->name('signature.store');
 
-
+Route::delete('/sign/{order}', [OrderSignatureController::class, 'destroy'])
+    ->name('signature.destroy');
 
 // Auth::routes();
 Route::group(['middleware' => ['web']], function () {
@@ -846,9 +847,8 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payments.index',
         'title' => 'dashboard.payments',
         'type' => 'parent',
-        'child' => ['payments.create', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
+        'child' => ['payments.create', 'payments.transfer', 'money-transfer', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
     ]);
-
     # payments store
     Route::get('transactions', [
         'uses' => 'PaymentsController@transactions',
@@ -861,6 +861,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::post('accounts/store', [
         'uses' => 'PaymentsController@accountsStore',
         'as' => 'accounts.store',
+        'act-as' => 'payments.create',
+        'title' => ['actions.add', 'dashboard.accounts']
+    ]);
+
+    // New routes to handle account charges via GeneralPaymentsController
+    Route::post('general-accounts/store', [
+        'uses' => 'GeneralPaymentsController@storeAccountCharge',
+        'as' => 'general-accounts.store',
         'act-as' => 'payments.create',
         'title' => ['actions.add', 'dashboard.accounts']
     ]);
@@ -881,12 +889,35 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.edit', 'dashboard.payments']
     ]);
 
+    // New route to update account charges via GeneralPaymentsController
+    Route::put('general-accounts/{id}', [
+        'uses' => 'GeneralPaymentsController@updateAccountCharge',
+        'as' => 'general-accounts.update',
+        'act-as' => 'payments.edit',
+        'title' => ['actions.edit', 'dashboard.accounts']
+    ]);
+
     # payments store
-    Route::get('payments/create', [
+    Route::get('payments/create/{bankAccount?}', [
         'uses' => 'PaymentsController@create',
         'as' => 'payments.create',
         'title' => ['actions.add', 'dashboard.payments']
     ]);
+    
+        Route::get('payments/transfer', [
+        'uses' => 'PaymentsController@transfer',
+        'as' => 'payments.transfer',
+        'title' => ['actions.add', 'dashboard.payments']
+    ]);
+    
+    
+    Route::post('payments/money-transfer', [
+        'uses' => 'PaymentsController@moneyTransfer',
+        'as' => 'money-transfer',
+        // 'title' => ['actions.add', 'dashboard.payments']
+    ]);
+
+
     # payments show
     Route::get('payments/{id}/show', [
         'uses' => 'PaymentsController@show',
@@ -1237,6 +1268,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.delete', 'dashboard.expenses']
     ]);
 
+    # expenses image download
+    Route::get('expenses/{id}/download-image', [
+        'uses' => 'ExpensesController@downloadImage',
+        'as' => 'expenses.download_image',
+        'title' => ['actions.download', 'dashboard.expenses']
+    ]);
+
     /*------------ end Of expenses ----------*/
     /*------------ start Of Settings----------*/
     Route::get('set-lang/{lang}', [
@@ -1251,6 +1289,82 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => 'dashboard.calender'
     ]);
     /*------------ end Of Settings ----------*/
+
+    /*------------ start Of general payments ----------*/
+    Route::get('general_payments', [
+        'uses' => 'GeneralPaymentsController@index',
+        'as' => 'general_payments.index',
+        'title' => 'dashboard.general_payments',
+        'type' => 'parent',
+        'child' => ['general_payments.create', 'general_payments.store', 'general_payments.edit', 'general_payments.update', 'general_payments.destroy', 'general_payments.verified', 'general_payments.download']
+    ]);
+
+    Route::get('general_payments/create', [
+        'uses' => 'GeneralPaymentsController@create',
+        'as' => 'general_payments.create',
+        'title' => ['actions.add', 'dashboard.general_payments']
+    ]);
+
+    Route::post('general_payments', [
+        'uses' => 'GeneralPaymentsController@store',
+        'as' => 'general_payments.store',
+        'title' => ['actions.add', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/edit', [
+        'uses' => 'GeneralPaymentsController@edit',
+        'as' => 'general_payments.edit',
+        'title' => ['actions.edit', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/show', [
+        'uses' => 'GeneralPaymentsController@show',
+        'as' => 'general_payments.show',
+        'title' => ['actions.show', 'dashboard.general_payments']
+    ]);
+
+    Route::put('general_payments/{id}', [
+        'uses' => 'GeneralPaymentsController@update',
+        'as' => 'general_payments.update',
+        'title' => ['actions.edit', 'dashboard.general_paaddon.bladeyments']
+    ]);
+
+    Route::delete('general_payments/{id}', [
+        'uses' => 'GeneralPaymentsController@destroy',
+        'as' => 'general_payments.destroy',
+        'title' => ['actions.delete', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/download', [
+        'uses' => 'GeneralPaymentsController@downloadImage',
+        'as' => 'general_payments.download',
+        'title' => ['actions.download', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/{id}/verified', [
+        'uses' => 'GeneralPaymentsController@verified',
+        'as' => 'general_payments.verified',
+        'title' => ['actions.verified', 'dashboard.general_payments']
+    ]);
+
+    Route::get('general_payments/add-funds/create', [
+        'uses' => 'GeneralPaymentsController@createAddFunds',
+        'as' => 'general_payments.create_add_funds',
+        'title' => ['actions.add_funds', 'dashboard.general_payments']
+    ]);
+
+    Route::post('general_payments/add-funds/store', [
+        'uses' => 'GeneralPaymentsController@storeAddFunds',
+        'as' => 'general_payments.store_add_funds',
+        'title' => ['actions.add_funds', 'dashboard.general_payments']
+    ]);
+
+    Route::put('general_payments/add-funds/update/{id}', [
+        'uses' => 'GeneralPaymentsController@updateAddFunds',
+        'as' => 'general_payments.update_add_funds',
+        'title' => ['actions.update_funds', 'dashboard.general_payments']
+    ]);
+    /*------------ end Of general payments ----------*/
 });
 
 /*** update route if i added new routes  */
@@ -1317,11 +1431,15 @@ Route::get('/clear', function () {
     Artisan::call('storage:link');
     return response()->json(['status' => 'success', 'code' => 1000000000]);
 });
-/*------------ start Of general payments ----------*/
+// General payments routes are now defined inside the dashboard middleware group above
 
-Route::resource('general_payments', GeneralPaymentsController::class);
-
+// Custom create route with optional id for terms settings
+Route::get('terms_sittngs/create/{id?}', [TermsSittngController::class, 'create'])
+    ->name('terms_sittngs.create')
+    ->middleware(['auth']);
+// Other resource routes (excluding create) remain
 Route::resource('terms_sittngs', TermsSittngController::class)
+    ->except(['create'])
     ->middleware(['auth']);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);

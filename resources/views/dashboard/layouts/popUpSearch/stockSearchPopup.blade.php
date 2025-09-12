@@ -23,6 +23,15 @@
                         <input type="number" class="form-control" id="quantity" name="quantity"
                             placeholder="@lang('dashboard.Quantity')" value="{{ request()->query('quantity') }}">
                     </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="higher_selling" name="higher_selling" value="1"
+                                {{ request()->query('higher_selling') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="higher_selling">
+                                @lang('dashboard.filter_higher_selling')
+                            </label>
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-primary">@lang('dashboard.submit_fillter')</button>
                 </form>
             </div>

@@ -1,4 +1,7 @@
-@section('pageTitle' , __('dashboard.bank-accounts'))
+@php
+$pageTitle =  __('dashboard.all_transactions');
+@endphp
+@section('pageTitle' , $pageTitle)
 
 @extends('dashboard.layouts.app')
 @section('content')
@@ -114,3 +117,7 @@
 <!--end::Post-->
 					
 @endsection
+
+@push('js')
+<script src="{{asset('dashboard/custom/js/dataTable.js')}}"></script>
+@endpush

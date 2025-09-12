@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('title', __('dashboard.create_payment_link'))
+@section('pageTitle', __('dashboard.payment_links'))
 
 @section('content')
 <div class="container-fluid">

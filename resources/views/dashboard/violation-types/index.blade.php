@@ -13,13 +13,15 @@
                 </a>
             </div>
         </div>
-        <div class="card-body pt-0">
+        <div class="card-body pt-0 table-responsive">
             <table class="table align-middle table-row-dashed fs-6 gy-5">
                 <thead class="text-gray-400 fw-bolder">
                 <tr>
                     <th>@lang('dashboard.name')</th>
                     <th>@lang('dashboard.description')</th>
                     <th>@lang('dashboard.violation_type_status')</th>
+                    <th>@lang('dashboard.created_date')</th>
+                    <th>@lang('dashboard.created_time')</th>
                     <th>@lang('dashboard.actions')</th>
                 </tr>
                 </thead>
@@ -33,6 +35,8 @@
                                 {{ $type->is_active ? __('dashboard.active') : __('dashboard.inactive') }}
                             </span>
                         </td>
+                        <td>{{ $type->created_at->format('Y-m-d') }}</td>
+                        <td>{{ $type->created_at->format('h:i A') }}</td>
                         <td>
 {{--                            <a href="{{ route('violation-types.show', $type) }}" class="btn btn-sm btn-info">--}}
 {{--                                @lang('dashboard.view')--}}
@@ -42,7 +46,7 @@
                             </a>
                             <form action="{{ route('violation-types.destroy', $type) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                     @lang('dashboard.delete')
                                 </button>
                             </form>

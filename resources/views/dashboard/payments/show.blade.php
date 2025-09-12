@@ -1,4 +1,3 @@
-
 @section('pageTitle' , __('dashboard.payments'))
 @extends('dashboard.layouts.app')
 @section('content')
@@ -14,6 +13,19 @@
 
         <!--begin::Category-->
         <div class="card card-flush">
+            <!-- customer information -->
+                <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                    </div>
+                </div>
             <!--begin::Card header-->
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <!--begin::Card title-->
@@ -64,10 +76,13 @@
                             <input class="form-check-input" id="checkedAll"  type="checkbox" data-kt-check="true" data-kt-check-target="#kt_ecommerce_category_table .form-check-input" value="1" />
                         </div>
                     </th>
+                    <th class="">{{ __('dashboard.statement') }}</th>
                     <th>{{ __('dashboard.price') }}</th>
                     <th class="">{{ __('dashboard.payment_method') }}</th>
-                    <th class="">{{ __('dashboard.statement') }}</th>
-                    <th class="">{{ __('dashboard.verified') }}</th>
+                    <th class="">{{ __('dashboard.bank_account') }}</th>
+                    @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
+                        <th class="">{{ __('dashboard.verified') }}</th>
+                    @endif
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
                     <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
@@ -87,31 +102,61 @@
                             </div>
                         </td>
                         <!--begin::Category=-->
+                        <td>{{__('dashboard.'. $payment->statement )}}</td>
                         <td>
                             <div class="d-flex">
                                 <!--end::Thumbnail-->
                                 <div class="ms-5">
                                     <!--begin::Title-->
-                                    <a href="#"
-                                    data-kt-ecommerce-category-filter="search"
-                                     class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
-                                   >{{$payment->price}}</a>
-                                    <!--end::Title-->
+                                    @if($payment->insurance_status == 'confiscated_partial')
+                                        <a href="#"
+                                        data-kt-ecommerce-category-filter="search"
+                                        class="text-gray-800  fs-7 fw-bolder mb-1"  >{{__("dashboard.remaining :priceAferConfiscation", ['priceAferConfiscation' => $payment->price - $payment->transaction->amount])}}
+                                    {{__("dashboard.from")}} {{$payment->price}}
+                                    </a>
+                                    @else
+                                         <a href="#"
+                                        data-kt-ecommerce-category-filter="search"
+                                        class="text-gray-800 text-hover-primary fs-5 fw-bolder mb-1"
+                                         >{{$payment->price}}</a>
+                                        <!--end::Title-->
+                                    @endif
+                                    </div>
                                 </div>
-                            </div>
                         </td>
+
                         <td>{{__('dashboard.'. $payment->payment_method )}}</td>
-                        <td>{{__('dashboard.'. $payment->statement )}}</td>
-                        <td>
-                            {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
-                            @if($payment->verified)
-                                <a href="{{ route('payments.verified', $payment->id) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
-                            @else
-                                 <a href="{{ route('payments.verified', $payment->id) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }} <i class="fa fa-check"></i></a>
+                        @foreach($bankAccounts as $bankAccount)
+                            @if($payment->account_id == $bankAccount->id)
+                            <td>{{__($bankAccount->name )}}</td>
+    
                             @endif
-                        </td>
+                        @endforeach
+                        @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
+                            <td>
+                                {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                                @if($payment->verified)
+                                        <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                    @else
+                                        <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                    @endif
+                            </td>
+                        @endif
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
+                                @if($payment->statement == 'the_insurance' && $payment->verified == "1")
+                                    @if($order->insurance_status === 'returned')
+                                        <br><span class="badge badge-success">{{ __('dashboard.insurance_returned_note') }}</span>
+                                    @elseif($order->insurance_status === 'confiscated_full' )
+                                        <br><span class="badge badge-dark">{{ __('dashboard.insurance_confiscated_full') }}</span>
+                                    @elseif($payment->insurance_status == 'confiscated_partial')
+                                        <br><span class="badge badge-warning">{{ __('dashboard.insurance_confiscated_partial') }}</span>
+                                    @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") < 1)
+                                        <br><span class="badge badge-danger">{{ __('dashboard.insurance_null') }}</span>
+                                    @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") > 1)
+                                        <br><span class="badge badge-info">{{ __('dashboard.insurance_not_returned') }}</span>
+                                    @endif
+                                @endif
                         </td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}
@@ -174,22 +219,16 @@
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.statement') }}</label>
                                     <select name="statement" id="" class="form-select" required>
+                                        <option value="">{{ __('dashboard.select') }}</option>
                                         @foreach(statements() as $statement)
                                             <option {{$payment->statement == $statement ? 'selected' : ''}} value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <div class="mb-5 fv-row col-md-12">
-                                    <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                                    <select name="account_id" id="" class="form-select" required>
-                                        @foreach($bankAccounts as $bankAccount)
-                                            <option {{$payment->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
+                                
                                 <!--begin::Card body-->
+                                 <input type="hidden" value="reservation_payments" name="source">
+
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.price') }}</label>
                                     <input type="number" name="price" id="price" value="{{   $payment->price }}"
@@ -198,12 +237,23 @@
                                 </div>
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                                    <select name="payment_method" id="" class="form-select" required>
+                                    <select name="payment_method" id="edit_payment_method_{{$payment->id}}" class="form-select" required>
+                                        <option value="">{{ __('dashboard.select_payment_method') }}</option>
                                         @foreach(paymentMethod() as $paymentSelect)
                                             <option {{$payment->payment_method == $paymentSelect ? 'selected' : ''}} value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
                                         @endforeach
                                     </select>
-                                </div>
+                                 </div>
+                                 <div class="mb-5 fv-row col-md-12">
+                                     <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                                    <select name="account_id" id="edit_account_id_{{$payment->id}}" class="form-select" required>
+                                        <option value="">{{ __('dashboard.select_bank_account') }}</option>
+                                        @foreach($bankAccounts as $bankAccount)
+                                            <option {{$payment->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                                        @endforeach
+                                    </select>
+                                 </div>
+
                                 <!--begin::Input group-->
                                 <div class="mb-5 fv-row col-md-12">
                                     <label class="form-label">{{ __('dashboard.notes') }}</label>
@@ -240,20 +290,15 @@
             @csrf
             <!--begin::Input group-->
             <input type="hidden" value="{{ $order->id }}" name="order_id">
-
+            <input type="hidden" value="reservation_payments" name="source">
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.statement') }}</label>
                 <select name="statement" id="" class="form-select" required>
+                                                        
+                    <option value="">{{ __('dashboard.select') }}</option>
+
                     @foreach(statements() as $statement)
                         <option value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-5 fv-row col-md-12">
-                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                <select name="account_id" id="" class="form-select" required>
-                    @foreach($bankAccounts as $bankAccount)
-                        <option {{old('account_id') == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -265,9 +310,19 @@
             </div>
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                <select name="payment_method" id="" class="form-select" required>
+                <select name="payment_method" id="payment_method" class="form-select" required>
+                    <option value="">{{ __('dashboard.select_payment_method') }}</option>
                     @foreach(paymentMethod() as $paymentSelect)
                         <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                <select name="account_id" id="account_id" class="form-select" required>
+                    <option value="">{{ __('dashboard.select_bank_account') }}</option>
+                    @foreach($bankAccounts as $bankAccount)
+                        <option {{old('account_id') == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -313,5 +368,88 @@
                 });
             }
         });
+
+        // Add payment form validation
+        $('#saveCountDetails').on('submit', function(e) {
+            let statementSelect = $(this).find('select[name="statement"]')[0];
+            if (!statementSelect.value || statementSelect.value === '') {
+                statementSelect.setCustomValidity('{{ __("dashboard.required") }}');
+                statementSelect.reportValidity();
+                e.preventDefault();
+                return false;
+            } else {
+                statementSelect.setCustomValidity('');
+            }
++
++            // Validate payment method
++            let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
++            if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
++                paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                paymentMethodSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                paymentMethodSelect.setCustomValidity('');
++            }
++
++            // Validate bank account
++            let accountSelect = $(this).find('select[name="account_id"]')[0];
++            if (!accountSelect.value || accountSelect.value === '') {
++                accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                accountSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                accountSelect.setCustomValidity('');
++            }
+         });
+
+         // Edit payment form validation
+         $('form[id^="editCountForm"]').on('submit', function(e) {
+             let statementSelect = $(this).find('select[name="statement"]')[0];
+             if (!statementSelect.value || statementSelect.value === '') {
+                 statementSelect.setCustomValidity('{{ __("dashboard.required") }}');
+                 statementSelect.reportValidity();
+                 e.preventDefault();
+                 return false;
+             } else {
+                 statementSelect.setCustomValidity('');
+             }
++
++            // Validate payment method inside edit form
++            let paymentMethodSelect = $(this).find('select[name="payment_method"]')[0];
++            if (!paymentMethodSelect.value || paymentMethodSelect.value === '') {
++                paymentMethodSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                paymentMethodSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                paymentMethodSelect.setCustomValidity('');
++            }
++
++            // Validate account inside edit form
++            let accountSelect = $(this).find('select[name="account_id"]')[0];
++            if (!accountSelect.value || accountSelect.value === '') {
++                accountSelect.setCustomValidity('{{ __("dashboard.required") }}');
++                accountSelect.reportValidity();
++                e.preventDefault();
++                return false;
++            } else {
++                accountSelect.setCustomValidity('');
++            }
+         });
+
+         // Clear validation when user selects a valid option
+-        $(document).on('change', 'select[name="statement"]', function() {
+-            if (this.value && this.value !== '') {
+-                this.setCustomValidity('');
+-            }
+-        });
++        $(document).on('change', 'select[name="statement"], select[name="payment_method"], select[name="account_id"]', function() {
++            if (this.value && this.value !== '') {
++                this.setCustomValidity('');
++            }
++        });
+        
     </script>
 @endpush

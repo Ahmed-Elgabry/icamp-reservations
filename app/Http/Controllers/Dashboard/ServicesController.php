@@ -61,7 +61,7 @@ class ServicesController extends Controller
                 'reports_counts' => 'nullable|array',
                 'reports_counts.*' => 'required|integer|min:1',
                 'reports_images' => 'nullable|array',
-                'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'reports_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
                 'report_orders' => 'nullable|array',
                 'report_orders.*' => 'nullable|integer',
                 'set_qty' => 'nullable|integer'
@@ -106,7 +106,6 @@ class ServicesController extends Controller
 
         } catch (\Exception $e) {
             \DB::rollBack();
-            \Log::error('Error creating service: '.$e->getMessage());
             return response()->json([
                 'errors' => ['server' => $e->getMessage()]
             ], 500);
@@ -157,7 +156,7 @@ class ServicesController extends Controller
             'report_orders'  => 'nullable|array',
             'report_orders.*'=> 'nullable|integer',
             'images'         => 'nullable|array',
-            'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2040',
             'set_qty'       => 'nullable|integer'
         ]);
 
@@ -340,11 +339,8 @@ class ServicesController extends Controller
                 }
             }
 
-            $cur = $current->ordered_count;
-            $nbr = $neighbor->ordered_count;
-
-            $current->ordered_count = $nbr;
-            $neighbor->ordered_count = $cur;
+            $current->ordered_count = $neighbor->ordered_count;
+            $neighbor->ordered_count = $current->ordered_count;
 
             $current->save();
             $neighbor->save();

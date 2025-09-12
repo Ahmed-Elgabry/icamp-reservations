@@ -5,13 +5,12 @@
  <ul class="nav nav-bold nav-tabs nav-tabs-line nav-tabs-line-3x nav-tabs-line-transparent-white nav-tabs-line-active-border-success mt-3">
             <!--begin:::Tab item-->
         <li class="nav-item">
-            <a href="{{  isset($order) ? route('orders.edit',$order->id) : route('orders.create') }}" class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.edit') }}">
-                {{-- {{ isset($order) ? $order->customer->name : __('dashboard.create_title', ['page_title' => __('dashboard.orders')]) }} --}}
+                <a href="{{  route('orders.edit', $order->id) }}" class="nav-link bg-transparent border-0 text-active-primary pb-4 {{ isActiveRoute('orders.edit') }}">
+                    <i class="fa fa-home text-primary me-1"></i>
+                    {{ __('dashboard.Reservation_information') }} 
                 </a>
         </li>
         @if(isset($order))
-
-
             @can('orders.addons')
                 <li class="nav-item">
                     <a href="{{ route('orders.addons',$order->id) }}"
@@ -24,7 +23,7 @@
                 <li class="nav-item">
                     <a href="{{ route('payments.show',$order->id) }}"
                     class="nav-link text-active-primary pb-4 {{ isActiveRoute('payments.show') }}">
-                     {{ __('dashboard.payments') }} <span class="badge badge-primary">{{$order->payments->sum('price')}}</span>
+                     {{ __('dashboard.payments') }} <span class="badge badge-primary" id="payment-amount">{{$order->payments->sum('price')}}</span>
                     </a>
                 </li>
             @endcan
@@ -55,7 +54,7 @@
                 <li class="nav-item">
                     <a href="{{ route('expenses.show',$order->id) }}"
                     class="nav-link text-active-primary pb-4 {{ isActiveRoute('expenses.show') }}">
-                     {{ __('dashboard.expenses') }} <span class="badge badge-primary">{{$order->expenses->sum('price')}}</span>
+                     {{ __('dashboard.expenses') }} <span class="badge badge-primary " id="expense-amount">{{$order->expenses->sum('price')}}</span>
                     </a>
                 </li>
             @endcan
