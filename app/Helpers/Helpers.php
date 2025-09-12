@@ -19,6 +19,39 @@ function isSuperAdmin(): bool
     return auth()->check() && auth()->user()->id == 1;
 }
 
+/**
+ * Check user permission directly from database (fresh check)
+ */
+function canAccessFresh($permission): bool
+{
+    if (!auth()->check()) {
+        return false;
+    }
+
+    // Super Admin bypass
+    if (auth()->user()->id == 1) {
+        return true;
+    }
+
+    // Get fresh user with roles and permissions from database
+    $user = \App\Models\User::with(['roles.permissions'])->find(auth()->id());
+
+    if (!$user) {
+        return false;
+    }
+
+    // Check if user has the permission through any role
+    foreach ($user->roles as $role) {
+        foreach ($role->permissions as $perm) {
+            if ($perm->name === $permission) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 
 function campInventory()
 {
