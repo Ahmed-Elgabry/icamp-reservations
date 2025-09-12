@@ -295,7 +295,7 @@
         <!--end::Menu item-->
     @endcan
 
-    @can('addons.index')
+    @if(canAccessFresh('addons.index'))
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['addons.index', 'addons.show', 'addons.create', 'addons.edit', 'stock-quantities.show'])}}"
              data-kt-menu-trigger="click">
@@ -323,7 +323,7 @@
                 </div>
                 <!--end::Menu item-->
 
-                @can('addons.create')
+                @if(canAccessFresh('addons.create'))
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{route('addons.create')}}" class="menu-link py-3 {{ isActiveRoute('addons.create') }}">
@@ -334,13 +334,13 @@
                                 class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.addons')])</span>
                         </a>
                     </div>
-                @endcan
+                @endif
                 <!--end::Menu item-->
             </div>
             <!--end::Menu sub-->
         </div>
         <!--end::Menu item-->
-    @endcan
+    @endif
 
     @if(Gate::allows('services.index') || Gate::allows('camp-types.index'))
         <!--begin::Menu item-->
