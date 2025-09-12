@@ -1432,5 +1432,46 @@ return [
     "approved" => 'معتمد',  
     "canceled" => 'ملغي',
     "delayed" => 'مؤجل',
+        // Manual item withdrawal translations
+    'manual_item_withdrawal_show' => 'عرض سحب عنصر يدوي',
+    'manual_item_return_show' => 'عرض إرجاع عنصر يدوي',
+
+    'manual_item_withdrawal_and_return' => [
+        'title' => 'سحب عنصر يدوي',
+        'heading' => ' صرف و إرجاع عنصر من المخزون يدوياً',
+        "history_heading" => 'أخر معاملات صرف وإرجاع العناصر',
+        'item' => 'العنصر',
+        'available_quantity' => 'المتوافر حاليا بالمخزون',
+        'quantity_to_discount' => 'العدد المطلوب صرفه',
+        'type' => 'النوع',
+        'select_type' => 'اختر النوع',
+        'type_decrement' => 'صرف',
+        'type_increment' => 'إرجاع',
+        'reason' => 'السبب',
+        'note' => 'ملاحظة',
+        'image' => 'صورة',
+        'date_time' => 'التاريخ والوقت',
+        'by' => 'بواسطة',
+    'specify_reason' => 'حدد السبب',
+    'select_item' => 'اختر العنصر',
+    'select_reason' => 'اختر السبب',
+    'select_order' => 'اختر رقم الحجز',
+        'submit' => 'تحديث المخزون',
+    'edit_adjustment' => 'تعديل صرف العنصر',
+    'reason_options' => [
+            'correct_quantity' => 'تصحيح الكمية',
+            'for_employee' => 'لموظف',
+            'employee_mistake' => 'خطأ الموظف',
+            'invalid' => 'غير صالح',
+            'damage' => 'تلف',
+            'losing' => 'فقدان',
+            'for_orders' => 'للطلبات',
+            'else' => 'أخرى',
+            'non-consumption' => 'عدم إستهلاك',
+        ],
+    ],
+
+    'stock_updated_successfully' => 'تم تحديث المخزون بنجاح',
+
 
 ];

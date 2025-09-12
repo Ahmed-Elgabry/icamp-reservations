@@ -137,7 +137,7 @@
                                                 <div>{{ $stock->name }}</div>
                                             </td>
                                             <td class="text-center">
-                                                <input type="text" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" disabled>
+                                                <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" >
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center align-items-center gap-2">

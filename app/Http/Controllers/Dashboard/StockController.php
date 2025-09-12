@@ -154,4 +154,10 @@ class StockController extends Controller
         $report->delete();
         return response()->json(['message' => __('dashboard.success')], 200);
     }
+
+    public function getAvailableStocks()
+    {
+        $stocks = Stock::select('id', 'name', 'quantity')->where('quantity', '>', 0)->get();
+        return response()->json($stocks);
+    }
 }
