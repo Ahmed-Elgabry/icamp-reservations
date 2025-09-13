@@ -1766,5 +1766,5 @@ return [
     ],
 
     'stock_updated_successfully' => 'Stock updated successfully',
-
+    'stockTakingReport' => 'Stock Taking Report',
 ];

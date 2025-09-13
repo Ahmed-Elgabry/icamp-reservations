@@ -8,13 +8,14 @@ return new class extends Migration {
     {
         Schema::table('stock_adjustments', function (Blueprint $table) {
             $table->integer('available_quantity_before')->nullable()->after('quantity');
+            $table->boolean('verified')->default(false)->after('available_quantity_before');
         });
     }
 
     public function down()
     {
         Schema::table('stock_adjustments', function (Blueprint $table) {
-            $table->dropColumn('available_quantity_before');
+            $table->dropColumn(['available_quantity_before', 'verified']);
         });
     }
 };

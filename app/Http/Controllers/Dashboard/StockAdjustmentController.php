@@ -38,7 +38,7 @@ class StockAdjustmentController extends Controller
         $validated = $request->validate([
             'stock_id' => 'required|exists:stocks,id',
             'quantity_to_discount' => 'required|integer|min:1',
-            'type' => 'required|in:item_decrement,item_increment',
+            'type' => 'required|in:item_decrement,item_increment,stockTaking_decrement,stockTaking_increment',
             'reason' => 'nullable|string|max:255',
             'custom_reason' => 'nullable|string|max:255',
             'order_id' => 'nullable|exists:orders,id',
@@ -47,26 +47,28 @@ class StockAdjustmentController extends Controller
             'date_time' => 'nullable|date',
             'image' => 'nullable|image|max:20480',
         ]);
-
         $type = $validated['type'] ?? null;
         $qty = (int) $validated['quantity_to_discount'];
 
         $stock = Stock::findOrFail($validated['stock_id']);
-
+        
         
         try {
             DB::transaction(function () use ($stock, $validated, $type, $qty) {
                 // update stock quantity
                 // if decrement ensure available
-                if ($type === 'item_decrement' && $stock->quantity < $qty) {
-                    $stock->update(['quantity' => $qty]);
-                } 
-                elseif ($type === 'item_decrement') {
-                    $stock->decrement('quantity', $qty);
-                } elseif ($type === 'item_increment') {
-                    $stock->increment('quantity', $qty);
+                if ($request->type !== 'stockTaking_decrement' && $request->type !== 'stockTaking_increment') {
+                    
+                    if ($type === 'item_decrement' && $stock->quantity < $qty) {
+                        $stock->update(['quantity' => $qty]);
+                    } 
+                    elseif ($type === 'item_decrement') {
+                        $stock->decrement('quantity', $qty);
+                    } elseif ($type === 'item_increment') {
+                        $stock->increment('quantity', $qty);
+                    }
+                    $validated['verification'] = true;
                 }
-
                 // handle image upload if present
                 $imagePath = null;
                 if (request()->hasFile('image')) {
@@ -78,6 +80,7 @@ class StockAdjustmentController extends Controller
                     'quantity' => $qty,
                     'type' => $type,
                     'reason' => $validated['reason'] ?? null,
+                    'verification' => $validated['verification'] ?? false,
                     'custom_reason' => $validated['custom_reason'] ?? null,
                     'order_id' => $validated['order_id'] ?? null,
                     'note' => $validated['note'] ?? null,

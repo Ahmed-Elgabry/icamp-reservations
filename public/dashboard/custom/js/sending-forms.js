@@ -1,4 +1,14 @@
 $(document).ready(function(){
+    // Set verified value based on which submit button is clicked
+    $(document).on('click', 'button[type="submit"]#kt_ecommerce_add_product_submit', function(e) {
+        var $btn = $(this);
+        var $form = $btn.closest('form');
+        // Remove any previous hidden verified input
+        $form.find('input[name="verified"]').remove();
+        // If the button has class 'verified', set verified=true, else false
+        var verifiedValue = $btn.hasClass('verified') ? 'true' : 'false';
+        $('<input>').attr({type: 'hidden', name: 'verified', value: verifiedValue}).appendTo($form);
+    });
     const t = document.getElementById("kt_ecommerce_add_product_form");
 
     // Global Delete Confirmation Function
@@ -66,7 +76,6 @@ $(document).ready(function(){
         var url = $form.attr('action');
         // Find this form's submit button and use it for indicator
         var o = $form.find('#kt_ecommerce_add_product_submit')[0] || $form.find('button[type="submit"]')[0] || null;
-
         $.ajax({
             url: url,
             method: 'post',

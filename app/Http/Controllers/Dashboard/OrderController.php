@@ -858,7 +858,9 @@ class OrderController extends Controller
                 $item = GeneralPayment::findOrFail($id);
                 $transaction = $item->transaction()->first();
                 \Log::info($item);
-                
+            }elseif ($type == 'stockTaking') {
+                $item = StockAdjustment::findOrFail($id);
+
             }elseif ($type == 'insurance') {
                     $item = Order::findOrFail($id);                    
                     event(new \App\Events\VerificationStatusChanged('insurance', $item, $item->insurance_approved));                    
@@ -871,16 +873,12 @@ class OrderController extends Controller
             } elseif ($type == 'warehouse_sales') {
                 $item = OrderItem::findOrFail($id);
                 $transaction = Transaction::where('order_item_id', $item->id)->first();
-
-                \Log::info($transaction);
             } else {
                 return redirect()->back()->with('error', __('dashboard.invalid_type'));
             }
             $newVerifiedStatus = !$item->verified;
-                        \Log::info($item->verified);
 
             $item->update(["verified"=>$newVerifiedStatus]);
-            \Log::info($item->verified);
             if ($transaction) {
                 $transaction->update(["verified"=>$newVerifiedStatus]);
             }
@@ -891,7 +889,8 @@ class OrderController extends Controller
                 'expense' => 'expense',
                 'general_revenue_deposit' => 'general_revenue_deposit', // Map to 'payment' since it's handled the same way
                 'insurance' => 'insurance',
-                'p' => 'warehouse_sales',
+                'stockTaking' => 'stockTaking',
+                'warehouse_sales' => 'warehouse_sales',
                 default => $type,
             }, $item, $newVerifiedStatus));
             

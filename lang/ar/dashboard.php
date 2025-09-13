@@ -1473,6 +1473,6 @@ return [
     ],
 
     'stock_updated_successfully' => 'تم تحديث المخزون بنجاح',
-
+    "stockTakingReport" => "تقرير جرد المخزون"
 
 ];

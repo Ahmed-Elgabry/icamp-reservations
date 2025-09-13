@@ -641,10 +641,7 @@
 
     @endcan
 
-
-
     @if(canAccessFresh('addons.index'))
-
         <!--begin::Menu item-->
 
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['addons.index', 'addons.show', 'addons.create', 'addons.edit', 'stock-quantities.show'])}}"
@@ -697,10 +694,7 @@
 
                 <!--end::Menu item-->
 
-
-
                 @if(canAccessFresh('addons.create'))
-
                     <!--begin::Menu item-->
 
                     <div class="menu-item">
@@ -720,9 +714,7 @@
                         </a>
 
                     </div>
-
                 @endif
-
                 <!--end::Menu item-->
 
             </div>
@@ -732,10 +724,7 @@
         </div>
 
         <!--end::Menu item-->
-
     @endif
-
-
 
     @if(Gate::allows('services.index') || Gate::allows('camp-types.index'))
 

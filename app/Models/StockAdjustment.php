@@ -19,6 +19,8 @@ class StockAdjustment extends Model
         'reason',
         'custom_reason',
         'note',
+        'verified',
+    'available_quantity_before',
         'image',
         'employee_name',
         'date_time',
