@@ -20,7 +20,7 @@ return new class extends Migration
             // quantity deducted (can be positive integer)
             $table->integer('quantity')->unsigned();
             // type: item_decrement or item_increment
-            $table->enum('type', ['item_decrement', 'item_increment'])->default(null);
+            $table->enum('type', ['item_decrement', 'item_increment', "stockTaking_decrement","stockTaking_increment"])->default(null);
             // optional reason and free-text custom reason
             $table->string('reason')->nullable();
             $table->string('custom_reason')->nullable();

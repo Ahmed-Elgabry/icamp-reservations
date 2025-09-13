@@ -228,6 +228,8 @@
                     <td>
                         <input type="number" name="quantity_to_discount" class="form-control w-auto" required>
                     </td>
+                    <input type="hidden" name="source" value="stockIssueAndReturn">
+
                     <td>
                         <select name="type" class="form-control w-auto" required>
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_type') }}</option>

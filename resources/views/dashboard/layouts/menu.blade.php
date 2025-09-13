@@ -607,9 +607,7 @@
                             </span>
 
                             <span
-
                                 class="menu-title">@lang('dashboard.manual_item_withdrawal_show')</span>
-
                         </a>
 
                     </div>
@@ -630,7 +628,40 @@
                         </a>
 
                     </div>
+                     <div class="menu-item">
 
+                        <a href="{{route('stockTaking.create')}}" class="menu-link py-3 {{ isActiveRoute('stockTaking.create') }}">
+
+                            <span class="menu-bullet">
+
+                                <span class="bullet bullet-dot"></span>
+
+                            </span>
+
+                            <span
+
+                                class="menu-title">@lang('dashboard.stock_taking')</span>
+
+                        </a>
+
+                    </div>
+                     <div class="menu-item">
+
+                        <a href="{{route('stockTaking.index')}}" class="menu-link py-3 {{ isActiveRoute('stockTaking.index') }}">
+
+                            <span class="menu-bullet">
+
+                                <span class="bullet bullet-dot"></span>
+
+                            </span>
+
+                            <span
+
+                                class="menu-title">@lang('dashboard.stock_taking_report')</span>
+
+                        </a>
+
+                    </div>
             </div>
 
             <!--end::Menu sub-->

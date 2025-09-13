@@ -303,7 +303,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         Route::get('item-return', [StockAdjustmentController::class, 'returnedItemsIndex'])->name('item-return');
 
         Route::get('stock-adjustments/{adjustment}/json', [StockAdjustmentController::class, 'json'])->name('stock.adjustments.json');
-    // Store adjustment
+        Route::get('stockTaking/create', [StockAdjustmentController::class, 'stockTakingCreate'])->name('stockTaking.create');
+
+    Route::get('stockTaking/index', [StockAdjustmentController::class, 'stockTakingIndex'])->name('stockTaking.index');
+
+        // Store adjustment
     Route::post('stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock.adjustments.store');
     // Update adjustment
     Route::put('stock-adjustments/{adjustment}', [StockAdjustmentController::class, 'update'])->name('stock.adjustments.update');

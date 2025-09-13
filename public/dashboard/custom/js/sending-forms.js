@@ -6,7 +6,7 @@ $(document).ready(function(){
         // Remove any previous hidden verified input
         $form.find('input[name="verified"]').remove();
         // If the button has class 'verified', set verified=true, else false
-        var verifiedValue = $btn.hasClass('verified') ? 'true' : 'false';
+        var verifiedValue = $btn.hasClass('verified') ? "1" : "0";
         $('<input>').attr({type: 'hidden', name: 'verified', value: verifiedValue}).appendTo($form);
     });
     const t = document.getElementById("kt_ecommerce_add_product_form");
