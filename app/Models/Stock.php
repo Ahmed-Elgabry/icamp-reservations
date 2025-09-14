@@ -65,6 +65,10 @@ class Stock extends Model
     {
         return $this->hasMany(StockActivity::class);
     }
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class ,'stock_id' , 'id');
+    }
 
     public function scopeFilter(Builder $builder, $filters)
     {

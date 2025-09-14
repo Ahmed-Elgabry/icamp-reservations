@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'stock_report_title' => 'Stock Report',
     'mark_all_not_completed' => 'Mark all as not completed',
     'the_insurance' => 'Insurance',
     'Insurance forfeiture refund' => 'Insurance Forfeiture/Refund',
@@ -1423,7 +1424,8 @@ return [
     'insufficient_stock' => 'Insufficient Stock',
     'item_added_successfully' => 'Item Added Successfully',
     'add' => 'Add',
-    'top_selling_services' => 'Top Selling Services',
+   
+   
     'sales' => 'Sales',
     'profits' => 'Profits',
     'monthly_payments' => 'Monthly Payments',
@@ -1702,9 +1704,7 @@ return [
     'updated_date' => 'Updated Date',
     'updated_time' => 'Updated Time',
     'date_time' => 'Date & Time',
-    
 
-    
     // Order status statistics
     'pending_and_show_price_count' => 'Pending Orders - Show Price Count',
     "order_status.pending_and_show_price_count" => 'Pending Orders - Show Price Count',
@@ -1729,4 +1729,42 @@ return [
     'no_insurance_payment_verified' => 'No Insurance Payment Approved',
     'add_title' => 'Add :page_title',
 
+    // Manual item withdrawal translations
+    'manual_item_withdrawal_and_return' => [
+        'title' => 'Manual Item Withdrawal and Return',
+        'heading' => 'Manual Item Withdrawal and Return',
+        "history_heading" => 'Withdrawal and return History',
+
+        'item' => 'Item',
+        'available_quantity' => 'Available Quantity',
+        'quantity_to_discount' => 'Quantity to Discount',
+        'type' => 'Type',
+        'type_decrement' => 'Decrement',
+        'type_increment' => 'Increment',
+        'reason' => 'Reason',
+        'note' => 'Note',
+        'image' => 'Image',
+        'date_time' => 'Date & Time',
+        'by' => 'By',
+        'specify_reason' => 'Specify reason',
+        'select_item' => 'Select Item',
+        'select_reason' => 'Select Reason',
+    'select_order' => 'Select Order',
+        'submit' => 'Update Stock',
+    'edit_adjustment' => 'Edit item withdrawal and return',
+    'reason_options' => [
+            'correct_quantity' => 'Correct the quantity',
+            'for_employee' => 'For employee',
+            'employee_mistake' => 'Employee mistake',
+            'invalid' => 'Invalid',
+            'damage' => 'Damage',
+            'losing' => 'Losing',
+            'for_orders' => 'For orders',
+            'else' => 'Other',
+            'non-consumption' => 'Non-consumption',
+        ],
+    ],
+
+    'stock_updated_successfully' => 'Stock updated successfully',
+    'stockTakingReport' => 'Stock Taking Report',
 ];

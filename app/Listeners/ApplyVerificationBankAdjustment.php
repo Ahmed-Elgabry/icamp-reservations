@@ -20,13 +20,13 @@ class ApplyVerificationBankAdjustment
         // Expect models to expose: account_id, total/amount/price
         try {
             $accountId = $item->account_id  ?? null;
-            if (!$accountId && $action !== "insurance") return; 
+            if (!$accountId && $action !== "insurance" && $action !== "stockTaking") return;
 
             $amount = $this->resolveAmount($action, $item);
-            if ($amount <= 0 && $action !== "insurance") return;
+            if ($amount <= 0 && $action !== "insurance" && $action !== "stockTaking") return;
 
             $account = BankAccount::find($accountId);
-            if (!$account && $action !== "insurance") {
+            if (!$account && $action !== "insurance" && $action !== "stockTaking") {
             return;
             }
 
@@ -38,7 +38,16 @@ class ApplyVerificationBankAdjustment
                 $account->increment('balance', $amount);
                 }
                 break;
-
+            case "stockTaking" :
+                if ($verified) {
+                    $item->update(['available_quantity_before' => $item->stock->quantity]);
+                    $item->stock()->update(['quantity' => $item->quantity]);
+                    $item->stock()->update(['percentage' => $item->percentage ?? null]);
+                } else {
+                    $item->stock()->update(['quantity' => $item->available_quantity_before]);
+                    $item->stock()->update(['percentage' => null]);
+                }
+                break;
             case 'insurance':
                 $insurances = $item->payments()->where('statement', 'the_insurance')->get();
                 $newstatus = $verified ? "0" : "1";

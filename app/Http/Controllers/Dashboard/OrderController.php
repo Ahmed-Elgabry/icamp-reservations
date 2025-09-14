@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Repositories\ICategoryRepository;
 use Illuminate\Support\Facades\DB as FacadesDB;
 use App\Models\Transaction;
+use App\Models\StockAdjustment;
 //use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -640,6 +641,7 @@ class OrderController extends Controller
             'stockId' => 'required|integer|exists:stocks,id',
             'qty'     => 'required|integer|min:1',
             'status'  => 'required|in:decrement,increment',
+            'orderId' => 'required|integer|exists:orders,id',
         ]);
         try {
             $result = FacadesDB::transaction(function () use ($data) {
@@ -653,6 +655,16 @@ class OrderController extends Controller
                     ]);
                 abort_if($affected === 0, 404, 'Pivot not found for this stock.');
 
+                StockAdjustment::create([
+                    "available_quantity_before" => Stock::find($data['stockId'])->quantity,
+                    'stock_id' => $data['stockId'],
+                    'quantity' => $data['qty'] ,
+                    'type' => $data['status'] ==="increment"? "item_increment" : "item_decrement",
+                    'order_id' => $data['orderId'],
+                    "source" => "Reservation",
+                    'verified' => "1",
+                    "date_time" => now(),
+                ]);
                 $stock = Stock::whereKey($data['stockId'])
                     ->lockForUpdate()
                     ->firstOrFail();
@@ -858,7 +870,9 @@ class OrderController extends Controller
                 $item = GeneralPayment::findOrFail($id);
                 $transaction = $item->transaction()->first();
                 \Log::info($item);
-                
+            }elseif ($type == 'stockTaking') {
+                $item = StockAdjustment::findOrFail($id);
+
             }elseif ($type == 'insurance') {
                     $item = Order::findOrFail($id);                    
                     event(new \App\Events\VerificationStatusChanged('insurance', $item, $item->insurance_approved));                    
@@ -871,17 +885,13 @@ class OrderController extends Controller
             } elseif ($type == 'warehouse_sales') {
                 $item = OrderItem::findOrFail($id);
                 $transaction = Transaction::where('order_item_id', $item->id)->first();
-
-                \Log::info($transaction);
             } else {
                 return redirect()->back()->with('error', __('dashboard.invalid_type'));
             }
             $newVerifiedStatus = !$item->verified;
-                        \Log::info($item->verified);
 
             $item->update(["verified"=>$newVerifiedStatus]);
-            \Log::info($item->verified);
-            if ($transaction) {
+            if (isset($transaction)) {
                 $transaction->update(["verified"=>$newVerifiedStatus]);
             }
             // Fire event so bank balance is adjusted by listener
@@ -891,7 +901,8 @@ class OrderController extends Controller
                 'expense' => 'expense',
                 'general_revenue_deposit' => 'general_revenue_deposit', // Map to 'payment' since it's handled the same way
                 'insurance' => 'insurance',
-                'p' => 'warehouse_sales',
+                'stockTaking' => 'stockTaking',
+                'warehouse_sales' => 'warehouse_sales',
                 default => $type,
             }, $item, $newVerifiedStatus));
             

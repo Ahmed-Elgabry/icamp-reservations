@@ -66,7 +66,6 @@ $(document).ready(function(){
         var url = $form.attr('action');
         // Find this form's submit button and use it for indicator
         var o = $form.find('#kt_ecommerce_add_product_submit')[0] || $form.find('button[type="submit"]')[0] || null;
-
         $.ajax({
             url: url,
             method: 'post',
@@ -193,6 +192,62 @@ $(document).ready(function(){
                         }
                     });
                 }
+            }
+        });
+    });
+
+    $(document).on('submit', '.update', function(e) {
+        e.preventDefault();
+        var $form = $(this);
+        var url = $form.attr('action');
+        var o = $form.find('#kt_ecommerce_add_product_submit')[0] || $form.find('button[type="submit"]')[0] || null;
+
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: new FormData($form[0]),
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                o && o.setAttribute && o.setAttribute("data-kt-indicator", "on");
+                o && (o.disabled = !0);
+                setTimeout(function() {
+                    o && o.removeAttribute && o.removeAttribute("data-kt-indicator");
+                    var successMsg = $form.attr('data-success-message') || 'Updated successfully';
+                    Swal.fire({
+                        text: successMsg,
+                        icon: "success",
+                        buttonsStyling: !1,
+                        confirmButtonText: "OK",
+                        customClass: {
+                            confirmButton: "btn btn-primary"
+                        }
+                    }).then(function() {
+                        $form.trigger('update:success', [response]);
+                        const redirect = $form.attr('data-kt-redirect');
+                        if (redirect) {
+                            window.location = redirect;
+                        } else {
+                            if (o) o.disabled = !1;
+                        }
+                    });
+                }, 2000);
+            },
+            error: function(xhr) {
+                var msg = 'An error occurred';
+                if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                Swal.fire({
+                    html: msg,
+                    icon: "error",
+                    buttonsStyling: !1,
+                    confirmButtonText: "OK",
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
             }
         });
     });
