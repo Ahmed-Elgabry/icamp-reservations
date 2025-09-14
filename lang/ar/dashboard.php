@@ -1476,12 +1476,13 @@ return [
             'invalid' => 'غير صالح',
             'damage' => 'تلف',
             'losing' => 'فقدان',
-            'for_orders' => 'للحجوزات',
+            'for_orders' => 'للطلبات',
             'else' => 'أخرى',
             'non-consumption' => 'عدم إستهلاك',
         ],
     ],
     
+  
     'stock_updated_successfully' => 'تم تحديث المخزون بنجاح',
     "stockTakingReport" => "تقرير جرد المخزون",
     'stockTaking' => [
@@ -1561,4 +1562,8 @@ return [
 "quantity-first-time" => 'الكمية - أول مرة',
 "date_of_creation" => 'تاريخ إضافة العنصر في النظام',
 "filter_by_date"=> 'بحث بالتاريخ',
+
+
+
 ];
+ 

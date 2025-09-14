@@ -74,11 +74,11 @@
     </style>
 @endpush
     <!-- Stock Report is the full stockTaking after approved or verification -->
-    @if(isset($stockTakingReport) && $stockTakingReport->count())
+    @if(isset($stockTakingReport) && $stockTakingReport->count() && $stockTakingReport !== "no-data")
     <!-- Stock Search Input -->
 
         <div class="mb-3">
-            <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="Search by stock name or ID...">
+            <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="{{ __('dashboard.search_stock') }}">
         </div>
      
 <!-- Filter/Search Modal Trigger Button -->
@@ -184,10 +184,11 @@
                     	@include('dashboard.pagination.pagination', ['transactions' => $stockTakingReport])
                 @endif
             </div>
-        
+    @elseif(isset($stockTakingReport) && $stockTakingReport === "no-data")
+        <div class="alert alert-warning">{{ __('dashboard.no_data_found') }}</div>
     @else
             <div class="mb-3">
-                <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="Search by stock name or ID...">
+                <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="{{ __('dashboard.search_stock') }}">
             </div>
             <form method="POST" action="{{ route('stock.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
                 @csrf
@@ -204,7 +205,7 @@
                             <th class="min-w-200">{{ __('dashboard.stockTaking.image') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.by') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.date_time') }}</th>
-                            <th class="min-w-200">{{ __('dashboard.action') }}</th>
+                            <th class="min-w-200">{{ __('dashboard.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -289,7 +290,7 @@
             </div>
         </form>
              <!-- Stock Report is the full stockTaking before approved or verification -->
-            @if(isset($stockTakingItems) && $stockTakingItems->count())
+            @if(isset($stockTakingItems) && $stockTakingItems->count()  )
 
 
                 <h2>{{ __('dashboard.stockTakingReport') }}</h2>
@@ -352,7 +353,7 @@
                                                             </td>
                                     <td>{{ $adj->date_time }}</td>
                                     <td>{{ $adj->employee_name }}</td>
-                                    <td class="d-flex flex-nowrap flex-row gap-4">
+                                    <td class="d-flex flex-nowrap flex-row justify-content-between gap-4">
                                 @if($adj->verified)
                                         <a href="{{ route('order.verified' , [$adj->id , 'stockTaking']) }}" class="btn btn-sm btn-success " >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                     @else
