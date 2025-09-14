@@ -6,6 +6,30 @@
 <div class="container">
 @push('css')
     <style>
+        .active-switch {
+            opacity: 1 !important;
+            filter: none !important;
+            box-shadow: 0 0 0 0.15rem rgba(40,167,69,.25);
+        }
+        .btn-outline-danger.active-switch {
+            background-color: #dc3545 !important;
+            color: #fff !important;
+            border-color: #dc3545 !important;
+        }
+        .btn-outline-success.active-switch {
+            background-color: #28a745 !important;
+            color: #fff !important;
+            border-color: #28a745 !important;
+        }
+        .btn-outline-danger, .btn-outline-success {
+            opacity: 0.5;
+            filter: grayscale(40%);
+            transition: opacity 0.2s, filter 0.2s;
+        }
+        .btn-outline-danger.active-switch, .btn-outline-success.active-switch {
+            opacity: 1;
+            filter: none;
+        }
         .select2-container--default .select2-selection--single {
             height: calc(1.5em + .75rem + 2px);
             padding: .375rem .75rem;
@@ -32,7 +56,6 @@
 
     /* Make tables scroll only within their container instead of scrolling the whole page */
     .scrollable-table-wrapper {
-        max-height: 60vh; /* adjust as needed */
         overflow: auto;
         -webkit-overflow-scrolling: touch;
     }
@@ -53,37 +76,70 @@
     <!-- Stock Report is the full stockTaking after approved or verification -->
     @if(isset($stockTakingReport) && $stockTakingReport->count())
     <!-- Stock Search Input -->
+
         <div class="mb-3">
             <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="Search by stock name or ID...">
         </div>
+     
+<!-- Filter/Search Modal Trigger Button -->
+<button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#filterModal">
+    {{ __('dashboard.filter_by_date') }}
+</button>
+
+<!-- Filter/Search Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">{{ __('dashboard.filter_by_date') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="GET" action="{{ url()->current() }}" class="form-inline p-3">
+                <div class="form-group mr-2">
+                    <label for="modal_date_from" class="mr-2">{{ __('dashboard.date_from') }}</label>
+                    <input type="date" name="date_from" id="modal_date_from" class="form-control" value="{{ request('date_from') }}">
+                </div>
+                <div class="form-group mr-2">
+                    <label for="modal_date_to" class="mr-2">{{ __('dashboard.date_to') }}</label>
+                    <input type="date" name="date_to" id="modal_date_to" class="form-control" value="{{ request('date_to') }}">
+                </div>
+                <button type="submit" class="btn btn-primary">{{ __('dashboard.filter') }}</button>
+                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">{{ __('dashboard.cancel') }}</button>
+            </form>
+        </div>
+    </div>
+</div>   
         <h2>{{ __('dashboard.stockTakingReport') }}</h2>
         <div class="scrollable-table-wrapper">
             <table class="table table-responsive" id="stock-table">
                 <thead>
                     <tr>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.item') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.available_quantity') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.correct_quantity') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.reason') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.note') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.image') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.date_time') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.stock_taking.by') }}</th>
-                        <th class="min-w-200">{{ __('dashboard.actions') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.item') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.available_quantity') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.correct_quantity') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.type') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.reason') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.note') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.image') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.date_time') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.stockTaking.by') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($stockTakingReport as $adj)
                     <tr data-id="{{ $adj->id }}">
-                            <td>{{ $adj->stock->name ?? '-' }}</td>
+                            <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                             <td>{{ $adj->stock->quantity ?? '-' }}</td>
                             <td>{{ $adj->quantity }}</td>
+                            <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                             @if($adj->order_id)
-                                <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
+                                <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                             @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                                <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ". __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->custom_reason) }}</td>
+                                <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}  {{ " - ". __("dashboard.stockTaking.reason_options.".$adj->custom_reason) }}</td>
                             @else
-                                <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
+                                <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}</td>
                             @endif
                                                     <td>{{ $adj->note }}</td>
                                                     <td>
@@ -114,18 +170,18 @@
                                                     </td>
                             <td>{{ $adj->date_time }}</td>
                             <td>{{ $adj->employee_name }}</td>
-                            <td>
+                            <!-- <td>
                                 <button class="btn btn-sm btn-primary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
                                 <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
-                            </td>
+                            </td> -->
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-            <div class="d-flex justify-content-center mt-3">
+            <div class="d-flex justify-content-between mt-3">
                 @if(method_exists($stockTakingReport, 'links'))
-                    {!! $stockTakingReport->links() !!}
+                    	@include('dashboard.pagination.pagination', ['transactions' => $stockTakingReport])
                 @endif
             </div>
         
@@ -143,13 +199,12 @@
                             <th class="min-w-200">{{ __('dashboard.stockTaking.item') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.available_quantity') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.correct_quantity') }}</th>
-                            <th class="min-w-200">{{ __('dashboard.stockTaking.type') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.reason') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.note') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.image') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.by') }}</th>
                             <th class="min-w-200">{{ __('dashboard.stockTaking.date_time') }}</th>
-                            <th class="min-w-200">{{ __('dashboard.stockTaking.action') }}</th>
+                            <th class="min-w-200">{{ __('dashboard.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -167,15 +222,25 @@
                             <td>
                                 <input type="number" name="available_quantity" class="form-control w-auto" value="" readonly>
                             </td>
-                            <td>
-                                <input type="number" name="quantity_to_discount" class="form-control w-auto" required>
-                            </td>
-                            <td>
-                                <select name="type" class="form-control w-auto" required>
-                                    <option value="">{{ __('dashboard.stockTaking.select_type') }}</option>
-                                    <option value="stockTaking_decrement">{{ __('dashboard.stockTaking.decrement') }}</option>
-                                    <option value="stockTaking_increment">{{ __('dashboard.stockTaking.increment') }}</option>
-                                </select>
+                            <td class="d-flex flex-row gap-4">
+                                <div class="form-group d-flex align-items-center mb-0">
+                                    <div class="ml-2">
+                                        <button type="button" class="btn btn-outline-danger mr-2" id="btn-decrement-main">{{ __('dashboard.decrement') }}</button>
+                                        <button type="button" class="btn btn-outline-success" id="btn-increment-main">{{ __('dashboard.increment') }}</button>
+                                    </div>
+                                    <input type="hidden" name="type" id="main-type-value" value="">
+                                </div>
+                                <div class="form-group align-items-center  gap-5 mb-0" id="main-quantity-group" style="display:none;">
+                                    <div class="d-flex flex-column">
+                                        <label class="label-min-w">{{ __('dashboard.stockTaking.correct_quantity') }}</label>
+                                        <input type="number" name="correct_quantity" id="main-correct-quantity" class="form-control w-auto" required>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <label class="label-min-w">{{ __('dashboard.percentage') }}</label>
+                                        <input type="number" name="percentage" id="main-percentage" class="form-control w-auto ">%
+                                    </div>
+
+                                </div>
                             </td>
                             <input type="hidden" name="source" value="stockTaking">
                             <td>
@@ -212,15 +277,17 @@
                             <td>
                                 <input type="datetime-local" name="date_time" class="form-control w-auto" required>
                             </td>
-                            <td>
-                            <button type="submit" class="btn btn-danger" id="kt_ecommerce_add_product_submit">{{ __('dashboard.manual_item_withdrawal_and_return.unapprove') }}</button>
-                            <button type="submit" class="btn btn-success verified" id="kt_ecommerce_add_product_submit">{{ __('dashboard.manual_item_withdrawal_and_return.approved') }}</button>
+                            <td class="d-flex flex-row width auto flex-nowrap gap-4">
+                            <input type="hidden" name="verified" value="0" id="verified-input">
+                                <button type="button" class="btn btn-outline-danger text-nowrap" id="btn-draft-switch">{{ __('dashboard.stockTaking.draft') }}</button>
+                                <button type="button" class="btn btn-outline-success verified text-nowrap" id="btn-approved-switch">{{ __('dashboard.stockTaking.approved') }}</button>
+                                <button type="submit" class="btn btn-primary text-nowrap" id="kt_ecommerce_add_product_submit">{{ __('dashboard.submit') }}</button>
                             </td>
                         </tr>
                     </tbody>
-                    </table>
-                </div>
-            </form>
+                </table>
+            </div>
+        </form>
              <!-- Stock Report is the full stockTaking before approved or verification -->
             @if(isset($stockTakingItems) && $stockTakingItems->count())
 
@@ -245,10 +312,10 @@
                         <tbody>
                             @foreach($stockTakingItems as $adj)
                                     <tr data-id="{{ $adj->id }}">
-                                    <td>{{ $adj->stock->name ?? '-' }}</td>
+                                      <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                                     <td>{{ $adj->stock->quantity ?? '-' }}</td>
                                     <td>{{ $adj->quantity }}</td>
-                                    <td>{{ $adj->type }}</td>
+                                    <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                                     @if($adj->order_id)
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id }}</td>
                                     @elseif(isset($adj->custom_reason) && $adj->custom_reason)
@@ -283,20 +350,25 @@
                                                                             </div>
                                                                     @endif
                                                             </td>
-                                    <td>{{ $adj->employee_name }}</td>
                                     <td>{{ $adj->date_time }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
-                                        <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
+                                    <td>{{ $adj->employee_name }}</td>
+                                    <td class="d-flex flex-nowrap flex-row gap-4">
+                                @if($adj->verified)
+                                        <a href="{{ route('order.verified' , [$adj->id , 'stockTaking']) }}" class="btn btn-sm btn-success " >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                    @else
+                                        <a href="{{ route('order.verified' , [$adj->id , 'stockTaking']) }}" class="btn btn-sm  btn-warning text-nowrap">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                    @endif
+                                        <button class="btn btn-sm btn-secondary btn-edit-adjustment text-nowrap" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
+                                        <button class="btn btn-sm btn-danger btn-delete-adjustment text-nowrap" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-                    <div class="d-flex justify-content-center mt-3">
+                    <div class="d-flex justify-content-between mt-3">
                         @if(method_exists($stockTakingItems, 'links'))
-                            {!! $stockTakingItems->links() !!}
+                            @include('dashboard.pagination.pagination', ['transactions' => $stockTakingItems])
                         @endif
                     </div>
             @endif
@@ -318,22 +390,38 @@
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.available_quantity') }}</label>
                                     <input type="number" name="available_quantity" id="edit-available-quantity" class="form-control w-auto" readonly>
                                 </div>
+                                <!-- corrected: single quantity input lives inside the hidden group below -->
                                 <div class="form-group d-flex align-items-center">
-                                    <label class="label-min-w">{{ __('dashboard.stockTaking.correct_quantity') }}</label>
-                                    <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control w-auto" required>
+
+                                    <label class="label-min-w">{{ __('dashboard.stockTaking.type') }}</label>
+                                    <div class="ml-2">
+                                        <button type="button" class="btn btn-outline-danger mr-2" id="btn-decrement-edit">{{ __('dashboard.decrement') }}</button>
+                                        <button type="button" class="btn btn-outline-success" id="btn-increment-edit">{{ __('dashboard.increment') }}</button>
+                                    </div>
+                                    <input type="hidden" name="type" id="edit-type-value" value="">
                                 </div>
-                                <div class="form-group d-flex align-items-center">
-                                    <label class="label-min-w" for="edit-type-select">{{ __('dashboard.stockTaking.type') }}</label>
-                                    <select name="type" id="edit-type-select" class="form-control ml-2 w-auto" required>
-                                        <option value="">{{ __('dashboard.stockTaking.select_type') }}</option>
-                                        <option value="stockTaking_decrement">{{ __('dashboard.stockTaking.type_decrement') }}</option>
-                                        <option value="stockTaking_increment">{{ __('dashboard.stockTaking.type_increment') }}</option>
-                                    </select>
+                                <div class="form-group align-items-center" id="edit-quantity-group" style="display:none;">
+                                    <div class="d-flex flex-row gap-5 mb-0">
+                                        <label class="label-min-w">{{ __('dashboard.stockTaking.correct_quantity') }}</label>
+                                        <div class="d-flex flex-column gap-4">
+                                            <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control w-auto" required>
+                                            <input type="number" name="percentage" id="edit-percentage" class="form-control w-auto ">%
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="form-group d-flex align-items-center">
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.reason') }}</label>
                                     <select name="reason" id="edit-reason" class="form-control reason-select w-auto">
                                     <option value="">{{ __('dashboard.stockTaking.select_reason') }}</option>
+                                    <option value="stockTaking">{{ __('dashboard.stockTaking.reason_options.stockTaking') }}</option>
+                                    <option value="correct_quantity">{{ __('dashboard.stockTaking.reason_options.correct_quantity') }}</option>
+                                    <option value="for_employee">{{ __('dashboard.stockTaking.reason_options.for_employee') }}</option>
+                                    <option value="employee_mistake">{{ __('dashboard.stockTaking.reason_options.employee_mistake') }}</option>
+                                    <option value="invalid">{{ __('dashboard.stockTaking.reason_options.invalid') }}</option>
+                                    <option value="damage">{{ __('dashboard.stockTaking.reason_options.damage') }}</option>
+                                    <option value="losing">{{ __('dashboard.stockTaking.reason_options.losing') }}</option>
+                                    <option value="for_orders">{{ __('dashboard.stockTaking.reason_options.for_orders') }}</option>
+                                    <option value="else">{{ __('dashboard.stockTaking.reason_options.else') }}</option>
                                     </select>
                                     <input type="text" name="custom_reason" id="edit-custom-reason" class="form-control ml-0 custom-reason-input w-auto d-none" placeholder="{{ __('dashboard.stockTaking.specify_reason') }}">
                                     <select name="order_id" id="edit-order-id" class="form-control mt-2 orders-select w-auto d-none">
@@ -412,7 +500,7 @@ if (!window.Swal) {
             });
             // ensure Select2 computes proper widths after rendering
             setTimeout(function(){ $('.select-item').trigger('resize.select2'); }, 100);
-        };
+    };
         document.head.appendChild(s);
     })();
 
@@ -440,7 +528,8 @@ if (!window.Swal) {
                 $('#edit-adjustment-id').val(data.id);
                 $('#edit-available-quantity').val(data.stock ? data.stock.quantity : '');
                 $('#edit-quantity').val(data.quantity);
-                $('#edit-type-select').val(data.type);
+                // store type in hidden input rather than non-existent select
+                $('#edit-type-value').val(data.type);
                    const selectedType = data.type;
                      const $reasonDropdown = $('select[name="reason"]');
 
@@ -485,9 +574,9 @@ if (!window.Swal) {
         e.preventDefault();
         var id = $('#edit-adjustment-id').val();
         var formData = new FormData(this);
-        // ensure type select value is included
-        var t = $('#edit-type-select').val();
-        if (t) { formData.set('type', t); }
+    // ensure hidden type value is included
+    var t = $('#edit-type-value').val();
+    if (t) { formData.set('type', t); }
 
         $.ajax({
             url: '{{ url('') }}/manual/stock-adjustments/' + id,
@@ -629,24 +718,6 @@ if (!window.Swal) {
         $('#editAdjustmentModal').modal('hide');
     });
 
-    $(document).ready(function() {
-
-        // Listen for changes in the type dropdown
-        $('select[name="type"]').on('change', function() {
-            const selectedType = $(this).val();
-            const $reasonDropdown = $('select[name="reason"]');
-
-            // Update the reason dropdown options based on the selected type
-            if (reasonOptions[selectedType]) {
-                $reasonDropdown.html(reasonOptions[selectedType]);
-            } else {
-                $reasonDropdown.html('<option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_reason') }}</option>');
-            }
-        });
-
-        // Trigger change event on page load to initialize the reason dropdown
-        $('select[name="type"]').trigger('change');
-    });
     // Approve/Verify button AJAX handler for stockTaking
 $(document).on('click', '.btn-approve-adjustment', function () {
     var id = $(this).data('id');
@@ -692,7 +763,94 @@ $(document).on('click', '.btn-approve-adjustment', function () {
         sendApproveRequest();
     }
 });
+// Verified switch button logic
+$(function() {
+    function updateSwitchButtons() {
+        if ($('#verified-input').val() == '1') {
+            $('#btn-approved-switch').addClass('active-switch');
+            $('#btn-draft-switch').removeClass('active-switch');
+        } else {
+            $('#btn-draft-switch').addClass('active-switch');
+            $('#btn-approved-switch').removeClass('active-switch');
+        }
+    }
+    $('#btn-draft-switch').on('click', function() {
+        $('#verified-input').val('0');
+        updateSwitchButtons();
+    });
+
+   
+    $('#btn-approved-switch').on('click', function() {
+        $('#verified-input').val('1');
+        updateSwitchButtons();
+    });
+    updateSwitchButtons();
+});
+ // Unified handler for increment/decrement buttons in both main form and edit modal
+    // Toggleable handlers: clicking same button again will unset it
+    $(document).on('click', '#btn-decrement-main, #btn-decrement-edit', function() {
+        var isMain = $(this).attr('id') === 'btn-decrement-main';
+        if (isMain) {
+            var $btn = $('#btn-decrement-main');
+            var active = $btn.hasClass('active-switch');
+            if (active) {
+                $btn.removeClass('active-switch');
+                $('#main-type-value').val('');
+                $('#main-quantity-group').hide();
+            } else {
+                $btn.addClass('active-switch');
+                $('#btn-increment-main').removeClass('active-switch');
+                $('#main-type-value').val('stockTaking_decrement');
+                $('#main-quantity-group').show();
+            }
+        } else {
+            var $btn = $('#btn-decrement-edit');
+            var active = $btn.hasClass('active-switch');
+            if (active) {
+                $btn.removeClass('active-switch');
+                $('#edit-type-value').val('');
+                $('#edit-quantity-group').hide();
+            } else {
+                $btn.addClass('active-switch');
+                $('#btn-increment-edit').removeClass('active-switch');
+                $('#edit-type-value').val('stockTaking_decrement');
+                $('#edit-quantity-group').show();
+            }
+        }
+    });
+
+    $(document).on('click', '#btn-increment-main, #btn-increment-edit', function() {
+        var isMain = $(this).attr('id') === 'btn-increment-main';
+        if (isMain) {
+            var $btn = $('#btn-increment-main');
+            var active = $btn.hasClass('active-switch');
+            if (active) {
+                $btn.removeClass('active-switch');
+                $('#main-type-value').val('');
+                $('#main-quantity-group').hide();
+            } else {
+                $btn.addClass('active-switch');
+                $('#btn-decrement-main').removeClass('active-switch');
+                $('#main-type-value').val('stockTaking_increment');
+                $('#main-quantity-group').show();
+            }
+        } else {
+            var $btn = $('#btn-increment-edit');
+            var active = $btn.hasClass('active-switch');
+            if (active) {
+                $btn.removeClass('active-switch');
+                $('#edit-type-value').val('');
+                $('#edit-quantity-group').hide();
+            } else {
+                $btn.addClass('active-switch');
+                $('#btn-decrement-edit').removeClass('active-switch');
+                $('#edit-type-value').val('stockTaking_increment');
+                $('#edit-quantity-group').show();
+            }
+        }
+    });
 </script>
 @endpush
+
 </div>
 @endsection

@@ -21,6 +21,8 @@ class StockAdjustment extends Model
         'note',
         'verified',
         'available_quantity_before',
+        'available_percentage_before',
+        'percentage',
         "source",
         'image',
         'employee_name',

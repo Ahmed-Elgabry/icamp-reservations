@@ -53,6 +53,8 @@ Route::delete('/sign/{order}', [OrderSignatureController::class, 'destroy'])
     ->name('signature.destroy');
 
 // Auth::routes();
+// Stock Report Route
+Route::get('dashboard/stocks/{stock}/report', [StockController::class, 'stockReport'])->name('dashboard.stock.report');
 Route::group(['middleware' => ['web']], function () {
     Route::get('/', [LoginController::class, 'showloginform'])->name('show.login');
     Route::post('admin-login', [LoginController::class, 'login'])->name('admin-login');

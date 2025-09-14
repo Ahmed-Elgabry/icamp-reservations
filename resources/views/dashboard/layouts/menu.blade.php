@@ -640,7 +640,7 @@
 
                             <span
 
-                                class="menu-title">@lang('dashboard.stock_taking')</span>
+                                class="menu-title">@lang('dashboard.stockTaking.title')</span>
 
                         </a>
 
@@ -657,7 +657,7 @@
 
                             <span
 
-                                class="menu-title">@lang('dashboard.stock_taking_report')</span>
+                                class="menu-title">@lang('dashboard.stockTaking.stock_taking_report')</span>
 
                         </a>
 

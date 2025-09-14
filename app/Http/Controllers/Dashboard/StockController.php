@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\ServiceReport;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use App\Models\StockAdjustment;
 
 class StockController extends Controller
 {
@@ -161,11 +162,11 @@ class StockController extends Controller
         return response()->json($stocks);
     }
 
-    public function stockReport($stock)
+    public function stockReport(Stock $stock)
     {
-        $stock = Stock::with('orders')->findOrFail($stock);
         // $this->authorize('view', $stock);
-        $transactions = $stock->stockAdjustments()->paginate(10);
+
+        $transactions = $stock->stockAdjustments()->where("verified", true)->paginate(10);
 
         return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
     }

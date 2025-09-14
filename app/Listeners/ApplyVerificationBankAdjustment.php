@@ -39,7 +39,14 @@ class ApplyVerificationBankAdjustment
                 }
                 break;
             case "stockTaking" :
-                $item->stock()->update(['quantity' => $item->quantity]);
+                if ($verified) {
+                    $item->update(['available_quantity_before' => $item->stock->quantity]);
+                    $item->stock()->update(['quantity' => $item->quantity]);
+                    $item->stock()->update(['percentage' => $item->percentage ?? null]);
+                } else {
+                    $item->stock()->update(['quantity' => $item->available_quantity_before]);
+                    $item->stock()->update(['percentage' => null]);
+                }
                 break;
             case 'insurance':
                 $insurances = $item->payments()->where('statement', 'the_insurance')->get();

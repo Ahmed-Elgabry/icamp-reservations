@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('stock_id')->nullable()->constrained('stocks')->nullOnDelete();
             // quantity deducted (can be positive integer)
             $table->integer('quantity')->unsigned();
+            
             // type: item_decrement or item_increment
             $table->enum('type', ['item_decrement', 'item_increment', "stockTaking_decrement","stockTaking_increment"])->default(null);
             // optional reason and free-text custom reason

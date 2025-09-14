@@ -37,9 +37,11 @@ class StockAdjustmentController extends Controller
 
         $validated = $request->validate([
             'stock_id' => 'required|exists:stocks,id',
-            'quantity_to_discount' => 'required|integer|min:1',
+            'quantity_to_discount' => 'sometimes|required|integer|min:1',
+            'correct_quantity' => 'sometimes|required|integer|min:1',
             'type' => 'required|in:item_decrement,item_increment,stockTaking_decrement,stockTaking_increment',
             'reason' => 'nullable|string|max:255',
+            'percentage' => 'nullable|string|max:255',
             'verified' => 'nullable|in:0,1',
             "source" => 'nullable',
             'custom_reason' => 'nullable|string|max:255',
@@ -49,10 +51,11 @@ class StockAdjustmentController extends Controller
             'date_time' => 'nullable|date',
             'image' => 'nullable|image|max:20480',
         ]);
-        \Log::info('Stock adjustment validation passed', $validated);
         $type = $validated['type'] ?? null;
-        $qty = (int) $validated['quantity_to_discount'];
-
+        $qty = isset($validated['quantity_to_discount']) ? (int) $validated['quantity_to_discount'] : (int) $validated['correct_quantity'];
+        if ($qty && $qty <= 0) {
+            return response()->json(['error' => 'Invalid quantity'], 422);
+        }
         $stock = Stock::findOrFail($validated['stock_id']);
         
         
@@ -60,15 +63,26 @@ class StockAdjustmentController extends Controller
             DB::transaction(function () use ($stock, $validated, $type, $qty) {
                 // update stock quantity
                 // if decrement ensure available
-                if (($validated["type"] !== 'stockTaking_decrement' && $validated["type"] !== 'stockTaking_increment') || isset($validated['verified'])
-                    ) {
-                    
+                //this handles item added from the manual item return and withdrawal form
+                // for stock taking adjustments
+                if (isset($validated['verified']) && $validated['verified'] == "1" && ($validated["type"] === 'stockTaking_decrement' || $validated["type"] === 'stockTaking_increment')) {
+                    $avaiableQty = $stock->quantity ;
+                    $availablePercentage = $stock->percentage ?? null;
+                    $stock->update(['quantity' => $qty]);
+                    $stock->update(['percentage' => $validated["percentage"] ?? null]);
+
+                }
+                if ($validated["type"] !== 'stockTaking_decrement' && $validated["type"] !== 'stockTaking_increment') {
+                       $avaiableQty = $stock->quantity;
                     if ($type === 'item_decrement' && $stock->quantity < $qty) {
                         $stock->update(['quantity' => $qty]);
-                    } elseif ($type === 'item_decrement') {
+                        $stock->update(['percentage' => $validated["percentage"] ?? null]);
+                    } elseif ($type === 'item_decrement' || $type === 'stockTaking_decrement') {
                         $stock->decrement('quantity', $qty);
-                    } elseif ($type === 'item_increment') {
+                        $stock->update(['percentage' => $validated["percentage"] ?? null]);
+                    } elseif ($type === 'item_increment' || $type === 'stockTaking_increment') {
                         $stock->increment('quantity', $qty);
+                        $stock->update(['percentage' => $validated["percentage"] ?? null]);
                     }
                     $validated['verified'] = true;
                 }
@@ -81,6 +95,9 @@ class StockAdjustmentController extends Controller
                 StockAdjustment::create([
                     'stock_id' => $stock->id,
                     'quantity' => $qty,
+                    'available_quantity_before' => $avaiableQty ?? null,
+                    'available_percentage_before' => $availablePercentage ?? null,
+                    'percentage' => $validated["percentage"] ?? null,
                     'type' => $type,
                     'source' => $validated["source"] ?? null,
                     'reason' => $validated['reason'] ?? null,
@@ -109,10 +126,12 @@ class StockAdjustmentController extends Controller
     public function update(Request $request, StockAdjustment $adjustment)
     {
         $validated = $request->validate([
-            'quantity_to_discount' => 'required|integer|min:1',
-            'type' => 'required|in:item_decrement,item_increment',
+            'quantity_to_discount' => 'sometimes|required|integer|min:1',
+            'correct_quantity' => 'sometimes|required|integer|min:1',
+            'type' => 'required|in:item_decrement,item_increment,stockTaking_decrement,stockTaking_increment',
             'reason' => 'nullable|string|max:255',
-            'verified' => 'nullable',
+            'verified' => 'nullable|in:0,1',
+            'percentage' => 'nullable|string|max:255',
             'custom_reason' => 'nullable|string|max:255',
             'order_id' => 'nullable|exists:orders,id',
             'note' => 'nullable|string',
@@ -121,7 +140,10 @@ class StockAdjustmentController extends Controller
             'image' => 'nullable|image|max:20480',
         ]);
 
-        $newQty = (int) $validated['quantity_to_discount'];
+        $newQty = isset($validated['quantity_to_discount']) ? (int) $validated['quantity_to_discount'] : (int) $validated['correct_quantity'];
+        if ($newQty && $newQty <= 0) {
+            return response()->json(['error' => 'Invalid quantity'], 422);
+        }
         $newType = $validated['type'] ?? $adjustment->type;
 
         try {
@@ -132,13 +154,14 @@ class StockAdjustmentController extends Controller
                 }
 
                 // 1. Revert previous adjustment
-                if ($adjustment->type === 'item_decrement') {
+                if ($adjustment->type === 'item_decrement' ||( $adjustment->type === 'stockTaking_decrement' && isset($validated['verified']) && $validated['verified'] == "1" )) {
                     $stock->increment('quantity', $adjustment->quantity);
-                } else {
+                } elseif ($adjustment->type === 'item_increment' || ( $adjustment->type === 'stockTaking_increment' && isset($validated['verified']) && $validated['verified'] == "1" )) {
                     $stock->decrement('quantity', $adjustment->quantity);
                 }
 
                 // 2. Apply new adjustment
+                // this handles item added from the manual item return and withdrawal form
                 if ($newType === 'item_decrement') {
                     if ($stock->quantity < $newQty) {
                         $stock->update(['quantity' => $newQty]);
@@ -147,10 +170,15 @@ class StockAdjustmentController extends Controller
                         $stock->decrement('quantity', $newQty);
                     }
                 } 
-                else {
+                elseif ($newType === 'item_increment') {
                     $stock->increment('quantity', $newQty);
                 }
-
+                // for stock taking adjustments
+                if (($newType === 'stockTaking_decrement' || $newType === 'stockTaking_increment')) {
+                    $availableQtyBefore = $stock->quantity ?? 0;
+                    $availablePercentageBefore = $stock->percentage ?? null;
+                    $validated['verified'] = false;
+                } 
                 // image handling
                 if (request()->hasFile('image')) {
                     $file = request()->file('image');
@@ -160,10 +188,12 @@ class StockAdjustmentController extends Controller
                 }
                 $adjustment->update([
                     'quantity' => $newQty,
+                    'available_quantity_before' => $availableQtyBefore ?? null,
+                    'available_percentage_before' => $availablePercentageBefore ?? null,
+                    'percentage' => $validated["percentage"] ?? null,
                     'type' => $newType, 
                     'reason' => $validated['reason'] ?? $adjustment->reason,
                     'custom_reason' => $validated['custom_reason'] ?? $adjustment->custom_reason,
-                    
                     'note' => $validated['note'] ?? $adjustment->note,
                     'employee_name' => $validated['employee_name'] ?? $adjustment->employee_name,
                     'date_time' => $validated['date_time'] ?? $adjustment->date_time,
@@ -226,7 +256,7 @@ class StockAdjustmentController extends Controller
     public function stockTakingCreate()
     {
         $stocks = \App\Models\Stock::all();
-        $stockTakingItems = StockAdjustment::where('source', 'stockTaking')->get();
+        $stockTakingItems = StockAdjustment::where('source', 'stockTaking')->paginate(10);
         return view('dashboard.stocks.stockTaking', compact('stockTakingItems', 'stocks'));
     }
 
@@ -235,7 +265,18 @@ class StockAdjustmentController extends Controller
          */
         public function stockTakingIndex()
         {
-            $stockTakingReport = StockAdjustment::where('source', 'stockTaking')->where("verified", true)->get();
+            $query = StockAdjustment::where('source', 'stockTaking')->where('verified', true);
+
+            $dateFrom = request('date_from');
+            $dateTo = request('date_to');
+            if ($dateFrom) {
+                $query->whereDate('date_time', '>=', $dateFrom);
+            }
+            if ($dateTo) {
+                $query->whereDate('date_time', '<=', $dateTo);
+            }
+
+            $stockTakingReport = $query->paginate(10);
             return view('dashboard.stocks.stockTaking', compact('stockTakingReport'));
         }
 }

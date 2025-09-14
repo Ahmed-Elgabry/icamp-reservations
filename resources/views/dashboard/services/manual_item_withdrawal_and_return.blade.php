@@ -28,6 +28,8 @@
           .select2-container--default .select2-selection--single { min-width: 200px; }
         /* helper to set a minimum width on table headers */
         .min-w-200 { min-width: 200px !important; }
+        .min-w-400 { min-width: 400px !important; }
+
         /* label helper for modal form alignment */
         .label-min-w { min-width: 200px; display: inline-block; margin-right: .5rem; }
     /* Modal form sizing & spacing */
@@ -43,14 +45,38 @@
     /* Select2 selected content transition and badge spacing */
     .select2-container--default .select2-selection--single .select2-selection__rendered { transition: background-color .18s ease, color .18s ease, transform .12s ease; }
     .select2-available-badge { margin-left: .35rem; opacity: .9; }
+          /* Input/select sizing helpers: use these classes to pick a sensible width
+              - .input-sm  : compact controls (percent, small numbers)
+              - .input-md  : regular form controls inside tables
+              - .input-lg  : wider controls for long content
+          */
+          .form-control.w-auto { display: inline-block; width: auto !important; min-width: 140px; max-width: 420px; box-sizing: border-box; }
+          .select2-container--default .select2-selection--single { min-width: 140px; max-width: 420px; box-sizing: border-box; }
+          .select-item.min-select-item { min-width: 200px; }
+          .input-sm { min-width: 90px; max-width: 150px; }
+          .input-md { min-width: 140px; max-width: 320px; }
+          .input-lg { min-width: 220px; max-width: 540px; }
+        /* Make tables scroll only within their container instead of scrolling the whole page */
+        .scrollable-table-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            margin: .5rem 0 1rem 0;
+            padding: .5rem;
+        }
+        /* Keep table layout intact while allowing horizontal overflow when needed */
+        .scrollable-table-wrapper .table {
+            margin-bottom: 0;
+        }
     </style>
 @endpush
     <!-- Stock Search Input -->
     <div class="mb-3">
-        <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="Search by stock name or ID...">
+        <input type="text" id="stock-search-input" class="form-control  px-4" placeholder="{{ __('dashboard.search_stock') }}">
     </div>
     @if(isset($issuedStocks) && $issuedStocks->count())
-    <h2>{{ __('dashboard.manual_item_withdrawal_and_return.history_heading') }}</h2>
+    <h2>{{ __('dashboard.manual_item_withdrawal_history_heading') }}</h2>
+    <div class="scrollable-table-wrapper">
     <table class="table table-responsive" id="stock-table">
             <thead>
                 <tr>
@@ -68,7 +94,7 @@
             <tbody>
                 @foreach($issuedStocks as $adj)
                     <tr data-id="{{ $adj->id }}">
-                        <td>{{ $adj->stock->name ?? '-' }}</td>
+                        <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
                         <td>{{ $adj->quantity }}</td>
                         @if($adj->order_id)
@@ -108,28 +134,32 @@
                         <td>{{ $adj->employee_name }}</td>
                         <td>{{ $adj->date_time }}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
+                            <button class="btn btn-sm btn-secondary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
                             <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+    </div>
         <div class="d-flex justify-content-center mt-3">
             @if(method_exists($issuedStocks, 'links'))
                 {!! $issuedStocks->links() !!}
             @endif
         </div>
     @elseif(isset($returnedStocks) && $returnedStocks->count())
-    <h2>{{ __('dashboard.manual_item_withdrawal_and_return.history_heading') }}</h2>
+    <h3 class="my-2">{{ __('dashboard.manual_item_return_history_heading') }}</h3>
+        <div class="scrollable-table-wrapper">
         <table class="table table-responsive">
             <thead>
                 <tr>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.item') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.available_quantity') }}</th>
-                    <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_returned') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.type') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.reason') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.note') }}</th>
+                    <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.image') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.by') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.date_time') }}</th>
                     <th class="min-w-200">{{ __('dashboard.actions') }}</th>
@@ -138,16 +168,16 @@
             <tbody>
                 @foreach($returnedStocks as $adj)
                     <tr data-id="{{ $adj->id }}">
-                        <td>{{ $adj->stock->name ?? '-' }}</td>
+                        <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
                         <td>{{ $adj->quantity }}</td>
-                        <td>{{ $adj->type ?? 'item_decrement' }}</td>
+                        <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
                         @if($adj->order_id)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options."."-".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options."."-".$adj->reason) }}  {{ " - ". __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->custom_reason) }}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason}}</td>
                         @else
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options."."-".$adj->reason) }}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
                         @endif
                                                 <td>{{ $adj->note }}</td>
                                                 <td>
@@ -179,13 +209,14 @@
                         <td>{{ $adj->employee_name }}</td>
                         <td>{{ $adj->date_time }}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary btn-edit-adjustment" style="padding: 5px 11px !important;border-radius: 4px !important;" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
+                            <button class="btn btn-sm btn-secondary btn-edit-adjustment" style="padding: 5px 11px !important;border-radius: 4px !important;" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
                             <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
-        </table>
+    </table>
+    </div>
         <div class="d-flex justify-content-center mt-3">
             @if(method_exists($returnedStocks, 'links'))
                 {!! $returnedStocks->links() !!}
@@ -196,12 +227,13 @@
     <form method="POST" action="{{ route('stock.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
         @csrf
         <input type="hidden" name="type" value="item_decrement">
+        <div class="scrollable-table-wrapper">
         <table class="table table-responsive">
             <thead>
                 <tr>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.item') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.available_quantity') }}</th>
-                    <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount') }}</th>
+                    <th class="min-w-400">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.type') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.reason') }}</th>
                     <th class="min-w-200">{{ __('dashboard.manual_item_withdrawal_and_return.note') }}</th>
@@ -213,7 +245,7 @@
             <tbody>
                 <tr>
                     <td>
-                        <select name="stock_id" class="form-control select-item min-select-item w-auto" required>
+                        <select name="stock_id" class="form-control select-item min-select-item" required>
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_item') }}</option>
                             @if(isset($stocks) && $stocks->count())
                                 @foreach($stocks as $stock)
@@ -223,26 +255,27 @@
                         </select>
                     </td>
                     <td>
-                        <input type="number" name="available_quantity" class="form-control w-auto" value="" readonly>
+                        <input type="number" name="available_quantity" class="form-control " value="" readonly>
                     </td>
-                    <td>
-                        <input type="number" name="quantity_to_discount" class="form-control w-auto" required>
+                    <td class = "d-flex flex-row gap-4">
+                            <input type="number" name="quantity_to_discount" class="form-control " placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}" required>
+                            <input type="number" name="percentage" id="main-percentage" class="form-control input-sm" placeholder="{{__('dashboard.percentage_placeholder')}}" >
                     </td>
                     <input type="hidden" name="source" value="stockIssueAndReturn">
 
                     <td>
-                        <select name="type" class="form-control w-auto" required>
+                        <select name="type" class="form-control " required>
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_type') }}</option>
                             <option value="item_decrement">{{ __('dashboard.manual_item_withdrawal_and_return.type_decrement') }}</option>
                             <option value="item_increment">{{ __('dashboard.manual_item_withdrawal_and_return.type_increment') }}</option>
                         </select>
                     </td>
                     <td>
-                        <select name="reason" class="form-control reason-select w-auto" required>
+                        <select name="reason" class="form-control reason-select " required>
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_reason') }}</option>
                             
-                        <input type="text" name="custom_reason" class="form-control mt-2 custom-reason-input w-auto d-none" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.specify_reason') }}"> 
-                        <select name="order_id" class="form-control mt-2 orders-select w-auto d-none">
+                        <input type="text" name="custom_reason" class="form-control mt-2 custom-reason-input  d-none" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.specify_reason') }}"> 
+                        <select name="order_id" class="form-control mt-2 orders-select  d-none">
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_order') }}</option>
                                 @if(isset($orders) && $orders->count())
                                     @foreach($orders as $order)
@@ -252,20 +285,21 @@
                         </select>
                     </td>
                     <td>
-                        <textarea name="note" class="form-control w-auto"></textarea>
+                        <textarea name="note" class="form-control"></textarea>
                     </td>
                     <td>
-                        <input type="file" name="image" class="form-control w-auto" accept="image/*" capture="environment">
+                        <input type="file" name="image" class="form-control" accept="image/*" capture="environment">
                     </td>
                     <td>
-                        <input type="datetime-local" name="date_time" class="form-control w-auto" required>
+                        <input type="datetime-local" name="date_time" class="form-control" required>
                     </td>
                     <td>
-                        <input type="text" name="employee_name" class="form-control w-auto" required>
+                        <input type="text" name="employee_name" class="form-control " required>
                     </td>
                 </tr>
             </tbody>
-        </table>
+    </table>
+    </div>
         <button type="submit" class="btn btn-primary" id="kt_ecommerce_add_product_submit">{{ __('dashboard.manual_item_withdrawal_and_return.submit') }}</button>
     </form>
     @endif
@@ -285,15 +319,16 @@
                         <input type="hidden" name="adjustment_id" id="edit-adjustment-id">
                         <div class="form-group d-flex align-items-center">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.available_quantity') }}</label>
-                            <input type="number" name="available_quantity" id="edit-available-quantity" class="form-control w-auto" readonly>
+                            <input type="number" name="available_quantity" id="edit-available-quantity" class="form-control " readonly>
                         </div>
-                        <div class="form-group d-flex align-items-center">
-                            <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount') }}</label>
-                            <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control w-auto" required>
+                        <div class="form-group d-flex flex-row gap-4 align-items-center">
+                            <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}</label>
+                            <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control" required>
+                            <input type="number" name="percentage" id="edit-percentage" class="form-control input-sm">%
                         </div>
                         <div class="form-group d-flex align-items-center">
                             <label class="label-min-w" for="edit-type-select">{{ __('dashboard.manual_item_withdrawal_and_return.type') }}</label>
-                            <select name="type" id="edit-type-select" class="form-control ml-2 w-auto" required>
+                            <select name="type" id="edit-type-select" class="form-control ml-2" required>
                                 <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_type') }}</option>
                                 <option value="item_decrement">{{ __('dashboard.manual_item_withdrawal_and_return.type_decrement') }}</option>
                                 <option value="item_increment">{{ __('dashboard.manual_item_withdrawal_and_return.type_increment') }}</option>
@@ -301,11 +336,11 @@
                         </div>
                         <div class="form-group d-flex align-items-center">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.reason') }}</label>
-                            <select name="reason" id="edit-reason" class="form-control reason-select w-auto">
+                            <select name="reason" id="edit-reason" class="form-control reason-select ">
                                <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_reason') }}</option>
                             </select>
-                            <input type="text" name="custom_reason" id="edit-custom-reason" class="form-control ml-0 custom-reason-input w-auto d-none" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.specify_reason') }}">
-                            <select name="order_id" id="edit-order-id" class="form-control mt-2 orders-select w-auto d-none">
+                            <input type="text" name="custom_reason" id="edit-custom-reason" class="form-control ml-0 custom-reason-input  d-none" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.specify_reason') }}">
+                            <select name="order_id" id="edit-order-id" class="form-control mt-2 orders-select  d-none">
                                 <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_order') }}</option>
                                     @foreach(App\Models\Order::all() as $order)
                                         <option value="{{ $order->id }}">{{ $order->id }} - {{ $order->customer?->name  }}</option>
@@ -314,7 +349,7 @@
                         </div>
                         <div class="form-group d-flex align-items-center">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.note') }}</label>
-                            <textarea name="note" id="edit-note" class="form-control w-auto"></textarea>
+                            <textarea name="note" id="edit-note" class="form-control"></textarea>
                         </div>
                         <div class="form-group d-flex align-items-center">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.image') }}</label>
@@ -322,7 +357,7 @@
                         </div>
                         <div class="form-group d-flex align-items-center">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.employee_name') }}</label>
-                            <input type="text" name="employee_name" id="edit-employee-name" class="form-control w-auto" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.specify_employee_name') }}">
+                            <input type="text" name="employee_name" id="edit-employee-name" class="form-control " placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.employee_name') }}">
                         </div>
                     </div>
                     <div class="modal-footer">
