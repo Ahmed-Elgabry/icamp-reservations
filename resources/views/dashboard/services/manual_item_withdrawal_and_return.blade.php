@@ -74,7 +74,7 @@
     <div class="mb-3">
         <input type="text" id="stock-search-input" class="form-control  px-4" placeholder="{{ __('dashboard.search_stock') }}">
     </div>
-    @if(isset($issuedStocks) && $issuedStocks->count())
+    @if(isset($issuedStocks) && $issuedStocks->count()  && $issuedStocks !== "no-data")
     <h2>{{ __('dashboard.manual_item_withdrawal_history_heading') }}</h2>
     <div class="scrollable-table-wrapper">
     <table class="table table-responsive" id="stock-table">
@@ -147,7 +147,7 @@
                 {!! $issuedStocks->links() !!}
             @endif
         </div>
-    @elseif(isset($returnedStocks) && $returnedStocks->count())
+    @elseif(isset($returnedStocks) && $returnedStocks->count() && $returnedStocks !== "no-data")
     <h3 class="my-2">{{ __('dashboard.manual_item_return_history_heading') }}</h3>
         <div class="scrollable-table-wrapper">
         <table class="table table-responsive">
@@ -222,7 +222,8 @@
                 {!! $returnedStocks->links() !!}
             @endif
         </div>
-
+    @elseif((isset($issuedStocks) && $issuedStocks === "no-data") || (isset($returnedStocks) && $returnedStocks === "no-data"))
+        <div class="alert alert-warning">{{ __('dashboard.no_data_found') }}</div>
     @else
     <form method="POST" action="{{ route('stock.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
         @csrf

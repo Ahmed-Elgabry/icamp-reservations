@@ -13,14 +13,14 @@ class StockAdjustmentController extends Controller
     public function issuedItemsIndex() {
         $issuedStocks = StockAdjustment::with('stock')
             ->where('type', 'item_decrement')
-            ->latest()->paginate(10);
+            ->latest()->paginate(10) ?? "no-data";
         return view('dashboard.services.manual_item_withdrawal_and_return', compact('issuedStocks'));
     }
     public function returnedItemsIndex(){
         $returnedStocks = StockAdjustment::with('stock')
             ->where('type', 'item_increment')
             ->latest()
-            ->paginate(10);
+            ->paginate(10) ?? "no-data";
 
          return view('dashboard.services.manual_item_withdrawal_and_return', compact('returnedStocks'));
     }
@@ -256,7 +256,7 @@ class StockAdjustmentController extends Controller
     public function stockTakingCreate()
     {
         $stocks = \App\Models\Stock::all();
-        $stockTakingItems = StockAdjustment::where('source', 'stockTaking')->paginate(10);
+        $stockTakingItems = StockAdjustment::where('source', 'stockTaking')->paginate(10) ?? "no-data";
         return view('dashboard.stocks.stockTaking', compact('stockTakingItems', 'stocks'));
     }
 
@@ -276,7 +276,7 @@ class StockAdjustmentController extends Controller
                 $query->whereDate('date_time', '<=', $dateTo);
             }
 
-            $stockTakingReport = $query->paginate(10);
+            $stockTakingReport = $query->paginate(10) ?? "no-data";
             return view('dashboard.stocks.stockTaking', compact('stockTakingReport'));
         }
 }

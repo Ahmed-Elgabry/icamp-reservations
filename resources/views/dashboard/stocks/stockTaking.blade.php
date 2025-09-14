@@ -74,7 +74,7 @@
     </style>
 @endpush
     <!-- Stock Report is the full stockTaking after approved or verification -->
-    @if(isset($stockTakingReport) && $stockTakingReport->count())
+    @if(isset($stockTakingReport) && $stockTakingReport->count() && $stockTakingReport !== "no-data")
     <!-- Stock Search Input -->
 
         <div class="mb-3">
@@ -184,7 +184,8 @@
                     	@include('dashboard.pagination.pagination', ['transactions' => $stockTakingReport])
                 @endif
             </div>
-        
+    @elseif($stockTakingReport === "no-data")
+        <div class="alert alert-warning">{{ __('dashboard.no_data_found') }}</div>
     @else
             <div class="mb-3">
                 <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="Search by stock name or ID...">
@@ -289,7 +290,7 @@
             </div>
         </form>
              <!-- Stock Report is the full stockTaking before approved or verification -->
-            @if(isset($stockTakingItems) && $stockTakingItems->count())
+            @if(isset($stockTakingItems) && $stockTakingItems->count()  )
 
 
                 <h2>{{ __('dashboard.stockTakingReport') }}</h2>
