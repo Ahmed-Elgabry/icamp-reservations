@@ -100,7 +100,7 @@
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ". __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->custom_reason) }}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason }}</td>
                         @else
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
                         @endif
@@ -318,16 +318,18 @@
                     @method('PUT')
                     <div class="modal-body">
                         <input type="hidden" name="adjustment_id" id="edit-adjustment-id">
-                        <div class="form-group d-flex align-items-center">
+                        <div class="form-group d-flex  flex-column">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.available_quantity') }}</label>
                             <input type="number" name="available_quantity" id="edit-available-quantity" class="form-control " readonly>
                         </div>
-                        <div class="form-group d-flex flex-row gap-4 align-items-center">
-                            <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}</label>
-                            <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control" required>
-                            <input type="number" name="percentage" id="edit-percentage" class="form-control input-sm">%
+                        <div class="form-group d-flex flex-row gap-4 flex-column">
+                            <label class="label">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}</label>
+                           <div class="flex-column d-flex gap-4 w-80 ">
+                               <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control" required>
+                               <input type="number" name="percentage" id="edit-percentage" placeholder="{{ __('dashboard.percentage_placeholder') }}" class="form-control ">
+                            </div>
                         </div>
-                        <div class="form-group d-flex align-items-center">
+                        <div class="form-group d-flex flex-column">
                             <label class="label-min-w" for="edit-type-select">{{ __('dashboard.manual_item_withdrawal_and_return.type') }}</label>
                             <select name="type" id="edit-type-select" class="form-control ml-2" required>
                                 <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_type') }}</option>
@@ -335,7 +337,7 @@
                                 <option value="item_increment">{{ __('dashboard.manual_item_withdrawal_and_return.type_increment') }}</option>
                             </select>
                         </div>
-                        <div class="form-group d-flex align-items-center">
+                        <div class="form-group d-flex flex-column">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.reason') }}</label>
                             <select name="reason" id="edit-reason" class="form-control reason-select ">
                                <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_reason') }}</option>
@@ -348,15 +350,15 @@
                                     @endforeach
                             </select>
                         </div>
-                        <div class="form-group d-flex align-items-center">
+                        <div class="form-group d-flex flex-column">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.note') }}</label>
                             <textarea name="note" id="edit-note" class="form-control"></textarea>
                         </div>
-                        <div class="form-group d-flex align-items-center">
+                        <div class="form-group d-flex flex-column">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.image') }}</label>
                             <input type="file" name="image" id="edit-image" class="form-control ">
                         </div>
-                        <div class="form-group d-flex align-items-center">
+                        <div class="form-group d-flex flex-column">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.employee_name') }}</label>
                             <input type="text" name="employee_name" id="edit-employee-name" class="form-control " placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.employee_name') }}">
                         </div>
