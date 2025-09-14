@@ -132,7 +132,7 @@
                                                         @endif
                                                 </td>
                         <td>{{ $adj->employee_name }}</td>
-                        <td>{{ $adj->date_time }}</td>
+                        <td class="min-w-200">{{ $adj->date_time }}</td>
                         <td>
                             <button class="btn btn-sm btn-secondary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
                             <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>

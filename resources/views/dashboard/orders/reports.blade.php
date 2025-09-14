@@ -96,7 +96,7 @@
 
                                                     <div class="incomplete-reason mt-2" data-report="{{ $report->id }}" @if($report && $report->is_completed) style="display:none" @endif>
                                                         <label class="form-label small">@lang('dashboard.not_completed_reason')</label>
-                                                        <textarea class="form-control" rows="2" name="not_completed_reason[{{ $report->id }}]">{{ $report ? $report->not_completed_reason : '' }}</textarea>
+                                                        <textarea class="form-control" rows="2" name="not_completed_reason[{{ $report->id }}]" >{{ $report ? $report->not_completed_reason : '' }}</textarea>
                                                     </div>
                                                 </div>
                                             </td>
@@ -200,17 +200,33 @@
        $(document).ready(function () {
             $(document).on('change', '.reports-check', function () {
                 if (this.checked) {
-                    $('.reports-check-not,.stock-check-not').prop('checked', false);
-                    $('.incomplete-reason').hide();
+                    $('.reports-check-not#not-completed-' + $(this).data('report')).prop('checked', false);
+                    $('.incomplete-reason[data-report="' + $(this).data('report') + '"]').hide();
                 }
             });
 
             $(document).on('change', '.reports-check-not', function () {
                 if (this.checked) {
-                    $('.reports-check,.stock-check').prop('checked', false);
-                    $('.incomplete-reason').show();
+                    $('.reports-check#completed-' + $(this).data('report')).prop('checked', false);
+                    $('.incomplete-reason[data-report="' + $(this).data('report') + '"]').show();
                 } else {
-                    $('.incomplete-reason').hide();
+                    $('.incomplete-reason[data-report="' + $(this).data('report') + '"]').hide();
+                }
+            });
+
+            $(document).on('change', '.stock-check', function () {
+                if (this.checked) {
+                    $('.stock-check-not#not-completed-stock-' + $(this).data('stock')).prop('checked', false);
+                    $('.incomplete-reason[data-stock="' + $(this).data('stock') + '"]').hide();
+                }
+            });
+
+            $(document).on('change', '.stock-check-not', function () {
+                if (this.checked) {
+                    $('.stock-check#completed-stock-' + $(this).data('stock')).prop('checked', false);
+                    $('.incomplete-reason[data-stock="' + $(this).data('stock') + '"]').show();
+                } else {
+                    $('.incomplete-reason[data-stock="' + $(this).data('stock') + '"]').hide();
                 }
             });
 
@@ -279,6 +295,42 @@
                 });
             });
         });
+    </script>
+    <script type="text/javascript">
+$(document).ready(function () {
+    $('#update-reports-form').on('submit', function(e) {
+        var valid = true;
+        $('.reports-check-not:checked').each(function() {
+            var reportId = $(this).data('report');
+            var $textarea = $('textarea[name="not_completed_reason[' + reportId + ']"]');
+            if ($textarea.is(':visible') && !$textarea.val().trim()) {
+                valid = false;
+                $textarea.addClass('is-invalid');
+            } else {
+                $textarea.removeClass('is-invalid');
+            }
+        });
+        $('.stock-check-not:checked').each(function() {
+            var stockId = $(this).data('stock');
+            var $textarea = $('textarea[name="not_completed_reason_stock[' + stockId + ']"]');
+            if ($textarea.is(':visible') && !$textarea.val().trim()) {
+                valid = false;
+                $textarea.addClass('is-invalid');
+            } else {
+                $textarea.removeClass('is-invalid');
+            }
+        });
+        if (!valid) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: "@lang('dashboard.invalid_title')",
+                text: "@lang('dashboard.please_fill_reason')",
+                confirmButtonText: "@lang('dashboard.confirm')"
+            });
+        }
+    });
+});
     </script>
 @endpush
 

@@ -275,7 +275,7 @@
                             <td>
                                 <input type="text" name="employee_name" class="form-control w-auto" required>
                             </td>
-                            <td>
+                            <td class="min-w-200">
                                 <input type="datetime-local" name="date_time" class="form-control w-auto" required>
                             </td>
                             <td class="d-flex flex-row width auto flex-nowrap gap-4">
