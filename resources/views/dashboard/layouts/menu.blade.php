@@ -248,6 +248,93 @@
         <!--end::Menu item-->
     @endcan
 
+    @can('admins.index')
+        <!--begin::Menu item-->
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['dashboard.whatsapp-templates.index', 'dashboard.whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}"
+             data-kt-menu-trigger="click">
+            <!--begin::Menu link-->
+            <a href="#" class="menu-link py-3 {{areActiveRoutes(['dashboard.whatsapp-templates.index', 'dashboard.whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}">
+                <span class="menu-icon">
+                    <img src="{{ asset('images/whatsapp.png') }}" style="width:25px;height:25px">
+                </span>
+                <span class="menu-title">@lang('dashboard.whatsapp_templates')</span>
+                <span class="menu-arrow"></span>
+            </a>
+            <!--end::Menu link-->
+
+            <!--begin::Menu sub-->
+            <div class="menu-sub menu-sub-accordion pt-3">
+                <!--begin::Menu item-->
+                <div class="menu-item">
+                    <a href="{{ route('dashboard.whatsapp-templates.index') }}" class="menu-link py-3  {{ isActiveRoute('dashboard.whatsapp-templates.index') }}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span class="menu-title">@lang('dashboard.all_title', ['page_title' => __('dashboard.whatsapp_templates')])</span>
+                    </a>
+                </div>
+                <!--end::Menu item-->
+
+                @can('admins.create')
+                    <!--begin::Menu item-->
+                    <div class="menu-item">
+                        <a href="{{route('dashboard.whatsapp-templates.create')}}" class="menu-link py-3 {{ isActiveRoute('dashboard.whatsapp-templates.create') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">@lang('dashboard.add_new_template')</span>
+                        </a>
+                    </div>
+                    <!--end::Menu item-->
+                @endcan
+            </div>
+            <!--end::Menu sub-->
+        </div>
+        <!--end::Menu item-->
+    @endcan
+
+    @can('admins.index')
+        <!--begin::Menu item-->
+        <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['dashboard.manual-whatsapp-sends.index', 'dashboard.manual-whatsapp-sends.create', 'dashboard.manual-whatsapp-sends.show'])}}"
+             data-kt-menu-trigger="click">
+            <span class="menu-link">
+                <span class="menu-icon">
+                    <img src="{{ asset('images/whatsapp.png') }}" style="width:25px;height:25px">
+                </span>
+                <span class="menu-title">@lang('dashboard.manual_whatsapp_sends')</span>
+                <span class="menu-arrow"></span>
+            </span>
+            <!--begin::Menu sub-->
+            <div class="menu-sub menu-sub-accordion">
+                <!--begin::Menu item-->
+                <div class="menu-item">
+                    <a href="{{route('dashboard.manual-whatsapp-sends.index')}}" class="menu-link py-3 {{ isActiveRoute('dashboard.manual-whatsapp-sends.index') }}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span class="menu-title">@lang('dashboard.all_title', ['page_title' => __('dashboard.manual_whatsapp_sends')])</span>
+                    </a>
+                </div>
+                <!--end::Menu item-->
+
+                @can('admins.create')
+                    <!--begin::Menu item-->
+                    <div class="menu-item">
+                        <a href="{{route('dashboard.manual-whatsapp-sends.create')}}" class="menu-link py-3 {{ isActiveRoute('dashboard.manual-whatsapp-sends.create') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">@lang('dashboard.send_manual_message')</span>
+                        </a>
+                    </div>
+                    <!--end::Menu item-->
+                @endcan
+            </div>
+            <!--end::Menu sub-->
+        </div>
+        <!--end::Menu item-->
+    @endcan
+
     @can('stocks.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['stocks.index', 'stocks.show', 'stocks.create', 'stocks.edit', 'stock-quantities.show'])}}"

@@ -155,6 +155,26 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- WhatsApp Notification Option -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   id="send_whatsapp" 
+                                   name="send_whatsapp" 
+                                   value="1" 
+                                   {{ old('send_whatsapp', false) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="send_whatsapp">
+                                <i class="fab fa-whatsapp me-2 text-success"></i> {{ __('dashboard.send_whatsapp_to_customer') }}
+                            </label>
+                            <small class="form-text text-muted d-block mt-1">
+                                {{ __('dashboard.send_whatsapp_to_customer_help') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>

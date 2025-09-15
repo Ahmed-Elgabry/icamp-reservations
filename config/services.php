@@ -39,4 +39,10 @@ return [
         'test_mode' => env('PAYMENNT_TEST_MODE', true),
     ],
 
+    'hypersender' => [
+        'instance_id' => env('HYPERSENDER_INSTANCE_ID', '9fdc1b0e-9b1f-4ef8-970f-bf7a08eaa39b'),
+        'api_url' => env('HYPERSENDER_API_URL', 'https://app.hypersender.com'),
+        'token' => env('HYPERSENDER_TOKEN', '613|XQMaOgnZNTRrrxB5CMR77WDscYAHSTodIe8vQp6K663e00ee'),
+    ],
+
 ];

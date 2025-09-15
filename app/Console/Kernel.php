@@ -15,6 +15,9 @@ class Kernel extends ConsoleKernel
         Commands\SendSurveyEmails::class,
         Commands\CheckPaymentStatus::class,
         Commands\FastPaymentStatusCheck::class,
+        Commands\SendWhatsAppEvaluationCommand::class,
+        Commands\SendWhatsAppBookingReminderCommand::class,
+        Commands\SendWhatsAppBookingEndingReminderCommand::class,
     ];
     /**
      * Define the application's command schedule.
@@ -32,6 +35,18 @@ class Kernel extends ConsoleKernel
         $schedule->command('survey:send-emails')
             ->everyMinute()
             ->appendOutputTo(storage_path('logs/survey.log'));
+
+        $schedule->command('whatsapp:send-evaluation')
+            ->everyMinute()
+            ->appendOutputTo(storage_path('logs/whatsapp-evaluation.log'));
+
+        $schedule->command('whatsapp:send-booking-reminder')
+            ->dailyAt('09:00')
+            ->appendOutputTo(storage_path('logs/whatsapp-booking-reminder.log'));
+
+        $schedule->command('whatsapp:send-booking-ending-reminder')
+            ->everyMinute()
+            ->appendOutputTo(storage_path('logs/whatsapp-booking-ending-reminder.log'));
 
         // * * * * * php /home/USERNAME/yourproject/artisan schedule:run >> /dev/null 2>&1
 
