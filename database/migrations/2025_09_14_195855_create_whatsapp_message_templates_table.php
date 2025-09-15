@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamps();
             
             // Add index for faster queries
-            $table->index(['type(191)', 'is_active']);
+            $table->index(['type', 'is_active']);
         });
     }
 
