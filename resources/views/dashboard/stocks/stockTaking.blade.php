@@ -277,7 +277,7 @@
                                 <input type="file" name="image" class="form-control w-auto" accept="image/*" capture="environment">
                             </td>
                             <td>
-                                <input type="text" name="employee_name" class="form-control w-auto" required>
+                                <input type="text" name="employee_name" class="form-control w-auto" value="{{ auth()->user()->name }}" readonly>
                             </td>
                             <td class="min-w-200">
                                 <input type="datetime-local" name="date_time" class="form-control w-auto" required>
@@ -452,7 +452,7 @@
                                 </div>
                                 <div class="form-group d-flex align-items-center">
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.employee_name') }}</label>
-                                    <input type="text" name="employee_name" id="edit-employee-name" class="form-control w-auto" placeholder="{{ __('dashboard.stockTaking.specify_employee_name') }}">
+                                    <input type="text" name="employee_name" id="edit-employee-name" class="form-control w-auto"  value="{{ auth()->user()->name }}" placeholder="{{ __('dashboard.stockTaking.specify_employee_name') }}" readonly>
                                 </div>
                             </div>
                             <div class="modal-footer">

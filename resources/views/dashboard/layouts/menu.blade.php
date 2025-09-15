@@ -742,7 +742,7 @@
 
                             <span
 
-                                class="menu-title">@lang('dashboard.stockTaking.stock_taking_report')</span>
+                                class="menu-title">@lang('dashboard.item_status_report_title')</span>
 
                         </a>
 

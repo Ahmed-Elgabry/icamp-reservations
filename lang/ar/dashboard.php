@@ -1490,7 +1490,7 @@ return [
     'from_date' => 'من تاريخ',
     'to_date' => 'إلى تاريخ',
     'stockTaking' => [
-        'title' => 'جرد يدوي',
+        'title' => 'تقرير الجرد اليدوي',
         "stock_taking_report" => 'تقرير الجرد',
         'heading' => ' صرف و إرجاع عنصر من المخزون يدوياً',
         "history_heading" => 'أخر معاملات صرف وإرجاع العناصر',
