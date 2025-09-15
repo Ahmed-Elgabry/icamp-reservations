@@ -184,6 +184,17 @@
                                                             <i class="fa fa-envelope"></i>
                                                         </button>
                                                     @endif
+
+                                                    @if($paymentLink->customer && $paymentLink->customer->phone)
+                                                        <button class="btn btn-icon btn-bg-light btn-active-color-success btn-sm me-1 resend-whatsapp-btn"
+                                                                data-id="{{ $paymentLink->id }}"
+                                                                data-customer-name="{{ $paymentLink->customer->name ?? __('dashboard.not_specified') }}"
+                                                                data-payment-url="{{ $paymentLink->payment_url }}"
+                                                                title="{{ __('dashboard.resend_whatsapp') }}">
+                                                            <i class="fab fa-whatsapp"></i>
+                                                        </button>
+                                                    @endif
+                                                    
                                                 </div>
                                             </div>
                                         </td>
@@ -748,6 +759,42 @@ document.addEventListener('DOMContentLoaded', function() {
              } finally {
                 button.disabled = false;
                 button.innerHTML = '<i class="fa fa-envelope"></i>';
+            }
+        }
+        
+        // Handle Resend WhatsApp button clicks
+        if (e.target.closest('.resend-whatsapp-btn')) {
+            const button = e.target.closest('.resend-whatsapp-btn');
+            const id = button.getAttribute('data-id');
+            const customerName = button.getAttribute('data-customer-name');
+            const paymentUrl = button.getAttribute('data-payment-url');
+            
+            // Confirm before sending
+            if (!confirm('{{ __('dashboard.confirm_resend_whatsapp') }} ' + customerName + '?')) {
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            
+            try {
+                const response = await fetchAPI(`/payment-links/${id}/resend-whatsapp`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        payment_url: paymentUrl
+                    })
+                });
+                
+                if (response.success) {
+                    showToast(response.message || '{{ __("dashboard.payment_link_whatsapp_resent_success") }}', 'success');
+                } else {
+                    showToast(response.message || '{{ __("dashboard.payment_link_whatsapp_resent_error") }}', 'error');
+                }
+            } catch (error) {
+                showToast('{{ __("dashboard.payment_link_whatsapp_resent_error") }}', 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fab fa-whatsapp"></i>';
             }
         }
     });

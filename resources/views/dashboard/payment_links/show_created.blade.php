@@ -53,8 +53,11 @@
             
             <!-- Generated Payment Link -->
             <div class="card mt-4">
-                <div class="card-header">
+                <div class="card-header d-flex align-items-center justify-content-between" >
                     <h5 class="card-title mb-0">{{ __('dashboard.generated_payment_link') }}</h5>
+                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> {{ __('dashboard.back_to_order') }}
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -81,7 +84,7 @@
                     <div class="text-center mt-4">
                         <div id="qrcode" class="d-inline-block"></div>
                         <p class="mt-2 text-muted">{{ __('dashboard.scan_qr_code_to_pay') }}</p>
-                        <button id="downloadQrBtn" class="btn btn-outline-secondary mt-2" disabled>
+                        <button id="downloadQrBtn" class="btn btn-secondary mt-2" disabled>
                             <i class="fa fa-download"></i> {{ __('dashboard.download_qr_code') }}
                         </button>
                     </div>
@@ -89,14 +92,11 @@
             </div>
 
             <!-- Actions -->
-            <div class="text-center mt-4">
-                <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-secondary me-2">
-                    <i class="fa fa-arrow-left"></i> {{ __('dashboard.back_to_order') }}
-                </a>
-                <a href="{{ route('payment-links.index', ['order_id' => $order->id]) }}" class="btn btn-outline-primary me-2">
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                <a href="{{ route('payment-links.index', ['order_id' => $order->id]) }}" class="btn btn-outline-primary">
                     <i class="fa fa-list"></i> {{ __('dashboard.view_payment_links') }}
                 </a>
-                <a href="{{ route('payment-links.create', ['order_id' => $order->id]) }}" class="btn btn-success me-2">
+                <a href="{{ route('payment-links.create', ['order_id' => $order->id]) }}" class="btn btn-success">
                     <i class="fa fa-plus"></i> {{ __('dashboard.create_new_payment_link') }}
                 </a>
                 
@@ -105,6 +105,15 @@
                             data-id="{{ $paymentLink->id }}"
                             data-customer-name="{{ $order->customer->name ?? __('dashboard.not_specified') }}">
                         <i class="fa fa-envelope"></i> {{ __('dashboard.resend_email') }}
+                    </button>
+                @endif
+                
+                @if($order->customer && $order->customer->phone)
+                    <button class="btn btn-success resend-whatsapp-btn" 
+                            data-id="{{ $paymentLink->id }}"
+                            data-customer-name="{{ $order->customer->name ?? __('dashboard.not_specified') }}"
+                            data-payment-url="{{ $payment_url }}">
+                        <i class="fab fa-whatsapp"></i> {{ __('dashboard.resend_whatsapp') }}
                     </button>
                 @endif
             </div>
@@ -467,6 +476,54 @@ document.addEventListener('DOMContentLoaded', function() {
             } finally {
                 button.disabled = false;
                 button.innerHTML = '<i class="fa fa-envelope"></i> {{ __('dashboard.resend_email') }}';
+            }
+        }
+        
+        // Handle Resend WhatsApp button clicks
+        if (e.target.closest('.resend-whatsapp-btn')) {
+            const button = e.target.closest('.resend-whatsapp-btn');
+            const id = button.getAttribute('data-id');
+            const customerName = button.getAttribute('data-customer-name');
+            const paymentUrl = button.getAttribute('data-payment-url');
+            
+            console.log('Resend WhatsApp button clicked:', { id, customerName, paymentUrl });
+            
+            // Confirm before sending
+            if (!confirm('{{ __('dashboard.confirm_resend_whatsapp') }} ' + customerName + '?')) {
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __('dashboard.sending') }}...';
+            
+            try {
+                console.log('Sending request to:', `/payment-links/${id}/resend-whatsapp`);
+                const response = await fetch(`/payment-links/${id}/resend-whatsapp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        payment_url: paymentUrl
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response result:', result);
+                
+                if (result.success) {
+                    showToast(result.message || '{{ __('dashboard.payment_link_whatsapp_resent_success') }}', 'success');
+                } else {
+                    showToast(result.message || '{{ __('dashboard.payment_link_whatsapp_resent_error') }}', 'error');
+                }
+            } catch (error) {
+                console.error('Error in resend WhatsApp:', error);
+                showToast('{{ __('dashboard.payment_link_whatsapp_resent_error') }}', 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fab fa-whatsapp"></i> {{ __('dashboard.resend_whatsapp') }}';
             }
         }
     });

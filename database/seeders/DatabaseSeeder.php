@@ -36,5 +36,8 @@ class DatabaseSeeder extends Seeder
         $this->call(BankAccounts::class);
         $this->call(OrderSeeder::class);
         $this->call(SurveySeeder::class);
+        $this->call(WhatsappMessageTemplateSeeder::class);
+        $this->call(PaymentReminderTemplateSeeder::class);
+        $this->call(ManualTemplateSeeder::class);
     }
 }

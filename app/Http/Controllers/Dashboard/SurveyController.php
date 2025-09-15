@@ -492,6 +492,33 @@ class SurveyController extends Controller
     }
 
     /**
+     * Display the public survey (no authentication required).
+     *
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\Response
+     */
+    public function showPublic(Order $order)
+    {
+        // No authorization required - this is a public route
+        
+        $survey = Survey::with(['questions' => function ($query) {
+            $query->where('hidden', 0); // only non-hidden questions
+        }])->find(1);
+
+        // Transform the data to match JavaScript expectations
+        if ($survey) {
+            $surveyArray = $survey->toArray();
+            // Rename questions to fields for JavaScript compatibility
+            $surveyArray['fields'] = $surveyArray['questions'];
+            unset($surveyArray['questions']);
+            $survey = $surveyArray;
+        }
+        return view('dashboard.surveys.show')
+        ->with('order',$order)
+        ->with('survey',$survey);
+    }
+
+    /**
      * Display survey results.
      *
      * @param  \App\Models\Survey  $survey

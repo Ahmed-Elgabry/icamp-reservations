@@ -277,6 +277,13 @@
                                         <span class="indicator-label">@lang('dashboard.send_email')</span>
                                     </button>
                                     <!--end::Email Button-->
+                                    
+                                    <!--begin::WhatsApp Button-->
+                                    <button type="button" id="send-whatsapp-btn" class="btn btn-success d-flex align-items-center gap-2 ms-2">
+                                        <img src="{{ asset('images/whatsapp.png') }}" alt="WhatsApp Icon" width="20" height="20">
+                                        <span class="indicator-label">@lang('dashboard.send_whatsapp')</span>
+                                    </button>
+                                    <!--end::WhatsApp Button-->
                                 @endif
                                 <!--begin::Additional Notes Button-->
                                 <button type="button" id="additional-notes-btn" class="btn btn-secondary">
@@ -412,6 +419,124 @@
         </div>
     </div>
     <!--end::Modal - Send Email-->
+
+    <!--begin::Modal - Send WhatsApp-->
+    <div class="modal fade" id="sendWhatsAppModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-650px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="fw-bolder">@lang('dashboard.send_whatsapp_to_customer')</h2>
+                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="svg-icon svg-icon-2x"></span>
+                    </div>
+                </div>
+                <div class="modal-body py-10 px-lg-15">
+                    <form id="sendWhatsAppForm" class="form">
+                        @csrf
+                        <input type="hidden" name="order_id" value="{{ isset($order) ? $order->id : '' }}">
+                        
+                        <!-- Customer Phone Display -->
+                        @if(isset($order) && $order->customer)
+                            <div class="row mb-6">
+                                <label class="col-form-label fw-bold fs-6">@lang('dashboard.customer_phone')</label>
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ asset('images/whatsapp.png') }}" alt="WhatsApp" width="20" height="20" class="me-2">
+                                    <span class="fw-bold text-success">{{ (new \App\Services\WhatsAppService())->getDisplayPhoneNumber($order->customer->phone) }}</span>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="row mb-8">
+                            <label class="col-form-label fw-bold fs-6">@lang('dashboard.select_message_template')</label>
+                            <div class="checkbox-list">
+                                @php
+                                    $checkboxTypes = [
+                                        'show_price' => __('dashboard.show_price'),
+                                        'reservation_data' => __('dashboard.reservation_data'),
+                                        'invoice' => __('dashboard.invoice'),
+                                        'evaluation' => __('dashboard.evaluation')
+                                    ];
+                                    
+                                    $allTemplateTypes = array_merge($checkboxTypes, ['receipt' => __('dashboard.receipt')]);
+                                @endphp
+                                
+                                @foreach($checkboxTypes as $type => $label)
+                                    @if(\App\Models\WhatsappMessageTemplate::active()->ofType($type)->exists())
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="templates[]" value="{{ $type }}">
+                                            <span></span>
+                                            {{ $label }}
+                                        </label>
+                                    @endif
+                                @endforeach
+                                
+                                @if(!\App\Models\WhatsappMessageTemplate::active()->whereIn('type', array_keys($allTemplateTypes))->exists())
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        @lang('dashboard.no_active_templates_available')
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Additional Receipts (only show if receipt template is active) -->
+                        @if(\App\Models\WhatsappMessageTemplate::active()->ofType('receipt')->exists())
+                            @if(isset($order) && $order->addons->where('pivot.verified', true)->count() > 0)
+                                <div class="row mb-6">
+                                    <h6 class="fw-bolder">@lang('dashboard.addon_receipts')</h6>
+                                    <div class="checkbox-list">
+                                        @foreach($order->addons->where('pivot.verified', true) as $addon)
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="receipts[addon][]" value="{{ $addon->pivot->id }}">
+                                                <span></span>
+                                                @lang('dashboard.addon_receipt'): {{ $addon->name }}
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if(isset($order) && $order->payments->where('verified', true)->count() > 0)
+                                <div class="row mb-6">
+                                    <h6 class="fw-bolder">@lang('dashboard.payment_receipts')</h6>
+                                    <div class="checkbox-list">
+                                        @foreach($order->payments->where('verified', true) as $payment)
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="receipts[payment][]" value="{{ $payment->id }}">
+                                                <span></span>
+                                                @lang('dashboard.payment_receipt'): {{ number_format($payment->amount, 2) }} AED
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if(isset($order) && $order->items->count() > 0)
+                                <div class="row mb-6">
+                                    <h6 class="fw-bolder">@lang('dashboard.warehouse_receipts')</h6>
+                                    <div class="checkbox-list">
+                                        @foreach($order->items as $item)
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="receipts[warehouse][]" value="{{ $item->id }}">
+                                                <span></span>
+                                                @lang('dashboard.warehouse_receipt'): {{ $item->stock->name }}
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">@lang('dashboard.cancel')</button>
+                    <button type="button" id="sendWhatsAppSubmit" class="btn btn-success">@lang('dashboard.send_whatsapp')</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end::Modal - Send WhatsApp-->
+
     <!--begin::Modal - Additional Notes-->
     <div class="modal fade" id="additionalNotesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered mw-900px">
@@ -870,6 +995,110 @@
                     }
                 });
             });
+
+            // WhatsApp modal functionality
+            const sendWhatsAppModal = new bootstrap.Modal(document.getElementById('sendWhatsAppModal'));
+
+            // Open WhatsApp modal
+            $('#send-whatsapp-btn').click(function() {
+                sendWhatsAppModal.show();
+            });
+
+            // Send WhatsApp
+            $('#sendWhatsAppSubmit').click(function() {
+                const formData = new FormData();
+                const templates = [];
+                const receipts = [];
+
+                // Get selected templates
+                $('input[name="templates[]"]:checked').each(function() {
+                    templates.push($(this).val());
+                    formData.append('templates[]', $(this).val());
+                });
+
+                // Get receipt selections (same logic as email)
+                $('input[name^="receipts[addon][]"]:checked').each(function() {
+                    const addonId = $(this).val();
+                    if (!receipts.addon) receipts.addon = [];
+                    receipts.addon.push(addonId);
+                    formData.append('receipts[addon][]', addonId);
+                });
+
+                $('input[name^="receipts[payment][]"]:checked').each(function() {
+                    const paymentId = $(this).val();
+                    if (!receipts.payment) receipts.payment = [];
+                    receipts.payment.push(paymentId);
+                    formData.append('receipts[payment][]', paymentId);
+                });
+
+                $('input[name^="receipts[warehouse][]"]:checked').each(function() {
+                    const itemId = $(this).val();
+                    if (!receipts.warehouse) receipts.warehouse = [];
+                    receipts.warehouse.push(itemId);
+                    formData.append('receipts[warehouse][]', itemId);
+                });
+
+                // Check if at least one template is selected
+                if (templates.length === 0 && Object.keys(receipts).length === 0) {
+                    Swal.fire({
+                        text: "{{ __('dashboard.please_select_at_least_one_template') }}",
+                        icon: "warning",
+                        buttonsStyling: false,
+                        confirmButtonText: "{{ __('dashboard.ok') }}",
+                        customClass: {
+                            confirmButton: "btn btn-primary"
+                        }
+                    });
+                    return;
+                }
+
+                const orderId = $('input[name="order_id"]').val();
+                formData.append('_token', $('input[name="_token"]').val());
+
+                // Show loading indicator
+                $('#sendWhatsAppSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __("dashboard.sending") }}');
+
+                $.ajax({
+                    url: "{{ route('orders.sendWhatsApp', isset($order) ? $order->id : '') }}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        sendWhatsAppModal.hide();
+                        $('#sendWhatsAppSubmit').prop('disabled', false).html('{{ __("dashboard.send_whatsapp") }}');
+
+                        Swal.fire({
+                            text: response.message,
+                            icon: response.success ? "success" : "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "{{ __('dashboard.ok') }}",
+                            customClass: {
+                                confirmButton: "btn btn-primary"
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        $('#sendWhatsAppSubmit').prop('disabled', false).html('{{ __("dashboard.send_whatsapp") }}');
+
+                        let message = "{{ __('dashboard.something_went_wrong') }}";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            text: message,
+                            icon: "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "{{ __('dashboard.ok') }}",
+                            customClass: {
+                                confirmButton: "btn btn-primary"
+                            }
+                        });
+                    }
+                });
+            });
+
             /////////////// End:samuel work ///////////////
         })();
     </script>

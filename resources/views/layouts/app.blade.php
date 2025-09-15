@@ -43,6 +43,7 @@
     <script src="{{asset('dashboard/assets/js/scripts.bundle.js')}}"></script>
 
     @yield('scripts')
+	@stack('scripts')
 	@stack('js')
     <!--begin::Page Custom Javascript(used by this page)-->
 

@@ -7,6 +7,8 @@ use App\Models\PaymentLink;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Services\PaymenntService;
+use App\Services\WhatsAppService;
+use App\Models\WhatsappMessageTemplate;
 use App\Mail\PaymentLinkCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -176,6 +178,26 @@ class PaymentLinkController extends Controller
                 }
             }
 
+            // Send WhatsApp message if requested and customer has phone number
+            if (filter_var($request->send_whatsapp, FILTER_VALIDATE_BOOLEAN) && $customer->phone) {
+                try {
+                    $this->sendPaymentLinkWhatsApp($customer, $result['checkout_url'], $request->amount, $request->description);
+                    
+                    Log::info('Payment link WhatsApp message sent successfully', [
+                        'customer_phone' => $customer->phone,
+                        'payment_link_id' => $paymentLink->id,
+                        'order_id' => $request->order_id
+                    ]);
+                } catch (\Exception $whatsappException) {
+                    Log::error('Payment link WhatsApp sending failed', [
+                        'customer_phone' => $customer->phone,
+                        'payment_link_id' => $paymentLink->id,
+                        'error' => $whatsappException->getMessage()
+                    ]);
+                    // Don't fail the entire request if WhatsApp fails
+                }
+            }
+
             // Redirect to success page with payment link details
             return redirect()->route('payment-links.show-created', [
                 'order_id' => $request->order_id,
@@ -185,7 +207,8 @@ class PaymentLinkController extends Controller
                 'amount' => $request->amount,
                 'description' => $request->description,
                 'expires_at' => $request->expires_at,
-                'email_sent' => filter_var($request->send_email, FILTER_VALIDATE_BOOLEAN) && $customer->email ? '1' : '0'
+                'email_sent' => filter_var($request->send_email, FILTER_VALIDATE_BOOLEAN) && $customer->email ? '1' : '0',
+                'whatsapp_sent' => filter_var($request->send_whatsapp, FILTER_VALIDATE_BOOLEAN) && $customer->phone ? '1' : '0'
             ]);
         } catch (\Exception $e) {
             Log::error('Payment Link Creation Error', [
@@ -515,6 +538,105 @@ class PaymentLinkController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء فحص حالة المدفوعات'
+            ]);
+        }
+    }
+
+    /**
+     * Send payment link WhatsApp message
+     *
+     * @param Customer $customer
+     * @param string $paymentUrl
+     * @param float $amount
+     * @param string $description
+     * @return void
+     */
+    private function sendPaymentLinkWhatsApp($customer, $paymentUrl, $amount, $description)
+    {
+        // Get the payment link created template
+        $template = WhatsappMessageTemplate::getByType('payment_link_created');
+        if (!$template) {
+            Log::warning('No active payment link created template found');
+            return;
+        }
+
+        // Get bilingual message
+        $message = $template->getBilingualMessage($customer->name);
+        
+        // Replace payment link placeholder
+        $message = str_replace(['[🔗 رابط الدفع]', '[🔗 Payment Link]'], $paymentUrl, $message);
+
+        // Send WhatsApp message
+        $whatsAppService = new WhatsAppService();
+        $success = $whatsAppService->sendTextMessage($customer->phone, $message);
+
+        if (!$success) {
+            throw new \Exception('Failed to send WhatsApp message');
+        }
+    }
+
+    /**
+     * Resend payment link via WhatsApp
+     */
+    public function resendWhatsApp(Request $request, $id)
+    {
+        try {
+            $paymentLink = PaymentLink::with(['customer', 'order'])->findOrFail($id);
+            
+            if (!$paymentLink->customer || !$paymentLink->customer->phone) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('dashboard.customer_phone_not_found')
+                ]);
+            }
+
+            // Get the payment link resend template
+            $template = WhatsappMessageTemplate::getByType('payment_link_resend');
+            if (!$template) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('dashboard.template_not_found')
+                ]);
+            }
+
+            // Get bilingual message
+            $message = $template->getBilingualMessage($paymentLink->customer->name);
+            
+            // Replace payment link placeholder
+            $paymentUrl = $request->input('payment_url', $paymentLink->payment_url);
+            $message = str_replace(['[🔗 رابط الدفع]', '[🔗 Payment Link]'], $paymentUrl, $message);
+
+            // Send WhatsApp message
+            $whatsAppService = new WhatsAppService();
+            $success = $whatsAppService->sendTextMessage($paymentLink->customer->phone, $message);
+
+            if ($success) {
+                Log::info('Payment link WhatsApp resent successfully', [
+                    'payment_link_id' => $paymentLink->id,
+                    'customer_phone' => $paymentLink->customer->phone
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.payment_link_whatsapp_resent_success')
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('dashboard.payment_link_whatsapp_resent_error')
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Payment link WhatsApp resend failed', [
+                'payment_link_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('dashboard.payment_link_whatsapp_resent_error')
             ]);
         }
     }
