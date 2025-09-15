@@ -134,7 +134,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <div>{{ $stock->name }}</div>
+                                                <div><a href="{{ route('dashboard.stock.report', $stock->id) }}">{{ $stock->name }}</a></div>
                                             </td>
                                             <td class="text-center">
                                                 <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" >
