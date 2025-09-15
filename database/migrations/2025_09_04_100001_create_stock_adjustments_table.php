@@ -16,15 +16,16 @@ return new class extends Migration
         Schema::create('stock_adjustments', function (Blueprint $table) {
             $table->bigIncrements('id');
             // reference to stocks table (nullable in case stock was removed)
-            $table->foreignId('stock_id')->nullable()->constrained('stocks')->nullOnDelete();
-            // quantity deducted (can be positive integer)
-            $table->integer('quantity')->unsigned();
-            
+            $table->foreignId('stock_id')->nullable()->constrained('stocks')->nullOnDelete();            
             // type: item_decrement or item_increment
             $table->enum('type', ['item_decrement', 'item_increment', "stockTaking_decrement","stockTaking_increment"])->default(null);
             // optional reason and free-text custom reason
             $table->string('reason')->nullable();
             $table->string('custom_reason')->nullable();
+            $table->string('source')->nullable();
+            $table->boolean('verified')->default(false);
+            $table->decimal('percentage', 5, 2)->nullable();
+            
             // optional note, image path, employee who performed the action
             $table->text('note')->nullable();
             $table->string('image')->nullable();
@@ -32,8 +33,10 @@ return new class extends Migration
             // optional reference to an order (nullable)
             $table->foreignId('order_id')->nullable()->constrained('orders')->nullOnDelete();
             // the datetime when the adjustment occurred (useful for historic corrections)
-            $table->dateTime('date_time')->nullable();
-
+            $table->dateTime('date_time')->nullable();  ;
+            $table->integer('available_quantity_after')->nullable();
+            $table->integer('available_quantity_before')->nullable();
+            $table->decimal('available_percentage_before', 5, 2)->nullable();
             $table->timestamps();
         });
     }

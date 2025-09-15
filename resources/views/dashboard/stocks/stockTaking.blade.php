@@ -78,7 +78,7 @@
     <!-- Stock Search Input -->
 
         <div class="mb-3">
-            <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="{{ __('dashboard.search_stock') }}">
+            <input type="text" id="stock-search-input" class="form-control min-w-200 px-4" placeholder="{{ __('dashboard.search_stock') }}">
         </div>
      
 <!-- Filter/Search Modal Trigger Button -->
@@ -132,7 +132,7 @@
                     <tr data-id="{{ $adj->id }}">
                             <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                             <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                            <td>{{ $adj->quantity }}</td>
+                            <td>{{ $adj->available_quantity_after ?? '-' }}</td>
                             <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                             @if($adj->order_id)
                                 <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
@@ -315,7 +315,7 @@
                                     <tr data-id="{{ $adj->id }}">
                                       <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                                     <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                                    <td>{{ $adj->quantity }}</td>
+                                    <td>{{ $adj->available_quantity_after ?? '-' }}</td>
                                     <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                                     @if($adj->order_id)
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id }}</td>
@@ -528,7 +528,7 @@ if (!window.Swal) {
             success: function(data) {
                 $('#edit-adjustment-id').val(data.id);
                 $('#edit-available-quantity').val(data.stock ? data.stock.quantity : '');
-                $('#edit-quantity').val(data.quantity);
+                $('#edit-quantity').val(data.available_quantity_after);
                 // store type in hidden input rather than non-existent select
                 $('#edit-type-value').val(data.type);
                    const selectedType = data.type;

@@ -96,7 +96,7 @@
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                        <td>{{ $adj->quantity }}</td>
+                        <td>{{ $adj->available_quantity_after ?? '-' }}</td>
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
@@ -170,7 +170,7 @@
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                        <td>{{ $adj->quantity }}</td>
+                        <td>{{ $adj->available_quantity_after ?? '-' }}</td>
                         <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
@@ -468,7 +468,7 @@ if (!window.Swal) {
             success: function(data) {
                 $('#edit-adjustment-id').val(data.id);
                 $('#edit-available-quantity').val(data.stock ? data.stock.quantity : '');
-                $('#edit-quantity').val(data.quantity);
+                $('#edit-quantity').val(data.available_quantity_after);
                 $('#edit-type-select').val(data.type);
                    const selectedType = data.type;
                      const $reasonDropdown = $('select[name="reason"]');

@@ -40,8 +40,8 @@ class ApplyVerificationBankAdjustment
                 break;
             case "stockTaking" :
                 if ($verified) {
-                    $item->update(['available_quantity_before' => $item->stock->quantity]);
-                    $item->stock()->update(['quantity' => $item->quantity]);
+
+                    $item->stock()->update(['quantity' => $item->available_quantity_after]);
                     $item->stock()->update(['percentage' => $item->percentage ?? null]);
                 } else {
                     $item->stock()->update(['quantity' => $item->available_quantity_before]);

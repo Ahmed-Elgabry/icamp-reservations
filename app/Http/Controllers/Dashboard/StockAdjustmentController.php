@@ -66,21 +66,30 @@ class StockAdjustmentController extends Controller
                 //this handles item added from the manual item return and withdrawal form
                 // for stock taking adjustments
                 if (isset($validated['verified']) && $validated['verified'] == "1" && ($validated["type"] === 'stockTaking_decrement' || $validated["type"] === 'stockTaking_increment')) {
-                    $avaiableQty = $stock->quantity ;
-                    $availablePercentage = $stock->percentage ?? null;
+                    $availableQtyBefore = $stock->quantity ;
+                    $availableQtyAfter = $qty ;
+                    $previous_percentage = $stock->percentage ?? null;
                     $stock->update(['quantity' => $qty]);
                     $stock->update(['percentage' => $validated["percentage"] ?? null]);
 
+                }elseif ($validated["type"] === 'stockTaking_decrement' || $validated["type"] === 'stockTaking_increment') {
+                    $availableQtyBefore = $stock->quantity;
+                    $availableQtyAfter = $qty;
+                    $previous_percentage = $stock->percentage ?? null;
+
                 }
                 if ($validated["type"] !== 'stockTaking_decrement' && $validated["type"] !== 'stockTaking_increment') {
-                       $avaiableQty = $stock->quantity;
+                    $availableQtyBefore = $stock->quantity;
                     if ($type === 'item_decrement' && $stock->quantity < $qty) {
+                        $availableQtyAfter = $qty;
                         $stock->update(['quantity' => $qty]);
                         $stock->update(['percentage' => $validated["percentage"] ?? null]);
                     } elseif ($type === 'item_decrement' || $type === 'stockTaking_decrement') {
+                        $availableQtyAfter = $stock->quantity - $qty;
                         $stock->decrement('quantity', $qty);
                         $stock->update(['percentage' => $validated["percentage"] ?? null]);
                     } elseif ($type === 'item_increment' || $type === 'stockTaking_increment') {
+                        $availableQtyAfter = $stock->quantity + $qty;
                         $stock->increment('quantity', $qty);
                         $stock->update(['percentage' => $validated["percentage"] ?? null]);
                     }
@@ -94,9 +103,9 @@ class StockAdjustmentController extends Controller
                 }
                 StockAdjustment::create([
                     'stock_id' => $stock->id,
-                    'quantity' => $qty,
-                    'available_quantity_before' => $avaiableQty ?? null,
-                    'available_percentage_before' => $availablePercentage ?? null,
+                    'available_quantity_before' => $availableQtyBefore ?? null,
+                    'available_quantity_after' => $availableQtyAfter ?? null,
+                    'available_percentage_before' => $previous_percentage ?? null,
                     'percentage' => $validated["percentage"] ?? null,
                     'type' => $type,
                     'source' => $validated["source"] ?? null,
@@ -155,8 +164,10 @@ class StockAdjustmentController extends Controller
 
                 // 1. Revert previous adjustment
                 if ($adjustment->type === 'item_decrement' ||( $adjustment->type === 'stockTaking_decrement' && isset($validated['verified']) && $validated['verified'] == "1" )) {
+                    $availableQtyBefore = $stock->quantity;
                     $stock->increment('quantity', $adjustment->quantity);
                 } elseif ($adjustment->type === 'item_increment' || ( $adjustment->type === 'stockTaking_increment' && isset($validated['verified']) && $validated['verified'] == "1" )) {
+                    $availableQtyBefore = $stock->quantity;                  
                     $stock->decrement('quantity', $adjustment->quantity);
                 }
 
@@ -165,17 +176,20 @@ class StockAdjustmentController extends Controller
                 if ($newType === 'item_decrement') {
                     if ($stock->quantity < $newQty) {
                         $stock->update(['quantity' => $newQty]);
+                        $availableQtyAfter = $stock->quantity;
                     } 
                     else {
                         $stock->decrement('quantity', $newQty);
+                        $availableQtyAfter = $stock->quantity;
                     }
                 } 
                 elseif ($newType === 'item_increment') {
                     $stock->increment('quantity', $newQty);
+                    $availableQtyAfter = $stock->quantity;
                 }
                 // for stock taking adjustments
                 if (($newType === 'stockTaking_decrement' || $newType === 'stockTaking_increment')) {
-                    $availableQtyBefore = $stock->quantity ?? 0;
+                    $availableQtyAfter = $newQty;
                     $availablePercentageBefore = $stock->percentage ?? null;
                     $validated['verified'] = false;
                 } 
@@ -187,7 +201,7 @@ class StockAdjustmentController extends Controller
                     $imagePath = $adjustment->image;
                 }
                 $adjustment->update([
-                    'quantity' => $newQty,
+                    'available_quantity_after' => $availableQtyAfter,
                     'available_quantity_before' => $availableQtyBefore ?? null,
                     'available_percentage_before' => $availablePercentageBefore ?? null,
                     'percentage' => $validated["percentage"] ?? null,
