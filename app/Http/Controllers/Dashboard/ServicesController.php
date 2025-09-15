@@ -92,7 +92,7 @@ class ServicesController extends Controller
                     ]);
                     if ($files = $request->file("reports_images.{$index}")) {
                         $path = $files->store('reports', 'public');
-                        $newReport->create([
+                        $newReport->update([
                             'image' => $path
                         ]);
                     }
