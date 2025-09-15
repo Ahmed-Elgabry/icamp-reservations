@@ -176,7 +176,7 @@
                     @foreach($returnedStocks as $adj)
                         <tr data-id="{{ $adj->id }}">
                             <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
-                            <td>{{$adj->stock->percentage % ?? $adj->stock->quantity  }}</td>
+                            <td>{{$adj->stock->percentage ? $adj->stock->percentage . ' %' : $adj->stock->quantity  }}</td>
                             <td>{{abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
                             @if($adj->order_id)
