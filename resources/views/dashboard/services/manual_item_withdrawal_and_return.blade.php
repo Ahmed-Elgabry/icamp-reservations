@@ -96,7 +96,7 @@
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                        <td>{{ Math.abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
+                        <td>{{ abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
@@ -170,7 +170,7 @@
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                        <td>{{Math.abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
+                        <td>{{abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
                         <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
