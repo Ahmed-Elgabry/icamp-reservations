@@ -10,6 +10,11 @@
 
 @section('content')
 <div class="container">
+    <!-- Table Scroll Arrows -->
+    <div class="d-flex justify-content-end mb-2">
+        <button type="button" class="btn btn-light mr-2 scroll-left-btn" title="Scroll Left"><i class="fa fa-arrow-left"></i></button>
+        <button type="button" class="btn btn-light scroll-right-btn" title="Scroll Right"><i class="fa fa-arrow-right"></i></button>
+    </div>
 @push('css')
     <style>
         .select2-container--default .select2-selection--single {
@@ -396,6 +401,17 @@ $(document).on('input', '#stock-search-input', function() {
             $(this).hide();
         }
     });
+});
+
+// Table horizontal scroll buttons
+$(document).on('click', '.scroll-left-btn', function() {
+    var $wrapper = $(this).closest('.container').find('.scrollable-table-wrapper:visible').first();
+    $wrapper.animate({ scrollLeft: 0 }, 400);
+});
+$(document).on('click', '.scroll-right-btn', function() {
+    var $wrapper = $(this).closest('.container').find('.scrollable-table-wrapper:visible').first();
+    var maxScroll = $wrapper[0].scrollWidth - $wrapper[0].clientWidth;
+    $wrapper.animate({ scrollLeft: maxScroll }, 400);
 });
 
 // Add SweetAlert2 CDN if not already present
