@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('pageTitle', __('dashboard.stock_report_title'))
+@section('pageTitle', __('dashboard.item_status_report_title'))
 
 @section('content')
 @push("css")
