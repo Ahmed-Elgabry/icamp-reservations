@@ -1479,12 +1479,16 @@ return [
             'for_orders' => 'للطلبات',
             'else' => 'أخرى',
             'non-consumption' => 'عدم إستهلاك',
+            'stockTaking' => 'جرد المخزون',
         ],
     ],
     
   
     'stock_updated_successfully' => 'تم تحديث المخزون بنجاح',
     "stockTakingReport" => "تقرير جرد المخزون",
+    'item_status_report_title' => 'تقرير حالة العنصر',
+    'from_date' => 'من تاريخ',
+    'to_date' => 'إلى تاريخ',
     'stockTaking' => [
         'title' => 'جرد يدوي',
         "stock_taking_report" => 'تقرير الجرد',
@@ -1528,6 +1532,7 @@ return [
             'stockTaking' => 'جرد المخزون',
         ],
     ],
+"image_preview" => "معاينة الصورة",
 "available_quantity"=> "المتوافر حاليا بالمخزون",
 "issued_quantity"=> "الكمية المصروفة",
 "returned_quantity"=> "الكمية المرجعة",

@@ -1,11 +1,11 @@
 @extends('dashboard.layouts.app')
 
-@if (isset($issuedStocks) && $issuedStocks->count())
-    @section('pageSubtitle', __('dashboard.manual_item_withdrawal_show'))
-@elseif (isset($returnedStocks) && $returnedStocks->count())
-    @section('pageSubtitle', __('dashboard.manual_item_return_show'))
+@if (isset($issuedStocks))
+    @section('pageTitle', __('dashboard.manual_item_withdrawal_show'))
+@elseif (isset($returnedStocks))
+    @section('pageTitle', __('dashboard.manual_item_return_show'))
 @else
-    @section('pageSubtitle', __('dashboard.manual_item_withdrawal_and_return.heading'))
+    @section('pageTitle', __('dashboard.manual_item_withdrawal_and_return.heading'))
 @endif
 
 @section('content')
@@ -74,7 +74,7 @@
     <div class="mb-3">
         <input type="text" id="stock-search-input" class="form-control  px-4" placeholder="{{ __('dashboard.search_stock') }}">
     </div>
-    @if(isset($issuedStocks) && $issuedStocks->count()  && $issuedStocks !== "no-data")
+    @if(isset($issuedStocks))
     <h2>{{ __('dashboard.manual_item_withdrawal_history_heading') }}</h2>
     <div class="scrollable-table-wrapper">
     <table class="table table-responsive" id="stock-table">
@@ -92,6 +92,7 @@
                 </tr>
             </thead>
             <tbody>
+            @if($issuedStocks->total() > 0)
                 @foreach($issuedStocks as $adj)
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
@@ -139,6 +140,11 @@
                         </td>
                     </tr>
                 @endforeach
+            @else
+                <tr>
+                    <td colspan="9" class="text-center">{{ __('dashboard.no_data_found') }}</td>
+                </tr>
+            @endif
             </tbody>
         </table>
     </div>
@@ -147,7 +153,7 @@
                 {!! $issuedStocks->links() !!}
             @endif
         </div>
-    @elseif(isset($returnedStocks) && $returnedStocks->count() && $returnedStocks !== "no-data")
+    @elseif(isset($returnedStocks))
     <h3 class="my-2">{{ __('dashboard.manual_item_return_history_heading') }}</h3>
         <div class="scrollable-table-wrapper">
         <table class="table table-responsive">
@@ -166,64 +172,68 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($returnedStocks as $adj)
-                    <tr data-id="{{ $adj->id }}">
-                        <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
-                        <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                        <td>{{abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
-                        <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
-                        @if($adj->order_id)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
-                        @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason}}</td>
-                        @else
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
-                        @endif
-                                                <td>{{ $adj->note }}</td>
-                                                <td>
-                                                        @if($adj->image)
-                                                                <a href="#" class="btn btn-sm btn-info" data-toggle="modal" data-target="#imageModal-{{ $adj->id }}">
-                                                                        <i class="fa fa-eye"></i>
-                                                                </a>
-                                                                <a href="{{ route('stock.adjustments.download', $adj->id) }}" class="btn btn-sm btn-success" target="_blank">
-                                                                        <i class="fa fa-download"></i>
-                                                                </a>
-                                                                <!-- Modal -->
-                                                                <div class="modal fade" id="imageModal-{{ $adj->id }}" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel-{{ $adj->id }}" aria-hidden="true">
-                                                                    <div class="modal-dialog" role="document">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <h5 class="modal-title" id="imageModalLabel-{{ $adj->id }}">{{ __('dashboard.manual_item_withdrawal_and_return.image') }}</h5>
-                                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                                    <span aria-hidden="true">&times;</span>
-                                                                                </button>
-                                                                            </div>
-                                                                            <div class="modal-body text-center">
-                                                                                <img src="{{ asset('storage/' . $adj->image) }}" alt="Image" class="img-fluid" style="max-width:100%;height:auto;">
+                @if( $returnedStocks->total() > 0)
+                    @foreach($returnedStocks as $adj)
+                        <tr data-id="{{ $adj->id }}">
+                            <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
+                            <td>{{ $adj->stock->quantity ?? '-' }}</td>
+                            <td>{{abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
+                            @if($adj->order_id)
+                                <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
+                            @elseif(isset($adj->custom_reason) && $adj->custom_reason)
+                                <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason}}</td>
+                            @else
+                                <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
+                            @endif
+                                                    <td>{{ $adj->note }}</td>
+                                                    <td>
+                                                            @if($adj->image)
+                                                                    <a href="#" class="btn btn-sm btn-info" data-toggle="modal" data-target="#imageModal-{{ $adj->id }}">
+                                                                            <i class="fa fa-eye"></i>
+                                                                    </a>
+                                                                    <a href="{{ route('stock.adjustments.download', $adj->id) }}" class="btn btn-sm btn-success" target="_blank">
+                                                                            <i class="fa fa-download"></i>
+                                                                    </a>
+                                                                    <!-- Modal -->
+                                                                    <div class="modal fade" id="imageModal-{{ $adj->id }}" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel-{{ $adj->id }}" aria-hidden="true">
+                                                                        <div class="modal-dialog" role="document">
+                                                                            <div class="modal-content">
+                                                                                <div class="modal-header">
+                                                                                    <h5 class="modal-title" id="imageModalLabel-{{ $adj->id }}">{{ __('dashboard.manual_item_withdrawal_and_return.image') }}</h5>
+                                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                                        <span aria-hidden="true">&times;</span>
+                                                                                    </button>
+                                                                                </div>
+                                                                                <div class="modal-body text-center">
+                                                                                    <img src="{{ asset('storage/' . $adj->image) }}" alt="Image" class="img-fluid" style="max-width:100%;height:auto;">
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                        @endif
-                                                </td>
-                        <td>{{ $adj->employee_name }}</td>
-                        <td>{{ $adj->date_time }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary btn-edit-adjustment" style="padding: 5px 11px !important;border-radius: 4px !important;" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
-                            <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
-                        </td>
+                                                            @endif
+                                                    </td>
+                            <td>{{ $adj->employee_name }}</td>
+                            <td>{{ $adj->date_time }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary btn-edit-adjustment" style="padding: 5px 11px !important;border-radius: 4px !important;" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
+                                <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="10" class="text-center">{{ __('dashboard.no_data_found') }}</td>
                     </tr>
-                @endforeach
+                @endif
             </tbody>
     </table>
     </div>
         <div class="d-flex justify-content-center mt-3">
             @if(method_exists($returnedStocks, 'links'))
-                {!! $returnedStocks->links() !!}
+                @include('dashboard.pagination.pagination', ['transactions' => $returnedStocks])
             @endif
         </div>
-    @elseif((isset($issuedStocks) && $issuedStocks === "no-data") || (isset($returnedStocks) && $returnedStocks === "no-data"))
-        <div class="alert alert-warning">{{ __('dashboard.no_data_found') }}</div>
     @else
     <form method="POST" action="{{ route('stock.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
         @csrf

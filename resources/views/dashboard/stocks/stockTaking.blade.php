@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('pageSubtitle', __('dashboard.stockTakingReport'))
+@section('pageTitle', __('dashboard.stockTakingReport'))
 
 @section('content')
 <div class="container">
@@ -74,43 +74,43 @@
     </style>
 @endpush
     <!-- Stock Report is the full stockTaking after approved or verification -->
-    @if(isset($stockTakingReport) && $stockTakingReport->count() && $stockTakingReport !== "no-data")
+    @if(isset($stockTakingReport))
     <!-- Stock Search Input -->
 
         <div class="mb-3">
             <input type="text" id="stock-search-input" class="form-control min-w-200 px-4" placeholder="{{ __('dashboard.search_stock') }}">
         </div>
      
-<!-- Filter/Search Modal Trigger Button -->
-<button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#filterModal">
-    {{ __('dashboard.filter_by_date') }}
-</button>
+        <!-- Filter/Search Modal Trigger Button -->
+        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#filterModal">
+            {{ __('dashboard.filter_by_date') }}
+        </button>
 
-<!-- Filter/Search Modal -->
-<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="filterModalLabel">{{ __('dashboard.filter_by_date') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <!-- Filter/Search Modal -->
+        <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filterModalLabel">{{ __('dashboard.filter_by_date') }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="GET" action="{{ url()->current() }}" class="form-inline p-3">
+                        <div class="form-group mr-2">
+                            <label for="modal_date_from" class="mr-2">{{ __('dashboard.date_from') }}</label>
+                            <input type="date" name="date_from" id="modal_date_from" class="form-control" value="{{ request('date_from') }}">
+                        </div>
+                        <div class="form-group mr-2">
+                            <label for="modal_date_to" class="mr-2">{{ __('dashboard.date_to') }}</label>
+                            <input type="date" name="date_to" id="modal_date_to" class="form-control" value="{{ request('date_to') }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">{{ __('dashboard.filter') }}</button>
+                        <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">{{ __('dashboard.cancel') }}</button>
+                    </form>
+                </div>
             </div>
-            <form method="GET" action="{{ url()->current() }}" class="form-inline p-3">
-                <div class="form-group mr-2">
-                    <label for="modal_date_from" class="mr-2">{{ __('dashboard.date_from') }}</label>
-                    <input type="date" name="date_from" id="modal_date_from" class="form-control" value="{{ request('date_from') }}">
-                </div>
-                <div class="form-group mr-2">
-                    <label for="modal_date_to" class="mr-2">{{ __('dashboard.date_to') }}</label>
-                    <input type="date" name="date_to" id="modal_date_to" class="form-control" value="{{ request('date_to') }}">
-                </div>
-                <button type="submit" class="btn btn-primary">{{ __('dashboard.filter') }}</button>
-                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">{{ __('dashboard.cancel') }}</button>
-            </form>
-        </div>
-    </div>
-</div>   
+        </div>   
         <h2>{{ __('dashboard.stockTakingReport') }}</h2>
         <div class="scrollable-table-wrapper">
             <table class="table table-responsive" id="stock-table">
@@ -128,54 +128,60 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($stockTakingReport as $adj)
-                    <tr data-id="{{ $adj->id }}">
-                            <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
-                            <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                            <td>{{ $adj->available_quantity_after ?? '-' }}</td>
-                            <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
-                            @if($adj->order_id)
-                                <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
-                            @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                                <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}  {{ " - ". __("dashboard.stockTaking.reason_options.".$adj->custom_reason) }}</td>
-                            @else
-                                <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}</td>
-                            @endif
-                                                    <td>{{ $adj->note }}</td>
-                                                    <td>
-                                                            @if($adj->image)
-                                                                    <a href="#" class="btn btn-sm btn-info" data-toggle="modal" data-target="#imageModal-{{ $adj->id }}">
-                                                                            <i class="fa fa-eye"></i>
-                                                                    </a>
-                                                                    <a href="{{ route('stock.adjustments.download', $adj->id) }}" class="btn btn-sm btn-success" target="_blank">
-                                                                            <i class="fa fa-download"></i>
-                                                                    </a>
-                                                                    <!-- Modal -->
-                                                                    <div class="modal fade" id="imageModal-{{ $adj->id }}" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel-{{ $adj->id }}" aria-hidden="true">
-                                                                        <div class="modal-dialog" role="document">
-                                                                            <div class="modal-content">
-                                                                                <div class="modal-header">
-                                                                                    <h5 class="modal-title" id="imageModalLabel-{{ $adj->id }}">{{ __('dashboard.manual_item_withdrawal_and_return.image') }}</h5>
-                                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                                        <span aria-hidden="true">&times;</span>
-                                                                                    </button>
-                                                                                </div>
-                                                                                <div class="modal-body text-center">
-                                                                                    <img src="{{ asset('storage/' . $adj->image) }}" alt="Image" class="img-fluid" style="max-width:100%;height:auto;">
+                    @if($stockTakingReport->total() > 0)
+                        @foreach($stockTakingReport as $adj)
+                        <tr data-id="{{ $adj->id }}">
+                                <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
+                                <td>{{ $adj->stock->quantity ?? '-' }}</td>
+                                <td>{{ $adj->available_quantity_after ?? '-' }}</td>
+                                <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
+                                @if($adj->order_id)
+                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
+                                @elseif(isset($adj->custom_reason) && $adj->custom_reason)
+                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}  {{ " - ". __("dashboard.stockTaking.reason_options.".$adj->custom_reason) }}</td>
+                                @else
+                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}</td>
+                                @endif
+                                                        <td>{{ $adj->note }}</td>
+                                                        <td>
+                                                                @if($adj->image)
+                                                                        <a href="#" class="btn btn-sm btn-info" data-toggle="modal" data-target="#imageModal-{{ $adj->id }}">
+                                                                                <i class="fa fa-eye"></i>
+                                                                        </a>
+                                                                        <a href="{{ route('stock.adjustments.download', $adj->id) }}" class="btn btn-sm btn-success" target="_blank">
+                                                                                <i class="fa fa-download"></i>
+                                                                        </a>
+                                                                        <!-- Modal -->
+                                                                        <div class="modal fade" id="imageModal-{{ $adj->id }}" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel-{{ $adj->id }}" aria-hidden="true">
+                                                                            <div class="modal-dialog" role="document">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-header">
+                                                                                        <h5 class="modal-title" id="imageModalLabel-{{ $adj->id }}">{{ __('dashboard.manual_item_withdrawal_and_return.image') }}</h5>
+                                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                                            <span aria-hidden="true">&times;</span>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                    <div class="modal-body text-center">
+                                                                                        <img src="{{ asset('storage/' . $adj->image) }}" alt="Image" class="img-fluid" style="max-width:100%;height:auto;">
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
-                                                            @endif
-                                                    </td>
-                            <td>{{ $adj->date_time }}</td>
-                            <td>{{ $adj->employee_name }}</td>
-                            <!-- <td>
-                                <button class="btn btn-sm btn-primary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
-                                <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
-                            </td> -->
+                                                                @endif
+                                                        </td>
+                                <td>{{ $adj->date_time }}</td>
+                                <td>{{ $adj->employee_name }}</td>
+                                <!-- <td>
+                                    <button class="btn btn-sm btn-primary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
+                                    <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
+                                </td> -->
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="9" class="text-center">{{ __('dashboard.no_data_found') }}</td>
                         </tr>
-                    @endforeach
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -184,11 +190,9 @@
                     	@include('dashboard.pagination.pagination', ['transactions' => $stockTakingReport])
                 @endif
             </div>
-    @elseif(isset($stockTakingReport) && $stockTakingReport === "no-data")
-        <div class="alert alert-warning">{{ __('dashboard.no_data_found') }}</div>
     @else
             <div class="mb-3">
-                <input type="text" id="stock-search-input" class="form-control w-auto px-4" placeholder="{{ __('dashboard.search_stock') }}">
+                <input type="text" id="stock-search-input" class="form-control min-w-200 px-4" placeholder="{{ __('dashboard.search_stock') }}">
             </div>
             <form method="POST" action="{{ route('stock.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
                 @csrf
@@ -311,6 +315,7 @@
                             </tr>
                         </thead>
                         <tbody>
+                        @if( $stockTakingItems->count() > 0) 
                             @foreach($stockTakingItems as $adj)
                                     <tr data-id="{{ $adj->id }}">
                                       <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
@@ -354,7 +359,7 @@
                                     <td>{{ $adj->date_time }}</td>
                                     <td>{{ $adj->employee_name }}</td>
                                     <td class="d-flex flex-nowrap flex-row justify-content-between gap-4">
-                                @if($adj->verified)
+                                    @if($adj->verified)
                                         <a href="{{ route('order.verified' , [$adj->id , 'stockTaking']) }}" class="btn btn-sm btn-success " >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                     @else
                                         <a href="{{ route('order.verified' , [$adj->id , 'stockTaking']) }}" class="btn btn-sm  btn-warning text-nowrap">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
@@ -364,6 +369,11 @@
                                     </td>
                                 </tr>
                             @endforeach
+                        @else
+                            <tr>
+                                <td colspan="10" class="text-center">{{ __('dashboard.no_data_found') }}</td>
+                            </tr>
+                        @endif
                         </tbody>
                     </table>
                 </div>

@@ -166,7 +166,7 @@ class StockController extends Controller
     {
         // $this->authorize('view', $stock);
 
-        $transactions = $stock->stockAdjustments()->where("verified", true)->paginate(10) ?? "no-data";
+        $transactions = $stock->stockAdjustments()->where("verified", true)->paginate(10) ;
 
         return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
     }
