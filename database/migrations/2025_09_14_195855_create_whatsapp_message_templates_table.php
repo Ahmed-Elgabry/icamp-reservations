@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('whatsapp_message_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Template name for admin identification
-            $table->string('type'); // show_price, invoice, receipt, reservation_data, evaluation
+            $table->string('type',191); // show_price, invoice, receipt, reservation_data, evaluation
             $table->text('message_ar'); // Arabic message content (HTML from CKEditor)
             $table->text('message_en'); // English message content (HTML from CKEditor)
             $table->boolean('is_active')->default(true); // To enable/disable templates
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamps();
             
             // Add index for faster queries
-            $table->index(['type', 'is_active']);
+            $table->index(['type(191)', 'is_active']);
         });
     }
 

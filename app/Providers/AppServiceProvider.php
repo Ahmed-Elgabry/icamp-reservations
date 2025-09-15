@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Pagination\Paginator;
 use App\Observers\InitialPageObserver;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -46,5 +47,7 @@ class AppServiceProvider extends ServiceProvider
             // تعيين اللغة بناءً على الجلسة أو الافتراضي (العربية)
             App::setLocale(session('lang', 'ar'));
         }
+
+        Schema::defaultStringLength(191);
     }
 }
