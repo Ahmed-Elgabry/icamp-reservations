@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->enum('insurance_status', ['returned', 'confiscated_full', 'confiscated_partial'])
-                ->nullable()
-                ->after('statement')
-                ->comment('Insurance status for insurance payments');
-        });
+        if (!Schema::hasColumn('payments', 'insurance_status')) {
+            Schema::table('payments', function (Blueprint $table) {
+                $table->enum('insurance_status', ['returned', 'confiscated_full', 'confiscated_partial'])
+                    ->nullable()
+                    ->after('statement')
+                    ->comment('Insurance status for insurance payments');
+            });
+        }
     }
 
     /**

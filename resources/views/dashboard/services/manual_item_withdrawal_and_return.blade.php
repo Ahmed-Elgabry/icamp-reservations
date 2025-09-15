@@ -96,7 +96,7 @@
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                        <td>{{ $adj->quantity }}</td>
+                        <td>{{ abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
@@ -132,7 +132,7 @@
                                                         @endif
                                                 </td>
                         <td>{{ $adj->employee_name }}</td>
-                        <td>{{ $adj->date_time }}</td>
+                        <td class="min-w-200">{{ $adj->date_time }}</td>
                         <td>
                             <button class="btn btn-sm btn-secondary btn-edit-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.edit') }}</button>
                             <button class="btn btn-sm btn-danger btn-delete-adjustment" data-id="{{ $adj->id }}">{{ __('dashboard.delete') }}</button>
@@ -170,7 +170,7 @@
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ $adj->stock->quantity ?? '-' }}</td>
-                        <td>{{ $adj->quantity }}</td>
+                        <td>{{abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
                         <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
@@ -468,7 +468,7 @@ if (!window.Swal) {
             success: function(data) {
                 $('#edit-adjustment-id').val(data.id);
                 $('#edit-available-quantity').val(data.stock ? data.stock.quantity : '');
-                $('#edit-quantity').val(data.quantity);
+                $('#edit-quantity').val(Math.abs(data.available_quantity_after-data.available_quantity_before));
                 $('#edit-type-select').val(data.type);
                    const selectedType = data.type;
                      const $reasonDropdown = $('select[name="reason"]');

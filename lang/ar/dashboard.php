@@ -1562,7 +1562,7 @@ return [
 "quantity-first-time" => 'الكمية - أول مرة',
 "date_of_creation" => 'تاريخ إضافة العنصر في النظام',
 "filter_by_date"=> 'بحث بالتاريخ',
-
+"please_fill_reason" => 'يرجى ملء حقل السبب',
 
 
     // WhatsApp Templates
