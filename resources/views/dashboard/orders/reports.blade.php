@@ -137,13 +137,13 @@
                                                 <div>{{ $stock->name }}</div>
                                             </td>
                                             <td class="text-center">
-                                                <input type="text" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" disabled>
+                                                <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" >
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center align-items-center gap-2">
                                                     <input type="number" value="{{ $stock->pivot->required_qty }}" name="required_qty_stock[{{ $stock->pivot->id }}]" class="form-control" style="width:80px">
                                                     <div class="d-flex flex-column">
-                                                        <button type="button" class="btn btn-sm btn-danger btn-decrement" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="decrement"><i class="fa fa-minus"></i></button>
+                                                        <button type="button" class="btn btn-sm btn-danger btn-decrement" data-order-id="{{ $order->id }}" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="decrement"><i class="fa fa-minus"></i></button>
                                                         @if ($stock->pivot->latest_activity)
                                                             <small class="d-block mt-1 text-center">
                                                                 <span class="badge rounded-pill {{ $stock->pivot->latest_activity === 'increment' ? 'bg-success' : ($stock->pivot->latest_activity === 'decrement' ? 'bg-danger' : 'bg-secondary') }}">
@@ -151,7 +151,7 @@
                                                                 </span>
                                                             </small>
                                                         @endif
-                                                        <button type="button" class="btn btn-sm btn-success btn-decrement mt-1" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="increment"><i class="fa fa-plus"></i></button>
+                                                        <button type="button" class="btn btn-sm btn-success btn-decrement mt-1" data-order-id="{{ $order->id }}" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="increment"><i class="fa fa-plus"></i></button>
                                                     </div>
                                                 </div>
                                             </td>
@@ -237,6 +237,7 @@
                 stockName  = $btn.data('stockName') || '',
                 available  = parseInt($btn.data('available') || '0', 10),
                 status     = $btn.data('status') || 'decrement';
+                orderId    = $btn.data('orderId');
 
             var $input = $('#required-qty-' + pivotId);
             if (!$input.length) $input = $('[name="required_qty_stock[' + pivotId + ']"]');
@@ -266,7 +267,7 @@
                     url: "{{ route('stock.decrement') }}",
                     method: "POST",
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                    data: { id: pivotId, stockId: stockId, qty: qty, status: status },
+                    data: { id: pivotId, stockId: stockId, qty: qty, status: status , orderId: orderId },
                     success: function(resp) {
                         Swal.fire({ icon:'success', title:"@lang('dashboard.confirm')", timer:1200, showConfirmButton:false });
                     },
