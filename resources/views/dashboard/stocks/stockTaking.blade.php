@@ -319,7 +319,7 @@
                             @foreach($stockTakingItems as $adj)
                                     <tr data-id="{{ $adj->id }}">
                                     <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
-                                    <td>{{ ($adj->stock->percentage ?? $adj->stock->quantity) !== null ? ($adj->stock->percentage ?? $adj->stock->quantity) . '%' : '-' }}</td>
+                                    <td>{{ $adj->stock->percentage ? $adj->stock->percentage ." %": $adj->stock->quantity}}</td>
                                     <td>{{ $adj->available_quantity_after ?? '-' }}</td>
                                     <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                                     @if($adj->order_id)
