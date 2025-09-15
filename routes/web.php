@@ -17,6 +17,8 @@ use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use App\Http\Controllers\Dashboard\WhatsappMessageTemplateController;
+use App\Http\Controllers\Dashboard\StockController;
+use App\Http\Controllers\Dashboard\StockAdjustmentController ;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{Dashboard\CampReportController, OrderSignatureController, RegistrationformController};
@@ -52,6 +54,8 @@ Route::delete('/sign/{order}', [OrderSignatureController::class, 'destroy'])
     ->name('signature.destroy');
 
 // Auth::routes();
+// Stock Report Route
+Route::get('dashboard/stocks/{stock}/report', [StockController::class, 'stockReport'])->name('dashboard.stock.report');
 Route::group(['middleware' => ['web']], function () {
     Route::get('/', [LoginController::class, 'showloginform'])->name('show.login');
     Route::post('admin-login', [LoginController::class, 'login'])->name('admin-login');
@@ -292,6 +296,29 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # stocks update
+    // Manual item withdrawal and return routes
+    Route::prefix('manual')->group(function () {
+        // Create page
+        Route::get('item-issue-and-return/create', [StockAdjustmentController::class, 'create'])->name('item-issue-and-return-create');
+        // Manual item withdrawal page
+        Route::get('item-issue', [StockAdjustmentController::class, 'issuedItemsIndex'])->name('item-issue');
+        // Manual item return page
+        Route::get('item-return', [StockAdjustmentController::class, 'returnedItemsIndex'])->name('item-return');
+
+        Route::get('stock-adjustments/{adjustment}/json', [StockAdjustmentController::class, 'json'])->name('stock.adjustments.json');
+        Route::get('stockTaking/create', [StockAdjustmentController::class, 'stockTakingCreate'])->name('stockTaking.create');
+
+    Route::get('stockTaking/index', [StockAdjustmentController::class, 'stockTakingIndex'])->name('stockTaking.index');
+
+        // Store adjustment
+    Route::post('stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock.adjustments.store');
+    // Update adjustment
+    Route::put('stock-adjustments/{adjustment}', [StockAdjustmentController::class, 'update'])->name('stock.adjustments.update');
+    // Delete adjustment
+    Route::delete('stock-adjustments/{adjustment}', [StockAdjustmentController::class, 'destroy'])->name('stock.adjustments.destroy');
+    // Download image
+    Route::get('stock-adjustments/{id}/download', [StockAdjustmentController::class, 'downloadImage'])->name('stock.adjustments.download');
+    });
     Route::get('stocks/{id}/edit', [
         'uses' => 'StockController@edit',
         'as' => 'stocks.edit',
@@ -337,6 +364,48 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.decrmentStock', 'dashboard.stocks']
     ]);
 
+    // // Manual stock adjustment (increment/decrement) - stores audit record
+    // Route::post('stock/adjust', [
+    //     'uses' => 'StockAdjustmentController@store',
+    //     'as' => 'stock.adjust',
+    //     'title' => ['actions.adjust', 'dashboard.stocks']
+    // ]);
+
+    // // RESTful store endpoint for stock adjustments (preferred for forms)
+    // Route::post('stock-adjustments', [
+    //     'uses' => 'StockAdjustmentController@store',
+    //     'as' => 'stock.adjustments.store',
+    //     'title' => ['actions.store', 'dashboard.stocks']
+    // ]);
+
+    // // Update an existing stock adjustment
+    // Route::put('stock-adjustments/{adjustment}', [
+    //     'uses' => 'StockAdjustmentController@update',
+    //     'as' => 'stock.adjustments.update',
+    //     'title' => ['actions.update', 'dashboard.stocks']
+    // ]);
+
+    // // Delete a stock adjustment
+    // Route::delete('stock-adjustments/{adjustment}', [
+    //     'uses' => 'StockAdjustmentController@destroy',
+    //     'as' => 'stock.adjustments.destroy',
+    //     'title' => ['actions.delete', 'dashboard.stocks']
+    // ]);
+    
+    // // List all stock adjustments (index)
+    // Route::get('stock-adjustments', [
+    //     'uses' => 'StockAdjustmentController@index',
+    //     'as' => 'stock.adjustments.index',
+    //     'title' => ['actions.index', 'dashboard.stocks']
+    // ]);
+
+    //     // Show create form for stock adjustment
+    //     Route::get('stock-adjustments/create', [
+    //         'uses' => 'StockAdjustmentController@create',
+    //         'as' => 'stock.adjustments.create',
+    //         'title' => ['actions.create', 'dashboard.stocks']
+    //     ]);
+    
     /*------------ end Of stocks ----------*/
     /*------------ start Of addons ----------*/
     Route::get('addons', [
@@ -1451,7 +1520,8 @@ Route::resource('terms_sittngs', TermsSittngController::class)
     ->middleware(['auth']);
 Route::get('/Terms_and_Conditions/{link}', [OrderController::class, 'getInvoiceByLink']);
 Route::resource('statistics', statisticsController::class);
-// Route::resource('stocks', StockController::class);
+// Stock report page
+Route::get('stocks/{stock}/report', [\App\Http\Controllers\Dashboard\StockController::class, 'stockReport'])->name('stocks.report');
 
 Route::resource('questions', QuestionController::class);
 Route::post('/questions/{question}/answer', [QuestionController::class, 'storeAnswer'])->name('questions.storeAnswer');
@@ -1693,4 +1763,8 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 // Public survey route
 Route::get('survey/{survey}/thankyou', [SurveySubmissionController::class, 'thankyou'])->name('surveys.thankyou');
 Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submit'])->name('surveys.submit');
+
 Route::get('survey/{order}', [SurveyController::class, 'showPublic'])->name('surveys.public');
+
+Route::get('stocks/available', [StockController::class, 'getAvailableStocks'])->name('stocks.available');
+

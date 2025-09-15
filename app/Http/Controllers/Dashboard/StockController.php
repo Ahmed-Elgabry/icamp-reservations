@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\ServiceReport;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use App\Models\StockAdjustment;
 
 class StockController extends Controller
 {
@@ -154,4 +155,20 @@ class StockController extends Controller
         $report->delete();
         return response()->json(['message' => __('dashboard.success')], 200);
     }
+
+    public function getAvailableStocks()
+    {
+        $stocks = Stock::select('id', 'name', 'quantity')->where('quantity', '>', 0)->get();
+        return response()->json($stocks);
+    }
+
+    public function stockReport(Stock $stock)
+    {
+        // $this->authorize('view', $stock);
+
+        $transactions = $stock->stockAdjustments()->where("verified", true)->paginate(10) ?? "no-data";
+
+        return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
+    }
+
 }
