@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Dashboard;
 use App\Mail\OrderDocumentsMail;
 use App\Models\Notice;
 use App\Models\Payment;
+use App\Services\WhatsAppService;
+use App\Models\WhatsappMessageTemplate;
 use DB;
 use Endroid\QrCode\Color\Color;
 use Illuminate\Support\Facades\Log;
@@ -416,6 +418,12 @@ class OrderController extends Controller
             }
 
             $order->save();
+            
+            // Send WhatsApp reservation data message if status changed to approved
+            if ($request->status === 'approved' && $order->wasChanged('status')) {
+                $this->sendReservationDataWhatsApp($order);
+            }
+            
             \DB::commit();
 
             return response()->json(['message' => 'Order updated successfully']);
@@ -1145,6 +1153,12 @@ class OrderController extends Controller
         $mpdf->SetDirectionality('rtl');
         $mpdf->WriteHTML($html);
 
+        // Ensure temp directory exists
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0775, true);
+        }
+
         $tempPath = storage_path('app/temp/' . $type . '_' . $order->id . '.pdf');
         $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
 
@@ -1232,6 +1246,161 @@ class OrderController extends Controller
         }
     }
 
+    // Add WhatsApp sending method
+    public function sendWhatsApp(Request $request, $id)
+    {
+        $request->validate([
+            'templates' => 'sometimes|array',
+            'templates.*' => 'in:show_price,reservation_data,invoice,receipt,evaluation,payment_link_created,payment_link_resend,booking_reminder,booking_ending_reminder,manual_template',
+            'receipts' => 'sometimes|array'
+        ]);
+
+        $order = Order::with(['customer', 'addons', 'payments', 'items.stock'])->findOrFail($id);
+        $whatsAppService = new WhatsAppService();
+        
+        if (!$order->customer || !$order->customer->phone) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد رقم هاتف للعميل'], 400);
+        }
+
+        $messagesCount = 0;
+        $errors = [];
+
+        // Process main templates
+        if ($request->has('templates')) {
+            foreach ($request->templates as $templateType) {
+                try {
+                    $template = WhatsappMessageTemplate::getByType($templateType);
+                    
+                    if (!$template) {
+                        $errors[] = "Template not found for type: {$templateType}";
+                        continue;
+                    }
+
+                    // Get bilingual processed message with customer data (Arabic + English)
+                    if ($templateType === 'evaluation') {
+                        // Send evaluation with survey link (public route that doesn't require auth)
+                        $surveyUrl = route('surveys.public', ['order' => $order->id]);
+                        $message = $template->getBilingualMessage($order->customer->name, $surveyUrl);
+                        
+                        // Log the generated URL and message for debugging
+                        Log::info('Evaluation message prepared', [
+                            'order_id' => $order->id,
+                            'survey_url' => $surveyUrl,
+                            'customer_name' => $order->customer->name,
+                            'message_preview' => substr($message, 0, 100) . '...'
+                        ]);
+                        
+                        // Validate that the message contains the evaluation link
+                        if (empty($surveyUrl) || strpos($message, 'undefined') !== false) {
+                            $errors[] = "Failed to generate evaluation link for order {$order->id}";
+                            continue;
+                        }
+                        
+                        // Use link preview for evaluation messages
+                        $success = $whatsAppService->sendLinkPreview(
+                            $order->customer->phone,
+                            $surveyUrl,
+                            $message
+                        );
+                    } else {
+                        // Get bilingual message for non-evaluation templates
+                        $message = $template->getBilingualMessage($order->customer->name);
+                        
+                        // Send message with PDF file
+                        $pdfPath = $this->generateTempPdf($order, $templateType);
+                        if ($pdfPath && file_exists($pdfPath)) {
+                            $success = $whatsAppService->sendFile(
+                                $order->customer->phone,
+                                $pdfPath,
+                                $message
+                            );
+                            // Clean up temp file
+                            if (file_exists($pdfPath)) {
+                                unlink($pdfPath);
+                            }
+                        } else {
+                            // Send text message if PDF generation fails
+                            $success = $whatsAppService->sendTextMessage($order->customer->phone, $message);
+                        }
+                    }
+
+                    if ($success) {
+                        $messagesCount++;
+                    } else {
+                        $errors[] = "Failed to send {$templateType} message";
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Error sending {$templateType}: " . $e->getMessage();
+                }
+            }
+        }
+
+        // Process receipt templates (same logic as email)
+        if ($request->has('receipts')) {
+            foreach ($request->receipts as $type => $ids) {
+                foreach ($ids as $itemId) {
+                    try {
+                        $template = WhatsappMessageTemplate::getByType('receipt');
+                        if (!$template) continue;
+
+                        $message = $template->getBilingualMessage($order->customer->name);
+                        $pdfPath = null;
+
+                        switch ($type) {
+                            case 'addon':
+                                $pdfPath = $this->generateAddonReceiptPdf($order->id, $itemId);
+                                break;
+                            case 'payment':
+                                $pdfPath = $this->generatePaymentReceiptPdf($order->id, $itemId);
+                                break;
+                            case 'warehouse':
+                                $pdfPath = $this->generateWarehouseReceiptPdf($order->id, $itemId);
+                                break;
+                        }
+
+                        if ($pdfPath && file_exists($pdfPath)) {
+                            $success = $whatsAppService->sendFile(
+                                $order->customer->phone,
+                                $pdfPath,
+                                $message
+                            );
+                            // Clean up temp file
+                            if (file_exists($pdfPath)) {
+                                unlink($pdfPath);
+                            }
+                            
+                            if ($success) {
+                                $messagesCount++;
+                            } else {
+                                $errors[] = "Failed to send {$type} receipt";
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        $errors[] = "Error sending {$type} receipt: " . $e->getMessage();
+                    }
+                }
+            }
+        }
+
+        if ($messagesCount > 0) {
+            $message = $messagesCount === 1 
+                ? 'تم إرسال رسالة واتساب واحدة بنجاح'
+                : "تم إرسال {$messagesCount} رسائل واتساب بنجاح";
+                
+            if (!empty($errors)) {
+                $message .= ' مع بعض الأخطاء: ' . implode(', ', $errors);
+            }
+            
+            return response()->json(['success' => true, 'message' => $message]);
+        } else {
+            $errorMessage = !empty($errors) 
+                ? 'فشل في إرسال رسائل الواتساب: ' . implode(', ', $errors)
+                : 'لم يتم إرسال أي رسائل واتساب';
+                
+            return response()->json(['success' => false, 'message' => $errorMessage], 500);
+        }
+    }
+
     private function generateAddonReceiptPdf($orderId, $addonId)
     {
         $order = Order::with(['payments', 'addons', 'services', 'customer', 'items'])
@@ -1245,6 +1414,12 @@ class OrderController extends Controller
 
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
+
+        // Ensure temp directory exists
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0775, true);
+        }
 
         $tempPath = storage_path('app/temp/addon_receipt_' . $addonId . '.pdf');
         $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
@@ -1264,6 +1439,12 @@ class OrderController extends Controller
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
 
+        // Ensure temp directory exists
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0775, true);
+        }
+
         $tempPath = storage_path('app/temp/payment_receipt_' . $paymentId . '.pdf');
         $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
 
@@ -1281,6 +1462,12 @@ class OrderController extends Controller
 
         $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
         $mpdf->WriteHTML($html);
+
+        // Ensure temp directory exists
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0775, true);
+        }
 
         $tempPath = storage_path('app/temp/warehouse_receipt_' . $itemId . '.pdf');
         $mpdf->Output($tempPath, \Mpdf\Output\Destination::FILE);
@@ -1307,6 +1494,77 @@ class OrderController extends Controller
             if (file_exists($tempPath)) {
                 unlink($tempPath);
             }
+        }
+    }
+
+    /**
+     * Send reservation data WhatsApp message when order is approved
+     *
+     * @param Order $order
+     * @return void
+     */
+    private function sendReservationDataWhatsApp(Order $order)
+    {
+        try {
+            // Check if customer has phone number
+            if (!$order->customer || !$order->customer->phone) {
+                Log::warning('Order customer has no phone number for WhatsApp reservation data', [
+                    'order_id' => $order->id,
+                    'customer_id' => $order->customer_id
+                ]);
+                return;
+            }
+
+            // Get the reservation data template
+            $template = WhatsappMessageTemplate::getByType('reservation_data');
+            if (!$template) {
+                Log::warning('No active reservation data template found', ['order_id' => $order->id]);
+                return;
+            }
+
+            // Get bilingual message
+            $message = $template->getBilingualMessage($order->customer->name);
+
+            // Generate PDF
+            $pdfPath = $this->generateTempPdf($order, 'reservation_data');
+            
+            // Send WhatsApp message
+            $whatsAppService = new WhatsAppService();
+            
+            if ($pdfPath && file_exists($pdfPath)) {
+                $success = $whatsAppService->sendFile(
+                    $order->customer->phone,
+                    $pdfPath,
+                    $message
+                );
+                
+                // Clean up temp file
+                if (file_exists($pdfPath)) {
+                    unlink($pdfPath);
+                }
+            } else {
+                // Send text message if PDF generation fails
+                $success = $whatsAppService->sendTextMessage($order->customer->phone, $message);
+            }
+
+            if ($success) {
+                Log::info('WhatsApp reservation data message sent successfully', [
+                    'order_id' => $order->id,
+                    'customer_phone' => $order->customer->phone
+                ]);
+            } else {
+                Log::error('Failed to send WhatsApp reservation data message', [
+                    'order_id' => $order->id,
+                    'customer_phone' => $order->customer->phone
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('WhatsApp reservation data sending failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
     }
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
+use App\Http\Controllers\Dashboard\WhatsappMessageTemplateController;
 use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\StockAdjustmentController ;
 use App\Models\Order;
@@ -1086,6 +1087,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => ['actions.test', 'dashboard.payment-links']
     ]);
 
+    # payment-links resend whatsapp
+    Route::post('payment-links/{id}/resend-whatsapp', [
+        'uses' => 'PaymentLinkController@resendWhatsApp',
+        'as' => 'payment-links.resend-whatsapp',
+        'title' => ['actions.resend', 'dashboard.payment_links']
+    ]);
+
     # payment-links test-connection debug
     Route::get('payment-links/test-connection-debug', [
         'uses' => 'PaymentLinkController@testConnectionDebug',
@@ -1718,6 +1726,21 @@ Route::get('/generate-order-numbers', function () {
 
 
 Route::post('orders/{id}/send-email', [OrderController::class, 'sendEmail'])->name('orders.sendEmail');
+Route::post('orders/{id}/send-whatsapp', [OrderController::class, 'sendWhatsApp'])->name('orders.sendWhatsApp');
+
+// WhatsApp Message Templates Routes
+Route::group(['prefix' => 'dashboard', 'as' => 'dashboard.', 'middleware' => ['auth', 'admin']], function () {
+    Route::resource('whatsapp-templates', WhatsappMessageTemplateController::class);
+    Route::post('whatsapp-templates/{id}/toggle-status', [WhatsappMessageTemplateController::class, 'toggleStatus'])
+        ->name('whatsapp-templates.toggle-status');
+});
+
+// Manual WhatsApp Sends Routes
+Route::group(['prefix' => 'dashboard', 'as' => 'dashboard.', 'middleware' => ['auth', 'admin']], function () {
+    Route::resource('manual-whatsapp-sends', \App\Http\Controllers\Dashboard\ManualWhatsappSendController::class);
+    Route::get('manual-whatsapp-sends/search-customers', [\App\Http\Controllers\Dashboard\ManualWhatsappSendController::class, 'searchCustomers'])
+        ->name('manual-whatsapp-sends.search-customers');
+});
 Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('surveys/create', [SurveyController::class, 'create'])->name('surveys.create')->middleware(['auth']);
     Route::get('survey/{response_id}/answer', [SurveyController::class, 'answer'])->name('surveys.answer')->middleware(['auth']);
@@ -1740,7 +1763,8 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 // Public survey route
 Route::get('survey/{survey}/thankyou', [SurveySubmissionController::class, 'thankyou'])->name('surveys.thankyou');
 Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submit'])->name('surveys.submit');
-Route::get('survey/{order}', [SurveyController::class, 'show'])->name('surveys.public');
+
+Route::get('survey/{order}', [SurveyController::class, 'showPublic'])->name('surveys.public');
 
 Route::get('stocks/available', [StockController::class, 'getAvailableStocks'])->name('stocks.available');
 
