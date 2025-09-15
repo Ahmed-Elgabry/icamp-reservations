@@ -43,7 +43,7 @@ class StockAdjustmentService
                 'custom_reason' => $validated['custom_reason'] ?? null,
                 'order_id' => $validated['order_id'] ?? null,
                 'note' => $validated['note'] ?? null,
-                'employee_name' => $validated['employee_name'] ?? null,
+                'employee_name' =>  auth()->user()->name ,
                 'date_time' => $validated['date_time'] ?? null,
                 'image' => $imagePath,
             ]);
@@ -110,7 +110,7 @@ class StockAdjustmentService
                 'reason' => $validated['reason'] ?? $adjustment->reason,
                 'custom_reason' => $validated['custom_reason'] ?? $adjustment->custom_reason,
                 'note' => $validated['note'] ?? $adjustment->note,
-                'employee_name' => $validated['employee_name'] ?? $adjustment->employee_name,
+                'employee_name' => auth()->user()->name ?? $adjustment->employee_name,
                 'date_time' => $validated['date_time'] ?? $adjustment->date_time,
                 "order_id" => $validated["order_id"] ,
                 'image' => $imagePath,

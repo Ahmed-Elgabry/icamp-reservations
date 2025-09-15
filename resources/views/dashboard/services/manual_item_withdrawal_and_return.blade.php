@@ -305,7 +305,7 @@
                         <input type="datetime-local" name="date_time" class="form-control" required>
                     </td>
                     <td>
-                        <input type="text" name="employee_name" class="form-control " required>
+                        <input type="text" name="employee_name" class="form-control " value="{{ auth()->user()->name }}" readonly>
                     </td>
                 </tr>
             </tbody>
@@ -370,7 +370,7 @@
                         </div>
                         <div class="form-group d-flex flex-column">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.employee_name') }}</label>
-                            <input type="text" name="employee_name" id="edit-employee-name" class="form-control " placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.employee_name') }}">
+                            <input type="text" name="employee_name" id="edit-employee-name" class="form-control "  value="{{ auth()->user()->name }}" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.employee_name') }}" readonly>
                         </div>
                     </div>
                     <div class="modal-footer">

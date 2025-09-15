@@ -1923,8 +1923,7 @@ return [
     ],
     'item_status_report_title' => 'Item Status Report',
     'stockTaking' => [
-        'title' => 'Manual Stock Taking',
-        'stock_taking_report' => 'Stock Taking Report',
+        'title' => 'Manual Stock Taking Report',
         'heading' => 'Manual withdrawal and return of item from stock',
         'history_heading' => 'Recent withdrawal and return transactions',
         'item' => 'Item',
