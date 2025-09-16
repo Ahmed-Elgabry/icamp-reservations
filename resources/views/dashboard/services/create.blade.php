@@ -180,63 +180,46 @@
 
                             <hr>
 
-                            @if (isset($service))
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>@lang('dashboard.image')</th>
-                                                <th>@lang('dashboard.sequence')</th>
-                                                <th>@lang('dashboard.stock')</th>
-                                                <th>@lang('dashboard.count')</th>
-                                                <th>@lang('dashboard.actions')</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($service->stocks as $index => $serviceStock)
-                                                <tr>
-                                                    <td>
-                                                        @if ($serviceStock->image)
-                                                            <img src="{{ asset($serviceStock->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
-                                                        @else
-                                                            <img src="{{ asset('images/logo.png') }}" alt="" class="preview-image" style="width:50px;height:50px;display:none;">
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <span class="row-number">{{ $index + 1 }} (المخزن)</span>
-                                                    </td>
-                                                    <td>
-                                                        <select name="stocks[]" class="form-select-stock select2-custome col-12 form-select-lg form-select-solid" required>
-                                                            @foreach ($stocks as $stock)
-                                                                <option value="{{ $stock->id }}" {{ $serviceStock->id == $stock->id ? 'selected' : '' }}>
-                                                                    {{ $stock->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <input type="number" name="counts[]" min="1"
-                                                               class="form-control form-control-lg form-control-solid"
-                                                               placeholder="@lang('dashboard.count')"
-                                                               value="{{ $serviceStock->pivot->count }}" required>
-                                                    </td>
-                                                    <td>
-                                                        @can('services.delete.internal')
-                                                            <a href="#"
-                                                               class="menu-link px-3 js-delete-stock"
-                                                               data-url="{{ route('stocks.destroyServiceStock', ['service' => $service->id, 'stock' => $serviceStock->id]) }}">
-                                                                @lang('dashboard.delete')
-                                                            </a>
-                                                        @endcan
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @else
-                                <div id="stocks-section"></div>
-                            @endif
+                            <div id="stocks-section">
+                                @if (isset($service))
+                                    @foreach ($service->stocks as $index => $serviceStock)
+                                        <div class="row align-items-center stock-item-row mb-2" data-index="{{ $index + 1}}">
+                                            <div class="col-1">
+                                                @if ($serviceStock->image)
+                                                    <img src="{{ asset($serviceStock->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
+                                                @else
+                                                    <img src="{{ asset('images/logo.png') }}" alt="" class="preview-image" style="width:50px;height:50px;display:none;">
+                                                @endif
+                                            </div>
+                                            <div class="col-1">
+                                                <span class="row-number">{{ $index + 1 }} (المخزن)</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <select name="stocks[]" class="form-select-stock select2-custome col-12 form-select-lg form-select-solid" required>
+                                                    <option value="" disabled>{{ __('dashboard.select') }}</option>
+                                                    @foreach ($stocks as $stock)
+                                                        <option value="{{ $stock->id }}" {{ $serviceStock->id == $stock->id ? 'selected' : '' }}>{{ $stock->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-2">
+                                                <input type="number" name="counts[]" min="1"
+                                                       class="form-control form-control-lg form-control-solid"
+                                                       placeholder="@lang('dashboard.count')"
+                                                       value="{{ $serviceStock->pivot->count }}" required>
+                                            </div>
+                                            <div class="col-2">
+                                                @can('services.delete.internal')
+                                                    <a href="#" class="btn btn-danger btn-sm js-delete-stock"
+                                                       data-url="{{ route('stocks.destroyServiceStock', ['service' => $service->id, 'stock' => $serviceStock->id]) }}">
+                                                        @lang('dashboard.delete')
+                                                    </a>
+                                                @endcan
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
 
                             <div class="d-flex justify-content-end mt-4">
                                 <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">

@@ -302,9 +302,10 @@
     </div>
 
     <!-- Terms and Conditions -->
-    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif">
+    <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif d-flex flex-column">
         <div class="section-title">@lang('dashboard.Terms_and_Conditions')</div>
-        <div>{!! $termsSittng->commercial_license !!}</div>
+        <div>{!! $termsSittng->commercial_license_ar !!}</div>
+        <div>{!! $termsSittng->commercial_license_en !!}</div>
     </div>
 
     <!-- Additional Notes -->
