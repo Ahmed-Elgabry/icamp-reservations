@@ -153,9 +153,9 @@
             </tbody>
         </table>
     </div>
-        <div class="d-flex justify-content-center mt-3">
+        <div class="d-flex justify-content-between align-items-center mt-3">
             @if(method_exists($issuedStocks, 'links'))
-                {!! $issuedStocks->links() !!}
+                @include('dashboard.pagination.pagination', ['transactions' => $issuedStocks])
             @endif
         </div>
     @elseif(isset($returnedStocks))
@@ -234,7 +234,7 @@
             </tbody>
     </table>
     </div>
-        <div class="d-flex justify-content-center mt-3">
+        <div class="d-flex justify-content-between align-items-center mt-3">
             @if(method_exists($returnedStocks, 'links'))
                 @include('dashboard.pagination.pagination', ['transactions' => $returnedStocks])
             @endif
