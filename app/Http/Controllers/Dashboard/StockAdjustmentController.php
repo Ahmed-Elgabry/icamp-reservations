@@ -35,8 +35,8 @@ class StockAdjustmentController extends Controller
     }
     public function create()
     {
-        $stocks = \App\Models\Stock::all();
-        $orders = \App\Models\Order::all();
+        $stocks = \App\Models\Stock::latest()->get();
+        $orders = \App\Models\Order::latest()->get();
         return view('dashboard.services.manual_item_withdrawal_and_return', compact('stocks', 'orders'));
     }
     public function store(StockAdjustmentRequest $request)
@@ -117,7 +117,7 @@ class StockAdjustmentController extends Controller
     }
     public function stockTakingCreate()
     {
-        $stocks = \App\Models\Stock::all();
+        $stocks = \App\Models\Stock::latest()->get();
         $stockTakingItems = StockAdjustment::where('source', 'stockTaking')->latest()->paginate(10) ?? 'no-data';
         return view('dashboard.stocks.stockTaking', compact('stockTakingItems', 'stocks'));
     }

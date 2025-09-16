@@ -102,11 +102,11 @@
                     <tr data-id="{{ $adj->id }}">
                         <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                         <td>{{ isset($adj->stock->percentage) ? $adj->stock->percentage . ' %' : ($adj->stock->quantity ?? '-') }}</td>
-                        <td>{{ (isset($adj->available_quantity_after) && isset($adj->available_quantity_before)) ? abs($adj->available_quantity_after - $adj->available_quantity_before) : '-' }}</td>
+                        <td>{{ isset($adj->stock->percentage) ? abs($adj->percentage - $adj->available_percentage_before) . ' %' : abs($adj->available_quantity_after - $adj->available_quantity_before) }}</td>
                         @if($adj->order_id)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason }}</td>
+                            <td>{{ __("dashboard.manual_item_withwithdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason }}</td>
                         @else
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
                         @endif
@@ -182,7 +182,7 @@
                         <tr data-id="{{ $adj->id }}">
                             <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                             <td>{{$adj->stock->percentage ? $adj->stock->percentage . ' %' : $adj->stock->quantity  }}</td>
-                            <td>{{abs($adj->available_quantity_after - $adj->available_quantity_before) ?? '-' }}</td>
+                            <td>{{ isset($adj->stock->percentage) ? abs($adj->percentage - $adj->available_percentage_before) . ' %' : abs($adj->available_quantity_after - $adj->available_quantity_before) }}</td>
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.".$adj->type) }}</td>
                             @if($adj->order_id)
                                 <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
@@ -265,13 +265,13 @@
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_item') }}</option>
                             @if(isset($stocks) && $stocks->count())
                                 @foreach($stocks as $stock)
-                                    <option value="{{ $stock->id }}" data-available="{{ $stock->quantity ?? 0 }}">{{ $stock->name }}</option>
+                                            <option value="{{ $stock->id }}" data-available="{{ $stock->percentage ? ($stock->percentage ) . ' %' : ($stock->quantity ?? '-') }}">{{ $stock->name }}</option>
                                 @endforeach
                             @endif
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="available_quantity" class="form-control " value="" readonly>
+                            <input type="text" name="available_quantity" class="form-control" value="" readonly>
                     </td>
                     <td class = "d-flex flex-row gap-4">
                             <input type="number" name="quantity_to_discount" class="form-control " placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}">

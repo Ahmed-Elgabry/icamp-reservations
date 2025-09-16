@@ -22,8 +22,8 @@ class StockController extends Controller
             'quantity' => request()->query('quantity'),
             'higher_selling' => request()->query('higher_selling'),
         ];
-
         $stocks = Stock::filter($filters)
+            ->latest()
             ->get();
 
         $lowStock = $stocks->filter(function ($stock) {
