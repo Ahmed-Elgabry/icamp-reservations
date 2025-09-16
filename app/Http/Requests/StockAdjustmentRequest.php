@@ -29,4 +29,22 @@ class StockAdjustmentRequest extends FormRequest
             'image' => 'nullable|image|max:20480',
         ];
     }
+
+    /**
+     * Remove any keys with null values before validation so the service
+     * receives only meaningful fields.
+     */
+    protected function prepareForValidation()
+    {
+        $data = $this->all();
+        $clean = [];
+        foreach ($data as $k => $v) {
+            if ($v !== null) {
+                $clean[$k] = $v;
+            }
+        }
+        $this->replace($clean);
+    }
+
+    
 }

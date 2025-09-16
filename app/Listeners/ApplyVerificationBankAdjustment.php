@@ -45,7 +45,7 @@ class ApplyVerificationBankAdjustment
                     $item->stock()->update(['percentage' => $item->percentage ?? null]);
                 } else {
                     $item->stock()->update(['quantity' => $item->available_quantity_before]);
-                    $item->stock()->update(['percentage' => null]);
+                    $item->stock()->update(['percentage' => $item->available_percentage_before]);
                 }
                 break;
             case 'insurance':

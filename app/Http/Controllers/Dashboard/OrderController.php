@@ -38,6 +38,7 @@ use App\Repositories\ICategoryRepository;
 use Illuminate\Support\Facades\DB as FacadesDB;
 use App\Models\Transaction;
 use App\Models\StockAdjustment;
+use App\Services\StockAdjustmentService;
 //use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -652,43 +653,8 @@ class OrderController extends Controller
             'orderId' => 'required|integer|exists:orders,id',
         ]);
         try {
-            $result = FacadesDB::transaction(function () use ($data) {
-                $affected = FacadesDB::table('service_stock')
-                    ->where('id', $data['id'])
-                    ->where('stock_id', $data['stockId'])
-                    ->update([
-                        'required_qty' => $data['qty'],
-                        'updated_at'   => now(),
-                        'latest_activity' => $data['status']
-                    ]);
-                abort_if($affected === 0, 404, 'Pivot not found for this stock.');
-
-                StockAdjustment::create([
-                    "available_quantity_before" => Stock::find($data['stockId'])->quantity,
-                    'stock_id' => $data['stockId'],
-                    'quantity' => $data['qty'] ,
-                    'type' => $data['status'] ==="increment"? "item_increment" : "item_decrement",
-                    'order_id' => $data['orderId'],
-                    "source" => "Reservation",
-                    'verified' => "1",
-                    "date_time" => now(),
-                ]);
-                $stock = Stock::whereKey($data['stockId'])
-                    ->lockForUpdate()
-                    ->firstOrFail();
-                match ($data['status']) {
-                    'increment' => $stock->increment('quantity', $data['qty']),
-                    'decrement' => $data['qty'] > $stock->quantity ? abort(422, __('dashboard.insufficient_stock')) : $stock->decrement('quantity', $data['qty']),
-                    default => abort(422, __('dashboard.not_found')),
-                };
-                return [
-                    'remaining' => (int) $stock->quantity,
-                    'decrement' => (int) $data['qty'],
-                    'stock_id'  => (int) $stock->id,
-                    'pivot_id'  => (int) $data['id'],
-                ];
-            });
-
+            $service = new StockAdjustmentService();
+            $result = $service->decrmentOrIncrementStock($data);
             return response()->json(['ok' => true, 'data' => $result], 200);
         } catch (\Throwable $e) {
             return response()->json(['ok' => false, 'message' => $e->getMessage()], 500);

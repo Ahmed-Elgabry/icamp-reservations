@@ -1907,7 +1907,7 @@ return [
         'select_reason' => 'Select reason',
         'select_order' => 'Select order number',
         'submit' => 'Update stock',
-        'edit_adjustment' => 'Edit item withdrawal',
+        'edit_adjustment' => 'Edit item withdrawal and return',
         'reason_options' => [
             'correct_quantity' => 'Correct quantity',
             'for_employee' => 'For employee',
@@ -1943,6 +1943,7 @@ return [
         'image_preview' => 'Image preview',
         'date_time' => 'Date and time',
         'by' => 'By',
+        'correct_percentage' => 'Correct percentage',
         'stockTaking_decrement' => 'Stock decrement',
         'stockTaking_increment' => 'Stock increment',
         'specify_reason' => 'Specify reason',
@@ -1998,5 +1999,7 @@ return [
     'date_of_creation' => 'Date of item addition to system',
     'filter_by_date' => 'Search by date',
     'please_fill_reason' => 'Please fill the reason field',
+
+    'enter_quantity_or_percentage' => 'Enter quantity or percentage',
 
 ];

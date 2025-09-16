@@ -45,12 +45,18 @@ class StockAdjustmentController extends Controller
         // $this->authorize('update', Stock::class);
 
         $type = $request['type'] ?? null;
-        $qty = isset($request['quantity_to_discount']) ? (int) $request['quantity_to_discount'] : (int) $request['correct_quantity'];
-        if ($qty && $qty <= 0) {
+        if (isset($request['quantity_to_discount'])) {
+            $qty = (int) $request['quantity_to_discount'];
+        } elseif (isset($request['correct_quantity'])) {
+            $qty = (int) $request['correct_quantity'];
+        } else {
+            $qty = null;
+        }
+        if ($qty && $qty <= 0 && !$request["percentage"]) {
             return response()->json(['error' => 'Invalid quantity'], 422);
         }
         try {
-            $adjustment = $this->stockAdjustmentService->createAdjustment($request->all());
+            $adjustment = $this->stockAdjustmentService->createAdjustment($request->validated());
             if ($request->ajax()) {
                 return response()->json(['success' => true, 'message' => __('dashboard.stock_updated_successfully')], 200);
             }
@@ -63,8 +69,14 @@ class StockAdjustmentController extends Controller
 
     public function update(StockAdjustmentUpdateRequest $request, StockAdjustment $adjustment)
     {
-        $newQty = isset($request['quantity_to_discount']) ? (int) $request['quantity_to_discount'] : (int) $request['correct_quantity'];
-        if ($newQty && $newQty <= 0) {
+          if (isset($request['quantity_to_discount']) && $request['quantity_to_discount'] ) {
+            $newQty = (int) $request['quantity_to_discount'];
+        } elseif (isset($request['correct_quantity']) && $request['correct_quantity']) {
+            $newQty = (int) $request['correct_quantity'];
+        } else {
+            $newQty = null;
+        }
+        if ($newQty && $newQty <= 0 && !$request["percentage"]) {
             return response()->json(['error' => 'Invalid quantity'], 422);
         }
         try {
@@ -72,7 +84,6 @@ class StockAdjustmentController extends Controller
             return response()->json(['message' => __('dashboard.stock_updated_successfully')], 200);
         } catch (\Exception $e) {
             \Log::error('Stock adjustment update failed: ' . $e->getMessage());
-            \Log::error('Request data: ' . $e->getTraceAsString());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -107,7 +118,7 @@ class StockAdjustmentController extends Controller
     public function stockTakingCreate()
     {
         $stocks = \App\Models\Stock::all();
-        $stockTakingItems = StockAdjustment::where('source', 'stockTaking')->paginate(10) ?? "no-data";
+        $stockTakingItems = StockAdjustment::where('source', 'stockTaking')->latest()->paginate(10) ?? 'no-data';
         return view('dashboard.stocks.stockTaking', compact('stockTakingItems', 'stocks'));
     }
 
@@ -127,7 +138,7 @@ class StockAdjustmentController extends Controller
                 $query->whereDate('date_time', '<=', $dateTo);
             }
 
-            $stockTakingReport = $query->paginate(10) ;
+            $stockTakingReport = $query->latest()->paginate(10);
             return view('dashboard.stocks.stockTaking', compact('stockTakingReport'));
         }
 }

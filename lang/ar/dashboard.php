@@ -1468,7 +1468,7 @@ return [
     'select_reason' => 'اختر السبب',
     'select_order' => 'اختر رقم الحجز',
         'submit' => 'تحديث المخزون',
-    'edit_adjustment' => 'تعديل صرف العنصر',
+    'edit_adjustment' => 'تعديل صرف و إرجاع العنصر',
     'reason_options' => [
             'correct_quantity' => 'تصحيح الكمية',
             'for_employee' => 'لموظف',
@@ -1519,6 +1519,8 @@ return [
     'select_order' => 'اختر رقم الحجز',
         'submit' => 'تحديث المخزون',
     'edit_adjustment' => 'تعديل صرف العنصر',
+    "edit_stockTaking_item" => "تعديل جرد العنصر",
+    'correct_percentage' => 'تصحيح النسبة',
     'reason_options' => [
             'correct_quantity' => 'تصحيح الكمية',
             'for_employee' => 'لموظف',
@@ -1679,6 +1681,6 @@ return [
     'sending' => 'جاري الإرسال',
     'completed' => 'مكتمل',
     'unknown' => 'غير معروف',
-
+    'enter_quantity_or_percentage' => 'يرجى إدخال الكمية أو النسبة',
 ];
  

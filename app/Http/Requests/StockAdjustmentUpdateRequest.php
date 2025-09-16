@@ -13,8 +13,8 @@ class StockAdjustmentUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'quantity_to_discount' => 'sometimes|required|integer|min:1',
-            'correct_quantity' => 'sometimes|required|integer|min:1',
+            'quantity_to_discount' => 'sometimes|required|integer',
+            'correct_quantity' => 'sometimes|required|integer',
             'type' => 'required|in:item_decrement,item_increment,stockTaking_decrement,stockTaking_increment',
             'reason' => 'nullable|string|max:255',
             'verified' => 'nullable|in:0,1',
@@ -27,4 +27,21 @@ class StockAdjustmentUpdateRequest extends FormRequest
             'image' => 'nullable|image|max:20480',
         ];
     }
+    /**
+     * Remove any keys with null values before validation so the service
+     * receives only meaningful fields.
+     */
+    protected function prepareForValidation()
+    {
+        $data = $this->all();
+        $clean = [];
+        foreach ($data as $k => $v) {
+            if ($v !== null) {
+                $clean[$k] = $v;
+            }
+        }
+        $this->replace($clean);
+    }
+
+    
 }
