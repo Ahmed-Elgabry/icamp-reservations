@@ -137,6 +137,7 @@
                                                 <div><a href="{{ route('dashboard.stock.report', $stock->id) }}">{{ $stock->name }}</a></div>
                                             </td>
                                             <td class="text-center">
+                                                {{ $stock->quantity ?? 0 }}
                                                 <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" >
                                             </td>
                                             <td class="text-center">

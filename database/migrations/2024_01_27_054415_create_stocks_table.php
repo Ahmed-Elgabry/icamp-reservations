@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->decimal('price', 8, 2)->nullable(); // Buying price
             $table->decimal('selling_price', 8, 2)->nullable(); // Selling price
-            $table->integer('quantity')->default(0);
+            $table->integer('quantity')->nullable();
             $table->timestamps();
         });
     }

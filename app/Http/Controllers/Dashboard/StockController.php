@@ -54,7 +54,9 @@ class StockController extends Controller
                 'quantity' => 'nullable|integer',
                 'percentage' => 'nullable|string'
             ]);
-
+            if (!$validatedData['quantity']  && !$validatedData['percentage']) {
+                return response()->json(['error' => 'You must provide either quantity or percentage.'], 422);
+            }
             $stock = new Stock($validatedData);
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
@@ -166,7 +168,7 @@ class StockController extends Controller
     {
         // $this->authorize('view', $stock);
 
-        $transactions = $stock->stockAdjustments()->where("verified", true)->paginate(10) ;
+        $transactions = $stock->stockAdjustments()->where('verified', true)->orderBy('created_at', 'desc')->paginate(10);
 
         return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
     }

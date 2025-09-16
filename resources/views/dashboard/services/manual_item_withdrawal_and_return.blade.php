@@ -271,10 +271,10 @@
                         </select>
                     </td>
                     <td>
-                        <input type="number" name="available_quantity" class="form-control " value="" readonly>
+                        <input type="text" name="available_quantity" class="form-control " value="" readonly>
                     </td>
                     <td class = "d-flex flex-row gap-4">
-                            <input type="number" name="quantity_to_discount" class="form-control " placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}" required>
+                            <input type="number" name="quantity_to_discount" class="form-control " placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}">
                             <input type="number" name="percentage" id="main-percentage" class="form-control input-sm" placeholder="{{__('dashboard.percentage_placeholder')}}" >
                     </td>
                     <input type="hidden" name="source" value="stockIssueAndReturn">
@@ -335,12 +335,12 @@
                         <input type="hidden" name="adjustment_id" id="edit-adjustment-id">
                         <div class="form-group d-flex  flex-column">
                             <label class="label-min-w">{{ __('dashboard.manual_item_withdrawal_and_return.available_quantity') }}</label>
-                            <input type="number" name="available_quantity" id="edit-available-quantity" class="form-control " readonly>
+                            <input type="text" name="available_quantity" id="edit-available-quantity" class="form-control " readonly>
                         </div>
                         <div class="form-group d-flex flex-row gap-4 flex-column">
                             <label class="label">{{ __('dashboard.manual_item_withdrawal_and_return.quantity_to_discount_or_to_add') }}</label>
                            <div class="flex-column d-flex gap-4 w-80 ">
-                               <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control" required>
+                               <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control" >
                                <input type="number" name="percentage" id="edit-percentage" placeholder="{{ __('dashboard.percentage_placeholder') }}" class="form-control ">
                             </div>
                         </div>
@@ -452,14 +452,14 @@ if (!window.Swal) {
     // When the stock/item select changes, populate the available quantity input
     // listen for the real select name `stock_id` and for Select2 events on `.select-item`
     $(document).on('change', 'select[name="stock_id"]', function () {
-        var available = $(this).find('option:selected').data('available') || 0;
-        $(this).closest('form').find('input[name="available_quantity"]').val(available);
+    var available = $(this).find('option:selected').data('available') || '';
+    $(this).closest('form').find('input[name="available_quantity"]').val(available);
     });
 
     // Select2 fires its own events — sync those as well
     $(document).on('select2:select', '.select-item', function () {
-        var available = $(this).find('option:selected').data('available') || 0;
-        $(this).closest('form').find('input[name="available_quantity"]').val(available);
+    var available = $(this).find('option:selected').data('available') || '';
+    $(this).closest('form').find('input[name="available_quantity"]').val(available);
     });
         // Define reason options for each type
         const reasonOptions = {
@@ -496,6 +496,8 @@ if (!window.Swal) {
                 $('#edit-available-quantity').val(data.stock ? data.stock.quantity : '');
                 $('#edit-quantity').val(Math.abs(data.available_quantity_after-data.available_quantity_before));
                 $('#edit-type-select').val(data.type);
+                $('#edit-percentage').val(data.available_percentage_after);
+
                    const selectedType = data.type;
                      const $reasonDropdown = $('select[name="reason"]');
 
@@ -654,7 +656,7 @@ if (!window.Swal) {
     $(function(){
         $('select[name="stock_id"]').each(function(){
             var $sel = $(this);
-            var available = $sel.find('option:selected').data('available') || 0;
+            var available = $sel.find('option:selected').data('available') || '';
             $sel.closest('form').find('input[name="available_quantity"]').val(available);
         });
     });
@@ -707,6 +709,26 @@ if (!window.Swal) {
         // Trigger change event on page load to initialize the reason dropdown
         $('select[name="type"]').trigger('change');
     });
+// Unified validation: require at least one of quantity_to_discount or percentage for both main and edit forms
+$(document).on('submit', 'form.update, #edit-adjustment-form', function(e) {
+    var $form = $(this);
+    var qty = $form.find('input[name="quantity_to_discount"]').val();
+    var perc = $form.find('input[name="percentage"]').val();
+    if ((!qty || qty === "") && (!perc || perc === "")) {
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '{{ __('dashboard.enter_quantity_or_percentage') }}'
+                    });
+                } else {
+                    alert('{{ __('dashboard.enter_quantity_or_percentage') }}');
+                }
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+    }
+});
 </script>
 @endpush
 </div>

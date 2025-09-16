@@ -52,10 +52,10 @@
 							<td>{{ $tx->type == "item_increment" ? __("dashboard.item_return") : __("dashboard.item_issued") }}</td>
 							<td>{{ $tx->order_id ? __('dashboard.reservations') . ' - ' . $tx->order_id : __("dashboard.manual") }}</td>
 
-							<td>{{ $tx->available_percentage_before ? $tx->available_percentage_before . ' %' : $tx->available_quantity_before }}</td>
+							<td>{{ $tx->stock->percentage ? $tx->available_percentage_before . ' %' : $tx->available_quantity_before }}</td>
 							<!-- when the type is item_increment or item_decrement it is meant this is from manual stock adjustment which the quintity in the stock ajustment is the difference between the available quantity before and after the adjustment -->
 							<!-- when the type is stockTaking_increment or stockTaking_decrement it is meant this is from stock taking which the quantity in the stock taking is  quantity after the stock taking -->
-							<td>{{  abs($tx->percentage - $tx->available_percentage_before)  ?abs($tx->percentage - $tx->available_percentage_before) . ' %'  : abs($tx->available_quantity_after - $tx->available_quantity_before) }}</td>
+							<td>{{  $tx->stock->percentage ? abs($tx->percentage - $tx->available_percentage_before) . ' %'  : abs($tx->available_quantity_after - $tx->available_quantity_before) }}</td>
 							<td>{{ $tx->percentage  ? $tx->percentage . ' %' : $tx->available_quantity_after  }}</td>
 							<td>
 								@if($tx->order_id)

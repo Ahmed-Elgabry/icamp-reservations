@@ -138,7 +138,7 @@
                         <tr data-id="{{ $adj->id }}">
                                 <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                                 <td>{{ ($adj->stock->percentage ? ($adj->stock->percentage ) . ' %' : ($adj->stock->quantity ?? '-')) }}</td>
-                                <td>{{ $adj->available_quantity_after ?? '-' }}</td>
+                                <td>{{ ($adj->percentage ? $adj->percentage . ' %' : $adj->available_quantity_after) ?? '-' }}</td>
                                 <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                                 @if($adj->order_id)
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
@@ -220,17 +220,17 @@
                     <tbody>
                         <tr>
                             <td>
-                                <select name="stock_id" class="form-control select-item min-select-item w-auto" required>
+                                <select name="stock_id" class="form-control select-item min-select-item" required>
                                     <option value="">{{ __('dashboard.stockTaking.select_item') }}</option>
                                     @if(isset($stocks) && $stocks->count())
                                         @foreach($stocks as $stock)
-                                            <option value="{{ $stock->id }}" data-available="{{ $stock->quantity ?? 0 }}">{{ $stock->name }}</option>
+                                            <option value="{{ $stock->id }}" data-available="{{ $stock->percentage ? ($stock->percentage ) . ' %' : ($stock->quantity ?? '-') }}">{{ $stock->name }}</option>
                                         @endforeach
                                     @endif
                                 </select>
                             </td>
                             <td>
-                                <input type="number" name="available_quantity" class="form-control w-auto" value="" readonly>
+                            <input type="text" name="available_quantity" class="form-control" value="" readonly>
                             </td>
                             <td class="d-flex flex-row gap-4">
                                 <div class="form-group d-flex align-items-center mb-0">
@@ -243,11 +243,11 @@
                                 <div class="form-group align-items-center  gap-5 mb-0" id="main-quantity-group" style="display:none;">
                                     <div class="d-flex flex-column">
                                         <label class="label-min-w">{{ __('dashboard.stockTaking.correct_quantity') }}</label>
-                                        <input type="number" name="correct_quantity" id="main-correct-quantity" class="form-control w-auto" required>
+                                        <input type="number" name="correct_quantity" id="main-correct-quantity" class="form-control" >
                                     </div>
                                     <div class="d-flex flex-column">
-                                        <label class="label-min-w">{{ __('dashboard.percentage') }}</label>
-                                        <input type="number" name="percentage" id="main-percentage" class="form-control w-auto ">%
+                                        <label class="label-min-w">{{ __('dashboard.stockTaking.correct_percentage') }}</label>
+                                        <input type="number" name="percentage" id="main-percentage" class="form-control">%
                                     </div>
 
                                 </div>
@@ -268,11 +268,9 @@
                                 <input type="text" name="custom_reason" class="form-control mt-2 custom-reason-input w-auto d-none" placeholder="{{ __('dashboard.stockTaking.specify_reason') }}">
                                 <select name="order_id" class="form-control mt-2 orders-select w-auto d-none">
                                     <option value="">{{ __('dashboard.stockTaking.select_order') }}</option>
-                                        @if(isset($orders) && $orders->count())
-                                            @foreach($orders as $order)
+                                            @foreach(App\Models\Order::all() as $order)
                                                 <option value="{{ $order->id }}">{{ $order->id }} - {{ $order->customer->name  }}</option>
                                             @endforeach
-                                        @endif
                                 </select>
                             </td>
                             <td>
@@ -325,7 +323,7 @@
                                     <tr data-id="{{ $adj->id }}">
                                     <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                                     <td>{{ $adj->stock->percentage ? $adj->stock->percentage ." %": $adj->stock->quantity}}</td>
-                                    <td>{{ $adj->available_quantity_after ?? '-' }}</td>
+                                    <td>{{ $adj->stock->percentage ? ($adj->percentage - $adj->available_quantity_after) . ' %' : ($adj->available_quantity_after  - $adj->available_quantity_before ) }}</td>
                                     <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                                     @if($adj->order_id)
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id }}</td>
@@ -394,7 +392,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">{{ __('dashboard.stockTaking.edit_adjustment',['default' => 'Edit Adjustment']) }}</h5>
+                            <h5 class="modal-title">{{ __('dashboard.stockTaking.edit_stockTaking_item') }}</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
                         </div>
                         <form id="edit-adjustment-form" enctype="multipart/form-data">
@@ -402,12 +400,12 @@
                             @method('PUT')
                             <div class="modal-body">
                                 <input type="hidden" name="adjustment_id" id="edit-adjustment-id">
-                                <div class="form-group d-flex align-items-center">
+                                <div class="form-group d-flex flex-column">
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.available_quantity') }}</label>
-                                    <input type="number" name="available_quantity" id="edit-available-quantity" class="form-control w-auto" readonly>
+                                        <input type="text" name="available_quantity" id="edit-available-quantity" class="form-control" readonly>
                                 </div>
                                 <!-- corrected: single quantity input lives inside the hidden group below -->
-                                <div class="form-group d-flex align-items-center">
+                                <div class="form-group d-flex flex-column ">
 
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.type') }}</label>
                                     <div class="ml-2">
@@ -416,18 +414,21 @@
                                     </div>
                                     <input type="hidden" name="type" id="edit-type-value" value="">
                                 </div>
-                                <div class="form-group align-items-center" id="edit-quantity-group" style="display:none;">
+                                <div class="form-group" id="edit-quantity-group" style="display:none;">
                                     <div class="d-flex flex-row gap-5 mb-0">
-                                        <label class="label-min-w">{{ __('dashboard.stockTaking.correct_quantity') }}</label>
                                         <div class="d-flex flex-column gap-4">
-                                            <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control w-auto" required>
-                                            <input type="number" name="percentage" id="edit-percentage" class="form-control w-auto ">%
+                                            <label class="label-min-w">{{ __('dashboard.stockTaking.correct_quantity') }}</label>
+                                            <input type="number" name="quantity_to_discount" id="edit-quantity" class="form-control">
+                                        </div>
+                                        <div class="d-flex flex-column gap-4">
+                                            <label class="label-min-w">{{ __('dashboard.stockTaking.correct_percentage') }}</label>
+                                            <input type="number" name="percentage" id="edit-percentage" class="form-control">
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group d-flex align-items-center">
+                                <div class="form-group d-flex  flex-column">
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.reason') }}</label>
-                                    <select name="reason" id="edit-reason" class="form-control reason-select w-auto">
+                                    <select name="reason" id="edit-reason" class="form-control reason-select ">
                                     <option value="">{{ __('dashboard.stockTaking.select_reason') }}</option>
                                     <option value="stockTaking">{{ __('dashboard.stockTaking.reason_options.stockTaking') }}</option>
                                     <option value="correct_quantity">{{ __('dashboard.stockTaking.reason_options.correct_quantity') }}</option>
@@ -439,25 +440,25 @@
                                     <option value="for_orders">{{ __('dashboard.stockTaking.reason_options.for_orders') }}</option>
                                     <option value="else">{{ __('dashboard.stockTaking.reason_options.else') }}</option>
                                     </select>
-                                    <input type="text" name="custom_reason" id="edit-custom-reason" class="form-control ml-0 custom-reason-input w-auto d-none" placeholder="{{ __('dashboard.stockTaking.specify_reason') }}">
-                                    <select name="order_id" id="edit-order-id" class="form-control mt-2 orders-select w-auto d-none">
+                                    <input type="text" name="custom_reason" id="edit-custom-reason" class="form-control ml-0 custom-reason-input d-none" placeholder="{{ __('dashboard.stockTaking.specify_reason') }}">
+                                    <select name="order_id" id="edit-order-id" class="form-control mt-2 orders-select  d-none">
                                         <option value="">{{ __('dashboard.stockTaking.select_order') }}</option>
                                             @foreach(App\Models\Order::all() as $order)
                                                 <option value="{{ $order->id }}">{{ $order->id }} - {{ $order->customer?->name  }}</option>
                                             @endforeach
                                     </select>
                                 </div>
-                                <div class="form-group d-flex align-items-center">
+                                <div class="form-group d-flex flex-column ">
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.note') }}</label>
-                                    <textarea name="note" id="edit-note" class="form-control w-auto"></textarea>
+                                    <textarea name="note" id="edit-note" class="form-control"></textarea>
                                 </div>
-                                <div class="form-group d-flex align-items-center">
+                                <div class="form-group d-flex flex-column ">
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.image') }}</label>
                                     <input type="file" name="image" id="edit-image" class="form-control ">
                                 </div>
-                                <div class="form-group d-flex align-items-center">
+                                <div class="form-group d-flex flex-column">
                                     <label class="label-min-w">{{ __('dashboard.stockTaking.employee_name') }}</label>
-                                    <input type="text" name="employee_name" id="edit-employee-name" class="form-control w-auto"  value="{{ auth()->user()->name }}" placeholder="{{ __('dashboard.stockTaking.specify_employee_name') }}" readonly>
+                                    <input type="text" name="employee_name" id="edit-employee-name" class="form-control "  value="{{ auth()->user()->name }}" placeholder="{{ __('dashboard.stockTaking.specify_employee_name') }}" readonly>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -534,14 +535,19 @@ if (!window.Swal) {
     // When the stock/item select changes, populate the available quantity input
     // listen for the real select name `stock_id` and for Select2 events on `.select-item`
     $(document).on('change', 'select[name="stock_id"]', function () {
-        var available = $(this).find('option:selected').data('available') || 0;
+        // data-available stores either "NN %" or a numeric quantity; preserve that exact string
+        var available = $(this).find('option:selected').data('available') || '';
+        // populate the available_quantity input within the same form or modal
         $(this).closest('form').find('input[name="available_quantity"]').val(available);
+        // also populate any readonly available display in the same container (for safety)
+        $(this).closest('.scrollable-table-wrapper').find('input[name="available_quantity"]').val(available);
     });
 
     // Select2 fires its own events — sync those as well
     $(document).on('select2:select', '.select-item', function () {
-        var available = $(this).find('option:selected').data('available') || 0;
+        var available = $(this).find('option:selected').data('available') || '';
         $(this).closest('form').find('input[name="available_quantity"]').val(available);
+        $(this).closest('.scrollable-table-wrapper').find('input[name="available_quantity"]').val(available);
     });
        
     $(document).on('click', '.btn-edit-adjustment', function () {
@@ -551,12 +557,23 @@ if (!window.Swal) {
         $.ajax({
             url: '/manual/stock-adjustments/' + id + '/json',
             method: 'GET',
-            success: function(data) {
+                success: function(data) {
                 $('#edit-adjustment-id').val(data.id);
-                $('#edit-available-quantity').val(data.stock ? data.stock.quantity : '');
+                // show percentage with percent sign when stock tracks percentage, otherwise show quantity
+                var availableDisplay = '';
+                if (data.stock) {
+                    if (data.stock.percentage !== null && data.stock.percentage !== undefined) {
+                        availableDisplay = data.stock.percentage + ' %';
+                    } else if (data.stock.quantity !== null && data.stock.quantity !== undefined) {
+                        availableDisplay = data.stock.quantity;
+                    }
+                }
+                $('#edit-available-quantity').val(availableDisplay);
                 $('#edit-quantity').val(data.available_quantity_after);
                 // store type in hidden input rather than non-existent select
                 $('#edit-type-value').val(data.type);
+                $('#edit-percentage').val(data.available_percentage_after);
+
                    const selectedType = data.type;
                      const $reasonDropdown = $('select[name="reason"]');
 
@@ -876,6 +893,26 @@ $(function() {
             }
         }
     });
+// Unified validation: require at least one of quantity (correct_quantity or quantity_to_discount) or percentage
+$(document).on('submit', 'form.update, #edit-adjustment-form', function(e) {
+    var $form = $(this);
+    var qty = $form.find('input[name="correct_quantity"], input[name="quantity_to_discount"]').val();
+    var perc = $form.find('input[name="percentage"]').val();
+    if ((!qty || qty === "") && (!perc || perc === "")) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '{{ __('dashboard.enter_quantity_or_percentage') }}'
+            });
+        } else {
+            alert('{{ __('dashboard.enter_quantity_or_percentage') }}');
+        }
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+    }
+});
 </script>
 @endpush
 
