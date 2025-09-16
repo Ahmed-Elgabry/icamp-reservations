@@ -190,7 +190,7 @@
                 </tbody>
             </table>
         </div>
-            <div class="d-flex justify-content-between mt-3">
+            <div class="d-flex justify-content-between align-items-center mt-3">
                 @if(method_exists($stockTakingReport, 'links'))
                     	@include('dashboard.pagination.pagination', ['transactions' => $stockTakingReport])
                 @endif
@@ -380,7 +380,7 @@
                         </tbody>
                     </table>
                 </div>
-                    <div class="d-flex justify-content-between mt-3">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
                         @if(method_exists($stockTakingItems, 'links'))
                             @include('dashboard.pagination.pagination', ['transactions' => $stockTakingItems])
                         @endif
