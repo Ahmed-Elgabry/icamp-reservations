@@ -28,11 +28,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet" />
-	<link rel="stylesheet" href="{{ asset('dashboard/custom/css/intlTelInput.css') }}">
-<!-- Include intl-tel-input from CDN -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.min.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.css">
 
 
     <style type="text/css">
@@ -89,15 +85,12 @@
         .select2-container { direction: inherit; }
         .select2-container--bootstrap-5 .select2-selection { border-radius: .375rem; }
         .flatpickr-calendar { font-family: "Cairo", sans-serif; }
-        	.iti.iti--container {
+        .iti.iti--container {
 		top: 90% !important;
 		left: 66% !important;
 	}
 
 	</style>
-
-	
-	
 </head>
 <body>
 <div class="container container-narrow py-3">
@@ -356,10 +349,10 @@
       </div>
       <div class="modal-body">
         <div class="rtl-text" dir="rtl" style="text-align: right;">
-            {!! nl2br(e(\App\Models\TermsSittng::first()->commercial_license_ar)) !!}
+            {!! (\App\Models\TermsSittng::first()->commercial_license_ar) !!}
         </div>
         <div class="ltr-text" dir="ltr" style="text-align: left;">
-            {!! nl2br(e(\App\Models\TermsSittng::first()->commercial_license_en)) !!}
+            {!! (\App\Models\TermsSittng::first()->commercial_license_en) !!}
         </div>
       </div>
       <div class="modal-footer">
@@ -375,6 +368,8 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
 
 
 <script>
@@ -384,16 +379,13 @@
 			window.ini = window.ini || null;
 					if (phoneInput && typeof window.intlTelInput === 'function') {
 				try {
-					var dropdownContainer = phoneInput.closest('div');
-
-
-					window.ini = window.intlTelInput(phoneInput, {
-						utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js',
+                    window.ini = window.intlTelInput(phoneInput, {
+                        utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js',
 						initialCountry: 'ae',
 						separateDialCode: true,
 						allowDropdown: true,
 						autoHideDialCode: false,
-						dropdownContainer: dropdownContainer,
+						dropdownContainer: phoneInput.closest('div') || document.body,
 					});
 				} catch (err) {
 					console.error('intlTelInput init error:', err);

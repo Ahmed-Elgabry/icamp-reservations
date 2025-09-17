@@ -2002,4 +2002,16 @@ return [
 
     'enter_quantity_or_percentage' => 'Enter quantity or percentage',
     'service_site_customer_service' => 'Service Site & Reception office',
+    'service_site' => 'Service Site',
+    'worker_name_en' => 'Worker Name (EN)',
+    'worker_name_ar' => 'Worker Name (AR)',
+    'worker_phone' => 'Worker Phone',
+
+    'existing_entries' => 'Existing Entries',
+    'delete_confirmation' => 'Are you sure you want to delete this item?',
+
+    'please_wait' => 'Please wait...',
+    'item_updated_successfully' => 'Item updated successfully',
+    'item_deleted_successfully' => 'Item deleted successfully',
+
 ];

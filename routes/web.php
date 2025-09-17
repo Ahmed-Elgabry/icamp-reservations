@@ -1769,11 +1769,10 @@ Route::get('survey/{order}', [SurveyController::class, 'showPublic'])->name('sur
 
 Route::get('stocks/available', [StockController::class, 'getAvailableStocks'])->name('stocks.available');
 
-// Resource routes for ServiceSiteAndCustomerServiceController
-Route::resource('service_site_customer_service', ServiceSiteAndCustomerServiceController::class)->names('service_site_customer_service');
-
 // Named routes for ServiceSiteAndCustomerServiceController CRUD actions
 Route::post('service_site_customer_service', [ServiceSiteAndCustomerServiceController::class, 'store'])->name('service_site_customer_service.store');
 Route::get('service_site_customer_service/{id}/edit', [ServiceSiteAndCustomerServiceController::class, 'edit'])->name('service_site_customer_service.edit');
+Route::get('service_site_customer_service/create', [ServiceSiteAndCustomerServiceController::class, 'create'])->name('service_site_customer_service.create');
 Route::delete('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('service_site_customer_service.destroy');
+Route::put('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'update'])->name('service_site_customer_service.update');
 

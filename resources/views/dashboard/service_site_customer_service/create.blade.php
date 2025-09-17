@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.app')
-
+@section('pageTitle', __('dashboard.service_site_customer_service'))
 @section('content')
 <div class="container">
     <h1>{{ __('dashboard.service_site_customer_service') }}</h1>
@@ -7,77 +7,88 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    <div class="d-flex flex-coulmn">
 
-    <div class="row">
-        <div class="col-md-8">
-            <form id="kt_ecommerce_add_product_form" 
-                data-kt-redirect="{{ isset($item) ? route('service_site_customer_service.edit', $item->id) : route('service_site_customer_service.create') }}" 
-                action="{{ isset($item) ? route('service_site_customer_service.update', $item->id) : route('service_site_customer_service.store') }}" 
-                method="POST" enctype="multipart/form-data" 
-                class="form d-flex flex-column flex-lg-row store">
+        <form id="kt_ecommerce_add_product_form" 
+        data-kt-redirect="{{ isset($item) ? route('service_site_customer_service.edit', $item->id) : route('service_site_customer_service.create') }}" 
+        action="{{ isset($item) ? route('service_site_customer_service.update', $item->id) : route('service_site_customer_service.store') }}" 
+        method="POST" enctype="multipart/form-data" 
+                class="form d-flex flex-column store" dir="rtl">
                 @csrf
                 @if(isset($item))
-                    @method('PUT')
+                @method('PUT')
                 @endif
 
-                <div class="form-group">
+                <div class="form-group mb-25">
                     <label for="serviceSite">{{ __('dashboard.service_site') }}</label>
-                    <div id="editor-serviceSite" style="min-height:150px;">{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}</div>
+                    <div id="editor-serviceSite" dir="rtl" style="min-height:150px; direction: rtl; text-align: right;">{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}</div>
                     <input type="hidden" name="serviceSite" id="input-serviceSite" value="{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}">
                 </div>
+                <div class="d-flex flex-row flex-wrap w-100 gap-25 mb-25">
+                    <div class="form-group">
+                        <label for="workername_en">{{ __('dashboard.worker_name_en') }}</label>
+                        <div id="editor-workername-en" class="w-100" dir="ltr" style="min-height:120px; direction: ltr; text-align: left;">{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}</div>
+                        <input type="hidden" name="workername_en" id="input-workername-en" value="{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}">
+                    </div>
 
-                <div class="form-group">
-                    <label for="workername_en">{{ __('dashboard.worker_name_en') }}</label>
-                    <div id="editor-workername-en" style="min-height:120px;">{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}</div>
-                    <input type="hidden" name="workername_en" id="input-workername-en" value="{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}">
+                    <div class="form-group mb-25">
+                        <label for="workername_ar">{{ __('dashboard.worker_name_ar') }}</label>
+                        <div id="editor-workername-ar" class="w-100" dir="rtl" style="min-height:120px; direction: rtl; text-align: right;">{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}</div>
+                        <input type="hidden" name="workername_ar" id="input-workername-ar" value="{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}">
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="workername_ar">{{ __('dashboard.worker_name_ar') }}</label>
-                    <div id="editor-workername-ar" style="min-height:120px;">{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}</div>
-                    <input type="hidden" name="workername_ar" id="input-workername-ar" value="{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}">
-                </div>
-
-                <div class="form-group">
+                <div class="form-group mb-15 position-relative w-100">
                     <label for="workerphone">{{ __('dashboard.worker_phone') }}</label>
-                    <input type="tel" name="workerphone" class="form-control" value="{{ old('workerphone', isset($item) ? $item->workerphone : '') }}">
+                    <input type="tel" name="workerphone" class="form-control" style="direction: rtl; text-align: right;" value="{{ old('workerphone', isset($item) ? $item->workerphone : '') }}">
                 </div>
 
-                <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
-                    <span class="indicator-label">{{ isset($item) ? __('dashboard.update') : __('dashboard.create') }}</span>
+                <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary w-fit mb-10">
+                    <span class="indicator-label">{{ isset($item) ? __('dashboard.update_item') : __('dashboard.create_item') }}</span>
                     <span class="indicator-progress">{{ __('dashboard.please_wait') }}
                         <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
                     </span>
                 </button>
             </form>
-        </div>
-
-        <div class="col-md-4">
-            <h4>Existing Entries</h4>
-            <ul class="list-group">
-                @foreach(isset($items) ? $items : [] as $row)
-                    <li class="list-group-item">
-                        <div><strong>ID:</strong> {{ $row->id }}</div>
-                        <div><strong>Phone:</strong> {{ $row->workerphone }}</div>
-                        <div class="mt-2">
-                            <a href="{{ route('service_site_customer_service.edit', $row->id) }}" class="btn btn-sm btn-secondary">Edit</a>
-                            <form action="{{ route('service_site_customer_service.destroy', $row->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Delete?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
     </div>
-</div>
-
+        
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>{{ __('dashboard.service_site') }}</th>
+                            <th>{{ __('dashboard.worker_name_en') }}</th>
+                            <th>{{ __('dashboard.worker_name_ar') }}</th>
+                            <th>{{ __('dashboard.phone') }}</th>
+                            <th class="text-center">{{ __('dashboard.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(isset($items) ? $items : [] as $row)
+                            <tr>
+                                <td>{!! $row->service_site !!}</td>
+                                <td>{!! $row->workername_en !!}</td>
+                                <td>{!! $row->workername_ar !!}</td>
+                                <td>{{ $row->workerphone }}</td>
+                                <td class="text-center">
+                                    <a href="{{ route('service_site_customer_service.edit', $row->id) }}" class="btn btn-sm btn-secondary">{{ __('dashboard.edit') }}</a>
+                                    <form action="{{ route('service_site_customer_service.destroy', $row->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('{{ __('dashboard.delete_confirmation') }}');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-danger">{{ __('dashboard.delete') }}</button>
+                                    </form>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">{{ __('dashboard.no_data_found') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
 @endsection
 
 @section('scripts')
-<script src="{{ asset('dashboard/custom/js/sending-forms.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const toolbarOptions = [
