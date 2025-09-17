@@ -28,6 +28,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="{{ asset('dashboard/custom/css/intlTelInput.css') }}">
+
 
     <style type="text/css">
         :root{
@@ -341,7 +343,12 @@
         <h6 class="modal-title">{{ __('booking.terms_title') }}</h6>
       </div>
       <div class="modal-body">
-        {!! nl2br(e(\App\Models\TermsSittng::first()->commercial_license)) !!}
+        <div class="rtl-text" dir="rtl" style="text-align: right;">
+            {!! nl2br(e(\App\Models\TermsSittng::first()->commercial_license_ar)) !!}
+        </div>
+        <div class="ltr-text" dir="ltr" style="text-align: left;">
+            {!! nl2br(e(\App\Models\TermsSittng::first()->commercial_license_en)) !!}
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('booking.close') }}</button>
@@ -356,7 +363,35 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ar.js"></script>
+<script src="{{ asset('dashboard/custom/js/intlTelInput.js') }}"></script>
+<script src="{{ asset('dashboard/custom/js/utils.js') }}"></script>
 
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
+			// Expose instance globally so other scripts (e.g. sending-forms.js) can access it
+			window.ini = window.ini || null;
+			if (phoneInput && typeof window.intlTelInput === 'function') {
+				try {
+					window.ini = window.intlTelInput(phoneInput, {
+						utilsScript: '{{ asset('dashboard/custom/js/utils.js') }}',
+						initialCountry: 'auto',
+						separateDialCode: true,
+						allowDropdown: true,
+						autoHideDialCode: false,
+						// dropdownContainer must be a DOM node; use body to be safe
+						dropdownContainer: document.phoneInput,
+					});
+				} catch (err) {
+					console.error('intlTelInput init error:', err);
+				}
+			} else {
+				// Helpful debug info when ini is not defined
+				if (!phoneInput) console.warn('Phone input not found: selector input[name="phone"]');
+				if (typeof window.intlTelInput !== 'function') console.warn('intlTelInput library not loaded');
+			}
+		});
+	</script>
 <script type="text/javascript">
     (function(){
         function syncSlots(){
@@ -433,6 +468,22 @@
         document.getElementById('bookingForm').addEventListener('input', updateProgress);
         updateProgress();
 
+        // Ensure the mobile phone input is set to the intl-tel-input E.164 number before submit
+        document.getElementById('bookingForm').addEventListener('submit', function(e){
+            try {
+                var phoneInput = document.querySelector('input[name="mobile_phone"]');
+                if (window.ini && typeof window.ini.getNumber === 'function') {
+                    var val = window.ini.getNumber();
+                    phoneInput.value = val ? val : '';
+                } else {
+                    // If window.ini isn't ready, leave the raw value but log for debug
+                    console.warn('window.ini not available when form submitted');
+                }
+            } catch (err) {
+                console.error('Error setting mobile_phone before submit', err);
+            }
+        });
+
         const dir = document.documentElement.getAttribute('dir') || 'rtl';
         const placeholder = @json(__('booking.camp_placeholder'));
         $('#service_id').select2({
@@ -465,6 +516,7 @@
             flatpickr(dateEl, opts);
         }
     })();
+
 </script>
 </body>
 </html>

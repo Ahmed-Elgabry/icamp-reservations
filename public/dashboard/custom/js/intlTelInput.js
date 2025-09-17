@@ -374,7 +374,6 @@
                         this.dropdownArrow = this._createEl("div", {
                             "class": "iti__arrow"
                         }, this.selectedFlag);
-                        // country dropdown: preferred countries, then divider, then all countries
                         this.countryList = this._createEl("ul", {
                             "class": "iti__country-list iti__hide",
                             id: "iti-".concat(this.id, "__country-listbox"),
@@ -394,7 +393,6 @@
                             this.dropdown = this._createEl("div", {
                                 "class": "iti iti--container"
                             });
-                            this.dropdown.appendChild(this.countryList);
                         } else {
                             this.flagsContainer.appendChild(this.countryList);
                         }

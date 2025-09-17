@@ -37,14 +37,14 @@
                             <div class="form-group col-md-6 mb-3">
                                 <label for="quill_ar" class="form-label">{{ __('dashboard.commercial_license') }} ({{ __('dashboard.arabic') }})</label>
                                 <div id="quill_ar" class="quill-container"></div>
-                                <textarea name="commercial_license_ar" id="commercial_license_ar" class="d-none">{{ optional($termsSittings)->commercial_license_ar ?? '' }}</textarea>
+                                <textarea name="commercial_license_ar" id="commercial_license_ar" class="d-none">{{!! nl2br(e(optional($termsSittings)->commercial_license_ar)) !!}}</textarea>
                             </div>
 
                             <!-- Commercial License Field - English (Quill) -->
                             <div class="form-group col-md-6 mb-3">
                                 <label for="quill_en" class="form-label">{{ __('dashboard.commercial_license') }} ({{ __('dashboard.english') }})</label>
                                 <div id="quill_en" class="quill-container"></div>
-                                <textarea name="commercial_license_en" id="commercial_license_en" class="d-none">{{ optional($termsSittings)->commercial_license_en ?? '' }}</textarea>
+                                <textarea name="commercial_license_en" id="commercial_license_en" class="d-none">{{!! nl2br(e(optional($termsSittings)->commercial_license_en)) !!}}</textarea>
                             </div>
 
                         </div>
