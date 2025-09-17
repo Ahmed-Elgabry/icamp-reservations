@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TermsSittngRequest;
 use TCPDF;
-use App\Helpers\Sanitizer;
 
 
 class TermsSittngController extends Controller
@@ -45,17 +44,20 @@ class TermsSittngController extends Controller
     public function store(TermsSittngRequest $request)
     {
         $this->authorize('create', TermsSittng::class);
+        $data = $request->validated();
 
         // For singleton settings: update the first row if exists, otherwise create
         $terms = TermsSittng::first();
         if ($terms) {
-            $terms->update($request->validated());
+            $terms->update($data);
         } else {
-            $terms = TermsSittng::create($request->validated());
+            $terms = TermsSittng::create($data);
         }
+        \Log::info('2');
         return redirect()->route('terms_sittngs.create')
             ->with('success', 'تم تحديث الإعدادات بنجاح.');
     }
+
 
 
     /**
@@ -87,12 +89,12 @@ class TermsSittngController extends Controller
     {
         $termsSittings = TermsSittng::findOrFail($id);
         $this->authorize('update', $termsSittings);
-        $termsSittings->update($request->validated());
+        $data = $request->validated();
+        \Log::info('4');
+        $termsSittings->update($data);
         return redirect()->route('terms_sittngs.create')
-            ->with('success', __("dashboard.settings_updated_successfully"));
+            ->with('success', 'تم تحديث الإعدادات بنجاح.');
     }
-
-    // ...existing code...
 
     public function generatePDF(Request $request)
     {

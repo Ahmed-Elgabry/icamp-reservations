@@ -52,11 +52,6 @@ return [
     'sequence' => 'التسلسل',
     'registration_forms'        => 'استمارات التسجيل',
     'registration_form'         => 'استمارة تسجيل',
-    'service_site_customer_service' => 'موقع الخدمة وخدمة العملاء',
-    'service_site' => 'موقع الخدمة',
-    'worker_name_en' => 'اسم العامل (EN)',
-    'worker_name_ar' => 'اسم العامل (AR)',
-    'worker_phone' => 'هاتف العامل',
     'search_rf_placeholder'     => 'ابحث برقم الاستمارة أو الهاتف المتحرك أو الاسم أو البريد',
 
     'form_no'                   => 'رقم الاستمارة',
@@ -1643,7 +1638,6 @@ return [
     'template' => 'النموذج',
     'progress' => 'التقدم',
     'updated_at' => 'تاريخ التحديث',
-    "Updated" => "تم التحديث",
     'message' => 'الرسالة',
     // Manual WhatsApp Sends
     'manual_whatsapp_sends' => 'إرسال واتساب يدوي',

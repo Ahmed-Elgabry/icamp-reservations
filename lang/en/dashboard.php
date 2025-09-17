@@ -517,11 +517,6 @@ return [
     'copied'       => 'Copied',
     'registration_forms'        => 'Registration Forms',
     'registration_form'         => 'Registration Form',
-    'service_site_customer_service' => 'Service Site & Customer Service',
-    'service_site' => 'Service Site',
-    'worker_name_en' => 'Worker Name (EN)',
-    'worker_name_ar' => 'Worker Name (AR)',
-    'worker_phone' => 'Worker Phone',
     'search_rf_placeholder'     => 'Search by form #, phone, name, or email',
     'form_no'                   => 'Form No.',
     'full_name'                 => 'First & Last Name',
@@ -1712,7 +1707,7 @@ return [
     'updated_date' => 'Updated Date',
     'updated_time' => 'Updated Time',
     'date_time' => 'Date & Time',
-    'Updated' => 'Updated',
+
     // Order status statistics
     'pending_and_show_price_count' => 'Pending Orders - Show Price Count',
     "order_status.pending_and_show_price_count" => 'Pending Orders - Show Price Count',
