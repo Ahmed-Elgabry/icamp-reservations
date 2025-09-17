@@ -305,10 +305,10 @@
     <div class="section @if(app()->getLocale() == 'en') ltr-text @else rtl-text @endif d-flex flex-column">
         <div class="section-title">@lang('dashboard.Terms_and_Conditions')</div>
         <div class="rtl-text" dir="rtl" style="text-align: right;">
-            {!! ($termsSittng->commercial_license_ar) !!}
+            {!! nl2br(e($termsSittng->commercial_license_ar)) !!}
         </div>
         <div class="ltr-text" dir="ltr" style="text-align: left;">
-            {!! ($termsSittng->commercial_license_en) !!}
+            {!! nl2br(e($termsSittng->commercial_license_en)) !!}
         </div>
     </div>
 
