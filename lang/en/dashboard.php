@@ -2001,5 +2001,5 @@ return [
     'please_fill_reason' => 'Please fill the reason field',
 
     'enter_quantity_or_percentage' => 'Enter quantity or percentage',
-
+    'service_site_customer_service' => 'Service Site & Reception office',
 ];

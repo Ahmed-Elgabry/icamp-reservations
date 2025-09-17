@@ -1682,5 +1682,6 @@ return [
     'completed' => 'مكتمل',
     'unknown' => 'غير معروف',
     'enter_quantity_or_percentage' => 'يرجى إدخال الكمية أو النسبة',
+    'service_site_customer_service' => 'موقع المخيم و مكتب الإستقبال ',
 ];
  

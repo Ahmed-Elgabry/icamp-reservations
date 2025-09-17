@@ -19,6 +19,7 @@ use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use App\Http\Controllers\Dashboard\WhatsappMessageTemplateController;
 use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\StockAdjustmentController ;
+use App\Http\Controllers\Dashboard\ServiceSiteAndCustomerServiceController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{Dashboard\CampReportController, OrderSignatureController, RegistrationformController};
@@ -1767,4 +1768,12 @@ Route::post('survey/{survey}/submit', [SurveySubmissionController::class, 'submi
 Route::get('survey/{order}', [SurveyController::class, 'showPublic'])->name('surveys.public');
 
 Route::get('stocks/available', [StockController::class, 'getAvailableStocks'])->name('stocks.available');
+
+// Resource routes for ServiceSiteAndCustomerServiceController
+Route::resource('service_site_customer_service', ServiceSiteAndCustomerServiceController::class)->names('service_site_customer_service');
+
+// Named routes for ServiceSiteAndCustomerServiceController CRUD actions
+Route::post('service_site_customer_service', [ServiceSiteAndCustomerServiceController::class, 'store'])->name('service_site_customer_service.store');
+Route::get('service_site_customer_service/{id}/edit', [ServiceSiteAndCustomerServiceController::class, 'edit'])->name('service_site_customer_service.edit');
+Route::delete('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('service_site_customer_service.destroy');
 

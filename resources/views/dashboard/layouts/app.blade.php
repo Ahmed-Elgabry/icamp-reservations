@@ -350,29 +350,35 @@
 		height: 3px;
 		background: linear-gradient(to right, var(--secondary-brown), var(--primary-brown));
 	}
+	.iti.iti--container {
+		top: 90% !important;
+		left: 66% !important;
+	}
 
 	</style>
 
-	<!-- Include intl-tel-input with corrected paths -->
-	<link rel="stylesheet" href="{{ asset('dashboard/custom/css/intlTelInput.css') }}">
-	<script src="{{ asset('dashboard/custom/js/intlTelInput.js') }}"></script>
-	<script src="{{ asset('dashboard/custom/js/utils.js') }}"></script>
+	<!-- Include intl-tel-input from CDN -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
 			// Expose instance globally so other scripts (e.g. sending-forms.js) can access it
 			window.ini = window.ini || null;
-			if (phoneInput && typeof window.intlTelInput === 'function') {
+					if (phoneInput && typeof window.intlTelInput === 'function') {
 				try {
+					var dropdownContainer = phoneInput.closest('div');
+
+
 					window.ini = window.intlTelInput(phoneInput, {
-						utilsScript: '{{ asset('dashboard/custom/js/utils.js') }}',
-						initialCountry: 'auto',
+						utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js',
+						initialCountry: 'ae',
 						separateDialCode: true,
 						allowDropdown: true,
 						autoHideDialCode: false,
-						// dropdownContainer must be a DOM node; use body to be safe
-						dropdownContainer: document.phoneInput,
+						dropdownContainer: dropdownContainer,
 					});
 				} catch (err) {
 					console.error('intlTelInput init error:', err);
