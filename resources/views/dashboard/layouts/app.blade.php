@@ -46,7 +46,8 @@
 	<link href="{{asset('dashboard/assets/plugins/custom/prismjs/prismjs.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
 	<link href="{{asset('dashboard/assets/plugins/global/plugins.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
 	<link href="{{asset('dashboard/assets/css/style.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
 	<!--ar-->
 	@endif
 
@@ -366,18 +367,6 @@
 	.gap-25 {
 		gap: 7rem !important;
 	}
-/*  */
-	.iti.iti--container{
-		top: 40px !important;
-		left: 100% !important;
-	
-	}
-	.iti.iti--allow-dropdown{
-		width: 100% !important;
-	}
-	.iti__country{
-		width: 70vw !important;
-	}
 	</style>
 
 </head>
@@ -474,37 +463,10 @@
 	<script src="{{asset('dashboard/assets/js/custom/utilities/modals/users-search.js')}}"></script>
 	<!--end::Page Custom Javascript-->
 		<!-- Include intl-tel-input from CDN -->
-	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<script src="{{ asset('js/country-select.js') }}"></script>
 
-	<script>
-		$(document).ready(function () {
-			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
-			window.ini = window.ini || null;
-			if (phoneInput && typeof window.intlTelInput === 'function') {
-				try {
-					var dropdownContainer = phoneInput.closest('div');
-
-								window.ini = window.intlTelInput(phoneInput, {
-									utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js',
-									initialCountry: 'ae',
-									separateDialCode: true,
-									allowDropdown: true,
-									autoHideDialCode: false,
-									dropdownContainer: phoneInput.closest('div') || document.body,
-								});
-							} catch (err) {
-								console.error('intlTelInput init error:', err);
-							}
-						} else {
-							// Helpful debug info when ini is not defined
-							if (!phoneInput) console.warn('Phone input not found: selector input[name="phone"]');
-							if (typeof window.intlTelInput !== 'function') console.warn('intlTelInput library not loaded');
-						}
-
-					});
-					
-	</script>
+	<!-- intl-tel-input removed; using Select2 country selector instead -->
 	<!-- Global Delete Confirmation Translations -->
 	<script>
 		// Set global translations for delete confirmation (available on all dashboard pages)
