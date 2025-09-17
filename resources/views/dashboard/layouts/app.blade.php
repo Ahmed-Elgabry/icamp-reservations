@@ -154,6 +154,9 @@
 			box-shadow: 0
 			4px 6px rgba(0, 0, 0, 0.07) !important;
 		}
+		.w-45 {
+    		width: 45%;
+		}
 
 	</style>
 

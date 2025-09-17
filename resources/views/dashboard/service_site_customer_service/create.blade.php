@@ -7,7 +7,7 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
-    <div class="d-flex flex-coulmn iti_width">
+    <div class="d-flex flex-coulmn">
 
         <form id="kt_ecommerce_add_product_form" 
         data-kt-redirect="{{ isset($item) ? route('service_site_customer_service.edit', $item->id) : route('service_site_customer_service.create') }}" 
@@ -24,14 +24,14 @@
                     <div id="editor-serviceSite" dir="rtl" style="min-height:150px; direction: rtl; text-align: right;">{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}</div>
                     <input type="hidden" name="serviceSite" id="input-serviceSite" value="{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}">
                 </div>
-                <div class="d-flex flex-row flex-wrap w-100 gap-25 mb-25">
-                    <div class="form-group w-50 ">
+                <div class="d-flex flex-row flex-wrap w-100 justify-content-between mb-25">
+                    <div class="form-group w-45 mb-25 ">
                         <label for="workername_en">{{ __('dashboard.worker_name_en') }}</label>
                         <div id="editor-workername-en" class="w-100" dir="ltr" style="min-height:120px; direction: ltr; text-align: left;">{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}</div>
                         <input type="hidden" name="workername_en" id="input-workername-en" value="{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}">
                     </div>
 
-                    <div class="form-group mb-25 w-50">
+                    <div class="form-group mb-25 w-45">
                         <label for="workername_ar">{{ __('dashboard.worker_name_ar') }}</label>
                         <div id="editor-workername-ar" class="w-100" dir="rtl" style="min-height:120px; direction: rtl; text-align: right;">{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}</div>
                         <input type="hidden" name="workername_ar" id="input-workername-ar" value="{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}">
@@ -40,7 +40,7 @@
                 <div class="form-group mb-15  w-100 d-flex flex-column">
                     <label for="workerphone">{{ __('dashboard.worker_phone') }}</label>
                     <div class="d-flex flex-column align-items-start position-relative w-100">
-                        <input type="tel" name="workerphone" class="form-control w-100" style="direction: rtl; text-align: right;" value="{{ old('workerphone', isset($item) ? $item->workerphone : '') }}">
+                        <input type="tel" name="workerphone" class="form-control w-100 ltr-input" dir="ltr" style="direction: ltr; text-align: left;" value="{{ old('workerphone', isset($item) ? $item->workerphone : '') }}">
                     </div>
                 </div>
 
@@ -72,7 +72,7 @@
                                 <td>{!! $row->workername_en !!}</td>
                                 <td>{!! $row->workername_ar !!}</td>
                                 <td>{{ $row->workerphone }}</td>
-                                <td class="text-center">
+                                <td class="text-center d-flex flex-row flex-nowrap">
                                     <a href="{{ route('service_site_customer_service.edit', $row->id) }}" class="btn btn-sm btn-secondary">{{ __('dashboard.edit') }}</a>
                                     <form action="{{ route('service_site_customer_service.destroy', $row->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('{{ __('dashboard.delete_confirmation') }}');">
                                         @csrf
@@ -94,7 +94,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const toolbarOptions = [
-            [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'font': [] }, { 'size': ['small', '14px', '18px', '32px'] }],
             [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
             ['bold', 'italic', 'underline', 'strike'],
             [{ 'color': [] }, { 'background': [] }],
@@ -112,9 +112,23 @@
         Size.whitelist = ['small', '14px', '18px', '32px'];
         Quill.register(Size, true);
 
+        // Initialize Quill editors
         const quillService = new Quill('#editor-serviceSite', { theme: 'snow', modules: { toolbar: toolbarOptions } });
         const quillEn = new Quill('#editor-workername-en', { theme: 'snow', modules: { toolbar: toolbarOptions } });
         const quillAr = new Quill('#editor-workername-ar', { theme: 'snow', modules: { toolbar: toolbarOptions } });
+
+        // Enforce RTL direction on Arabic editors and serviceSite editor
+        // The worker name EN field should remain LTR (quillEn)
+        var setEditorRTL = function(quill){
+            var root = quill.root;
+            root.setAttribute('dir', 'rtl');
+            root.style.direction = 'rtl';
+            root.style.textAlign = 'right';
+            // add caret support class
+            root.classList.add('rtl-input');
+        };
+        setEditorRTL(quillService);
+        setEditorRTL(quillAr);
 
         const form = document.querySelector('form');
         form.addEventListener('submit', function (e) {
@@ -124,4 +138,13 @@
         });
     });
 </script>
+@endsection
+
+@section('styles')
+<style>
+    /* RTL input/editor adjustments */
+    .rtl-input{ font-size:14px; caret-color: auto; }
+    /* Make sure Quill placeholder text aligns right in RTL editors */
+    .ql-editor[dir="rtl"]::before{ right: 0; left: auto; }
+</style>
 @endsection

@@ -46,6 +46,7 @@ class StockAdjustmentService
                 'available_quantity_after' => $availableQtyAfter,
                 'stock_id' => $data['stockId'],
                 'quantity' => $data['qty'],
+                "reason" => "for_orders",
                 // type  is increment to order and decremnt to stock and vice versa
                 'type' => $data['status'] === 'increment' ? 'item_decrement' : 'item_increment',
                 'order_id' => $data['orderId'] ?? null,
