@@ -10,7 +10,11 @@
 
     <div class="row">
         <div class="col-md-8">
-            <form method="POST" action="{{ isset($item) ? route('service_site_customer_service.update', $item->id) : route('service_site_customer_service.store') }}">
+            <form id="kt_ecommerce_add_product_form" 
+                data-kt-redirect="{{ isset($item) ? route('service_site_customer_service.edit', $item->id) : route('service_site_customer_service.create') }}" 
+                action="{{ isset($item) ? route('service_site_customer_service.update', $item->id) : route('service_site_customer_service.store') }}" 
+                method="POST" enctype="multipart/form-data" 
+                class="form d-flex flex-column flex-lg-row store">
                 @csrf
                 @if(isset($item))
                     @method('PUT')
@@ -39,7 +43,12 @@
                     <input type="tel" name="workerphone" class="form-control" value="{{ old('workerphone', isset($item) ? $item->workerphone : '') }}">
                 </div>
 
-                <button type="submit" class="btn btn-primary">{{ isset($item) ? __('dashboard.update') : __('dashboard.create') }}</button>
+                <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
+                    <span class="indicator-label">{{ isset($item) ? __('dashboard.update') : __('dashboard.create') }}</span>
+                    <span class="indicator-progress">{{ __('dashboard.please_wait') }}
+                        <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    </span>
+                </button>
             </form>
         </div>
 
@@ -68,38 +77,38 @@
 @endsection
 
 @section('scripts')
+<script src="{{ asset('dashboard/custom/js/sending-forms.js') }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const toolbarOptions = [
-        [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'align': [] }],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        ['link', 'clean']
-    ];
+    document.addEventListener('DOMContentLoaded', function () {
+        const toolbarOptions = [
+            [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'align': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            ['link', 'clean']
+        ];
 
-    // Register fonts and sizes if needed
-    var Font = Quill.import('formats/font');
-    Font.whitelist = ['sans-serif', 'serif', 'monospace'];
-    Quill.register(Font, true);
+        // Register fonts and sizes if needed
+        var Font = Quill.import('formats/font');
+        Font.whitelist = ['sans-serif', 'serif', 'monospace'];
+        Quill.register(Font, true);
 
-    var Size = Quill.import('attributors/style/size');
-    Size.whitelist = ['small', '14px', '18px', '32px'];
-    Quill.register(Size, true);
+        var Size = Quill.import('attributors/style/size');
+        Size.whitelist = ['small', '14px', '18px', '32px'];
+        Quill.register(Size, true);
 
-    const quillService = new Quill('#editor-serviceSite', { theme: 'snow', modules: { toolbar: toolbarOptions } });
-    const quillEn = new Quill('#editor-workername-en', { theme: 'snow', modules: { toolbar: toolbarOptions } });
-    const quillAr = new Quill('#editor-workername-ar', { theme: 'snow', modules: { toolbar: toolbarOptions } });
+        const quillService = new Quill('#editor-serviceSite', { theme: 'snow', modules: { toolbar: toolbarOptions } });
+        const quillEn = new Quill('#editor-workername-en', { theme: 'snow', modules: { toolbar: toolbarOptions } });
+        const quillAr = new Quill('#editor-workername-ar', { theme: 'snow', modules: { toolbar: toolbarOptions } });
 
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function (e) {
-        document.getElementById('input-serviceSite').value = quillService.root.innerHTML;
-        document.getElementById('input-workername-en').value = quillEn.root.innerHTML;
-        document.getElementById('input-workername-ar').value = quillAr.root.innerHTML;
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (e) {
+            document.getElementById('input-serviceSite').value = quillService.root.innerHTML;
+            document.getElementById('input-workername-en').value = quillEn.root.innerHTML;
+            document.getElementById('input-workername-ar').value = quillAr.root.innerHTML;
+        });
     });
-});
 </script>
-
 @endsection
