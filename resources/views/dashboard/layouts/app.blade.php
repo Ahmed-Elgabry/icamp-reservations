@@ -21,6 +21,7 @@
 	<link rel="shortcut icon" href="{{asset('images/logo.png')}}" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
+
 	<!-- html5-qrcode -->
 	<script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 	<!-- CKeditor -->
@@ -349,7 +350,40 @@
 		height: 3px;
 		background: linear-gradient(to right, var(--secondary-brown), var(--primary-brown));
 	}
+
 	</style>
+
+	<!-- Include intl-tel-input with corrected paths -->
+	<link rel="stylesheet" href="{{ asset('dashboard/custom/css/intlTelInput.css') }}">
+	<script src="{{ asset('dashboard/custom/js/intlTelInput.js') }}"></script>
+	<script src="{{ asset('dashboard/custom/js/utils.js') }}"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
+			// Expose instance globally so other scripts (e.g. sending-forms.js) can access it
+			window.ini = window.ini || null;
+			if (phoneInput && typeof window.intlTelInput === 'function') {
+				try {
+					window.ini = window.intlTelInput(phoneInput, {
+						utilsScript: '{{ asset('dashboard/custom/js/utils.js') }}',
+						initialCountry: 'auto',
+						separateDialCode: true,
+						allowDropdown: true,
+						autoHideDialCode: false,
+						// dropdownContainer must be a DOM node; use body to be safe
+						dropdownContainer: document.phoneInput,
+					});
+				} catch (err) {
+					console.error('intlTelInput init error:', err);
+				}
+			} else {
+				// Helpful debug info when ini is not defined
+				if (!phoneInput) console.warn('Phone input not found: selector input[name="phone"]');
+				if (typeof window.intlTelInput !== 'function') console.warn('intlTelInput library not loaded');
+			}
+		});
+	</script>
 </head>
 <!--end::Head-->
 <!--begin::Body-->
@@ -553,7 +587,6 @@
 	@stack('scripts')
 
 	@stack('js')
-
 	<!--end::Page Custom Javascript-->
 	<!--- hundel messges --->
 	@if($errors->any())
@@ -616,8 +649,14 @@
 			position: 'top-right',
 			bgColor: '#ff0000'
 		})
+
+	</script>
+	<script>
+		// keep existing session danger toast
 	</script>
 	@endif
+
+
 
 </body>
 <!--end::Body-->

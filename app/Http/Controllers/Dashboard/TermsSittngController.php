@@ -34,8 +34,6 @@ class TermsSittngController extends Controller
 
         // Load specific record if ID provided, otherwise the first (singleton behavior)
         $termsSittings = $id ? TermsSittng::find($id) : TermsSittng::first();
-        \Log::info('3');
-        // عرض صفحة الإنشاء مع البيانات الحالية إن وجدت
         return view('dashboard.TermsSittngs.create', compact('termsSittings'));
     }
 
