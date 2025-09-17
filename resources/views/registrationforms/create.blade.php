@@ -28,7 +28,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
 
 
     <style type="text/css">
@@ -363,34 +363,11 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ar.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
+<script src="{{ asset('js/country-select.js') }}"></script>
 
 
 <script>
-		document.addEventListener('DOMContentLoaded', function () {
-			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
-			// Expose instance globally so other scripts (e.g. sending-forms.js) can access it
-			window.ini = window.ini || null;
-					if (phoneInput && typeof window.intlTelInput === 'function') {
-				try {
-                    window.ini = window.intlTelInput(phoneInput, {
-                        utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js',
-						initialCountry: 'ae',
-						separateDialCode: true,
-						allowDropdown: true,
-						autoHideDialCode: false,
-						dropdownContainer: document.body,
-					});
-				} catch (err) {
-					console.error('intlTelInput init error:', err);
-				}
-			} else {
-				// Helpful debug info when ini is not defined
-				if (!phoneInput) console.warn('Phone input not found: selector input[name="phone"]');
-				if (typeof window.intlTelInput !== 'function') console.warn('intlTelInput library not loaded');
-			}
-		});
+	// phone handling moved to country-select.js (Select2 based)
 	</script>
 <script type="text/javascript">
     (function(){
@@ -468,21 +445,7 @@
         document.getElementById('bookingForm').addEventListener('input', updateProgress);
         updateProgress();
 
-        // Ensure the mobile phone input is set to the intl-tel-input E.164 number before submit
-        document.getElementById('bookingForm').addEventListener('submit', function(e){
-            try {
-                var phoneInput = document.querySelector('input[name="mobile_phone"]');
-                if (window.ini && typeof window.ini.getNumber === 'function') {
-                    var val = window.ini.getNumber();
-                    phoneInput.value = val ? val : '';
-                } else {
-                    // If window.ini isn't ready, leave the raw value but log for debug
-                    console.warn('window.ini not available when form submitted');
-                }
-            } catch (err) {
-                console.error('Error setting mobile_phone before submit', err);
-            }
-        });
+        // Phone merging is handled by country-select.js which prefixes the selected dial code
 
         const dir = document.documentElement.getAttribute('dir') || 'rtl';
         const placeholder = @json(__('booking.camp_placeholder'));
