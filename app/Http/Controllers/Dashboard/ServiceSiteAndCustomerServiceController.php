@@ -17,7 +17,7 @@ class ServiceSiteAndCustomerServiceController extends Controller
     public function edit($id)
     {
         $item = ServiceSiteAndCustomerService::findOrFail($id);
-        return view('dashboard.service_site_customer_service.edit', compact('item'));
+        return view('dashboard.service_site_customer_service.create', compact('item'));
     }
 
     /**
@@ -79,7 +79,14 @@ class ServiceSiteAndCustomerServiceController extends Controller
             'workerphone' => $validatedData['workerphone'],
         ]);
 
-        return redirect()->route('service_site_customer_service.create')->with('success', __('item_updated_successfully'));
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+            'success' => true,
+            'message' => __('item_updated_successfully'),
+            ]);
+        }
+
+        return redirect()->route('service_site_customer_service.create', $item->id)->with('success', __('item_updated_successfully'));
     }
 
     /**
@@ -92,6 +99,13 @@ class ServiceSiteAndCustomerServiceController extends Controller
     {
         $item = ServiceSiteAndCustomerService::findOrFail($id);
         $item->delete();
+
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+            'success' => true,
+            'message' => __('item_deleted_successfully'),
+            ]);
+        }
 
         return redirect()->route('service_site_customer_service.create')->with('success', __('item_deleted_successfully'));
     }

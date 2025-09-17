@@ -5,7 +5,12 @@ $(document).ready(function(){
     window.confirmDelete = function(deleteUrl, csrfToken) {
         // Check if Swal is available
         if (typeof Swal === 'undefined') {
-            alert('SweetAlert is not loaded!');
+            // Prevent double submission: use a per-form guard flag
+            if ($form.data('isSubmitting')) {
+                return;
+            }
+            $form.data('isSubmitting', true);
+            var url = $form.attr('action');
             return;
         }
         

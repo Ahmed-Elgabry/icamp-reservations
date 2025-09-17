@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.app')
-
+@section('pageTitle', __('dashboard.service_site_customer_service'))
 @section('content')
 <div class="container">
     <h1>{{ __('dashboard.service_site_customer_service') }}</h1>
@@ -43,7 +43,7 @@
                 </div>
 
                 <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary w-fit mb-10">
-                    <span class="indicator-label">{{ isset($item) ? __('dashboard.update') : __('dashboard.create') }}</span>
+                    <span class="indicator-label">{{ isset($item) ? __('dashboard.update_item') : __('dashboard.create_item') }}</span>
                     <span class="indicator-progress">{{ __('dashboard.please_wait') }}
                         <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
                     </span>
@@ -51,29 +51,44 @@
             </form>
     </div>
         
-        <div class="col-md-4">
-            <ul class="list-group">
-                @foreach(isset($items) ? $items : [] as $row)
-                    <li class="list-group-item">
-                        <div><strong>{{ __('dashboard.id') }}:</strong> {{ $row->id }}</div>
-                        <div><strong>{{ __('dashboard.phone') }}:</strong> {{ $row->workerphone }}</div>
-                        <div class="mt-2">
-                            <a href="{{ route('service_site_customer_service.edit', $row->id) }}" class="btn btn-sm btn-secondary">{{ __('dashboard.edit') }}</a>
-                            <form action="{{ route('service_site_customer_service.destroy', $row->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('{{ __('dashboard.delete_confirmation') }}');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger">{{ __('dashboard.delete') }}</button>
-                            </form>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>{{ __('dashboard.service_site') }}</th>
+                            <th>{{ __('dashboard.worker_name_en') }}</th>
+                            <th>{{ __('dashboard.worker_name_ar') }}</th>
+                            <th>{{ __('dashboard.phone') }}</th>
+                            <th class="text-center">{{ __('dashboard.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(isset($items) ? $items : [] as $row)
+                            <tr>
+                                <td>{!! $row->service_site !!}</td>
+                                <td>{!! $row->workername_en !!}</td>
+                                <td>{!! $row->workername_ar !!}</td>
+                                <td>{{ $row->workerphone }}</td>
+                                <td class="text-center">
+                                    <a href="{{ route('service_site_customer_service.edit', $row->id) }}" class="btn btn-sm btn-secondary">{{ __('dashboard.edit') }}</a>
+                                    <form action="{{ route('service_site_customer_service.destroy', $row->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('{{ __('dashboard.delete_confirmation') }}');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-danger">{{ __('dashboard.delete') }}</button>
+                                    </form>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">{{ __('dashboard.no_data_found') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-        
 @endsection
 
 @section('scripts')
-<script src="{{ asset('dashboard/custom/js/sending-forms.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const toolbarOptions = [

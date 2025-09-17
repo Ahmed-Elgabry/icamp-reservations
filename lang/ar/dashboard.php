@@ -1693,6 +1693,9 @@ return [
 
     'please_wait' => 'يرجى الانتظار...',
     'item_updated_successfully' => 'تم تحديث العنصر بنجاح',
+    'item_created_successfully' => 'تم إنشاء العنصر بنجاح',
     'item_deleted_successfully' => 'تم حذف العنصر بنجاح ',
+    'update_item' => 'تحديث العنصر',
+    'create_item' => 'إنشاء العنصر
 ];
  
