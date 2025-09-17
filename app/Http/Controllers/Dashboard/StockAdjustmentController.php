@@ -127,8 +127,7 @@ class StockAdjustmentController extends Controller
          */
         public function stockTakingIndex()
         {
-            $query = StockAdjustment::where('source', 'stockTaking')->where('verified', true);
-
+            $query = StockAdjustment::with('stock');
             $dateFrom = request('date_from');
             $dateTo = request('date_to');
             if ($dateFrom) {

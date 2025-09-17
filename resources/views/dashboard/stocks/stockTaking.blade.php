@@ -141,9 +141,9 @@
                                 <td>{{ ($adj->percentage ? $adj->percentage . ' %' : $adj->available_quantity_after) ?? '-' }}</td>
                                 <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                                 @if($adj->order_id)
-                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
+                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason ?? 'for_orders') }} {{ " - ".$adj->order_id}}</td>
                                 @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}  {{ " - ". __("dashboard.stockTaking.reason_options.".$adj->custom_reason) }}</td>
+                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason ) }}  {{ " - ". __("dashboard.stockTaking.reason_options.".$adj->custom_reason) }}</td>
                                 @else
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}</td>
                                 @endif
