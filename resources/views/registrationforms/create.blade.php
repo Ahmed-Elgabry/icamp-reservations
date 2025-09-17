@@ -371,12 +371,13 @@
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
 
-	<script>
+
+<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
 			// Expose instance globally so other scripts (e.g. sending-forms.js) can access it
 			window.ini = window.ini || null;
-			if (phoneInput && typeof window.intlTelInput === 'function') {
+					if (phoneInput && typeof window.intlTelInput === 'function') {
 				try {
                     window.ini = window.intlTelInput(phoneInput, {
                         utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js',
