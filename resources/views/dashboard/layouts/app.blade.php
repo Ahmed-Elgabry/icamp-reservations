@@ -46,6 +46,7 @@
 	<link href="{{asset('dashboard/assets/plugins/custom/prismjs/prismjs.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
 	<link href="{{asset('dashboard/assets/plugins/global/plugins.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
 	<link href="{{asset('dashboard/assets/css/style.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.css">
 	<!--ar-->
 	@endif
 
@@ -123,6 +124,10 @@
 			font-weight: 600 !important;
 		}
 
+		/* Utility spacing helpers */
+		.mb-25 { margin-bottom: 25px !important; }
+		.mb-10 { margin-bottom: 10px !important; }
+
 		/* Money/Amount column styling */
 		td[data-kt-ecommerce-category-filter="category_name"] {
 			font-weight: 700 !important;
@@ -136,7 +141,7 @@
 			font-size: 0.875rem !important;
 			border-radius: 0.25rem !important;
 		}
-
+		
 		/* Center checkboxes */
 		.form-check-input {
 			margin: 0 auto !important;
@@ -350,13 +355,24 @@
 		height: 3px;
 		background: linear-gradient(to right, var(--secondary-brown), var(--primary-brown));
 	}
-
+	.mb-25 {
+		margin-bottom: 7rem !important;
+	}
+	.w-fit {
+		width : fit-content ;
+	}
+	.gap-25 {
+		gap: 7rem !important;
+	}
+	.iti.iti--container {
+		top: 90% !important;
+		left: 66% !important;
+	}
 	</style>
 
-	<!-- Include intl-tel-input with corrected paths -->
-	<link rel="stylesheet" href="{{ asset('dashboard/custom/css/intlTelInput.css') }}">
-	<script src="{{ asset('dashboard/custom/js/intlTelInput.js') }}"></script>
-	<script src="{{ asset('dashboard/custom/js/utils.js') }}"></script>
+	<!-- Include intl-tel-input from CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
 
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
@@ -366,13 +382,12 @@
 			if (phoneInput && typeof window.intlTelInput === 'function') {
 				try {
 					window.ini = window.intlTelInput(phoneInput, {
-						utilsScript: '{{ asset('dashboard/custom/js/utils.js') }}',
-						initialCountry: 'auto',
+						utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js',
+						initialCountry: 'ae',
 						separateDialCode: true,
 						allowDropdown: true,
 						autoHideDialCode: false,
-						// dropdownContainer must be a DOM node; use body to be safe
-						dropdownContainer: document.phoneInput,
+						dropdownContainer: phoneInput.closest('div') || document.body,
 					});
 				} catch (err) {
 					console.error('intlTelInput init error:', err);

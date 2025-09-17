@@ -1682,5 +1682,17 @@ return [
     'completed' => 'مكتمل',
     'unknown' => 'غير معروف',
     'enter_quantity_or_percentage' => 'يرجى إدخال الكمية أو النسبة',
+    'service_site_customer_service' => 'موقع المخيم و مكتب الإستقبال ',
+    'service_site' => 'موقع الخدمة',
+    'worker_name_en' => 'اسم العامل (إنجليزي)',
+    'worker_name_ar' => 'اسم العامل (عربي)',
+    'worker_phone' => 'هاتف العامل',
+
+    'existing_entries' => 'الإدخالات الموجودة',
+    'delete_confirmation' => 'هل أنت متأكد أنك تريد حذف هذا العنصر؟',
+
+    'please_wait' => 'يرجى الانتظار...',
+    'item_updated_successfully' => 'تم تحديث العنصر بنجاح',
+    'item_deleted_successfully' => 'تم حذف العنصر بنجاح ',
 ];
  

@@ -66,9 +66,9 @@ $(document).ready(function(){
         var url = $form.attr('action');
         // Find this form's submit button and use it for indicator
         var o = $form.find('#kt_ecommerce_add_product_submit')[0] || $form.find('button[type="submit"]')[0] || null;
-        if ($form.find("input[name='phone']").length) {
+        if ($form.find("input[type='tel']").length) {
             // Phone input exists, perform validation
-            var phoneInput = $form.find("input[name='phone']")[0];
+            var phoneInput = $form.find("input[type='tel']")[0];
             window.ini.getNumber() ? phoneInput.value = window.ini.getNumber() : phoneInput.value = '';
 
         }

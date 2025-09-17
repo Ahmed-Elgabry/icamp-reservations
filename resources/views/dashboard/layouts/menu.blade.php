@@ -1145,6 +1145,14 @@
                     </a>
 
                 </div>
+    		<div class="menu-item">
+                <a href="{{ route('service_site_customer_service.create') }}" class="menu-link py-3 {{ isActiveRoute('service_site_customer_service.create') }}">
+                    <span class="menu-bullet">
+                        <span class="bullet bullet-dot"></span>
+                    </span>
+                    <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.service_site_customer_service')])</span>
+                </a>
+            </div>
 
             </div>
 

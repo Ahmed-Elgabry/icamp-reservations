@@ -96,6 +96,7 @@ class ServicesController extends Controller
                             'image' => $path
                         ]);
                     }
+                    
                 }
             }
             \DB::commit();
