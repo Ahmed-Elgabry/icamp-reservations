@@ -150,8 +150,10 @@
 		/* Responsive table improvements */
 		.table-responsive {
 			border-radius: 0.5rem !important;
-			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07) !important;
+			box-shadow: 0
+			4px 6px rgba(0, 0, 0, 0.07) !important;
 		}
+
 	</style>
 
 	@yield('style')
@@ -364,44 +366,20 @@
 	.gap-25 {
 		gap: 7rem !important;
 	}
-	.iti.iti--container {
-		top: 90% !important;
-		left: 66% !important;
+/*  */
+	.iti.iti--container{
+		top: 40px !important;
+		left: 100% !important;
+	
+	}
+	.iti.iti--allow-dropdown{
+		width: 100% !important;
+	}
+	.iti__country{
+		width: 70vw !important;
 	}
 	</style>
 
-	<!-- Include intl-tel-input from CDN -->
-	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
-
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
-			// Expose instance globally so other scripts (e.g. sending-forms.js) can access it
-			window.ini = window.ini || null;
-					if (phoneInput && typeof window.intlTelInput === 'function') {
-				try {
-					var dropdownContainer = phoneInput.closest('div');
-
-
-					window.ini = window.intlTelInput(phoneInput, {
-						utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js',
-						initialCountry: 'ae',
-						separateDialCode: true,
-						allowDropdown: true,
-						autoHideDialCode: false,
-						dropdownContainer: phoneInput.closest('div') || document.body,
-					});
-				} catch (err) {
-					console.error('intlTelInput init error:', err);
-				}
-			} else {
-				// Helpful debug info when ini is not defined
-				if (!phoneInput) console.warn('Phone input not found: selector input[name="phone"]');
-				if (typeof window.intlTelInput !== 'function') console.warn('intlTelInput library not loaded');
-			}
-		});
-	</script>
 </head>
 <!--end::Head-->
 <!--begin::Body-->
@@ -495,7 +473,38 @@
 	<script src="{{asset('dashboard/assets/js/custom/utilities/modals/create-app.js')}}"></script>
 	<script src="{{asset('dashboard/assets/js/custom/utilities/modals/users-search.js')}}"></script>
 	<!--end::Page Custom Javascript-->
-	
+		<!-- Include intl-tel-input from CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
+
+	<script>
+		$(document).ready(function () {
+			const phoneInput = document.querySelector('input[type="tel"]'); // support both "phone" and "mobile_phone"
+			window.ini = window.ini || null;
+			if (phoneInput && typeof window.intlTelInput === 'function') {
+				try {
+					var dropdownContainer = phoneInput.closest('div');
+
+								window.ini = window.intlTelInput(phoneInput, {
+									utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js',
+									initialCountry: 'ae',
+									separateDialCode: true,
+									allowDropdown: true,
+									autoHideDialCode: false,
+									dropdownContainer: phoneInput.closest('div') || document.body,
+								});
+							} catch (err) {
+								console.error('intlTelInput init error:', err);
+							}
+						} else {
+							// Helpful debug info when ini is not defined
+							if (!phoneInput) console.warn('Phone input not found: selector input[name="phone"]');
+							if (typeof window.intlTelInput !== 'function') console.warn('intlTelInput library not loaded');
+						}
+
+					});
+					
+	</script>
 	<!-- Global Delete Confirmation Translations -->
 	<script>
 		// Set global translations for delete confirmation (available on all dashboard pages)

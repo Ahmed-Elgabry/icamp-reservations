@@ -7,7 +7,7 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
-    <div class="d-flex flex-coulmn">
+    <div class="d-flex flex-coulmn iti_width">
 
         <form id="kt_ecommerce_add_product_form" 
         data-kt-redirect="{{ isset($item) ? route('service_site_customer_service.edit', $item->id) : route('service_site_customer_service.create') }}" 
@@ -25,21 +25,23 @@
                     <input type="hidden" name="serviceSite" id="input-serviceSite" value="{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}">
                 </div>
                 <div class="d-flex flex-row flex-wrap w-100 gap-25 mb-25">
-                    <div class="form-group">
+                    <div class="form-group w-50 ">
                         <label for="workername_en">{{ __('dashboard.worker_name_en') }}</label>
                         <div id="editor-workername-en" class="w-100" dir="ltr" style="min-height:120px; direction: ltr; text-align: left;">{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}</div>
                         <input type="hidden" name="workername_en" id="input-workername-en" value="{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}">
                     </div>
 
-                    <div class="form-group mb-25">
+                    <div class="form-group mb-25 w-50">
                         <label for="workername_ar">{{ __('dashboard.worker_name_ar') }}</label>
                         <div id="editor-workername-ar" class="w-100" dir="rtl" style="min-height:120px; direction: rtl; text-align: right;">{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}</div>
                         <input type="hidden" name="workername_ar" id="input-workername-ar" value="{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}">
                     </div>
                 </div>
-                <div class="form-group mb-15 position-relative w-100">
+                <div class="form-group mb-15  w-100 d-flex flex-column">
                     <label for="workerphone">{{ __('dashboard.worker_phone') }}</label>
-                    <input type="tel" name="workerphone" class="form-control" style="direction: rtl; text-align: right;" value="{{ old('workerphone', isset($item) ? $item->workerphone : '') }}">
+                    <div class="d-flex flex-column align-items-start position-relative w-100">
+                        <input type="tel" name="workerphone" class="form-control w-100" style="direction: rtl; text-align: right;" value="{{ old('workerphone', isset($item) ? $item->workerphone : '') }}">
+                    </div>
                 </div>
 
                 <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary w-fit mb-10">
