@@ -104,9 +104,10 @@
                         <td>{{ isset($adj->stock->percentage) ? $adj->stock->percentage . ' %' : ($adj->stock->quantity ?? '-') }}</td>
                         <td>{{ isset($adj->stock->percentage) ? abs($adj->percentage - $adj->available_percentage_before) . ' %' : abs($adj->available_quantity_after - $adj->available_quantity_before) }}</td>
                         @if($adj->order_id)
+                        
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                            <td>{{ __("dashboard.manual_item_withwithdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason }}</td>
+                            <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason }}</td>
                         @else
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}</td>
                         @endif
