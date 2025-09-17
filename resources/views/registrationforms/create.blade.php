@@ -85,11 +85,6 @@
         .select2-container { direction: inherit; }
         .select2-container--bootstrap-5 .select2-selection { border-radius: .375rem; }
         .flatpickr-calendar { font-family: "Cairo", sans-serif; }
-        .iti.iti--container {
-		top: 90% !important;
-		left: 66% !important;
-	}
-
 	</style>
 </head>
 <body>
@@ -385,7 +380,7 @@
 						separateDialCode: true,
 						allowDropdown: true,
 						autoHideDialCode: false,
-						dropdownContainer: phoneInput.closest('div') || document.body,
+						dropdownContainer: document.body,
 					});
 				} catch (err) {
 					console.error('intlTelInput init error:', err);
