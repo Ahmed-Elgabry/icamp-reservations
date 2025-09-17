@@ -1696,6 +1696,6 @@ return [
     'item_created_successfully' => 'تم إنشاء العنصر بنجاح',
     'item_deleted_successfully' => 'تم حذف العنصر بنجاح ',
     'update_item' => 'تحديث العنصر',
-    'create_item' => 'إنشاء العنصر
+    'create_item' => 'إنشاء العنصر'
 ];
  
