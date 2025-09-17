@@ -143,7 +143,7 @@
                                 @if($adj->order_id)
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason ?? 'for_orders') }} {{ " - ".$adj->order_id}}</td>
                                 @elseif(isset($adj->custom_reason) && $adj->custom_reason)
-                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason ) }}  {{ " - ". $adj->custom_reason }}</td>
+                                    <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason ) }}  {{ " - ".$adj->custom_reason }}</td>
                                 @else
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }}</td>
                                 @endif
