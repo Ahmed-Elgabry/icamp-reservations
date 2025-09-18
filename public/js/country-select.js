@@ -40,7 +40,8 @@
                     if (!item.id) return item.text;
                     var $node = $(
                         '<span class="fi fi-' + (item.iso || '').toLowerCase() + '" style="margin-right:6px"></span>' +
-                        '<span>' + item.text + '</span>'
+                        // force LTR for the country text/dial so + stays before the number in RTL pages
+                        '<span dir="ltr" style="direction:ltr; display:inline-block; text-align:left;">' + item.text + '</span>'
                     );
                     return $node;
                 },
@@ -50,7 +51,8 @@
                     var iso = (item.iso || '').toLowerCase();
                     var dial = item.id || '';
                     var short = '<span class="fi fi-' + iso + '" style="margin-right:6px"></span>' +
-                        '<span class="country-dial">+' + dial + '</span>';
+                        // force LTR so the plus sign appears before the digits even in RTL contexts
+                        '<span class="country-dial" dir="ltr" style="direction:ltr; display:inline-block; text-align:left;">+' + dial + '</span>';
                     return $(short);
                 },
                 escapeMarkup: function(m) { return m; }
@@ -105,10 +107,8 @@
     padding: 5px 15px !important;
     border-radius: 6px;
 }
-    .select2-selection__rendered{
-    direction : ltr;
-    }
-    .country-select-wrap .select2-selection__rendered{ font-size:12px; display:flex; align-items:center; gap:6px; padding:0 !important; }
+    .country-select-wrap .select2-selection__rendered{ font-size:12px; display:flex; align-items:center; gap:6px; padding:0 !important;     direction : ltr;
+}
     .country-select-wrap .fi{ font-size:16px; line-height:16px; }
     .country-select-dropdown .select2-dropdown{ min-width:300px !important; }
     .country-select-wrap .select2-container--default .select2-selection--single .country-label{ font-size:12px; }
