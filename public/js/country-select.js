@@ -105,6 +105,9 @@
     padding: 5px 15px !important;
     border-radius: 6px;
 }
+    .select2-selection__rendered{
+    direction : ltr;
+    }
     .country-select-wrap .select2-selection__rendered{ font-size:12px; display:flex; align-items:center; gap:6px; padding:0 !important; }
     .country-select-wrap .fi{ font-size:16px; line-height:16px; }
     .country-select-dropdown .select2-dropdown{ min-width:300px !important; }
