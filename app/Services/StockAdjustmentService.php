@@ -204,14 +204,14 @@ class StockAdjustmentService
 
     private function handleStockTakingAdjustment($stock, $validated, $type, $availableQtyAfter = null, $available_percentage_after = null , $adjustment = null)
     {
-        if ($adjustment && $adjustment->verified == "1") {
+        if (isset($validated["verified"]) && $validated["verified"] == true) {
             if ($stock->percentage !== null) {
                 $stock->update(['percentage' => $available_percentage_after ]);
             } else {
                 $stock->update(['quantity' => $availableQtyAfter]);
             }
         }
-        return $availableQtyAfter;
+        return $available_percentage_after ?? $availableQtyAfter;
     }
 
     private function handleItemAdjustment($stock, $validated, $type, $availableQtyAfter = null, $available_percentage_after = null)

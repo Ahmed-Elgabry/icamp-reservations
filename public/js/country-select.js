@@ -91,7 +91,7 @@
 
         // inject compact CSS for inline selects and wide dropdown
     var css = `
-    .country-select-wrap .country-select{ width:58px !important; height:37px !important;padding: 9px 0 0 0; }
+    .country-select-wrap .country-select{ width:65px !important; height:37px !important;padding: 9px 0 0 0; }
     .country-select-wrap .select2-container{ width:82px !important; }
     span.select2-dropdown.country-select-dropdown.select2-dropdown--below {
     width: 256px !important;
@@ -106,7 +106,7 @@
     .country-select-wrap .select2-container--default .select2-selection--single .country-label{ font-size:12px; }
     .country-select-wrap .country-dial{ font-size:11px; color:#6c757d; margin-left:6px; }
     `;
-    var style = document.createElement('style'); style.type = 'text/css'; style.appendChild(document.createTextNode(css)); document.head.appendChild(style);
+    var style = document.createElement('style'); style.appendChild(document.createTextNode(css)); document.head.appendChild(style);
     });
 
 })(window, jQuery);
