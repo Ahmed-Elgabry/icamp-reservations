@@ -289,7 +289,7 @@
                             <input type="hidden" name="verified" value="0" id="verified-input">
                                 <button type="button" class="btn btn-outline-danger text-nowrap" id="btn-draft-switch">{{ __('dashboard.stockTaking.draft') }}</button>
                                 <button type="button" class="btn btn-outline-success verified text-nowrap" id="btn-approved-switch">{{ __('dashboard.stockTaking.approved') }}</button>
-                                <button type="submit" class="btn btn-primary text-nowrap" id="kt_ecommerce_add_product_submit">{{ __('dashboard.submit') }}</button>
+                                <button type="submit" class="btn btn-primary d-none text-nowrap" id="kt_ecommerce_add_product_submit">{{ __('dashboard.submit') }}</button>
                             </td>
                         </tr>
                     </tbody>
@@ -323,7 +323,7 @@
                                     <tr data-id="{{ $adj->id }}">
                                     <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
                                     <td>{{ $adj->stock->percentage ? $adj->stock->percentage ." %": $adj->stock->quantity}}</td>
-                                    <td>{{ $adj->stock->percentage ? ($adj->percentage - $adj->available_quantity_after) . ' %' : ($adj->available_quantity_after  - $adj->available_quantity_before ) }}</td>
+                                    <td>{{ ($adj->percentage ? $adj->percentage . ' %' : $adj->available_quantity_after) ?? '-' }}</td>
                                     <td>{{ __("dashboard.stockTaking.".$adj->type) }}</td>
                                     @if($adj->order_id)
                                     <td>{{ __("dashboard.stockTaking.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id }}</td>
@@ -821,12 +821,24 @@ $(function() {
     $('#btn-draft-switch').on('click', function() {
         $('#verified-input').val('0');
         updateSwitchButtons();
+        // auto-submit the enclosing form when switching to draft
+        var $btn = $(this);
+        var $form = $btn.closest('form');
+        if ($form.length) {
+            $form.trigger('submit');
+        }
     });
 
    
     $('#btn-approved-switch').on('click', function() {
         $('#verified-input').val('1');
         updateSwitchButtons();
+        // auto-submit the enclosing form when switching to approved
+        var $btn = $(this);
+        var $form = $btn.closest('form');
+        if ($form.length) {
+            $form.trigger('submit');
+        }
     });
     updateSwitchButtons();
 });
@@ -896,6 +908,12 @@ $(function() {
 // Unified validation: require at least one of quantity (correct_quantity or quantity_to_discount) or percentage
 $(document).on('submit', 'form.update, #edit-adjustment-form', function(e) {
     var $form = $(this);
+    // If the form is auto-submitted by the draft/approved switch, skip this validation
+    if ($form.find('input[name="_auto_submit_from_switch"]').length) {
+        // remove the flag so subsequent manual submits will validate normally
+        $form.find('input[name="_auto_submit_from_switch"]').remove();
+        return true;
+    }
     var qty = $form.find('input[name="correct_quantity"], input[name="quantity_to_discount"]').val();
     var perc = $form.find('input[name="percentage"]').val();
     if ((!qty || qty === "") && (!perc || perc === "")) {
