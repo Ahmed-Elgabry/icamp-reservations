@@ -24,19 +24,19 @@
                     <div id="editor-serviceSite" dir="rtl" style="min-height:150px; direction: rtl; text-align: right;">{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}</div>
                     <input type="hidden" name="serviceSite" id="input-serviceSite" value="{!! old('serviceSite', isset($item) ? $item->serviceSite : '') !!}">
                 </div>
-                <div class="d-flex flex-row flex-wrap w-100 justify-content-between mb-25">
-                    <div class="form-group w-45 mb-25 ">
-                        <label for="workername_en">{{ __('dashboard.worker_name_en') }}</label>
-                        <div id="editor-workername-en" class="w-100" dir="ltr" style="min-height:120px; direction: ltr; text-align: left;">{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}</div>
-                        <input type="hidden" name="workername_en" id="input-workername-en" value="{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}">
+                    <div class="d-flex flex-row flex-wrap w-100 justify-content-between overflow-hidden mb-25">
+                        <div class="form-group w-45 mb-25 ">
+                            <label for="workername_en">{{ __('dashboard.worker_name_en') }}</label>
+                            <div id="editor-workername-en" class="w-100" dir="ltr" style="min-height:120px; direction: ltr; text-align: left;">{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}</div>
+                            <input type="hidden" name="workername_en" id="input-workername-en" value="{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}">
+                        </div>
+    
+                        <div class="form-group mb-15 w-45">
+                            <label for="workername_ar">{{ __('dashboard.worker_name_ar') }}</label>
+                            <div id="editor-workername-ar" class="w-100" dir="rtl" style="min-height:120px; direction: rtl; text-align: right;">{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}</div>
+                            <input type="hidden" name="workername_ar" id="input-workername-ar" value="{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}">
+                        </div>
                     </div>
-
-                    <div class="form-group mb-25 w-45">
-                        <label for="workername_ar">{{ __('dashboard.worker_name_ar') }}</label>
-                        <div id="editor-workername-ar" class="w-100" dir="rtl" style="min-height:120px; direction: rtl; text-align: right;">{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}</div>
-                        <input type="hidden" name="workername_ar" id="input-workername-ar" value="{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}">
-                    </div>
-                </div>
                 <div class="form-group mb-15  w-100 d-flex flex-column">
                     <label for="workerphone">{{ __('dashboard.worker_phone') }}</label>
                     <div class="d-flex flex-column align-items-start position-relative w-100">
@@ -146,5 +146,7 @@
     .rtl-input{ font-size:14px; caret-color: auto; }
     /* Make sure Quill placeholder text aligns right in RTL editors */
     .ql-editor[dir="rtl"]::before{ right: 0; left: auto; }
+    /* If you have inline country select next to phone input, ensure it stays inline */
+    .country-select-wrap { display: inline-flex; align-items: center; gap:8px; }
 </style>
 @endsection

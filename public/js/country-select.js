@@ -46,11 +46,11 @@
                 },
                 templateSelection: function(item) {
                     if (!item.id) return item.text;
-                    // show compact selection with flag and dial
-                    var iso = item.iso || '';
-                    var text = item.text || '';
-                    var short = '<span class="fi fi-' + iso.toLowerCase() + '" style="margin-right:6px"></span>' +
-                        '<span class="country-label">' + text.split(' (+')[0] + '</span>';
+                    // After selection (when dropdown closes) show only flag + dial code compactly
+                    var iso = (item.iso || '').toLowerCase();
+                    var dial = item.id || '';
+                    var short = '<span class="fi fi-' + iso + '" style="margin-right:6px"></span>' +
+                        '<span class="country-dial">+' + dial + '</span>';
                     return $(short);
                 },
                 escapeMarkup: function(m) { return m; }
@@ -63,12 +63,17 @@
             // store selected dial code on the input element
             $select.on('select2:select', function(e) {
                 var dial = e.params.data.id;
+                var iso = (e.params.data.iso || '').toLowerCase();
                 $input.data('selected-dial', dial);
+                $input.data('selected-iso', iso);
             });
 
-            // ensure initial store
+            // ensure initial store (dial + iso)
             var initData = $select.select2('data');
-            if (initData && initData[0]) $input.data('selected-dial', initData[0].id);
+            if (initData && initData[0]) {
+                $input.data('selected-dial', initData[0].id);
+                $input.data('selected-iso', (initData[0].iso || '').toLowerCase());
+            }
 
             // before form submit, merge dial code with number if not already starts with +
             $input.closest('form').on('submit', function() {
@@ -86,8 +91,8 @@
 
         // inject compact CSS for inline selects and wide dropdown
     var css = `
-    .country-select-wrap .country-select{ width:64px !important; height:37px !important; }
-    .country-select-wrap .select2-container{ width:62px !important; }
+    .country-select-wrap .country-select{ width:58px !important; height:37px !important;padding: 9px 0 0 0; }
+    .country-select-wrap .select2-container{ width:82px !important; }
     span.select2-dropdown.country-select-dropdown.select2-dropdown--below {
     width: 256px !important;
 }
@@ -95,10 +100,11 @@
     width: 256px !important;
     }
     .country-select-wrap .select2-container--default .select2-selection--single{ height:45px; width: 40px !important; padding:2px 6px; border-radius:6px; }
-    .country-select-wrap .select2-selection__rendered{ font-size:12px; display:flex; align-items:center; gap:6px; }
+    .country-select-wrap .select2-selection__rendered{ font-size:12px; display:flex; align-items:center; gap:6px; padding:0 !important; }
     .country-select-wrap .fi{ font-size:16px; line-height:16px; }
     .country-select-dropdown .select2-dropdown{ min-width:300px !important; }
     .country-select-wrap .select2-container--default .select2-selection--single .country-label{ font-size:12px; }
+    .country-select-wrap .country-dial{ font-size:11px; color:#6c757d; margin-left:6px; }
     `;
     var style = document.createElement('style'); style.type = 'text/css'; style.appendChild(document.createTextNode(css)); document.head.appendChild(style);
     });
