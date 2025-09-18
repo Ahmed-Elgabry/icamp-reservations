@@ -99,7 +99,12 @@
     .select2-dropdown.country-select-dropdown.select2-dropdown--above {
     width: 256px !important;
     }
-    .country-select-wrap .select2-container--default .select2-selection--single{ height:45px; width: 40px !important; padding:2px 6px; border-radius:6px; }
+    .country-select-wrap .select2-container--default .select2-selection--single {
+    height: 36px;
+    width: 96px !important;
+    padding: 5px 15px !important;
+    border-radius: 6px;
+}
     .country-select-wrap .select2-selection__rendered{ font-size:12px; display:flex; align-items:center; gap:6px; padding:0 !important; }
     .country-select-wrap .fi{ font-size:16px; line-height:16px; }
     .country-select-dropdown .select2-dropdown{ min-width:300px !important; }
