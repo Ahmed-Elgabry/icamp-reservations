@@ -76,6 +76,9 @@
                     <ul class="mb-0">
                         <li><strong>[اسم العميل]</strong> / <strong>[Customer Name]</strong> - @lang('dashboard.customer_name_placeholder')</li>
                         <li><strong>[رابط التقييم]</strong> / <strong>[🔗 Evaluation Link]</strong> - @lang('dashboard.evaluation_link_placeholder')</li>
+                        <li><strong>[موقع المخيم]</strong> / <strong>[Camp Location]</strong> - @lang('dashboard.camp_location_placeholder')</li>
+                        <li><strong>[اسم العامل]</strong> / <strong>[Worker Name]</strong> - @lang('dashboard.worker_name_placeholder')</li>
+                        <li><strong>[رقم هاتف العامل]</strong> / <strong>[Worker Phone]</strong> - @lang('dashboard.worker_phone_placeholder')</li>
                     </ul>
                 </div>
             </div>

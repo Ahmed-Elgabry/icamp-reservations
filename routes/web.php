@@ -1674,6 +1674,7 @@ Route::resource('meetings', MeetingController::class)
 Route::resource('meeting-locations', MeetingLocationController::class)
     ->middleware(['auth']);
 Route::get('/meetings/export/pdf', [MeetingController::class, 'exportPdf'])->name('meetings.export');
+Route::get('/meetings/{meeting}/export/pdf', [MeetingController::class, 'exportSinglePdf'])->name('meetings.export.single');
 
 Route::resource('violation-types', ViolationTypeController::class)
     ->middleware(['auth']);

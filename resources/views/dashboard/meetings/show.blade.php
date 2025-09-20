@@ -9,6 +9,11 @@
                 <span class="text-muted mt-1 fw-semibold fs-7">Meeting #{{ $meeting->meeting_number }}</span>
             </h3>
             <div class="card-toolbar">
+                @can('meetings.export')
+                    <a href="{{ route('meetings.export.single', $meeting) }}" class="btn btn-success me-2">
+                        <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
+                    </a>
+                @endcan
                 <a href="{{ route('meetings.index') }}" class="btn btn-light-primary">
                     <i class="fas fa-arrow-left me-2"></i> @lang('dashboard.back_to_meetings')
                 </a>

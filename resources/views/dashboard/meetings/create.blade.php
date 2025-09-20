@@ -199,24 +199,37 @@
     </div>
 @endsection
 
-@push('js')
-    <script src="https://cdn.tiny.cloud/1/m181ycw0urzvmmzinvpzqn3nv10wxttgo7gvv77hf6ce6z89/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>
-        function initTinyMCE(selector) {
-            tinymce.init({
-                selector: selector,
-                plugins: 'advlist autolink lists link image charmap preview anchor',
-                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-                menubar: false,
-                height: 300,
-                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-            });
-        }
+@push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script>  
+document.addEventListener('DOMContentLoaded', function() {
+    let ckEditors = {};
 
-        // Initialize existing textareas on page load
-        document.querySelectorAll('textarea[name*="discussion"]').forEach(el => {
-            initTinyMCE(`textarea[name="${el.name}"]`);
-        });
+    // Initialize existing textareas on page load
+    document.querySelectorAll('textarea[name*="discussion"]').forEach(el => {
+        ClassicEditor
+            .create(document.querySelector(`textarea[name="${el.name}"]`), {
+                toolbar: {
+                    items: [
+                        'bold', 'italic', 'underline', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'link', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                height: '300px'
+            })
+            .then(editor => {
+                // Set editor height
+                editor.editing.view.change(writer => {
+                    writer.setStyle('height', '300px', editor.editing.view.document.getRoot());
+                });
+                ckEditors[el.name] = editor;
+            })
+            .catch(error => {
+                console.error('CKEditor 5 initialization error:', error);
+            });
+    });
 
         $(document).ready(function() {
             $('#attendees-select').select2({
@@ -266,8 +279,29 @@
                 </div>
                 `;
                 $('#topics-container').append(html);
-                // Initialize TinyMCE for the new field
-                initTinyMCE(`textarea[name="topics[${topicCount}][discussion]"]`);
+                // Initialize CKEditor for the new field
+                ClassicEditor
+                    .create(document.querySelector(`textarea[name="topics[${topicCount}][discussion]"]`), {
+                        toolbar: {
+                            items: [
+                                'bold', 'italic', 'underline', '|',
+                                'bulletedList', 'numberedList', '|',
+                                'link', '|',
+                                'undo', 'redo'
+                            ]
+                        },
+                        height: '300px'
+                    })
+                    .then(editor => {
+                        // Set editor height
+                        editor.editing.view.change(writer => {
+                            writer.setStyle('height', '300px', editor.editing.view.document.getRoot());
+                        });
+                        ckEditors[`topics[${topicCount}][discussion]`] = editor;
+                    })
+                    .catch(error => {
+                        console.error('CKEditor 5 initialization error:', error);
+                    });
                 topicCount++;
             });
 
@@ -275,17 +309,28 @@
                 $(this).closest('.topic-row').remove();
             });
         });
-    </script>
+});
+</script>
 @endpush
 
 @push('css')
     <style>
-        .tox-tinymce {
+        .ck-editor {
+            width: 100% !important;
+        }
+        .ck-editor__editable {
             border-radius: 0.475rem !important;
             border: 1px solid #E4E6EF !important;
+            min-height: 300px !important;
+            width: 100% !important;
         }
-        .tox .tox-editor-header {
+        .ck-editor__top {
             background-color: #F1FAFF !important;
+            border-radius: 0.475rem 0.475rem 0 0 !important;
+            width: 100% !important;
+        }
+        .ck-editor__main {
+            width: 100% !important;
         }
     </style>
 @endpush

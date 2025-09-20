@@ -143,9 +143,9 @@
                         <td class="assigned-user">
                             @if($topic->assigned_to)
                                 {{ $topic->assignee->name ?? __('dashboard.not_available') }}
-                                @if($topic->task)
+                                <!-- @if($topic->task)
                                     <br><small>(@lang('dashboard.task_created'))</small>
-                                @endif
+                                @endif -->
                             @else
                                 @lang('dashboard.not_assigned')
                             @endif

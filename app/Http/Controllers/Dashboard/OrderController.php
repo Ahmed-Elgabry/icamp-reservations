@@ -7,6 +7,7 @@ use App\Models\Notice;
 use App\Models\Payment;
 use App\Services\WhatsAppService;
 use App\Models\WhatsappMessageTemplate;
+use App\Models\ServiceSiteAndCustomerService;
 use DB;
 use Endroid\QrCode\Color\Color;
 use Illuminate\Support\Facades\Log;
@@ -1228,6 +1229,9 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'لا يوجد رقم هاتف للعميل'], 400);
         }
 
+        // Get service site data for placeholders
+        $serviceSiteData = ServiceSiteAndCustomerService::getLatestForWhatsApp();
+
         $messagesCount = 0;
         $errors = [];
 
@@ -1246,7 +1250,7 @@ class OrderController extends Controller
                     if ($templateType === 'evaluation') {
                         // Send evaluation with survey link (public route that doesn't require auth)
                         $surveyUrl = route('surveys.public', ['order' => $order->id]);
-                        $message = $template->getBilingualMessage($order->customer->name, $surveyUrl);
+                        $message = $template->getBilingualMessage($order->customer->name, $surveyUrl, $serviceSiteData);
                         
                         // Log the generated URL and message for debugging
                         Log::info('Evaluation message prepared', [
@@ -1270,7 +1274,7 @@ class OrderController extends Controller
                         );
                     } else {
                         // Get bilingual message for non-evaluation templates
-                        $message = $template->getBilingualMessage($order->customer->name);
+                        $message = $template->getBilingualMessage($order->customer->name, '', $serviceSiteData);
                         
                         // Send message with PDF file
                         $pdfPath = $this->generateTempPdf($order, $templateType);
@@ -1309,7 +1313,7 @@ class OrderController extends Controller
                         $template = WhatsappMessageTemplate::getByType('receipt');
                         if (!$template) continue;
 
-                        $message = $template->getBilingualMessage($order->customer->name);
+                        $message = $template->getBilingualMessage($order->customer->name, '', $serviceSiteData);
                         $pdfPath = null;
 
                         switch ($type) {
@@ -1488,8 +1492,11 @@ class OrderController extends Controller
                 return;
             }
 
+            // Get service site data for placeholders
+            $serviceSiteData = ServiceSiteAndCustomerService::getLatestForWhatsApp();
+            
             // Get bilingual message
-            $message = $template->getBilingualMessage($order->customer->name);
+            $message = $template->getBilingualMessage($order->customer->name, '', $serviceSiteData);
 
             // Generate PDF
             $pdfPath = $this->generateTempPdf($order, 'reservation_data');

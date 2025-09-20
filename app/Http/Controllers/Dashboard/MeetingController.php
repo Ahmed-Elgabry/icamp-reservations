@@ -15,6 +15,7 @@ use App\Notifications\TaskAssignedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Mpdf\Mpdf;
+use Mpdf\Output\Destination;
 
 class MeetingController extends Controller
 {
@@ -250,6 +251,39 @@ class MeetingController extends Controller
         $mpdf->WriteHTML($html);
 
         $filename = __('dashboard.meetings') . "-" . date('Y-m-d') . ".pdf";
+        return $mpdf->Output($filename, 'D');
+    }
+
+    public function exportSinglePdf(Meeting $meeting)
+    {
+        $this->authorize('view', $meeting);
+
+        $meeting->load(['creator', 'attendees.user', 'topics.assignee', 'location']);
+        $meetings = collect([$meeting]); // Wrap single meeting in collection for existing view
+
+        $html = view('dashboard.meetings.export', compact('meetings'))->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 16,
+            'margin_bottom' => 16,
+            'margin_header' => 9,
+            'margin_footer' => 9,
+            // Add RTL support for Arabic
+            'dir' => app()->getLocale() === 'ar' ? 'rtl' : 'ltr',
+            'default_font' => 'DejaVuSans'
+        ]);
+
+        // Enable image processing
+        $mpdf->showImageErrors = true;
+
+        $mpdf->WriteHTML($html);
+
+        $filename = __('dashboard.meeting') . "-{$meeting->meeting_number}-" . date('Y-m-d') . ".pdf";
         return $mpdf->Output($filename, 'D');
     }
 

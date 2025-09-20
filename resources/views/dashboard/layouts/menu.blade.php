@@ -1724,7 +1724,7 @@
 
                         </span>
 
-                            <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.tasks')])</span>
+                            <span class="menu-title">@lang('dashboard.add_task_title', ['page_title' => __('dashboard.tasks')])</span>
 
                         </a>
 

@@ -592,10 +592,10 @@
     <!--end::Modal - Additional Notes-->
 @endsection
 
-@section('scripts')
-    <script src="https://cdn.tiny.cloud/1/m181ycw0urzvmmzinvpzqn3nv10wxttgo7gvv77hf6ce6z89/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-
-    <script type="text/javascript">
+@push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
         (function(){
             const isRTL = "{{ app()->getLocale() }}" === "ar";
             $('.js-select2').each(function(){
@@ -789,26 +789,100 @@
             })();
 
             /////////////// Start:samuel work ///////////////
-            // Initialize TinyMCE
-            const editorConfig = {
-                plugins: 'link lists code',
-                toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link',
-                menubar: false,
-                height: '50vh',
-                skin: 'oxide',
-                content_css: 'default',
-                setup: function(editor) {
-                    editor.on('change', function() {
-                        editor.save();
-                    });
-                }
-            };
+            // Initialize CKEditor
+            let ckEditors = {};
 
-            // Initialize editors
-            tinymce.init({ ...editorConfig, selector: '#showPriceEditor' });
-            tinymce.init({ ...editorConfig, selector: '#orderDataEditor' });
-            tinymce.init({ ...editorConfig, selector: '#invoiceEditor' });
-            tinymce.init({ ...editorConfig, selector: '#receiptEditor' });
+            // Initialize Show Price Editor
+            ClassicEditor
+                .create(document.querySelector('#showPriceEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['showPriceEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Show Price Editor error:', error);
+                });
+
+            // Initialize Order Data Editor
+            ClassicEditor
+                .create(document.querySelector('#orderDataEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['orderDataEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Order Data Editor error:', error);
+                });
+
+            // Initialize Invoice Editor
+            ClassicEditor
+                .create(document.querySelector('#invoiceEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['invoiceEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Invoice Editor error:', error);
+                });
+
+            // Initialize Receipt Editor
+            ClassicEditor
+                .create(document.querySelector('#receiptEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['receiptEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Receipt Editor error:', error);
+                });
 
             // Additional notes modal functionality
             const additionalNotesModal = new bootstrap.Modal(document.getElementById('additionalNotesModal'));
@@ -823,10 +897,18 @@
 
             // Load existing data if any
             function loadExistingData() {
-                tinymce.get('showPriceEditor').setContent($('#show_price_notes').val() || '');
-                tinymce.get('orderDataEditor').setContent($('#order_data_notes').val() || '');
-                tinymce.get('invoiceEditor').setContent($('#invoice_notes').val() || '');
-                tinymce.get('receiptEditor').setContent($('#receipt_notes').val() || '');
+                if (ckEditors['showPriceEditor']) {
+                    ckEditors['showPriceEditor'].setData($('#show_price_notes').val() || '');
+                }
+                if (ckEditors['orderDataEditor']) {
+                    ckEditors['orderDataEditor'].setData($('#order_data_notes').val() || '');
+                }
+                if (ckEditors['invoiceEditor']) {
+                    ckEditors['invoiceEditor'].setData($('#invoice_notes').val() || '');
+                }
+                if (ckEditors['receiptEditor']) {
+                    ckEditors['receiptEditor'].setData($('#receipt_notes').val() || '');
+                }
             }
 
             // Open modal
@@ -838,10 +920,18 @@
             // Save additional notes
             $('#saveAdditionalNotes').click(function() {
                 // Update hidden fields with editor content
-                $('#show_price_notes').val(tinymce.get('showPriceEditor').getContent());
-                $('#order_data_notes').val(tinymce.get('orderDataEditor').getContent());
-                $('#invoice_notes').val(tinymce.get('invoiceEditor').getContent());
-                $('#receipt_notes').val(tinymce.get('receiptEditor').getContent());
+                if (ckEditors['showPriceEditor']) {
+                    $('#show_price_notes').val(ckEditors['showPriceEditor'].getData());
+                }
+                if (ckEditors['orderDataEditor']) {
+                    $('#order_data_notes').val(ckEditors['orderDataEditor'].getData());
+                }
+                if (ckEditors['invoiceEditor']) {
+                    $('#invoice_notes').val(ckEditors['invoiceEditor'].getData());
+                }
+                if (ckEditors['receiptEditor']) {
+                    $('#receipt_notes').val(ckEditors['receiptEditor'].getData());
+                }
 
                 additionalNotesModal.hide();
 
@@ -1101,5 +1191,23 @@
 
             /////////////// End:samuel work ///////////////
         })();
+});
     </script>
-@endsection
+@endpush
+
+@push('css')
+<style>
+    .ck-editor {
+        width: 100% !important;
+    }
+    .ck-editor__editable {
+        width: 100% !important;
+    }
+    .ck-editor__top {
+        width: 100% !important;
+    }
+    .ck-editor__main {
+        width: 100% !important;
+    }
+</style>
+@endpush
