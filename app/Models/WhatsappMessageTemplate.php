@@ -70,25 +70,25 @@ class WhatsappMessageTemplate extends Model
     }
 
     // Replace placeholders in message
-    public function getProcessedMessage($language = 'ar', $customerName = '', $evaluationLink = '')
+    public function getProcessedMessage($language = 'ar', $customerName = '', $evaluationLink = '', $serviceSiteData = null)
     {
         $message = $language === 'en' ? $this->message_en : $this->message_ar;
         
-        return $this->processMessageContent($message, $customerName, $evaluationLink);
+        return $this->processMessageContent($message, $customerName, $evaluationLink, $serviceSiteData);
     }
 
     // Get bilingual message (Arabic + English)
-    public function getBilingualMessage($customerName = '', $evaluationLink = '')
+    public function getBilingualMessage($customerName = '', $evaluationLink = '', $serviceSiteData = null)
     {
-        $arabicMessage = $this->processMessageContent($this->message_ar, $customerName, $evaluationLink);
-        $englishMessage = $this->processMessageContent($this->message_en, $customerName, $evaluationLink);
+        $arabicMessage = $this->processMessageContent($this->message_ar, $customerName, $evaluationLink, $serviceSiteData);
+        $englishMessage = $this->processMessageContent($this->message_en, $customerName, $evaluationLink, $serviceSiteData);
         
         // Combine both messages with a separator
-        return $arabicMessage . "\n\n" . "━━━━━━━━━━━━━━━━━━━━" . "\n\n" . $englishMessage;
+        return $arabicMessage . "\n\n" . "━━━━━━━━━━━━━" . "\n\n" . $englishMessage;
     }
 
     // Helper method to process message content
-    private function processMessageContent($message, $customerName = '', $evaluationLink = '')
+    private function processMessageContent($message, $customerName = '', $evaluationLink = '', $serviceSiteData = null)
     {
         // Replace placeholders
         $message = str_replace('[اسم العميل]', $customerName, $message);
@@ -99,6 +99,16 @@ class WhatsappMessageTemplate extends Model
         $message = str_replace('[🔗 رابط التقييم]', $evaluationLink, $message); // Arabic with emoji
         $message = str_replace('[🔗 Evaluation Link]', $evaluationLink, $message);
         $message = str_replace('[Evaluation Link]', $evaluationLink, $message);
+        
+        // Replace service site placeholders if data is provided
+        if ($serviceSiteData) {
+            $message = str_replace('[موقع المخيم]', $serviceSiteData['service_site'] ?? '', $message);
+            $message = str_replace('[Camp Location]', $serviceSiteData['service_site'] ?? '', $message);
+            $message = str_replace('[اسم العامل]', $serviceSiteData['workername_ar'] ?? '', $message);
+            $message = str_replace('[Worker Name]', $serviceSiteData['workername_en'] ?? '', $message);
+            $message = str_replace('[رقم هاتف العامل]', $serviceSiteData['workerphone'] ?? '', $message);
+            $message = str_replace('[Worker Phone]', $serviceSiteData['workerphone'] ?? '', $message);
+        }
         
         // Convert HTML tags to WhatsApp formatting
         $message = str_replace(["<b>", "</b>"], "*", $message); // Bold

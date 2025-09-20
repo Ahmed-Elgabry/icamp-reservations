@@ -55,6 +55,11 @@
                                         @lang('dashboard.view')
                                     </a>
                                 @endcan
+                                @can('meetings.export')
+                                    <a href="{{ route('meetings.export.single', $meeting) }}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-file-earmark-pdf"></i>
+                                    </a>
+                                @endcan
                                 @can('meetings.edit')
                                     <a href="{{ route('meetings.edit', $meeting) }}" class="btn btn-sm btn-warning">
                                         @lang('dashboard.edit')

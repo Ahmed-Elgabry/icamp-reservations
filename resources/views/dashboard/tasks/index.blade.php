@@ -31,7 +31,7 @@
                     <div class="card-toolbar">
                         <!--begin::Add task-->
                         @can('tasks.create')
-                            <a href="{{ route('tasks.create') }}" class="btn btn-primary">@lang('dashboard.create_task')</a>
+                            <a href="{{ route('tasks.create') }}" class="btn btn-primary">@lang('dashboard.add_task')</a>
                         @endcan
                         <!--end::Add task-->
                     </div>

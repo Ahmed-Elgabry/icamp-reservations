@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.app')
-@section('pageTitle', isset($task) ? __('dashboard.edit_task') : __('dashboard.create_task'))
+@section('pageTitle', isset($task) ? __('dashboard.edit_task') : __('dashboard.add_task'))
 
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -13,7 +13,7 @@
                      class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                     <!--begin::Title-->
                     <h1 class="d-flex text-dark fw-bolder fs-3 align-items-center my-1">
-                        {{ isset($task) ? __('dashboard.edit_task') : __('dashboard.create_task') }}
+                        {{ isset($task) ? __('dashboard.edit_task') : __('dashboard.add_task') }}
                     </h1>
                     <!--end::Title-->
                     <!--begin::Separator-->
@@ -43,7 +43,7 @@
                         <!--end::Item-->
                         <!--begin::Item-->
                         <li class="breadcrumb-item text-dark">
-                            {{ isset($task) ? __('dashboard.edit_task') : __('dashboard.create_task') }}
+                            {{ isset($task) ? __('dashboard.edit_task') : __('dashboard.add_task') }}
                         </li>
                         <!--end::Item-->
                     </ul>
@@ -66,7 +66,7 @@
                          aria-controls="kt_account_profile_details">
                         <!--begin::Card title-->
                         <div class="card-title m-0">
-                            <h3 class="fw-bolder m-0">{{ isset($task) ? __('dashboard.edit_task') : __('dashboard.create_task') }}</h3>
+                            <h3 class="fw-bolder m-0">{{ isset($task) ? __('dashboard.edit_task') : __('dashboard.add_task') }}</h3>
                         </div>
                         <!--end::Card title-->
                     </div>
