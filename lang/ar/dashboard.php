@@ -446,7 +446,7 @@ return [
     'address' => 'العنوان',
     'items' => 'عنصر المخزن',
     'firebase_key' => 'Firebase Key',
-    'status' => 'حالة الحجز',
+    'status' => 'الحالة',
     'sender_name' => 'اسم المرسل',
     'insurance_status' => 'حالة التأمين',
     'user_name' => 'اسم المستخدم',
