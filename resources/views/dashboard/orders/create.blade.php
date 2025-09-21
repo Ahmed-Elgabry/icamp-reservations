@@ -1810,8 +1810,6 @@
 
 
     </script>
-@endpush
-
 @push('css')
 <style>
     .ck-editor {
