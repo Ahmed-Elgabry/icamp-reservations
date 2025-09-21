@@ -130,7 +130,7 @@
                     </td>
                     <td>
                       @if(!empty($order->notes))
-                        <button type="button" class="btn btn-sm btn-light-primary btn-notes" data-notes="{{ e($order->notes) }}">
+                        <button type="button" class="btn btn-sm btn-light-primary btn-notes" data-notes="{!! $order->notes !!}">
                           <i class="bi bi-eye"></i>
                         </button>
                       @endif
