@@ -30,7 +30,7 @@
                     <!--begin::Card toolbar-->
                     <div class="card-toolbar">
                         <!--begin::Add task type-->
-                        <a href="{{ route('task-types.create') }}" class="btn btn-primary">@lang('dashboard.create_task_type')</a>
+                        <a href="{{ route('task-types.create') }}" class="btn btn-primary">@lang('dashboard.add_task_type')</a>
                         <!--end::Add task type-->
                     </div>
                     <!--end::Card toolbar-->

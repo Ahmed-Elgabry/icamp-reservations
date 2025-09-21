@@ -725,7 +725,6 @@
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
     <script src="https://cdn.tiny.cloud/1/m181ycw0urzvmmzinvpzqn3nv10wxttgo7gvv77hf6ce6z89/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-
     <script type="text/javascript">
     'use strict';
     document.addEventListener('DOMContentLoaded', function() {
@@ -924,6 +923,8 @@
             })();
 
             /////////////// CKEditor Initialization ///////////////
+            /////////////// Start:samuel work ///////////////
+            // Initialize CKEditor
             let ckEditors = {};
 
             // Initialize Show Price Editor
@@ -1809,4 +1810,21 @@
 
 
     </script>
-@endsection
+@endpush
+
+@push('css')
+<style>
+    .ck-editor {
+        width: 100% !important;
+    }
+    .ck-editor__editable {
+        width: 100% !important;
+    }
+    .ck-editor__top {
+        width: 100% !important;
+    }
+    .ck-editor__main {
+        width: 100% !important;
+    }
+</style>
+@endpush

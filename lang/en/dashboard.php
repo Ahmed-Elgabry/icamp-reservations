@@ -634,14 +634,17 @@ return [
     // Task Management
     'tasks' => 'Tasks',
     'create_task' => 'Create Task',
+    'add_task' => 'Add Task',
     'edit_task' => 'Edit Task',
     'task_created_successfully' => 'Task created successfully',
+    'task_created' => 'Task Created',
     'task_updated_successfully' => 'Task updated successfully',
     'task_deleted_successfully' => 'Task deleted successfully',
     // Task Types
     'task_types' => 'Task Types',
     'task_type' => 'Task Type',
     'create_task_type' => 'Create Task Type',
+    'add_task_type' => 'Add Task Type',
     'edit_task_type' => 'Edit Task Type',
     'task_type_name' => 'Task Type Name',
     'task_type_description' => 'Task Type Description',
@@ -1731,6 +1734,7 @@ return [
     'no_insurance_payment_verified' => 'No Insurance Payment Approved',
     'no_insurance_payment_verified' => 'No Insurance Payment Approved',
     'add_title' => 'Add :page_title',
+    'add_task_title' => 'Add :page_title',
 
 
     // WhatsApp Templates
@@ -1756,6 +1760,9 @@ return [
     'available_placeholders' => 'Available Placeholders',
     'customer_name_placeholder' => 'Will be replaced with customer name',
     'evaluation_link_placeholder' => 'Will be replaced with evaluation survey link',
+    'camp_location_placeholder' => 'Will be replaced with camp location',
+    'worker_name_placeholder' => 'Will be replaced with worker name',
+    'worker_phone_placeholder' => 'Will be replaced with worker phone number',
     'template_status' => 'Status',
     'template_status_updated' => 'Template status updated to :status',
     'activated' => 'activated',
@@ -1818,9 +1825,9 @@ return [
     'currency' => 'AED',      
 
     // Manual WhatsApp Sends
-    'manual_whatsapp_sends' => 'Manual WhatsApp Sends',
+    'manual_whatsapp_sends' => 'Manual WhatsApp Messages',
     'send_manual_message' => 'Send Manual Message',
-    'manual_whatsapp_send_details' => 'Manual WhatsApp Send Details',
+    'manual_whatsapp_send_details' => 'Manual WhatsApp Message Details',
     'message_title' => 'Message Title',
     'enter_message_title' => 'Enter message title',
     'message_title_help' => 'This title is only for display purposes and will not be sent to customers',
@@ -1839,7 +1846,7 @@ return [
     'attachments' => 'Attachments',
     'attachments_help' => 'Upload files (JPG, PNG, PDF, DOC, DOCX) - Max 10MB each',
     'send_messages' => 'Send Messages',
-    'no_manual_sends_found' => 'No manual sends found',
+    'no_manual_sends_found' => 'No manual messages found',
     'basic_information' => 'Basic Information',
     'progress_information' => 'Progress Information',
     'total_messages' => 'Total Messages',
@@ -1851,8 +1858,8 @@ return [
     'success' => 'Success',
     'failed' => 'Failed',
     'error_message' => 'Error Message',
-    'manual_whatsapp_send_created_successfully' => 'Manual WhatsApp send created successfully',
-    'manual_whatsapp_send_creation_failed' => 'Failed to create manual WhatsApp send',
+    'manual_whatsapp_send_created_successfully' => 'Manual WhatsApp message created successfully',
+    'manual_whatsapp_send_creation_failed' => 'Failed to create manual WhatsApp message',
     'download' => 'Download',
     'back' => 'Back',
     'pending' => 'Pending',
