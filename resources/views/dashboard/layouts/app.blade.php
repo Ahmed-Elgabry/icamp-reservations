@@ -24,8 +24,8 @@
 
 	<!-- html5-qrcode -->
 	<script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
-	<!-- CKeditor -->
-    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+	<!-- CKeditor 5 -->
+	<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 
 	<link href="{{asset('css/jquery.toast.css')}}" rel="stylesheet" />
 
@@ -648,7 +648,76 @@
 	</script>
 	@endif
 
-
+	<!-- Horizontal Scroll with Mouse Wheel for Responsive Tables -->
+	<script>
+	$(document).ready(function() {
+		// Function to enable horizontal scrolling with mouse wheel on responsive tables
+		function enableTableHorizontalScroll() {
+			$('.table-responsive').each(function() {
+				const $tableContainer = $(this);
+				const $table = $tableContainer.find('table');
+				
+				// Check if table exists and has content
+				if ($table.length === 0 || !$table[0] || !$tableContainer[0]) {
+					return; // Skip if no table or container found
+				}
+				
+				// Only apply if table is wider than container
+				if ($table[0].scrollWidth > $tableContainer[0].clientWidth) {
+					// Remove existing wheel event to prevent duplicates
+					$tableContainer.off('wheel.tableScroll');
+					
+					$tableContainer.on('wheel.tableScroll', function(e) {
+						// Check if mouse is over the table container
+						if ($(e.target).closest('.table-responsive').length > 0) {
+							// Prevent default vertical scroll
+							e.preventDefault();
+							
+							// Get wheel delta
+							const delta = e.originalEvent.deltaY || e.originalEvent.wheelDelta;
+							
+							// Scroll horizontally
+							this.scrollLeft += delta;
+						}
+					});
+					
+					// Add visual indicator that horizontal scroll is available
+					$tableContainer.css({
+						'cursor': 'grab',
+						'position': 'relative'
+					});
+					
+					// Add scroll indicator
+					if (!$tableContainer.find('.scroll-indicator').length) {
+						$tableContainer.append('<div class="scroll-indicator" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; z-index: 10;">↔</div>');
+					}
+					
+					// Change cursor on hover
+					$tableContainer.off('mouseenter.tableScroll mouseleave.tableScroll');
+					$tableContainer.on('mouseenter.tableScroll', function() {
+						$(this).css('cursor', 'grabbing');
+					});
+					$tableContainer.on('mouseleave.tableScroll', function() {
+						$(this).css('cursor', 'grab');
+					});
+				}
+			});
+		}
+		
+		// Initialize on page load
+		enableTableHorizontalScroll();
+		
+		// Re-initialize when DataTables redraws (for dynamic content)
+		$(document).on('draw.dt', function() {
+			setTimeout(enableTableHorizontalScroll, 100);
+		});
+		
+		// Re-initialize when window resizes
+		$(window).on('resize', function() {
+			setTimeout(enableTableHorizontalScroll, 100);
+		});
+	});
+	</script>
 
 </body>
 <!--end::Body-->

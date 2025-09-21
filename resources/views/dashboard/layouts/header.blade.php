@@ -50,11 +50,13 @@
                     <!--begin::Menu-wrapper-->
                     <div class="btn btn-icon btn-active-light-primary position-relative w-30px h-30px w-md-40px h-md-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
                         <i class="fas fa-bell fs-2"></i>
-                        @if(auth()->user()->unreadNotifications->count() > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-danger">
-                                {{ auth()->user()->unreadNotifications->count() }}
-                            </span>
-                        @endif
+                        @auth
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-danger">
+                                    {{ auth()->user()->unreadNotifications->count() }}
+                                </span>
+                            @endif
+                        @endauth
                     </div>
                     <!--begin::Menu-->
                     <div class="menu menu-sub menu-sub-dropdown menu-column w-350px w-lg-375px" data-kt-menu="true" dir="rtl">
@@ -63,7 +65,9 @@
                             <!--begin::Title-->
                             <h3 class="text-dark fw-bold px-9 mt-10 mb-6 text-end">
                                 @lang('dashboard.notifications')
-                                <span class="fs-8 opacity-75 pe-3">{{ auth()->user()->unreadNotifications->count() }} @lang('dashboard.unread')</span>
+                                @auth
+                                    <span class="fs-8 opacity-75 pe-3">{{ auth()->user()->unreadNotifications->count() }} @lang('dashboard.unread')</span>
+                                @endauth
                             </h3>
                             <!--end::Title-->
                         </div>
@@ -74,6 +78,7 @@
                             <div class="tab-pane fade show active" id="kt_topbar_notifications_1" role="tabpanel">
                                 <!--begin::Items-->
                                 <div class="scroll-y mh-325px my-5 px-8">
+                                @auth
                                     @forelse(auth()->user()->unreadNotifications as $notification)
                                         @php
                                             $data = $notification->data;
@@ -109,6 +114,7 @@
                                             <div class="text-gray-600">@lang('dashboard.no_new_notifications')</div>
                                         </div>
                                     @endforelse
+                                @endauth
                                 </div>
                                 <!--end::Items-->
                                 <!--begin::View more-->
@@ -127,89 +133,91 @@
                     <!--end::Menu-->
                 </div>
                 <!--end::Notifications-->
+                @auth
                 <!--begin::User menu-->
-                <div class="d-flex align-items-center ms-1 ms-lg-3" id="kt_header_user_menu_toggle">
-                    <!--begin::Menu wrapper-->
-                    <div class="cursor-pointer symbol symbol-30px symbol-md-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-                        <img src="{{ auth()->user()->image ? auth()->user()->image : asset('images/logo.png') }}" alt="user" />
-                    </div>
-                    <!--begin::User account menu-->
-                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-primary fw-bold py-4 fs-6 w-275px" data-kt-menu="true">
-                        <!--begin::Menu item-->
-                        <div class="menu-item px-3">
-                            <div class="menu-content d-flex align-items-center px-3">
-                                <!--begin::Avatar-->
-                                <div class="symbol symbol-50px me-5">
-                                    <img alt="Logo" src="{{ auth()->user()->image ? auth()->user()->image : asset('images/logo.png') }}" />
-                                </div>
-                                <!--end::Avatar-->
-                                <!--begin::Username-->
-                                <div class="d-flex flex-column">
-                                    <div class="fw-bolder d-flex align-items-center fs-5">{{ auth()->user()->name }}
+                    <div class="d-flex align-items-center ms-1 ms-lg-3" id="kt_header_user_menu_toggle">
+                        <!--begin::Menu wrapper-->
+                        <div class="cursor-pointer symbol symbol-30px symbol-md-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
+                            <img src="{{ auth()->user()->image ? auth()->user()->image : asset('images/logo.png') }}" alt="user" />
+                        </div>
+                        <!--begin::User account menu-->
+                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-primary fw-bold py-4 fs-6 w-275px" data-kt-menu="true">
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-3">
+                                <div class="menu-content d-flex align-items-center px-3">
+                                    <!--begin::Avatar-->
+                                    <div class="symbol symbol-50px me-5">
+                                        <img alt="Logo" src="{{ auth()->user()->image ? auth()->user()->image : asset('images/logo.png') }}" />
                                     </div>
-                                    <a href="#" class="fw-bold text-muted text-hover-primary fs-7">{{ auth()->user()->email }}</a>
+                                    <!--end::Avatar-->
+                                    <!--begin::Username-->
+                                    <div class="d-flex flex-column">
+                                        <div class="fw-bolder d-flex align-items-center fs-5">{{ auth()->user()->name }}
+                                        </div>
+                                        <a href="#" class="fw-bold text-muted text-hover-primary fs-7">{{ auth()->user()->email }}</a>
+                                    </div>
+                                    <!--end::Username-->
                                 </div>
-                                <!--end::Username-->
                             </div>
-                        </div>
-                        <!--end::Menu item-->
-                        <!--begin::Menu separator-->
-                        <div class="separator my-2"></div>
-                        <!--end::Menu separator-->
+                            <!--end::Menu item-->
+                            <!--begin::Menu separator-->
+                            <div class="separator my-2"></div>
+                            <!--end::Menu separator-->
 
-                        <!--begin::Menu item-->
-                        <div class="menu-item px-5" data-kt-menu-trigger="hover" data-kt-menu-placement="left-start">
-                            <a href="#" class="menu-link px-5">
-                                <span class="menu-title position-relative">@lang('dashboard.language')
-                                <span class="fs-8 rounded bg-light px-3 py-2 position-absolute translate-middle-y top-50 end-0">{{session()->get( 'lang' ) == "en" ? "English" : "العربية"}}
-                            </a>
-                            <!--begin::Menu sub-->
-                            <div class="menu-sub menu-sub-dropdown w-175px py-4">
-                                <!--begin::Menu item-->
-                                <!--begin::Menu item-->
-                                <div class="menu-item px-3 langauge-switcher">
-                                    <a  href="{{route('set-lang','ps')}}"  switchToLang="ps" class="menu-link d-flex px-5  {{ session()->get( 'lang' ) == "ps" ? "active" : ""}}">
-                                    <span class="symbol symbol-20px me-4">
-                                        <img class="rounded-1" src="{{asset('dashboard/assets/media/flags/afghanistan.svg')}}" alt="" />
-                                    </span>البشتو </a>
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-5" data-kt-menu-trigger="hover" data-kt-menu-placement="left-start">
+                                <a href="#" class="menu-link px-5">
+                                    <span class="menu-title position-relative">@lang('dashboard.language')
+                                    <span class="fs-8 rounded bg-light px-3 py-2 position-absolute translate-middle-y top-50 end-0">{{session()->get( 'lang' ) == "en" ? "English" : "العربية"}}
+                                </a>
+                                <!--begin::Menu sub-->
+                                <div class="menu-sub menu-sub-dropdown w-175px py-4">
+                                    <!--begin::Menu item-->
+                                    <!--begin::Menu item-->
+                                    <div class="menu-item px-3 langauge-switcher">
+                                        <a  href="{{route('set-lang','ps')}}"  switchToLang="ps" class="menu-link d-flex px-5  {{ session()->get( 'lang' ) == "ps" ? "active" : ""}}">
+                                        <span class="symbol symbol-20px me-4">
+                                            <img class="rounded-1" src="{{asset('dashboard/assets/media/flags/afghanistan.svg')}}" alt="" />
+                                        </span>البشتو </a>
+                                    </div>
+                                    <!--end::Menu item-->
+                                    <!--begin::Menu item-->
+                                    <div class="menu-item px-3 langauge-switcher">
+                                        <a  href="{{route('set-lang','ar')}}"  switchToLang="ar" class="menu-link d-flex px-5  {{ session()->get( 'lang' ) == "ar" ? "active" : ""}}">
+                                        <span class="symbol symbol-20px me-4">
+                                            <img class="rounded-1" src="{{asset('dashboard/assets/media/flags/saudi-arabia.svg')}}" alt="" />
+                                        </span>العربية</a>
+                                    </div>
+                                    <!--end::Menu item-->
+                                    <div class="menu-item px-3 langauge-switcher">
+                                        <a  switchToLang="en" href="{{route('set-lang','en')}}" class="menu-link d-flex px-5 {{ session()->get( 'lang' ) == "en" ? "active" : ""}}">
+                                        <span class="symbol symbol-20px me-4">
+                                            <img class="rounded-1" src="{{asset('dashboard/assets/media/flags/united-states.svg')}}" alt="" />
+                                        </span>English</a>
+                                    </div>
+                                    <!--end::Menu item-->
                                 </div>
-                                <!--end::Menu item-->
-                                <!--begin::Menu item-->
-                                <div class="menu-item px-3 langauge-switcher">
-                                    <a  href="{{route('set-lang','ar')}}"  switchToLang="ar" class="menu-link d-flex px-5  {{ session()->get( 'lang' ) == "ar" ? "active" : ""}}">
-                                    <span class="symbol symbol-20px me-4">
-                                        <img class="rounded-1" src="{{asset('dashboard/assets/media/flags/saudi-arabia.svg')}}" alt="" />
-                                    </span>العربية</a>
-                                </div>
-                                <!--end::Menu item-->
-                                <div class="menu-item px-3 langauge-switcher">
-                                    <a  switchToLang="en" href="{{route('set-lang','en')}}" class="menu-link d-flex px-5 {{ session()->get( 'lang' ) == "en" ? "active" : ""}}">
-                                    <span class="symbol symbol-20px me-4">
-                                        <img class="rounded-1" src="{{asset('dashboard/assets/media/flags/united-states.svg')}}" alt="" />
-                                    </span>English</a>
-                                </div>
-                                <!--end::Menu item-->
+                                <!--end::Menu sub-->
                             </div>
-                            <!--end::Menu sub-->
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-5 my-1">
+                                <a href="{{ route('edit-profile') }}" class="menu-link px-5">@lang('dashboard.account_settings')</a>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-5">
+                                <a href="{{ route('logout') }}" class="menu-link px-5">@lang('dashboard.sign_out')</a>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu separator-->
+                            <div class="separator my-2"></div>
+                            <!--end::Menu separator-->
                         </div>
-                        <!--end::Menu item-->
-                        <!--begin::Menu item-->
-                        <div class="menu-item px-5 my-1">
-                            <a href="{{ route('edit-profile') }}" class="menu-link px-5">@lang('dashboard.account_settings')</a>
-                        </div>
-                        <!--end::Menu item-->
-                        <!--begin::Menu item-->
-                        <div class="menu-item px-5">
-                            <a href="{{ route('logout') }}" class="menu-link px-5">@lang('dashboard.sign_out')</a>
-                        </div>
-                        <!--end::Menu item-->
-                        <!--begin::Menu separator-->
-                        <div class="separator my-2"></div>
-                        <!--end::Menu separator-->
+                        <!--end::User account menu-->
+                        <!--end::Menu wrapper-->
                     </div>
-                    <!--end::User account menu-->
-                    <!--end::Menu wrapper-->
-                </div>
+                @endauth
                 <!--end::User menu-->
                 <!--begin::Header menu toggle-->
                 <div class="d-flex align-items-center d-lg-none ms-2 me-n3" title="Show header menu">
@@ -232,19 +240,21 @@
     </div>
     <!--end::Container-->
 </div>
-<script>
-    function markNotificationAsRead(notificationId, url) {
-        fetch('/notifications/' + notificationId + '/read', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            }
-        })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = url;
+@auth
+    <script>
+        function markNotificationAsRead(notificationId, url) {
+            fetch('/notifications/' + notificationId + '/read', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
                 }
-            });
-    }
-</script>
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = url;
+                    }
+                });
+        }
+    </script>
+@endauth

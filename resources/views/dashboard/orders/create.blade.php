@@ -137,8 +137,35 @@
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
                                 <div class="col-lg-8">
-                                <textarea name="notes" class="form-control form-control-lg form-control-solid"
-                                          placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
+                                    <input type="hidden" name="internal_note_id" id="internal_note_id" value="{{ $selectedInternalNote->id ?? '' }}">
+                                    
+                                    <!-- Container for the selected note badge -->
+                                    <select id="internalNoteSelect" name="internal_note_id" class="form-select form-select-lg form-select-solid" data-placeholder="@lang('dashboard.choose')">
+                                        <option value="">@lang('dashboard.choose')</option>
+                                        @if(isset($internalNotes) && count($internalNotes))
+                                            @foreach($internalNotes as $in)
+                                                <?php 
+                                                    $isSelected = (isset($selectedInternalNote) && (is_object($selectedInternalNote) ? $selectedInternalNote->id : $selectedInternalNote) == $in->id);
+                                                    if ($isSelected) {
+                                                        // Ensure the note content is set in the hidden field
+                                                        $noteContent = $in->note_content;
+                                                        // Also set the selected attribute directly
+                                                        $selectedAttr = 'selected="selected"';
+                                                    } else {
+                                                        $selectedAttr = '';
+                                                    }
+                                                ?>
+                                                <option value="{{ $in->id }}" 
+                                                    data-name="{{ $in->note_name }}" 
+                                                    data-content="{!! $in->note_content !!}"
+                                                    {!! $selectedAttr !!}>
+                                                    {{ $in->note_name }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+
+                                    <textarea id="internalNoteField" name="notes" class="form-control form-control-lg form-control-solid d-none" placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
                                 </div>
                             </div>
 
@@ -175,25 +202,30 @@
                                     <select name="status" class="form-select form-select-lg form-select-solid" id="status">
                                         <option value="pending_and_show_price"
                                                 title="@lang('dashboard.pending_and_show_price_desc')"
+                                                data-badge="<span class='badge badge-warning'>@lang('dashboard.pending_and_show_price_desc')</span>"
                                             {{ isset($order) && $order->status == 'pending_and_show_price' ? 'selected' : '' }}>
-                                            @lang('dashboard.pending_and_show_price_desc')
+                                            <span class='badge badge-warning'>@lang('dashboard.pending_and_show_price_desc')</span>
                                         </option>
                                         <option value="pending_and_Initial_reservation"
                                                 title="@lang('dashboard.pending_and_Initial_reservation_desc')"
+                                                data-badge="<span class='badge badge-info'>@lang('dashboard.pending_and_Initial_reservation')</span>"
                                             {{ isset($order) && $order->status == 'pending_and_Initial_reservation' ? 'selected' : '' }}>
-                                            @lang('dashboard.pending_and_Initial_reservation')
+                                            <span class='badge badge-info'>@lang('dashboard.pending_and_Initial_reservation')</span>
                                         </option>
                                         <option value="approved" title="@lang('dashboard.approved_desc')"
+                                                data-badge="<span class='badge badge-success'>@lang('dashboard.approved')</span>"
                                             {{ isset($order) && $order->status == 'approved' ? 'selected' : '' }}>
-                                            @lang('dashboard.approved')
+                                            <span class='badge badge-success'>@lang('dashboard.approved')</span>
                                         </option>
                                         <option value="canceled" title="@lang('dashboard.canceled_desc')"
+                                                data-badge="<span class='badge badge-danger'>@lang('dashboard.canceled')</span>"
                                             {{ isset($order) && $order->status == 'canceled' ? 'selected' : '' }}>
-                                            @lang('dashboard.canceled')
+                                            <span class='badge badge-danger'>@lang('dashboard.canceled')</span>
                                         </option>
                                         <option value="delayed" title="@lang('dashboard.delayed')"
+                                                data-badge="<span class='badge badge-secondary'>@lang('dashboard.delayed')</span>"
                                             {{ isset($order) && $order->status == 'delayed' ? 'selected' : '' }}>
-                                            @lang('dashboard.delayed')
+                                            <span class='badge badge-secondary'>@lang('dashboard.delayed')</span>
                                         </option>
                                         <option value="completed" title="@lang('dashboard.completed_desc')"
                                             {{ isset($order) && $order->status == 'completed' ? 'selected' : '' }}>
@@ -590,14 +622,117 @@
         </div>
     </div>
     <!--end::Modal - Additional Notes-->
+    
+    <!--begin::Modal - Edit Internal Note (Quill) -->
+    <div class="modal fade" id="internalNoteEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-900px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="fw-bolder">@lang('dashboard.edit_internal_note')</h2>
+                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="svg-icon svg-icon-2x"></span>
+                    </div>
+                </div>
+                <div class="modal-body py-10 px-lg-15">
+                    <div id="internalNoteQuillToolbar">
+                        <span class="ql-formats">
+                            <button type="button" id="toggleDirection" class="btn btn-sm btn-icon" title="Toggle Text Direction">
+                                <i class="fas fa-text-width"></i>
+                            </button>
+                            <select class="ql-font"></select>
+                            <select class="ql-size"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-bold"></button>
+                            <button class="ql-italic"></button>
+                            <button class="ql-underline"></button>
+                            <button class="ql-strike"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <select class="ql-color"></select>
+                            <select class="ql-background"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-script" value="sub"></button>
+                            <button class="ql-script" value="super"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-header" value="1"></button>
+                            <button class="ql-header" value="2"></button>
+                            <button class="ql-blockquote"></button>
+                            <button class="ql-code-block"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-list" value="ordered"></button>
+                            <button class="ql-list" value="bullet"></button>
+                            <button class="ql-indent" value="-1"></button>
+                            <button class="ql-indent" value="+1"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-direction" value="rtl"></button>
+                            <select class="ql-align"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-link"></button>
+                            <button class="ql-clean"></button>
+                        </span>
+                    </div>
+                    <div id="internalNoteQuill" style="height:50vh;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">@lang('dashboard.cancel')</button>
+                    <button type="button" id="updateInternalNoteBtn" class="btn btn-primary">@lang('dashboard.update')</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end::Modal - Edit Internal Note (Quill) -->
+    
+    <!-- Inline styles for internal note Select2 positioning and sizing -->
+    <style>
+        /* Allow the rendered content to define the height and wrap lines */
+        #internalNoteSelect + .select2 .select2-selection--single {
+            position: relative;
+            min-height: 56px; /* increase as needed to fit the badge comfortably */
+            height: auto;
+            padding-top: 6px;
+            padding-bottom: 6px;
+            display: flex;
+            align-items: center;
+        }
+        #internalNoteSelect + .select2 .select2-selection__rendered {
+            white-space: normal;
+            line-height: 1.2;
+            display: block;
+            padding-right: 32px; /* leave room for arrow */
+            overflow: visible; /* avoid clipping the badge */
+        }
+        #internalNoteSelect + .select2 .select2-selection__arrow {
+            height: 100%;
+        }
+        /* Render the content normally (no absolute positioning) so the container grows */
+        span#select2-internalNoteSelect-container {
+            position: static;
+            top: auto;
+            left: auto;
+            right: auto;
+        }
+    </style>
 @endsection
 
 @section('scripts')
+    <!-- Quill assets for Internal Note editor -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
     <script src="https://cdn.tiny.cloud/1/m181ycw0urzvmmzinvpzqn3nv10wxttgo7gvv77hf6ce6z89/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 
     <script type="text/javascript">
+    'use strict';
+    document.addEventListener('DOMContentLoaded', function() {
         (function(){
             const isRTL = "{{ app()->getLocale() }}" === "ar";
+            
+            // Initialize Select2 for all js-select2 elements
             $('.js-select2').each(function(){
                 $(this).select2({
                     width: '100%',
@@ -606,6 +741,7 @@
                 });
             });
 
+            // Status change handler
             $('#status').on('change', function() {
                 if (this.value === 'pending_and_show_price' || this.value === 'pending_and_Initial_reservation') {
                     $('#expired_price_offer').removeClass('d-none');
@@ -617,24 +753,30 @@
                     $('#expired_price_offer,#delayed_reson').addClass('d-none');
                 }
             });
-
+            let first = false ; 
+            // Price recalculation
             function recalcPrice() {
+                console.log(first);
+                if ($('#price').val() > 0 && first) {
+                    first = false ;
+                    return;
+                }
                 let total = 0;
                 $('#service_id option:selected').each(function(){
                     total += parseFloat($(this).data('price')) || 0;
                 });
                 $('#price').val(total.toFixed(2));
+                    console.log(total);
+                    first = false ;
             }
-            // Recalculate only on user-initiated changes (ignore programmatic .trigger('change'))
+            
+            // Recalculate only on user-initiated changes
             $('#service_id').on('change', function(e){
-                if (!e.originalEvent) return; // skip programmatic changes
+                // if (!e.originalEvent) return;
                 recalcPrice();
             });
-            // Recalculate only on user-initiated changes (ignore programmatic .trigger('change'))
-            $('#service_id').on('change', function(e){
-                if (!e.originalEvent) return; // skip programmatic changes
-                recalcPrice();
-            });
+            
+            // Retrieve Registration Form functionality
             $('#btnRetrieveRf').on('click', ()=>{
                 const el = document.getElementById('retrieveRfModal');
                 bootstrap.Modal.getOrCreateInstance(el).show();
@@ -700,13 +842,10 @@
                 $('#rf_id').val(payload.rf_id || '');
                 $('input[name="people_count"]').val(payload.people_count || '');
 
-                // Set price from database if it exists, otherwise calculate from service IDs
                 if (payload.price) {
                     $('#price').val(payload.price);
                 } else {
                     $('#service_id').val(payload.service_ids.map(String)).trigger('change');
-                    // Recalc after programmatic selection from retrieved form
-                    recalcPrice();
                     recalcPrice();
                 }
 
@@ -734,11 +873,7 @@
                 m && m.hide();
             }
 
-            // Add event listener to recalculate price on service ID change
-            $('#service_id').on('change', function () {
-                recalcPrice();
-            });
-
+            // Link prefill functionality
             (function linkPrefill(){
                 const url = new URL(window.location.href);
                 const hasPrefill =
@@ -788,27 +923,100 @@
                 }
             })();
 
-            /////////////// Start:samuel work ///////////////
-            // Initialize TinyMCE
-            const editorConfig = {
-                plugins: 'link lists code',
-                toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link',
-                menubar: false,
-                height: '50vh',
-                skin: 'oxide',
-                content_css: 'default',
-                setup: function(editor) {
-                    editor.on('change', function() {
-                        editor.save();
-                    });
-                }
-            };
+            /////////////// CKEditor Initialization ///////////////
+            let ckEditors = {};
 
-            // Initialize editors
-            tinymce.init({ ...editorConfig, selector: '#showPriceEditor' });
-            tinymce.init({ ...editorConfig, selector: '#orderDataEditor' });
-            tinymce.init({ ...editorConfig, selector: '#invoiceEditor' });
-            tinymce.init({ ...editorConfig, selector: '#receiptEditor' });
+            // Initialize Show Price Editor
+            ClassicEditor
+                .create(document.querySelector('#showPriceEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['showPriceEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Show Price Editor error:', error);
+                });
+
+            // Initialize Order Data Editor
+            ClassicEditor
+                .create(document.querySelector('#orderDataEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['orderDataEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Order Data Editor error:', error);
+                });
+
+            // Initialize Invoice Editor
+            ClassicEditor
+                .create(document.querySelector('#invoiceEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['invoiceEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Invoice Editor error:', error);
+                });
+
+            // Initialize Receipt Editor
+            ClassicEditor
+                .create(document.querySelector('#receiptEditor'), {
+                    toolbar: {
+                        items: [
+                            'bold', 'italic', 'underline', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'link', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    height: '50vh'
+                })
+                .then(editor => {
+                    editor.editing.view.change(writer => {
+                        writer.setStyle('height', '50vh', editor.editing.view.document.getRoot());
+                    });
+                    ckEditors['receiptEditor'] = editor;
+                })
+                .catch(error => {
+                    console.error('Receipt Editor error:', error);
+                });
 
             // Additional notes modal functionality
             const additionalNotesModal = new bootstrap.Modal(document.getElementById('additionalNotesModal'));
@@ -821,31 +1029,42 @@
                 receipt: false
             };
 
-            // Load existing data if any
             function loadExistingData() {
-                tinymce.get('showPriceEditor').setContent($('#show_price_notes').val() || '');
-                tinymce.get('orderDataEditor').setContent($('#order_data_notes').val() || '');
-                tinymce.get('invoiceEditor').setContent($('#invoice_notes').val() || '');
-                tinymce.get('receiptEditor').setContent($('#receipt_notes').val() || '');
+                if (ckEditors['showPriceEditor']) {
+                    ckEditors['showPriceEditor'].setData($('#show_price_notes').val() || '');
+                }
+                if (ckEditors['orderDataEditor']) {
+                    ckEditors['orderDataEditor'].setData($('#order_data_notes').val() || '');
+                }
+                if (ckEditors['invoiceEditor']) {
+                    ckEditors['invoiceEditor'].setData($('#invoice_notes').val() || '');
+                }
+                if (ckEditors['receiptEditor']) {
+                    ckEditors['receiptEditor'].setData($('#receipt_notes').val() || '');
+                }
             }
 
-            // Open modal
             $('#additional-notes-btn').click(function() {
                 loadExistingData();
                 additionalNotesModal.show();
             });
 
-            // Save additional notes
             $('#saveAdditionalNotes').click(function() {
-                // Update hidden fields with editor content
-                $('#show_price_notes').val(tinymce.get('showPriceEditor').getContent());
-                $('#order_data_notes').val(tinymce.get('orderDataEditor').getContent());
-                $('#invoice_notes').val(tinymce.get('invoiceEditor').getContent());
-                $('#receipt_notes').val(tinymce.get('receiptEditor').getContent());
+                if (ckEditors['showPriceEditor']) {
+                    $('#show_price_notes').val(ckEditors['showPriceEditor'].getData());
+                }
+                if (ckEditors['orderDataEditor']) {
+                    $('#order_data_notes').val(ckEditors['orderDataEditor'].getData());
+                }
+                if (ckEditors['invoiceEditor']) {
+                    $('#invoice_notes').val(ckEditors['invoiceEditor'].getData());
+                }
+                if (ckEditors['receiptEditor']) {
+                    $('#receipt_notes').val(ckEditors['receiptEditor'].getData());
+                }
 
                 additionalNotesModal.hide();
 
-                // Show success message
                 Swal.fire({
                     text: "{{ __('dashboard.additional_notes_saved') }}",
                     icon: "success",
@@ -863,22 +1082,20 @@
                 if (customerId) {
                     $.get('/orders/check-customer-notices/' + customerId, function(response) {
                         if (response.hasNotices) {
-                            // Detect current language direction
                             const textAlign = isRTL ? 'right' : 'left';
 
                             let noticeContent = `<div style="text-align: ${textAlign}; font-size: 14px; line-height: 1.6;">`;
                             response.notices.forEach(notice => {
                                 noticeContent += `
-                        <div style="margin-bottom: 15px; padding: 12px; background: #fdfdfd; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                            <p style="margin: 0 0 6px 0; font-weight: bold; color: #333;">
-                                {{ __('dashboard.notice_label') }}:
-                            </p>
-                            <p style="margin: 0 0 8px 0; color: #555;">${notice.content}</p>
-                            <p style="margin: 0; font-size: 12px; color: #888;">
-                                {{ __('dashboard.created_by_at', ['name' => '${notice.created_by}', 'date' => '${notice.created_at}']) }}
-                                </p>
-                            </div>
-`;
+                                    <div style="margin-bottom: 15px; padding: 12px; background: #fdfdfd; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                        <p style="margin: 0 0 6px 0; font-weight: bold; color: #333;">
+                                            {{ __('dashboard.notice_label') }}:
+                                        </p>
+                                        <p style="margin: 0 0 8px 0; color: #555;">${notice.content}</p>
+                                        <p style="margin: 0; font-size: 12px; color: #888;">
+                                            {{ __('dashboard.created_by_at', ['name' => '${notice.created_by}', 'date' => '${notice.created_at}']) }}
+                                        </p>
+                                    </div>`;
                             });
                             noticeContent += '</div>';
 
@@ -900,42 +1117,35 @@
             // Email modal functionality
             const sendEmailModal = new bootstrap.Modal(document.getElementById('sendEmailModal'));
 
-            // Open email modal
             $('#send-email-btn').click(function() {
                 sendEmailModal.show();
             });
 
-            // Send email
             $('#sendEmailSubmit').click(function() {
                 const formData = new FormData();
                 const documents = [];
                 const receipts = [];
 
-                // Get main documents
                 $('input[name="documents[]"]:checked').each(function() {
                     documents.push($(this).val());
                     formData.append('documents[]', $(this).val());
                 });
 
-                // Get addon receipts
                 $('input[name="receipts[addon][]"]:checked').each(function() {
                     receipts.push({type: 'addon', id: $(this).val()});
                     formData.append('receipts[addon][]', $(this).val());
                 });
 
-                // Get payment receipts
                 $('input[name="receipts[payment][]"]:checked').each(function() {
                     receipts.push({type: 'payment', id: $(this).val()});
                     formData.append('receipts[payment][]', $(this).val());
                 });
 
-                // Get warehouse receipts
                 $('input[name="receipts[warehouse][]"]:checked').each(function() {
                     receipts.push({type: 'warehouse', id: $(this).val()});
                     formData.append('receipts[warehouse][]', $(this).val());
                 });
 
-                // Check if at least one document is selected
                 if (documents.length === 0 && receipts.length === 0) {
                     Swal.fire({
                         text: "{{ __('dashboard.please_select_at_least_one_document') }}",
@@ -952,7 +1162,6 @@
                 const orderId = $('input[name="order_id"]').val();
                 formData.append('_token', $('input[name="_token"]').val());
 
-                // Show loading indicator
                 $('#sendEmailSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __("dashboard.sending") }}');
 
                 $.ajax({
@@ -999,24 +1208,20 @@
             // WhatsApp modal functionality
             const sendWhatsAppModal = new bootstrap.Modal(document.getElementById('sendWhatsAppModal'));
 
-            // Open WhatsApp modal
             $('#send-whatsapp-btn').click(function() {
                 sendWhatsAppModal.show();
             });
 
-            // Send WhatsApp
             $('#sendWhatsAppSubmit').click(function() {
                 const formData = new FormData();
                 const templates = [];
                 const receipts = [];
 
-                // Get selected templates
                 $('input[name="templates[]"]:checked').each(function() {
                     templates.push($(this).val());
                     formData.append('templates[]', $(this).val());
                 });
 
-                // Get receipt selections (same logic as email)
                 $('input[name^="receipts[addon][]"]:checked').each(function() {
                     const addonId = $(this).val();
                     if (!receipts.addon) receipts.addon = [];
@@ -1038,7 +1243,6 @@
                     formData.append('receipts[warehouse][]', itemId);
                 });
 
-                // Check if at least one template is selected
                 if (templates.length === 0 && Object.keys(receipts).length === 0) {
                     Swal.fire({
                         text: "{{ __('dashboard.please_select_at_least_one_template') }}",
@@ -1055,7 +1259,6 @@
                 const orderId = $('input[name="order_id"]').val();
                 formData.append('_token', $('input[name="_token"]').val());
 
-                // Show loading indicator
                 $('#sendWhatsAppSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __("dashboard.sending") }}');
 
                 $.ajax({
@@ -1099,7 +1302,488 @@
                 });
             });
 
-            /////////////// End:samuel work ///////////////
-        })();
+            /////////////// Internal Note System (Merged) ///////////////
+            let internalNoteQuill = null;
+            let currentNoteContent = '';
+            let currentNoteDirection = 'ltr';
+            const isEditingOrder = "{{ isset($order) && $order->exists }}" === "1";
+            
+            // Initialize internal note system
+            function initializeInternalNoteSystem() {
+                const $select = $('#internalNoteSelect');
+                const $hiddenNoteField = $('#internalNoteField');
+                const $noteIdField = $('#internal_note_id');
+                
+                // Initialize Select2
+                initializeInternalNoteSelect2($select);
+                
+                // Initialize Quill editor when modal opens
+                initializeQuillEditor();
+                
+                // Set initial values if editing an order
+                if (isEditingOrder) {
+                    loadExistingOrderNote();
+                }
+                
+                // Bind event handlers
+                bindInternalNoteEventHandlers();
+            }
+            
+            // Initialize Select2 with custom templates for internal notes
+            function initializeInternalNoteSelect2($select) {
+                if ($select.data('select2')) {
+                    $select.select2('destroy');
+                }
+                
+                $select.select2({
+                    width: '100%',
+                    placeholder: "{{ __('dashboard.choose') }}",
+                    allowClear: true,
+                    dir: isRTL ? 'rtl' : 'ltr',
+                    
+                    // Template for dropdown items
+                    templateResult: function(state) {
+                        if (!state.id) return state.text;
+                        return $('<span>').text(state.text);
+                    },
+                    
+                    // Template for selected item (with edit/delete buttons)
+                    templateSelection: function(state) {
+                        if (!state.id) {
+                            return $('<span>').text(state.text || "{{ __('dashboard.choose') }}");
+                        }
+                        
+                        const $element = $(state.element);
+                        const name = $element.data('name') || state.text;
+                        
+                        const $badge = $('<span class="d-inline-flex align-items-center gap-2">');
+                        $badge.html(`
+                            <span class="badge bg-secondary text-dark px-2 py-1 d-inline-flex align-items-center gap-2">
+                                <span class="note-name">${escapeHtml(name)}</span>
+                                <span class="internal-note-actions d-inline-flex align-items-center">
+                                    <button type="button" class="btn-edit-internal p-0 border-0" title="{{ __('dashboard.edit') }}">
+                                        <span class="btn btn-sm btn-light"><i class="fas fa-edit"></i></span>
+                                    </button>
+                                    <button type="button" class="btn-remove-internal p-0 border-0" title="{{ __('dashboard.remove') }}">
+                                        <span class="btn btn-sm btn-danger"><i class="fas fa-times"></i></span>
+                                    </button>
+                                </span>
+                            </span>
+                        `);
+                        
+                        return $badge;
+                    },
+                    
+                    escapeMarkup: function(markup) {
+                        return markup;
+                    }
+                });
+            }
+            
+            // Initialize Quill editor
+            function initializeQuillEditor() {
+                const modalEl = document.getElementById('internalNoteEditModal');
+                if (!modalEl) return;
+                
+                const modal = new bootstrap.Modal(modalEl);
+                
+                modalEl.addEventListener('shown.bs.modal', function() {
+                    if (!internalNoteQuill) {
+                        const quillEl = document.getElementById('internalNoteQuill');
+                        if (quillEl) {
+                            internalNoteQuill = new Quill(quillEl, {
+                                theme: 'snow',
+                                modules: {
+                                    toolbar: '#internalNoteQuillToolbar'
+                                },
+                                placeholder: "{{ __('dashboard.enter_note_content') }}",
+                                bounds: document.body
+                            });
+                            
+                            loadContentIntoQuill();
+                        }
+                    } else {
+                        loadContentIntoQuill();
+                    }
+                });
+            }
+            
+            // Load content into Quill editor
+            function loadContentIntoQuill() {
+                if (!internalNoteQuill) return;
+                
+                const editorEl = internalNoteQuill.root;
+                
+                if (currentNoteContent) {
+                    internalNoteQuill.clipboard.dangerouslyPasteHTML(currentNoteContent);
+                } else {
+                    internalNoteQuill.setText('');
+                }
+                
+                editorEl.style.direction = currentNoteDirection;
+                $('#toggleDirection').toggleClass('active', currentNoteDirection === 'rtl');
+            }
+            
+            // Load existing order note if editing
+            function loadExistingOrderNote() {
+                @if(isset($order) && $order->exists && !empty($order->notes))
+                    currentNoteContent = `{!! addslashes($order->notes) !!}`;
+                    currentNoteDirection = "{{ $order->internal_note_direction ?? 'ltr' }}";
+                    
+                    $('#internalNoteField').val(currentNoteContent);
+                    
+                    @if(isset($order->internal_note_id))
+                        $('#internalNoteSelect').val("{{ $order->internal_note_id }}").trigger('change');
+                    @endif
+                @endif
+            }
+            
+            // Bind all internal note event handlers
+            function bindInternalNoteEventHandlers() {
+                const $select = $('#internalNoteSelect');
+                
+                // Handle selection change
+                $select.on('change', handleNoteSelectionChange);
+                
+                // FIXED: Enhanced event handling for edit button
+                $(document).on('click', '.btn-edit-internal', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    // Force close the dropdown
+                    const $select = $('#internalNoteSelect');
+                    if ($select.data('select2')) {
+                        $select.select2('close');
+                    }
+                    
+                    // Small delay to ensure dropdown is closed
+                    setTimeout(() => {
+                        const modalEl = document.getElementById('internalNoteEditModal');
+                        if (modalEl) {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                            modal.show();
+                        }
+                    }, 100);
+                    
+                    return false;
+                });
+                
+                // FIXED: Enhanced event handling for remove button
+                $(document).on('click', '.btn-remove-internal', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    // Force close the dropdown
+                    const $select = $('#internalNoteSelect');
+                    if ($select.data('select2')) {
+                        $select.select2('close');
+                    }
+                    
+                    // Confirm removal with delay
+                    setTimeout(() => {
+                        if (confirm("{{ __('dashboard.confirm_remove_note') }}")) {
+                            $select.val(null).trigger('change');
+                            currentNoteContent = '';
+                            currentNoteDirection = 'ltr';
+                            $('#internal_note_id').val('');
+                            $('#internalNoteField').val('');
+                            
+                            if (internalNoteQuill) {
+                                internalNoteQuill.setText('');
+                            }
+                        }
+                    }, 100);
+                    
+                    return false;
+                });
+                
+                // Handle direction toggle
+                $(document).on('click', '#toggleDirection', handleDirectionToggle);
+                
+                // Handle update button in modal
+                $('#updateInternalNoteBtn').on('click', handleUpdateNote);
+                
+                // CRITICAL FIX: Prevent Select2 from opening when clicking buttons
+                $(document).on('mousedown', '.btn-edit-internal, .btn-remove-internal', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    // Temporarily disable Select2 opening
+                    const $select = $('#internalNoteSelect');
+                    if ($select.data('select2')) {
+                        const select2Instance = $select.data('select2');
+                        const originalOpen = select2Instance.open;
+                        select2Instance.open = function() { /* Do nothing */ };
+                        
+                        // Re-enable after a short delay
+                        setTimeout(() => {
+                            select2Instance.open = originalOpen;
+                        }, 200);
+                    }
+                    
+                    return false;
+                });
+                
+                // Additional fix: Handle click on the entire badge area
+                $(document).on('click', '.select2-selection__rendered .badge', function(e) {
+                    // Only prevent default if clicking on buttons
+                    if ($(e.target).closest('.btn-edit-internal, .btn-remove-internal').length > 0) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                });
+            }
+            
+            // Handle note selection change
+            function handleNoteSelectionChange() {
+                const $select = $('#internalNoteSelect');
+                const noteId = $select.val();
+                
+                $('#internal_note_id').val(noteId || '');
+                
+                if (noteId) {
+                    const $option = $select.find('option:selected');
+                    
+                    if (!isEditingOrder || !currentNoteContent) {
+                        currentNoteContent = $option.data('content') || '';
+                        currentNoteDirection = $option.data('direction') || 'ltr';
+                        
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = currentNoteContent;
+                        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                        $('#internalNoteField').val(plainText);
+                    }
+                } else {
+                    currentNoteContent = '';
+                    currentNoteDirection = 'ltr';
+                    $('#internalNoteField').val('');
+                }
+            }
+            
+            // Handle direction toggle
+            function handleDirectionToggle() {
+                if (!internalNoteQuill) return;
+                
+                const editorEl = internalNoteQuill.root;
+                currentNoteDirection = (currentNoteDirection === 'ltr') ? 'rtl' : 'ltr';
+                editorEl.style.direction = currentNoteDirection;
+                
+                $(this).toggleClass('active', currentNoteDirection === 'rtl');
+            }
+            
+            // Handle update note from modal
+            function handleUpdateNote() {
+                if (!internalNoteQuill) return;
+                
+                currentNoteContent = internalNoteQuill.root.innerHTML;
+                const plainText = internalNoteQuill.getText().trim();
+                
+                $('#internalNoteField').val(plainText);
+                
+                if (!$('#internal_note_html_content').length) {
+                    $('<input type="hidden" id="internal_note_html_content" name="internal_note_content">').appendTo('form');
+                }
+                $('#internal_note_html_content').val(currentNoteContent);
+                
+                if (!$('#internal_note_direction').length) {
+                    $('<input type="hidden" id="internal_note_direction" name="internal_note_direction">').appendTo('form');
+                }
+                $('#internal_note_direction').val(currentNoteDirection);
+                
+                const modalEl = document.getElementById('internalNoteEditModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) {
+                    modal.hide();
+                }
+                
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: "{{ __('dashboard.note_updated') }}",
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            }
+            
+            // Helper function to escape HTML
+            function escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+            
+            // Initialize internal note system when ready
+            $(document).ready(function() {
+                // Initialize internal note system only if the element exists
+                if ($('#internalNoteSelect').length > 0) {
+                    initializeInternalNoteSystem();
+                }
+   $('#status').on('change', function() {
+                if (this.value === 'pending_and_show_price' || this.value === 'pending_and_Initial_reservation') {
+                    $('#expired_price_offer').removeClass('d-none');
+                    $('#delayed_reson').addClass('d-none');
+                } else if (this.value === 'delayed') {
+                    $('#delayed_reson').removeClass('d-none');
+                    $('#expired_price_offer').addClass('d-none');
+                } else {
+                    $('#expired_price_offer,#delayed_reson').addClass('d-none');
+                }
+            });
+
+            // function recalcPrice() {
+            //     let total = 0;
+            //     $('#service_id option:selected').each(function(){
+            //         total += parseFloat($(this).data('price')) || 0;
+            //     });
+            //     $('#price').val(total.toFixed(2));
+            // }
+            // // Recalculate only on user-initiated changes (ignore programmatic .trigger('change'))
+            // $('#service_id').on('change', function(e){
+            //     if (!e.originalEvent) return; // skip programmatic changes
+            //     recalcPrice();
+            // });
+            $('#btnRetrieveRf').on('click', ()=>{
+                const el = document.getElementById('retrieveRfModal');
+                bootstrap.Modal.getOrCreateInstance(el).show();
+            });
+                // Initialize CKEditor 5 for notes editors
+                if (typeof ClassicEditor !== 'undefined') {
+                    // Initialize additional notes editors in modal
+                    const editors = ['showPriceEditor', 'orderDataEditor', 'invoiceEditor', 'receiptEditor'];
+                    editors.forEach(function(editorId) {
+                        const element = document.getElementById(editorId);
+                        if (element) {
+                            ClassicEditor
+                                .create(element, {
+                                    toolbar: {
+                                        items: [
+                                            'heading', '|',
+                                            'bold', 'italic', 'underline', 'strikethrough', '|',
+                                            'fontSize', 'fontColor', 'fontBackgroundColor', '|',
+                                            'bulletedList', 'numberedList', '|',
+                                            'outdent', 'indent', '|',
+                                            'alignment', '|',
+                                            'link', 'blockQuote', 'insertTable', '|',
+                                            'undo', 'redo'
+                                        ],
+                                        shouldNotGroupWhenFull: false
+                                    },
+                                    language: '{{ app()->getLocale() }}',
+                                    table: {
+                                        contentToolbar: [
+                                            'tableColumn', 'tableRow', 'mergeTableCells',
+                                            'tableProperties', 'tableCellProperties'
+                                        ]
+                                    },
+                                    heading: {
+                                        options: [
+                                            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                                            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                                            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                                            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                                        ]
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error initializing CKEditor:', error);
+                                });
+                        }
+                    });
+
+                    // Initialize client notes editor if it exists
+                    const clientNotesElement = document.querySelector('textarea[name="client_notes"]');
+                    if (clientNotesElement) {
+                        ClassicEditor
+                            .create(clientNotesElement, {
+                                toolbar: {
+                                    items: [
+                                        'heading', '|',
+                                        'bold', 'italic', 'underline', 'strikethrough', '|',
+                                        'fontSize', 'fontColor', 'fontBackgroundColor', '|',
+                                        'bulletedList', 'numberedList', '|',
+                                        'outdent', 'indent', '|',
+                                        'alignment', '|',
+                                        'link', 'blockQuote', 'insertTable', '|',
+                                        'undo', 'redo'
+                                    ],
+                                    shouldNotGroupWhenFull: false
+                                },
+                                language: '{{ app()->getLocale() }}',
+                                table: {
+                                    contentToolbar: [
+                                        'tableColumn', 'tableRow', 'mergeTableCells',
+                                        'tableProperties', 'tableCellProperties'
+                                    ]
+                                },
+                                heading: {
+                                    options: [
+                                        { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                                        { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                                        { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                                        { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                                    ]
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error initializing CKEditor for client notes:', error);
+                            });
+                    }
+
+                    // Initialize refunds notes editor if it exists
+                    const refundsNotesElement = document.querySelector('textarea[name="refunds_notes"]');
+                    if (refundsNotesElement) {
+                        ClassicEditor
+                            .create(refundsNotesElement, {
+                                toolbar: {
+                                    items: [
+                                        'heading', '|',
+                                        'bold', 'italic', 'underline', 'strikethrough', '|',
+                                        'fontSize', 'fontColor', 'fontBackgroundColor', '|',
+                                        'bulletedList', 'numberedList', '|',
+                                        'outdent', 'indent', '|',
+                                        'alignment', '|',
+                                        'link', 'blockQuote', 'insertTable', '|',
+                                        'undo', 'redo'
+                                    ],
+                                    shouldNotGroupWhenFull: false
+                                },
+                                language: '{{ app()->getLocale() }}',
+                                table: {
+                                    contentToolbar: [
+                                        'tableColumn', 'tableRow', 'mergeTableCells',
+                                        'tableProperties', 'tableCellProperties'
+                                    ]
+                                },
+                                heading: {
+                                    options: [
+                                        { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                                        { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                                        { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                                        { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                                    ]
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error initializing CKEditor for refunds notes:', error);
+                            });
+                    }
+                }
+            });
+})();
+});
+
+
     </script>
 @endsection

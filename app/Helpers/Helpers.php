@@ -227,6 +227,39 @@ if (!function_exists('defaultLang')) {
 
 
 
+/**
+ * Get ordered statuses for dashboard display
+ */
+function getOrderedStatuses()
+{
+    return [
+        'approved',
+        'completed',
+        'pending_and_show_price',
+        'pending_and_Initial_reservation',
+        'delayed',
+        'cancelled'
+    ];
+}
+
+/**
+ * Get the appropriate badge color for order status
+ */
+function getStatusBadgeColor($status)
+{
+    $colors = [
+        'pending' => 'warning',
+        'approved' => 'primary',
+        'completed' => 'success',
+        'cancelled' => 'danger',
+        'delayed' => 'dark',
+        'pending_and_show_price' => 'info',
+        'pending_and_Initial_reservation' => 'info',
+    ];
+
+    return $colors[$status] ?? 'secondary';
+}
+
 function pushNotification($tokens, $data, $platforms)
 {
 

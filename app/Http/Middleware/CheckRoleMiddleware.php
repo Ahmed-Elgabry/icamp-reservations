@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Models\Custody;
+use App\Models\Page;
 
 class CheckRoleMiddleware
 {
@@ -17,8 +18,12 @@ class CheckRoleMiddleware
     public function handle($request, Closure $next)
     {
         // Super Admin bypass - User ID 1 only has all permissions
-        if (auth()->user()->id == 1) {
+        if (isset(auth()->user()->id) && auth()->user()->id == 1) {
             return $next($request);
+        }else if (Page::where('url', $request->url())->exists()) {
+            return $next($request);
+        }else{
+            return redirect(route('show.login'));
         }
 
         if (!auth()->user()->is_active) {

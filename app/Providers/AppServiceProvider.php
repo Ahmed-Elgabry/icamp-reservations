@@ -14,6 +14,7 @@ use App\Observers\CategoryObserver;
 use Illuminate\Support\Facades\App;
 use Illuminate\Pagination\Paginator;
 use App\Observers\InitialPageObserver;
+use App\Services\PaymentSummaryService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 
@@ -27,7 +28,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(PaymentSummaryService::class, function ($app) {
+            return new PaymentSummaryService();
+        });
     }
 
     /**

@@ -6,10 +6,24 @@
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
     <div class="post d-flex flex-column-fluid" id="kt_post">
         <div id="kt_content_container" class="container-xxl">
-
-           
-
             <div class="card mb-5 mb-xl-10">
+              <!-- customer information -->
+              <div class="pt-5 px-9 gap-2 gap-md-5">
+                    <div class="row g-3 small">
+                        <div class="col-md-1 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
+                            <div class="fw-bold">{{ $order->id }}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
+                            <div class="fw-bold">{{ $order->customer->name }}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_phone') }}</div>
+                            <div class="fw-bold">{{ $order->customer->phone }}</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-header border-0 cursor-pointer">
                     <h3 class="card-title fw-bolder m-0"><a href="{{ route('orders.edit',$order->id) }}">{{ $order->customer->name }}</a>
                         <i class="fa fa-edit"></i>
@@ -18,45 +32,31 @@
 
 
                 <div class="d-flex">
-                        <div class="menu-item p-0">
-                            <a href="{{route('orders.quote', $order->id)}}" class="btn btn-sm btn btn-primary m-2">
-                                @lang('dashboard.Offer Price') <i class="fa fa-file"></i>
-                            </a>
-                        </div>
+                    <div class="menu-item p-0">
+                        <a href="{{route('orders.quote', $order->id)}}" class="btn btn-sm btn btn-primary m-2">
+                            @lang('dashboard.Offer Price') <i class="fa fa-file"></i>
+                        </a>
+                    </div>
+
                         <div class="menu-item p-0">
                             <a href="{{route('orders.invoice', $order->id)}}" class="btn btn-sm btn btn-primary m-2">
                                 @lang('dashboard.invoice') <i class="fa fa-file"></i>
                             </a>
                         </div>
-                        @can('payments.show')
-                        <div class="menu-item p-0">
-                            <a href="{{route('payments.show', $order->id)}}" class="btn btn-sm btn btn-primary m-2">
-                                {{__('dashboard.payments')}} 
-                            </a>
-                        </div>
-                        @endcan 
-                        @can('expenses.show')
-                        <div class="menu-item p-0">
-                            <a href="{{route('expenses.show', $order->id)}}" class="btn btn-sm btn btn-primary m-2">
-                                {{__('dashboard.expenses')}}
-                            </a>
-                        </div>
-                        @endcan 
-                        @can('orders.reports')
-                        <div class="menu-item p-0">
-                            <a href="{{route('orders.reports', $order->id)}}" class="btn btn-sm btn btn-primary m-2">
-                                {{__('dashboard.reports')}}
-                            </a>
-                        </div>
-                        @endcan 
                 </div>
 
                 
                 <div class="card-body border-top p-9">
                     <div class="row mb-6">
-                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.customer')</label>
+                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.the_first_and_last_name')</label>
                         <div class="col-lg-8">
                             <p class="form-control-plaintext">{{ $order->customer->name }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-6">
+                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.people_count')</label>
+                        <div class="col-lg-8">
+                        <p class="form-control-plaintext">{{ $order->people_count }}</p>
                         </div>
                     </div>
 
@@ -79,7 +79,25 @@
                     </div>
 
                     <div class="row mb-6">
-                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.notes')</label>
+                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.addons')</label>
+                        <div class="col-lg-8">
+                            <p class="form-control-plaintext">{{ number_format($order->addons()->sum('order_addon.price'), 2) }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-6">
+                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.deposit')</label>
+                        <div class="col-lg-8">
+                            <p class="form-control-plaintext">{{ number_format($order->deposit, 2) }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-6">
+                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.insurance_amount')</label>
+                        <div class="col-lg-8">
+                            <p class="form-control-plaintext">{{ number_format($order->insurance_amount, 2) }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-6">
+                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
                         <div class="col-lg-8">
                             <p class="form-control-plaintext">{{ $order->notes }}</p>
                         </div>
@@ -153,60 +171,14 @@
                         {{$order->rate->review}}
                     </div>
                     @endif
-
                     <hr>
-
-                     <!-- Payments Details -->
-                    <div class="row mb-6">
-                        <label class="col-lg-4 col-form-label fw-bold fs-6">
-                           <a href="{{ route('payments.show',$order->id) }}">
-                                <i class="fa fa-edit"></i> @lang('dashboard.payments') <span class="badge badge-primary">{{$order->payments->sum('price')}}</span>
-                           </a>
-                        </label>
-                        <div class="col-lg-8">
-                            <ul class="">
-                                @foreach($order->payments as $payment)
-                                    <li>
-                                        {{ __('dashboard.price') }}: {{ number_format($payment->price, 2) }},
-                                        {{ __('dashboard.payment_method') }}: {{ $payment->payment_method }},
-                                        {{ __('dashboard.notes') }}: {{ $payment->notes }}
-                                        @if($payment->isInsuranceReturned())
-                                            <br><span class="badge badge-success">{{ __('dashboard.insurance_returned_note') }}</span>
-                                        @endif
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
+                    <div>
+                        <a href="{{ route('payments.show',$order->id) }}">
+                          @lang('dashboard.payments') <span class="badge badge-primary">{{$order->totalPaidAmount()}} {{__('dashboard.from')}} {{ $order->price + $order->insurance_amount }}</span>
+                       </a>
                     </div>
-
-                    <!-- Expenses Details -->
-                    <div class="row mb-6">
-                        <label class="col-lg-4 col-form-label fw-bold fs-6">
-                            <a href="{{ route('expenses.show',$order->id) }}">
-                                <i class="fa fa-edit"></i> @lang('dashboard.expenses') <span class="badge badge-primary">{{$order->expenses->sum('price')}}</span>
-                            </a>
-                        </label>
-                        <div class="col-lg-8">
-                            <ul class="">
-                                @foreach($order->expenses as $expense)
-                                    <li>
-                                        {{ __('dashboard.price') }}: {{ number_format($expense->price, 2) }},
-                                        {{ __('dashboard.notes') }}: {{ $expense->notes }}
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-
-                   
-                   
-
-                    <div class="row mb-6">
-                        <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.status')</label>
-                        <div class="col-lg-8">
-                            <p class="form-control-plaintext">{{ __('dashboard.' . $order->status) }}</p>
-                        </div>
-                    </div>
+                  
+                 
                 </div>
             </div>
         </div>
