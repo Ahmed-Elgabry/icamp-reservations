@@ -18,6 +18,7 @@ use App\Models\Addon;
 use App\Models\Order;
 use App\Models\Stock;
 use App\Models\Service;
+use App\Models\InternalNote;
 use App\Models\Customer;
 use App\Models\OrderRate;
 use App\Models\OrderAddon;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\GeneralPayment;
 use App\Models\OrderItem;
+use App\Models\OrderInternalNote;
 use App\Repositories\IUserRepository;
 use App\Repositories\IOrderRepository;
 use Illuminate\Support\Facades\Storage;
@@ -168,9 +170,12 @@ class OrderController extends Controller
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
 
+        $internalNotes = InternalNote::orderBy('created_at', 'desc')->get();
+
         return view('dashboard.orders.create', [
             'customers' => $customers,
             'services' => $services,
+            'internalNotes' => $internalNotes,
         ]);
     }
 
@@ -234,6 +239,7 @@ class OrderController extends Controller
             'expired_price_offer' => 'required_if:status,pending_and_show_price,pending_and_Initial_reservation',
             'created_by' => 'required|exists:users,id',
             'agree' => 'nullable|in:1,0',
+            'internal_note_id' => 'nullable|exists:internal_notes,id',
             'delayed_reson' => 'nullable|string',
             'refunds' => 'nullable|in:1,0',
             'refunds_notes' => 'nullable',
@@ -280,7 +286,20 @@ class OrderController extends Controller
         }
 
         $order = Order::create($validatedData);
-
+        
+        // Create or update the internal note if one was selected
+        if (!empty($validatedData['internal_note_id'])) {
+            $internalNote = InternalNote::find($validatedData['internal_note_id']);
+            if ($internalNote) {
+                OrderInternalNote::updateOrCreate(
+                    ['order_id' => $order->id],
+                    [
+                        'content' => $validatedData['notes'] ?: $internalNote->note_content,
+                        'internal_note_id' => $validatedData['internal_note_id']
+                    ]
+                );
+            }
+        }
         // Distribute the provided total price evenly across selected services
         $servicesData = [];
         $serviceCount = max(count($request->service_ids ?? []), 1);
@@ -330,18 +349,48 @@ class OrderController extends Controller
     {
         $order = $this->orderRepository->findOne($id);
         $this->authorize('update', $order);
+        
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
         $addonsPrice = OrderAddon::where('order_id', $order->id)->sum('price');
+        $internalNotes = InternalNote::orderBy('created_at', 'desc')->get();
+        
+        // Get the order's internal note if it exists
+        $orderInternalNote = OrderInternalNote::with('internalNote')
+            ->where('order_id', $order->id)
+            ->first();
+            
+        $selectedInternalNote = $orderInternalNote ? $orderInternalNote->internal_note_id : null;
+        
+        // If we have an internal note, use its content, otherwise use the order notes
+        $notes = $order->notes;
+        if ($orderInternalNote && $orderInternalNote->content) {
+            $notes = $orderInternalNote->content;
+        } elseif ($orderInternalNote && $orderInternalNote->internalNote) {
+            $notes = $orderInternalNote->internalNote->note_content;
+        }
 
         $additionalNotesData = [
             'notes' => $order->additional_notes,
             'show_price' => $order->show_price,
             'order_data' => $order->order_data,
             'invoice' => $order->invoice,
-            'receipt' => $order->receipt
+            'receipt' => $order->receipt,
+            'internal_note_content' => $notes
         ];
-        return view('dashboard.orders.create', compact('order', 'customers', 'services', 'addonsPrice', 'additionalNotesData'));
+        
+        // Pass the notes to the order object so they'll be displayed in the form
+        $order->notes = $notes;
+        
+        return view('dashboard.orders.create', [
+            'order' => $order,
+            'customers' => $customers,
+            'services' => $services,
+            'addonsPrice' => $addonsPrice,
+            'additionalNotesData' => $additionalNotesData,
+            'internalNotes' => $internalNotes,
+            'selectedInternalNote' => $selectedInternalNote
+        ]);
     }
 
     public function insurance($id)
@@ -366,6 +415,8 @@ class OrderController extends Controller
             'service_ids' => 'required|array',
             'service_ids.*' => 'exists:services,id',
             'price' => 'required|numeric',
+            'internal_note_id' => 'nullable|exists:internal_notes,id',
+            'notes' => 'nullable|string',
             'deposit' => 'nullable|numeric',
             'insurance_amount' => 'required|numeric',
             'notes' => 'nullable|string',
@@ -419,6 +470,23 @@ class OrderController extends Controller
                 ]);
             }
 
+            // Handle internal note update
+            if (!empty($validatedData['internal_note_id'])) {
+                $internalNote = InternalNote::find($validatedData['internal_note_id']);
+                if ($internalNote) {
+                    OrderInternalNote::updateOrCreate(
+                        ['order_id' => $order->id],
+                        [
+                            'content' => $validatedData['notes'] ?: $internalNote->note_content,
+                            'internal_note_id' => $validatedData['internal_note_id']
+                        ]
+                    );
+                }
+            } else {
+                // Remove the internal note if none is selected
+                OrderInternalNote::where('order_id', $order->id)->delete();
+            }
+            
             $order->save();
             
             // Send WhatsApp reservation data message if status changed to approved
@@ -690,6 +758,53 @@ class OrderController extends Controller
         //        $orders = Order::where('status', 'completed')->get()
         $rates = OrderRate::paginate(10);
         return view('dashboard.orders.rate_orders', compact('rates'));
+    }
+
+    public function boardToday(Request $request)
+    {
+        // $this->authorize('viewAny', Order::class);
+        $today = Carbon::today()->toDateString();
+        $todayOrders = Order::with(['customer', 'services', 'payments'])
+            ->whereDate('date', $today)
+            ->latest()
+            ->get();
+
+        return view('dashboard.orders.board', [
+            'activeTab' => 'today',
+            'todayOrders' => $todayOrders,
+            'upcomingOrders' => collect(),
+            'selectedFrom' => $today,
+            'selectedTo' => null,
+            'formAction' => route('reservations.board.today'),
+        ]);
+    }
+
+    public function boardUpcoming(Request $request)
+    {
+        // $this->authorize('viewAny', Order::class);
+        $today = Carbon::today()->toDateString();
+        $dateFrom = $request->query('from', $today);
+        $dateTo = $request->query('to');
+
+        $upcomingQuery = Order::with(['customer', 'services', 'payments'])
+            ->whereDate('date', '>', $dateFrom);
+        if (!empty($dateTo)) {
+            $upcomingQuery->whereDate('date', '<=', $dateTo);
+        }
+        $upcomingOrders = $upcomingQuery
+            ->orderBy('date')
+            ->orderBy('time_from')
+            ->limit(500)
+            ->get();
+
+        return view('dashboard.orders.board', [
+            'activeTab' => 'upcoming',
+            'todayOrders' => collect(),
+            'upcomingOrders' => $upcomingOrders,
+            'selectedFrom' => $dateFrom,
+            'selectedTo' => $dateTo,
+            'formAction' => route('reservations.board.upcoming'),
+        ]);
     }
 
     public function updatesignin(Request $request, $orderId)

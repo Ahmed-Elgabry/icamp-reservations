@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use App\Models\User;
+use App\Models\Survey;
 class SurveyResponse extends Model
 {
     use SoftDeletes;
@@ -26,6 +27,10 @@ class SurveyResponse extends Model
     {
         return $this->belongsTo(Survey::class);
     }
+    public function reservation()
+    {
+        return $this->belongsTo(Order::class , 'reservation_id');
+    }   
 
     public function user()
     {

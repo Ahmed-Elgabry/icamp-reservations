@@ -13,6 +13,7 @@ use App\Http\Controllers\Dashboard\MeetingLocationController;
 use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
 use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\OrderStatusController;
 use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
@@ -20,9 +21,11 @@ use App\Http\Controllers\Dashboard\WhatsappMessageTemplateController;
 use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\StockAdjustmentController ;
 use App\Http\Controllers\Dashboard\ServiceSiteAndCustomerServiceController;
+use App\Http\Controllers\Dashboard\InternalNoteController ;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{Dashboard\CampReportController, OrderSignatureController, RegistrationformController};
+use App\Http\Controllers\Dashboard\PageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -613,6 +616,23 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'type' => 'parent',
         'middleware' => ['auth'],
         'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes', 'orders.registeration-forms', 'orders.registeration-forms.edit', 'orders.registeration-forms.destroy', 'orders.registeration-forms.fetch', 'orders.registeration-forms.fetch', 'orders.customers.check']
+    ]);
+
+    // Reservations board (today default, upcoming as separate route)
+    Route::get('reservations/board', [
+        'uses' => 'OrderController@boardToday',
+        'as' => 'reservations.board',
+        'title' => ['actions.view', 'dashboard.reservations_board']
+    ]);
+    Route::get('reservations/board/today', [
+        'uses' => 'OrderController@boardToday',
+        'as' => 'reservations.board.today',
+        'title' => ['actions.view', 'dashboard.reservations_board']
+    ]);
+    Route::get('reservations/board/upcoming', [
+        'uses' => 'OrderController@boardUpcoming',
+        'as' => 'reservations.board.upcoming',
+        'title' => ['actions.view', 'dashboard.reservations_board']
     ]);
 
     # orders store
@@ -1538,11 +1558,21 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
         ->except('show')
         ->middleware(['auth', 'permission:tasks.index|tasks.create|tasks.edit|tasks.destroy']);
 
+    // Orders -> Tasks listing with filters
+    Route::get('orders/tasks', 'Dashboard\TaskController@ordersTasksIndex')
+        ->name('orders.tasks.index')
+        ->middleware(['auth', 'permission:tasks.index']);
+
     Route::get('tasks/reports', 'Dashboard\TaskController@reports')
         ->name('tasks.reports');
 
     Route::get('tasks/export-reports', 'Dashboard\TaskController@exportReports')
         ->name('tasks.exportReports');
+
+    // Contact Guides
+    Route::resource('contact-guides', App\Http\Controllers\Dashboard\ContactGuideController::class)
+        ->middleware(['auth', 'admin'])
+        ->except(['show']);
 });
 
 // Employee routes
@@ -1669,6 +1699,23 @@ Route::get('camp-reports/{campReport}', 'Dashboard\CampReportController@show')
     ->name('camp-reports.show')->middleware(['auth']);
 Route::get('camp-reports/export/pdf', [CampReportController::class, 'exportPdf'])->name('camp-reports.export');
 
+// Order Status Updates
+Route::post('orders/status', [OrderStatusController::class, 'getOrderStatuses'])
+    ->name('orders.status');
+
+// Order Internal Notes Routes
+Route::post('orders/{order}/internal-notes', [OrderController::class, 'updateInternalNote'])
+    ->name('orders.internal-notes.store')
+    ->middleware(['auth']);
+
+Route::get('orders/{order}/internal-notes', [OrderController::class, 'getInternalNotes'])
+    ->name('orders.internal-notes.index')
+    ->middleware(['auth']);
+    
+Route::delete('orders/{order}/internal-notes/{note}', [OrderController::class, 'deleteInternalNote'])
+    ->name('orders.internal-notes.destroy')
+    ->middleware(['auth']);
+
 Route::resource('meetings', MeetingController::class)
     ->middleware(['auth']);
 Route::resource('meeting-locations', MeetingLocationController::class)
@@ -1776,4 +1823,13 @@ Route::get('service_site_customer_service/{id}/edit', [ServiceSiteAndCustomerSer
 Route::get('service_site_customer_service/create', [ServiceSiteAndCustomerServiceController::class, 'create'])->name('service_site_customer_service.create');
 Route::delete('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('service_site_customer_service.destroy');
 Route::put('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'update'])->name('service_site_customer_service.update');
+
+// Internal notes CRUD (dashboard)
+Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function() {
+    Route::resource('internal-notes', InternalNoteController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
+});
+
+Route::middleware(['web', 'auth'])->group(function(){
+    Route::resource('pages', PageController::class)->except(['show']);
+});
 

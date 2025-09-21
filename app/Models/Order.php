@@ -16,6 +16,8 @@ use App\Models\SurveyEmailLog;
 use App\Models\SurveyResponse;
 use App\Models\TermsSittng;
 use App\Traits\UploadTrait;
+use App\Models\OrderInternalNote;
+use App\Models\InternalNote;
 use App\Models\PreLoginImage;
 use App\Models\PreLogoutImage;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +27,42 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Order extends Model
 {
     use HasFactory, UploadTrait;
-    protected $guarded = [];
+    
+    protected $fillable = [
+        'customer_id',
+        'price',
+        'deposit',
+        'insurance_amount',
+        'notes',
+        'date',
+        'time_from',
+        'time_to',
+        'time_of_receipt',
+        'time_of_receipt_notes',
+        'delivery_time',
+        'delivery_time_notes',
+        'voice_note',
+        'video_note',
+        'image_before_receiving',
+        'image_after_delivery',
+        'status',
+        'refunds',
+        'refunds_notes',
+        'delayed_time',
+        'inventory_withdrawal',
+        'insurance_status',
+        'confiscation_description',
+        'report_text',
+        'show_price_notes',
+        'order_data_notes',
+        'invoice_notes',
+        'receipt_notes',
+        'people_count',
+        "client_notes"
+    ];
+    
+    // Alternatively, you can keep using guarded if you prefer
+    // protected $guarded = [];
 
     public function addHoursCount()
     {
@@ -41,6 +78,14 @@ class Order extends Model
         }
 
         return null; // Return null if one of the time fields is null
+    }
+    
+    /**
+     * Get all internal notes for this order
+     */
+    public function internalNote()
+    {
+        return $this->hasOne(OrderInternalNote::class)->with(['creator', 'internalNote'])->latest();
     }
 
     protected static function boot()
@@ -151,7 +196,27 @@ class Order extends Model
     {
         return $this->hasMany(OrderReport::class);
     }
+    public function internalNotes()
+    {
+        return $this->hasMany(OrderInternalNote::class)->latest();
+    }
 
+    public function latestInternalNote()
+    {
+        return $this->hasOne(OrderInternalNote::class)->latestOfMany();
+    }
+    
+    public function internalNoteTemplates()
+    {
+        return $this->hasManyThrough(
+            InternalNote::class,
+            OrderInternalNote::class,
+            'order_id',
+            'id',
+            'id',
+            'internal_note_id'
+        );
+    }
     public function expenses()
     {
         return $this->hasMany(Expense::class);
