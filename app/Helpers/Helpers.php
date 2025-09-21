@@ -238,7 +238,7 @@ function getOrderedStatuses()
         'pending_and_show_price',
         'pending_and_Initial_reservation',
         'delayed',
-        'cancelled'
+        'canceled'
     ];
 }
 

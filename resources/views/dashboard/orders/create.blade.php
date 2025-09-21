@@ -1445,44 +1445,90 @@
                 // Handle selection change
                 $select.on('change', handleNoteSelectionChange);
                 
-                // FIXED: Enhanced event handling for edit button
-                $(document).on('click', '.btn-edit-internal', function(e) {
+                // Function to handle edit/remove actions without opening dropdown
+                function handleActionButtonClick(e, isRemove = false) {
+                    // Prevent default and stop propagation
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     
-                    // Force close the dropdown
+                    // Get the select2 instance
                     const $select = $('#internalNoteSelect');
-                    if ($select.data('select2')) {
+                    const select2 = $select.data('select2');
+                    
+                    // If select2 is open, close it first
+                    if (select2 && select2.isOpen()) {
                         $select.select2('close');
                     }
                     
-                    // Small delay to ensure dropdown is closed
+                    // Prevent the dropdown from opening
+                    const preventOpen = function(e) {
+                        e.preventDefault();
+                        $select.off('select2:opening', preventOpen);
+                    };
+                    
+                    $select.on('select2:opening', preventOpen);
+                    
+                    // Handle the action after a small delay
                     setTimeout(() => {
-                        const modalEl = document.getElementById('internalNoteEditModal');
-                        if (modalEl) {
-                            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                            modal.show();
+                        // Remove the event handler
+                        $select.off('select2:opening', preventOpen);
+                        
+                        if (isRemove) {
+                            // Handle remove action
+                            if (confirm("{{ __('dashboard.confirm_remove_note') }}")) {
+                                $select.val(null).trigger('change');
+                                currentNoteContent = '';
+                                currentNoteDirection = 'ltr';
+                                $('#internal_note_id').val('');
+                                $('#internalNoteField').val('');
+                                
+                                if (internalNoteQuill) {
+                                    internalNoteQuill.setText('');
+                                }
+                            }
+                        } else {
+                            // Handle edit action
+                            const modalEl = document.getElementById('internalNoteEditModal');
+                            if (modalEl) {
+                                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                                modal.show();
+                            }
                         }
-                    }, 100);
+                    }, 10);
                     
                     return false;
+                }
+                
+                // Edit button handler
+                $(document).on('mousedown', '.btn-edit-internal', function(e) {
+                    return handleActionButtonClick(e, false);
                 });
                 
-                // FIXED: Enhanced event handling for remove button
-                $(document).on('click', '.btn-remove-internal', function(e) {
+                // Remove button handler
+                $(document).on('mousedown', '.btn-remove-internal', function(e) {
+                    return handleActionButtonClick(e, true);
+                });
+                
+                // Handle direction toggle
+                $(document).on('click', '#toggleDirection', handleDirectionToggle);
+                
+                // Handle update button in modal
+                $('#updateInternalNoteBtn').on('click', handleUpdateNote);
+                
+                // Handler for edit/remove buttons
+                $(document).on('mousedown', '.btn-edit-internal, .btn-remove-internal', function(e) {
+                    // Prevent default and stop propagation
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     
-                    // Force close the dropdown
+                    // Get the action type (edit or remove)
+                    const isRemove = $(this).hasClass('btn-remove-internal');
                     const $select = $('#internalNoteSelect');
-                    if ($select.data('select2')) {
-                        $select.select2('close');
-                    }
                     
-                    // Confirm removal with delay
-                    setTimeout(() => {
+                    // Handle the action
+                    if (isRemove) {
                         if (confirm("{{ __('dashboard.confirm_remove_note') }}")) {
                             $select.val(null).trigger('change');
                             currentNoteContent = '';
@@ -1494,45 +1540,22 @@
                                 internalNoteQuill.setText('');
                             }
                         }
-                    }, 100);
-                    
-                    return false;
-                });
-                
-                // Handle direction toggle
-                $(document).on('click', '#toggleDirection', handleDirectionToggle);
-                
-                // Handle update button in modal
-                $('#updateInternalNoteBtn').on('click', handleUpdateNote);
-                
-                // CRITICAL FIX: Prevent Select2 from opening when clicking buttons
-                $(document).on('mousedown', '.btn-edit-internal, .btn-remove-internal', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    
-                    // Temporarily disable Select2 opening
-                    const $select = $('#internalNoteSelect');
-                    if ($select.data('select2')) {
-                        const select2Instance = $select.data('select2');
-                        const originalOpen = select2Instance.open;
-                        select2Instance.open = function() { /* Do nothing */ };
-                        
-                        // Re-enable after a short delay
-                        setTimeout(() => {
-                            select2Instance.open = originalOpen;
-                        }, 200);
+                    } else {
+                        const modalEl = document.getElementById('internalNoteEditModal');
+                        if (modalEl) {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                            modal.show();
+                        }
                     }
                     
                     return false;
                 });
                 
-                // Additional fix: Handle click on the entire badge area
-                $(document).on('click', '.select2-selection__rendered .badge', function(e) {
-                    // Only prevent default if clicking on buttons
-                    if ($(e.target).closest('.btn-edit-internal, .btn-remove-internal').length > 0) {
+                // Prevent Select2 from opening when clicking on the badge
+                $(document).on('select2:opening', '#internalNoteSelect', function(e) {
+                    const target = e.originalEvent && e.originalEvent.target;
+                    if (target && target.closest('.btn-edit-internal, .btn-remove-internal')) {
                         e.preventDefault();
-                        e.stopPropagation();
                         return false;
                     }
                 });
