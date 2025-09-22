@@ -1802,5 +1802,9 @@ return [
     "edit_internal_note" => 'تعديل الملاحظة الداخلية',
     "note_updated" => 'تم تحديث الملاحظة بنجاح',
     "confirm_delete_note" => 'هل أنت متأكد من رغبتك في حذف هذه الملاحظة؟',
+    "contacts_list" => 'جهات الاتصال',
+    "generated_on" => 'تم إنشاء في',
+    "use_template" => 'إستخدام النموذج',
+
 ];
  

@@ -137,35 +137,42 @@
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.internal_notes')</label>
                                 <div class="col-lg-8">
+                                    <!-- Toggle Switch -->
+                                    <div class="form-check form-switch form-check-custom form-check-solid mb-4">
+                                        <label class="form-check-label" for="toggleInternalNote">
+                                            @lang('dashboard.use_template')
+                                        </label>
+                                        <input class="form-check-input" type="checkbox" id="toggleInternalNote" checked>
+                                    </div>
+                                    
                                     <input type="hidden" name="internal_note_id" id="internal_note_id" value="{{ $selectedInternalNote->id ?? '' }}">
                                     
-                                    <!-- Container for the selected note badge -->
-                                    <select id="internalNoteSelect" name="internal_note_id" class="form-select form-select-lg form-select-solid" data-placeholder="@lang('dashboard.choose')">
-                                        <option value="">@lang('dashboard.choose')</option>
-                                        @if(isset($internalNotes) && count($internalNotes))
-                                            @foreach($internalNotes as $in)
-                                                <?php 
-                                                    $isSelected = (isset($selectedInternalNote) && (is_object($selectedInternalNote) ? $selectedInternalNote->id : $selectedInternalNote) == $in->id);
-                                                    if ($isSelected) {
-                                                        // Ensure the note content is set in the hidden field
-                                                        $noteContent = $in->note_content;
-                                                        // Also set the selected attribute directly
-                                                        $selectedAttr = 'selected="selected"';
-                                                    } else {
-                                                        $selectedAttr = '';
-                                                    }
-                                                ?>
-                                                <option value="{{ $in->id }}" 
-                                                    data-name="{{ $in->note_name }}" 
-                                                    data-content="{!! $in->note_content !!}"
-                                                    {!! $selectedAttr !!}>
-                                                    {{ $in->note_name }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-
-                                    <textarea id="internalNoteField" name="notes" class="form-control form-control-lg form-control-solid d-none" placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
+                                    <!-- Container for the selected note -->
+                                    <div id="templateNoteContainer">
+                                        <select id="internalNoteSelect" name="internal_note_id" class="form-select form-select-lg form-select-solid" data-placeholder="@lang('dashboard.choose')">
+                                            <option value="">@lang('dashboard.choose')</option>
+                                            @if(isset($internalNotes) && count($internalNotes))
+                                                @foreach($internalNotes as $in)
+                                                    <?php 
+                                                        $isSelected = (isset($selectedInternalNote) && (is_object($selectedInternalNote) ? $selectedInternalNote->id : $selectedInternalNote) == $in->id);
+                                                        if ($isSelected) {
+                                                            $noteContent = $in->note_content;
+                                                            $selectedAttr = 'selected="selected"';
+                                                        } else {
+                                                            $selectedAttr = '';
+                                                        }
+                                                    ?>
+                                                    <option value="{{ $in->id }}" 
+                                                        data-name="{{ $in->note_name }}" 
+                                                        data-content="{!! $in->note_content !!}"
+                                                        {!! $selectedAttr !!}>
+                                                        {{ $in->note_name }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <textarea id="internalNoteField" name="notes" class="form-control d-none form-control-lg form-control-solid" placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
                                 </div>
                             </div>
 
@@ -728,6 +735,31 @@
     <script type="text/javascript">
     'use strict';
     document.addEventListener('DOMContentLoaded', function() {
+            // Toggle between template select and custom notes using jQuery
+    $(document).on('change', '#toggleInternalNote', function() {
+        const $templateContainer = $('#templateNoteContainer');
+        const $customContainer = $('#customNoteContainer');
+        const $notesTextarea = $('#internalNoteField');
+        
+        if ($(this).is(':checked')) {
+            // Show template select, hide custom notes
+            $templateContainer.removeClass('d-none');
+            $notesTextarea.addClass('d-none');
+        } else {
+            // Hide template select, show custom notes
+            $templateContainer.addClass('d-none');
+            $notesTextarea.removeClass('d-none');
+        }
+    });
+    
+    // Initialize the toggle state on page load
+    $(document).ready(function() {
+        const $toggle = $('#toggleInternalNote');
+        if ($toggle.length) {
+            // Trigger change event to set initial state
+            $toggle.trigger('change');
+        }
+    });
         (function(){
             const isRTL = "{{ app()->getLocale() }}" === "ar";
             
@@ -1770,6 +1802,7 @@
             });
 })();
 });
+
 
 
     </script>

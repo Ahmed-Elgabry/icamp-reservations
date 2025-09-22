@@ -6,13 +6,13 @@
     <style>
         @if(app()->getLocale() == 'ar')
             @font-face {
-                font-family: 'Tajawal';
+                font-family: 'Cairo', sans-serif;
                 font-style: normal;
                 font-weight: 400;
-                src: url('{{ public_path('fonts/Tajawal-Regular.ttf') }}') format('truetype');
+                src: url('{{ public_path('fonts/Cairo-Regular.ttf') }}') format('truetype');
             }
             body {
-                font-family: 'Tajawal', sans-serif;
+                font-family: 'Cairo', sans-serif;
             }
         @else
             body {
