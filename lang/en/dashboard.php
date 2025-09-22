@@ -2108,4 +2108,7 @@ return [
     "edit_internal_note" => 'Edit Internal Note',
     "note_updated" => 'Note Updated Successfully',
     "confirm_delete_note" => 'Are you sure you want to delete this note?',
+    "contacts_list" => 'Contacts List',
+    "generated_on" => 'Generated On',
+    "use_template" => 'Use Template',
 ];

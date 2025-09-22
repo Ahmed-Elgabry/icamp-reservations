@@ -263,7 +263,7 @@
 {{-- Header --}}
     <div class="glass header mb-3">
         <div class="d-flex align-items-center gap-3">
-            <img src="{{ asset('images/logo.png') }}" class="logo" alt="Logo"
+            <img src="{{ asset('images/logo.png') }}" class="logo circle-rounded" alt="Logo" style="max-width: 50px; max-height: 50px;"
                  onerror="this.replaceWith(Object.assign(document.createElement('div'),{textContent:'Company',className:'fw-bold fs-4'}));">
             <div>
                 <div class="fw-bold">

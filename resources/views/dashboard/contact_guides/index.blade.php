@@ -89,7 +89,7 @@
                 <td class="text-center">
                   @if($c->photo)
                     @php
-                        $photoUrl = Storage::exists($c->photo) ? Storage::url($c->photo) : asset('storage/' . $c->photo);
+                        $photoUrl = Storage::url($c->photo);
                     @endphp
                     <a href="#" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#photoModal" data-photo="{{ $photoUrl }}" title="@lang('dashboard.view')">
                       <i class="bi bi-eye"></i>

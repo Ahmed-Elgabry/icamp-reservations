@@ -1006,53 +1006,7 @@
 
                 </div>
 
-                <div class="menu-item">
-
-                    <a href="{{ route('reservations.board.today') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.today') }} {{ isActiveRoute('reservations.board') }}">
-
-                        <span class="menu-bullet">
-
-                            <span class="bullet bullet-dot"></span>
-
-                        </span>
-
-                        <span class="menu-title">@lang('dashboard.orders') - @lang('dashboard.today')</span>
-
-                    </a>
-
-                </div>
-
-                <div class="menu-item">
-
-                    <a href="{{ route('reservations.board.upcoming') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.upcoming') }}">
-
-                        <span class="menu-bullet">
-
-                            <span class="bullet bullet-dot"></span>
-
-                        </span>
-
-                        <span class="menu-title">@lang('dashboard.orders') - @lang('dashboard.upcoming')</span>
-
-                    </a>
-
-                </div>
-
-                <div class="menu-item">
-
-                    <a href="{{ route('orders.tasks.index') }}" class="menu-link py-3 {{ request()->routeIs('orders.tasks.*') ? 'active' : '' }}">
-
-                        <span class="menu-bullet">
-
-                            <span class="bullet bullet-dot"></span>
-
-                        </span>
-
-                        <span class="menu-title">@lang('dashboard.tasks')</span>
-
-                    </a>
-
-                </div>
+ 
 
                 <div class="menu-item">
 
@@ -2553,8 +2507,55 @@
                         <span class="menu-title">@lang('dashboard.all_pages')</span>
                     </a>
                 </div>
-                <!--end::Menu item-->
+                <div class="menu-item">
 
+<a href="{{ route('reservations.board.today') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.today') }} {{ isActiveRoute('reservations.board') }}">
+
+    <span class="menu-bullet">
+
+        <span class="bullet bullet-dot"></span>
+
+    </span>
+
+    <span class="menu-title">@lang('dashboard.orders') - @lang('dashboard.today')</span>
+
+</a>
+
+</div>
+
+<div class="menu-item">
+
+<a href="{{ route('reservations.board.upcoming') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.upcoming') }}">
+
+    <span class="menu-bullet">
+
+        <span class="bullet bullet-dot"></span>
+
+    </span>
+
+    <span class="menu-title">@lang('dashboard.orders') - @lang('dashboard.upcoming')</span>
+    
+</a>
+
+</div>
+
+<div class="menu-item">
+
+<a href="{{ route('orders.tasks.index') }}" class="menu-link py-3 {{ request()->routeIs('orders.tasks.*') ? 'active' : '' }}">
+
+    <span class="menu-bullet">
+
+        <span class="bullet bullet-dot"></span>
+
+    </span>
+
+    <span class="menu-title">@lang('dashboard.tasks')</span>
+
+</a>
+
+</div>
+
+<!--end::Menu item-->
                 <!-- @can('pages.create') -->
                     <!--begin::Menu item-->
                     <div class="menu-item">
