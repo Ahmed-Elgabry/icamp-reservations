@@ -170,7 +170,6 @@ class ExpensesController extends Controller
                 'order_id' => $request->order_id,
                 'source' => $request->source
             ]);
-
             Transaction::create([
                 'account_id' => $request->account_id,
                 'amount' => $request->price,
@@ -237,7 +236,6 @@ class ExpensesController extends Controller
     {
         $expense = Expense::findOrFail($expense);
         $this->authorize('update', $expense);
-
         $data = $request->validate([
             'expense_item_id' => 'nullable|exists:expense_items,id',
             'account_id' => 'required|exists:bank_accounts,id',
@@ -273,7 +271,6 @@ class ExpensesController extends Controller
                 if ($expense->image_path && \Storage::disk('public')->exists($expense->image_path)) {
                     \Storage::disk('public')->delete($expense->image_path);
                 }
-
                 // Store new image
                 $imagePath = $request->file('image')->store('expenses', 'public');
                 $data['image'] = $imagePath;
@@ -290,7 +287,6 @@ class ExpensesController extends Controller
                 'description' => 'Expense: ' . ($request->statement ?? 'general_expenses'),
                 'source' => $request->source,
             ]);
-
             DB::commit();
 
             // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations

@@ -2,28 +2,28 @@
 @section('pageTitle', __('dashboard.meetings'))
 
 @section('content')
-    <div class="card card-flush">
-        <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-            <div class="card-title">
-                <h3>@lang('dashboard.meetings')</h3>
-            </div>
-            <div class="card-toolbar">
-                @can('meetings.export')
-                    <a href="{{ route('meetings.export') }}" class="btn btn-success me-2">
-                        <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
-                    </a>
-                @endcan
-                @can('meetings.create')
-                    <a href="{{ route('meetings.create') }}" class="btn btn-primary">
-                        @lang('dashboard.create_meeting')
-                    </a>
-                @endcan
-            </div>
+<div class="card card-flush">
+    <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+        <div class="card-title">
+            <h3>@lang('dashboard.meetings')</h3>
         </div>
-        <div class="card-body pt-0">
-            <div class="table-responsive">
-                <table class="table align-middle  table-row-dashed fs-6 gy-5">
-                    <thead class="text-gray-400 fw-bolder">
+        <div class="card-toolbar">
+            @can('meetings.export')
+            <a href="{{ route('meetings.export') }}" class="btn btn-success me-2">
+                <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
+            </a>
+            @endcan
+            @can('meetings.create')
+            <a href="{{ route('meetings.create') }}" class="btn btn-primary">
+                @lang('dashboard.create_meeting')
+            </a>
+            @endcan
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <div class="table-responsive">
+            <table class="table align-middle  table-row-dashed fs-6 gy-5">
+                <thead class="text-gray-400 fw-bolder">
                     <tr>
                         <th>@lang('dashboard.meeting_number')</th>
                         <th>@lang('dashboard.date')</th>
@@ -36,44 +36,49 @@
                         <th>@lang('dashboard.created_time')</th>
                         <th>@lang('dashboard.actions')</th>
                     </tr>
-                    </thead>
-                    <tbody>
+                </thead>
+                <tbody>
                     @foreach($meetings as $meeting)
-                        <tr>
-                            <td>{{ $meeting->meeting_number }}</td>
-                            <td>{{ $meeting->date->format('Y-m-d') }}</td>
-                            <td>{{ $meeting->start_time }} - {{ $meeting->end_time }}</td>
-                            <td>{{ $meeting->location->name }}</td>
-                            <td>{{ $meeting->attendees->count() }}</td>
-                            <td>{{ $meeting->topics->count() }}</td>
-                            <td>{{ $meeting->creator->name }}</td>
-                            <td>{{ $meeting->created_at->format('Y-m-d') }}</td>
-                            <td>{{ $meeting->created_at->format('h:i A') }}</td>
-                            <td>
-                                @can('meetings.show')
-                                    <a href="{{ route('meetings.show', $meeting) }}" class="btn btn-sm btn-info">
-                                        @lang('dashboard.view')
-                                    </a>
-                                @endcan
-                                @can('meetings.edit')
-                                    <a href="{{ route('meetings.edit', $meeting) }}" class="btn btn-sm btn-warning">
-                                        @lang('dashboard.edit')
-                                    </a>
-                                @endcan
-                                @can('meetings.destroy')
-                                    <form action="{{ route('meetings.destroy', $meeting) }}" method="POST" class="d-inline">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
-                                            @lang('dashboard.delete')
-                                        </button>
-                                    </form>
-                                @endcan
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>{{ $meeting->meeting_number }}</td>
+                        <td>{{ $meeting->date->format('Y-m-d') }}</td>
+                        <td>{{ $meeting->start_time }} - {{ $meeting->end_time }}</td>
+                        <td>{{ $meeting->location->name }}</td>
+                        <td>{{ $meeting->attendees->count() }}</td>
+                        <td>{{ $meeting->topics->count() }}</td>
+                        <td>{{ $meeting->creator->name }}</td>
+                        <td>{{ $meeting->created_at->format('Y-m-d') }}</td>
+                        <td>{{ $meeting->created_at->format('h:i A') }}</td>
+                        <td>
+                            @can('meetings.show')
+                            <a href="{{ route('meetings.show', $meeting) }}" class="btn btn-sm btn-info">
+                                @lang('dashboard.view')
+                            </a>
+                            @endcan
+                            @can('meetings.export')
+                            <a href="{{ route('meetings.export.single', $meeting) }}" class="btn btn-sm btn-success">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </a>
+                            @endcan
+                            @can('meetings.edit')
+                            <a href="{{ route('meetings.edit', $meeting) }}" class="btn btn-sm btn-warning">
+                                @lang('dashboard.edit')
+                            </a>
+                            @endcan
+                            @can('meetings.destroy')
+                            <form action="{{ route('meetings.destroy', $meeting) }}" method="POST" class="d-inline">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
+                                    @lang('dashboard.delete')
+                                </button>
+                            </form>
+                            @endcan
+                        </td>
+                    </tr>
                     @endforeach
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 @endsection

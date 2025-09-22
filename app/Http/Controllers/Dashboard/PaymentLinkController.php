@@ -199,7 +199,7 @@ class PaymentLinkController extends Controller
             }
 
             // Redirect to success page with payment link details
-            return redirect()->route('bookings.payment-links.show-created', [
+            return redirect()->route('payment-links.show-created', [
                 'order_id' => $request->order_id,
                 'payment_url' => $result['checkout_url'],
                 'checkout_id' => $result['checkout_id'],

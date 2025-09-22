@@ -88,7 +88,7 @@ class ManualWhatsappSendController extends Controller
             // Process the sending in the background
             $this->processManualSend($manualSend);
 
-            return redirect()->route('manual-whatsapp-sends.index')
+            return redirect()->route('dashboard.manual-whatsapp-sends.index')
                 ->with('success', __('dashboard.manual_whatsapp_send_created_successfully'));
         } catch (\Exception $e) {
             Log::error('Manual WhatsApp send creation failed', [
@@ -130,7 +130,6 @@ class ManualWhatsappSendController extends Controller
                 try {
                     // Prepare message
                     $message = $template->getBilingualMessage($phoneData['name']);
-
                     // Add custom message if provided
                     if ($manualSend->custom_message) {
                         $message .= "\n\n" . $manualSend->custom_message;

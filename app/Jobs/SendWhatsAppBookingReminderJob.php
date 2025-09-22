@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Order;
 use App\Services\WhatsAppService;
 use App\Models\WhatsappMessageTemplate;
+use App\Models\ServiceSiteAndCustomerService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -62,13 +63,18 @@ class SendWhatsAppBookingReminderJob implements ShouldQueue
             $amountPaid = $this->order->price ?: '[المبلغ المدفوع]';
             $remainingAmount = $this->order->deposit ?: '[المبلغ المتبقي]';
             $insuranceAmount = $this->order->insurance_amount ?: '[مبلغ التأمين]';
-            $locationLink = '[رابط اللوكيشن]'; // You can customize this based on your needs
-            $receptionName = '[الاسم]'; // You can customize this based on your needs
-            $receptionPhone = '[رقم الهاتف]'; // You can customize this based on your needs
+            // Get service site data for worker information and location
+            $serviceSiteData = ServiceSiteAndCustomerService::getLatestForWhatsApp();
+            $receptionName = $serviceSiteData['workername_ar'] ?? 'Funcamp'; // Use worker name in Arabic
+            $receptionPhone = $serviceSiteData['workerphone'] ?? '+971501234567'; // Use worker phone
+
+            // Generate location link from service site data
+            $serviceSite = $serviceSiteData['service_site'] ?? 'مخيم الوادي الأخضر - دبي';
+            $locationLink = $serviceSite; // Generate Google Maps link
 
             // Get bilingual message with placeholders replaced
             $message = $template->getBilingualMessage($customerName);
-            
+
             // Replace additional placeholders specific to booking reminder
             $message = str_replace(['[رقم الحجز]', '[Reservation Number]'], $reservationNumber, $message);
             $message = str_replace(['[التاريخ]', '[Date]'], $date, $message);
@@ -100,7 +106,6 @@ class SendWhatsAppBookingReminderJob implements ShouldQueue
                     'customer_phone' => $this->order->customer->phone
                 ]);
             }
-
         } catch (\Exception $e) {
             Log::error('WhatsApp booking reminder job failed', [
                 'order_id' => $this->order->id,

@@ -56,6 +56,8 @@ trait Roles
             'general_payments' => ['title_ar' => 'المدفوعات العامة', 'title_en' => 'General Payments'],
             'bank-accounts' => ['title_ar' => 'الحسابات البنكية', 'title_en' => 'Bank Accounts'],
             'transactions' => ['title_ar' => 'المعاملات', 'title_en' => 'Transactions'],
+            'pages' => ['title_ar' => 'الصفحات', 'title_en' => 'Pages'],
+            'contact-guides' => ['title_ar' => 'جهات الاتصال', 'title_en' => 'Contact Guides'],
         ];
 
         // Special mappings for permissions that don't follow the standard prefix pattern
@@ -67,7 +69,6 @@ trait Roles
             'orders.registeration-forms' => 'bookings',
             'orders.customers.check' => 'bookings',
             'order.verified' => 'bookings',
-
             // Services internal delete should appear in camp-types
             'services.delete.internal' => 'camp-types',
 

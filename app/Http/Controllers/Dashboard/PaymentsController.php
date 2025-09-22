@@ -386,7 +386,7 @@ class PaymentsController extends Controller
      */
     public function show($order)
     {
-        $this->authorize('viewAny', Payment::class);
+        $this->authorize('view', Payment::class);
 
         $order = Order::findOrFail($order);
         $bankAccounts = BankAccount::all();

@@ -75,7 +75,7 @@ class WhatsappMessageTemplateController extends Controller
                 'description' => $request->description,
             ]);
 
-            return redirect()->route('whatsapp-templates.index')
+            return redirect()->route('dashboard.whatsapp-templates.index')
                 ->with('success', __('dashboard.template_created_successfully'));
         } catch (\Exception $e) {
             return redirect()->back()
@@ -145,7 +145,7 @@ class WhatsappMessageTemplateController extends Controller
                 'description' => $request->description,
             ]);
 
-            return redirect()->route('whatsapp-templates.index')
+            return redirect()->route('dashboard.whatsapp-templates.index')
                 ->with('success', __('dashboard.template_updated_successfully'));
         } catch (\Exception $e) {
             return redirect()->back()
@@ -166,7 +166,7 @@ class WhatsappMessageTemplateController extends Controller
             $template = WhatsappMessageTemplate::findOrFail($id);
             $template->delete();
 
-            return redirect()->route('whatsapp-templates.index')
+            return redirect()->route('dashboard.whatsapp-templates.index')
                 ->with('success', __('dashboard.template_deleted_successfully'));
         } catch (\Exception $e) {
             return redirect()->back()

@@ -32,6 +32,29 @@ class TaskController extends Controller
         return view('dashboard.tasks.index', compact('tasks'));
     }
 
+
+    public function ordersTasksIndex(Request $request)
+    {
+        $this->authorize('viewAny', Task::class);
+        $query = Task::with(['assignedUser', 'creator', 'taskType']);
+        $status = $request->query('status', 'all');
+        if (isset($status) && $status == "all") {
+            $query->where('status', '!=', 'completed');
+        } elseif ($status && $status !== 'completed') {
+            $query->where('status', $status);
+        }
+
+        // Filter by date range
+        if ($request->query('from')) {
+            $query->whereDate('created_at', '>=', $request->query('from'));
+        }
+        if ($request->query('to')) {
+            $query->whereDate('created_at', '<=', $request->query('to'));
+        }
+        $tasks = $query->latest()->get();
+        return view('dashboard.orders.tasks', compact('tasks', 'status'));
+    }
+
     public function create()
     {
         $this->authorize('create', Task::class);

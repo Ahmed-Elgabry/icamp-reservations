@@ -51,7 +51,7 @@ class ServiceSiteAndCustomerServiceController extends Controller
             ], 201);
         }
 
-        return redirect()->route('bookings.service-site-customer-service.create')->with('success',  __('item_added_successfully'));
+        return redirect()->route('service_site_customer_service.create')->with('success',  __('item_added_successfully'));
     }
 
 
@@ -107,6 +107,6 @@ class ServiceSiteAndCustomerServiceController extends Controller
             ]);
         }
 
-        return redirect()->route('bookings.service-site-customer-service.create')->with('success', __('item_deleted_successfully'));
+        return redirect()->route('service_site_customer_service.create')->with('success', __('item_deleted_successfully'));
     }
 }

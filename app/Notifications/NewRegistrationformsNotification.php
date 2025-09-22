@@ -58,7 +58,7 @@ class NewRegistrationformsNotification extends Notification
         return [
             'title' => __('New Registration Form Submitted'),
             'message'  => __('A new registration form has been submitted.'),
-            'url'  => route('bookings.registeration-forms.index'),
+            'url'  => route('orders.registeration-forms'),
         ];
     }
 }
