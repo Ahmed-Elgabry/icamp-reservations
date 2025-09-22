@@ -19,9 +19,9 @@ use App\Http\Controllers\Dashboard\SurveyController;
 use App\Http\Controllers\Dashboard\SurveySubmissionController;
 use App\Http\Controllers\Dashboard\WhatsappMessageTemplateController;
 use App\Http\Controllers\Dashboard\StockController;
-use App\Http\Controllers\Dashboard\StockAdjustmentController ;
+use App\Http\Controllers\Dashboard\StockAdjustmentController;
 use App\Http\Controllers\Dashboard\ServiceSiteAndCustomerServiceController;
-use App\Http\Controllers\Dashboard\InternalNoteController ;
+use App\Http\Controllers\Dashboard\InternalNoteController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
@@ -87,12 +87,12 @@ Route::get('check-permissions', function () {
 
     return '';
 })->middleware('auth');
-    /*------------ start Of Settings----------*/
-    Route::get('set-lang/{lang}', [
-        'uses' => 'Dashboard\SettingController@SetLanguage',
-        'as' => 'set-lang',
-        'title' => 'dashboard.set_lang'
-    ]);
+/*------------ start Of Settings----------*/
+Route::get('set-lang/{lang}', [
+    'uses' => 'Dashboard\SettingController@SetLanguage',
+    'as' => 'set-lang',
+    'title' => 'dashboard.set_lang'
+]);
 Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'namespace' => 'Dashboard'], function () {
 
 
@@ -309,25 +309,32 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     // Manual item withdrawal and return routes
     Route::prefix('manual')->group(function () {
         // Create page
-        Route::get('item-issue-and-return/create', [StockAdjustmentController::class, 'create'])->name('item-issue-and-return-create');
+        // Route::get('item-issue-and-return/create', [StockAdjustmentController::class, 'create'])->name('item-issue-and-return-create');
+
+        Route::get('item-issue-and-return/create', [
+            'uses' => 'StockAdjustmentController@create',
+            'as' => 'stocks.item-issue-and-return.create',
+            'title' => ['actions.add', 'dashboard.stocks'],
+        ]);
+
         // Manual item withdrawal page
-        Route::get('item-issue', [StockAdjustmentController::class, 'issuedItemsIndex'])->name('item-issue');
+        Route::get('item-issue', [StockAdjustmentController::class, 'issuedItemsIndex'])->name('stocks.item-issue.index');
         // Manual item return page
-        Route::get('item-return', [StockAdjustmentController::class, 'returnedItemsIndex'])->name('item-return');
+        Route::get('item-return', [StockAdjustmentController::class, 'returnedItemsIndex'])->name('stocks.item-return.index');
 
         Route::get('stock-adjustments/{adjustment}/json', [StockAdjustmentController::class, 'json'])->name('stock.adjustments.json');
-        Route::get('stockTaking/create', [StockAdjustmentController::class, 'stockTakingCreate'])->name('stockTaking.create');
+        Route::get('stockTaking/create', [StockAdjustmentController::class, 'stockTakingCreate'])->name('stocks.stockTaking.create');
 
-    Route::get('stockTaking/index', [StockAdjustmentController::class, 'stockTakingIndex'])->name('stockTaking.index');
+        Route::get('stockTaking/index', [StockAdjustmentController::class, 'stockTakingIndex'])->name('stocks.stockTaking.index');
 
         // Store adjustment
-    Route::post('stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock.adjustments.store');
-    // Update adjustment
-    Route::put('stock-adjustments/{adjustment}', [StockAdjustmentController::class, 'update'])->name('stock.adjustments.update');
-    // Delete adjustment
-    Route::delete('stock-adjustments/{adjustment}', [StockAdjustmentController::class, 'destroy'])->name('stock.adjustments.destroy');
-    // Download image
-    Route::get('stock-adjustments/{id}/download', [StockAdjustmentController::class, 'downloadImage'])->name('stock.adjustments.download');
+        Route::post('stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stocks.adjustments.store');
+        // Update adjustment
+        Route::put('stock-adjustments/{adjustment}', [StockAdjustmentController::class, 'update'])->name('stock.adjustments.update');
+        // Delete adjustment
+        Route::delete('stock-adjustments/{adjustment}', [StockAdjustmentController::class, 'destroy'])->name('stock.adjustments.destroy');
+        // Download image
+        Route::get('stock-adjustments/{id}/download', [StockAdjustmentController::class, 'downloadImage'])->name('stock.adjustments.download');
     });
     Route::get('stocks/{id}/edit', [
         'uses' => 'StockController@edit',
@@ -401,7 +408,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     //     'as' => 'stock.adjustments.destroy',
     //     'title' => ['actions.delete', 'dashboard.stocks']
     // ]);
-    
+
     // // List all stock adjustments (index)
     // Route::get('stock-adjustments', [
     //     'uses' => 'StockAdjustmentController@index',
@@ -415,7 +422,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     //         'as' => 'stock.adjustments.create',
     //         'title' => ['actions.create', 'dashboard.stocks']
     //     ]);
-    
+
     /*------------ end Of stocks ----------*/
     /*------------ start Of addons ----------*/
     Route::get('addons', [
@@ -621,7 +628,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => 'dashboard.orders',
         'type' => 'parent',
         'middleware' => ['auth'],
-        'child' => ['orders.store', 'orders.signin', 'orders/{id}/terms_form', 'orders.logout', 'orders.receipt', 'orders.show', 'orders.reports', 'orders.edit', 'orders.removeAddon', 'orders.update', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes', 'orders.registeration-forms', 'orders.registeration-forms.edit', 'orders.registeration-forms.destroy', 'orders.registeration-forms.fetch', 'orders.registeration-forms.fetch', 'orders.customers.check']
+        'child' => ['orders.store', 'bookings.signin', 'orders.signin', 'orders/{id}/terms_form', 'bookings.logout', 'orders.logout', 'orders.receipt', 'orders.show', 'bookings.reports', 'orders.reports', 'orders.edit', 'bookings.removeAddon', 'orders.removeAddon', 'orders.update', 'bookings.addons', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes', 'bookings.registeration-forms.index', 'bookings.registeration-forms.edit', 'bookings.registeration-forms.destroy', 'bookings.registeration-forms.fetch', 'bookings.registeration-forms.fetch', 'orders.customers.check']
     ]);
 
     // Reservations board (today default, upcoming as separate route)
@@ -644,21 +651,21 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     # orders store
     Route::get('orders/{id}/signin', [
         'uses' => 'OrderController@signin',
-        'as' => 'orders.signin',
+        'as' => 'bookings.signin',
         'title' => ['actions.add', 'dashboard.signin']
     ]);
 
     # orders registeration-forms
     Route::get('orders/registeration-forms/search', [
         'uses' => 'RegistrationformController@search',
-        'as'   => 'orders.registeration-forms.search',
+        'as'   => 'bookings.registeration-forms.search',
         'title' => ['actions.add', 'dashboard.orders']
     ]);
 
     # orders registeration-forms
     Route::get('orders/registeration-forms/{id}/fetch', [
         'uses' => 'RegistrationformController@fetch',
-        'as'   => 'orders.registeration-forms.fetch',
+        'as'   => 'bookings.registeration-forms.fetch',
         'title' => ['actions.add', 'dashboard.orders']
     ]);
 
@@ -672,14 +679,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     # orders registeration-forms
     Route::get('orders/registeration-forms', [
         'uses' => 'RegistrationformController@index',
-        'as' => 'orders.registeration-forms',
+        'as' => 'bookings.registeration-forms.index',
         'title' => ['actions.index', 'dashboard.registeration-forms']
     ]);
 
     # orders registeration-forms
     Route::put('orders/registeration-forms/update/{id}', [
         'uses' => 'RegistrationformController@update',
-        'as' => 'orders.registeration-forms.update',
+        'as' => 'bookings.registeration-forms.update',
         'title' => ['actions.index', 'dashboard.registeration-forms']
     ]);
 
@@ -687,14 +694,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     # orders edit registeration-forms
     Route::get('orders/registeration-forms/{id}', [
         'uses' => 'RegistrationformController@edit',
-        'as' => 'orders.registeration-forms.edit',
+        'as' => 'bookings.registeration-forms.edit',
         'title' => ['actions.index', 'dashboard.registeration-forms']
     ]);
 
     # orders edit registeration-forms
     Route::delete('orders/registeration-forms/{id}/destroy', [
         'uses' => 'RegistrationformController@destroy',
-        'as' => 'orders.registeration-forms.destroy',
+        'as' => 'bookings.registeration-forms.destroy',
         'title' => ['actions.delete', 'dashboard.registeration-forms']
     ]);
 
@@ -730,7 +737,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     # orders logout
     Route::get('orders/{id}/logout', [
         'uses' => 'OrderController@logout',
-        'as' => 'orders.logout',
+        'as' => 'bookings.logout',
         'title' => ['actions.add', 'dashboard.logout']
     ]);
 
@@ -745,47 +752,47 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     # orders store
     Route::get('orders/{id}/insurance', [
         'uses' => 'OrderController@insurance',
-        'as' => 'orders.insurance',
+        'as' => 'bookings.insurance',
         'title' => ['actions.add', 'dashboard.insurance']
     ]);
 
     # orders store
     Route::put('orders/{id}/updateInsurance', [
         'uses' => 'OrderController@updateInsurance',
-        'as' => 'orders.updateInsurance',
+        'as' => 'bookings.updateInsurance',
         'title' => ['actions.add', 'dashboard.insurance']
     ]);
 
     # orders store
     Route::get('orders/{id}/reports', [
         'uses' => 'OrderController@reports',
-        'as' => 'orders.reports',
+        'as' => 'bookings.reports',
         'title' => ['actions.add', 'dashboard.reports']
     ]);
 
     # addons store
     Route::get('orders/{id}/addons', [
         'uses' => 'OrderController@addons',
-        'as' => 'orders.addons',
+        'as' => 'bookings.addons',
         'title' => ['actions.add', 'dashboard.addons']
     ]);
 
     # addons store
     Route::post('orders/{id}/addonsStore', [
         'uses' => 'OrderController@storeAddons',
-        'as' => 'ordersStore.addons',
+        'as' => 'bookingsStore.addons',
         'title' => ['actions.add', 'dashboard.addons']
     ]);
     # addons store
     Route::put('orders/{addon}/addonsUpdate', [
         'uses' => 'OrderController@UpdateAddons',
-        'as' => 'ordersUpdate.addons',
+        'as' => 'bookingsUpdate.addons',
         'title' => ['actions.add', 'dashboard.addons']
     ]);
     # addons store
     Route::delete('orders/{id}/removeAddon', [
         'uses' => 'OrderController@removeAddon',
-        'as' => 'orders.removeAddon',
+        'as' => 'bookings.removeAddon',
         'title' => ['actions.add', 'dashboard.addons']
     ]);
 
@@ -950,7 +957,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::get('transactions', [
         'uses' => 'PaymentsController@transactions',
         'as' => 'transactions.index',
-        'act-as' => 'payments.index',
+        // 'act-as' => 'payments.index',
         'title' => ['actions.add', 'dashboard.accounts']
     ]);
 
@@ -1000,14 +1007,14 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payments.create',
         'title' => ['actions.add', 'dashboard.payments']
     ]);
-    
-        Route::get('payments/transfer', [
+
+    Route::get('payments/transfer', [
         'uses' => 'PaymentsController@transfer',
         'as' => 'payments.transfer',
         'title' => ['actions.add', 'dashboard.payments']
     ]);
-    
-    
+
+
     Route::post('payments/money-transfer', [
         'uses' => 'PaymentsController@moneyTransfer',
         'as' => 'money-transfer',
@@ -1067,7 +1074,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::delete('transactions/{id}', [
         'uses' => 'PaymentsController@transactionsDestroy',
         'as' => 'transactions.destroy',
-        'act-as' => 'payments.destroy',
+        // 'act-as' => 'payments.destroy',
         'title' => ['actions.delete', 'dashboard.payments']
     ]);
     #delete all payments
@@ -1081,7 +1088,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     /*------------ start Of payment-links ----------*/
     Route::get('payment-links', [
         'uses' => 'PaymentLinkController@index',
-        'as' => 'payment-links.index',
+        'as' => 'bookings.payment-links.index',
         'title' => 'dashboard.payment-links',
         'type' => 'parent',
     ]);
@@ -1089,42 +1096,42 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     # payment-links create
     Route::get('payment-links/create', [
         'uses' => 'PaymentLinkController@create',
-        'as' => 'payment-links.create',
+        'as' => 'bookings.payment-links.create',
         'title' => ['actions.add', 'dashboard.payment-links']
     ]);
 
     # payment-links store
     Route::post('payment-links', [
         'uses' => 'PaymentLinkController@store',
-        'as' => 'payment-links.store',
+        'as' => 'bookings.payment-links.store',
         'title' => ['actions.add', 'dashboard.payment-links']
     ]);
 
     # payment-links show created
     Route::get('payment-links/created', [
         'uses' => 'PaymentLinkController@showCreated',
-        'as' => 'payment-links.show-created',
+        'as' => 'bookings.payment-links.show-created',
         'title' => ['actions.show', 'dashboard.payment_link_created']
     ]);
 
     # payment-links test-connection
     Route::post('payment-links/test-connection', [
         'uses' => 'PaymentLinkController@testConnection',
-        'as' => 'payment-links.test-connection',
+        'as' => 'bookings.payment-links.test-connection',
         'title' => ['actions.test', 'dashboard.payment-links']
     ]);
 
     # payment-links resend whatsapp
     Route::post('payment-links/{id}/resend-whatsapp', [
         'uses' => 'PaymentLinkController@resendWhatsApp',
-        'as' => 'payment-links.resend-whatsapp',
+        'as' => 'bookings.payment-links.resend-whatsapp',
         'title' => ['actions.resend', 'dashboard.payment_links']
     ]);
 
     # payment-links test-connection debug
     Route::get('payment-links/test-connection-debug', [
         'uses' => 'PaymentLinkController@testConnectionDebug',
-        'as' => 'payment-links.test-connection-debug',
+        'as' => 'bookings.payment-links.test-connection-debug',
         'title' => ['actions.test', 'dashboard.payment-links']
     ]);
 
@@ -1463,7 +1470,123 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'general_payments.update_add_funds',
         'title' => ['actions.update_funds', 'dashboard.general_payments']
     ]);
+
+    Route::delete('general_payments/add-funds/{id}', [
+        'uses' => 'GeneralPaymentsController@destroy',
+        'as' => 'general_payments.destroy_add_funds',
+        'title' => ['actions.update_funds', 'dashboard.general_payments']
+    ]);
     /*------------ end Of general payments ----------*/
+
+
+    Route::get('whatsapp-templates', [
+        'uses' => 'WhatsappMessageTemplateController@index',
+        'as' => 'whatsapp-templates.index',
+        'title' => 'dashboard.whatsapp-templates',
+        'type' => 'parent',
+        'child' => ['whatsapp-templates.create', 'whatsapp-templates.store', 'whatsapp-templates.edit', 'whatsapp-templates.update', 'whatsapp-templates.destroy', 'whatsapp-templates.toggle-status']
+    ]);
+
+    Route::get('whatsapp-templates/create', [
+        'uses' => 'WhatsappMessageTemplateController@create',
+        'as' => 'whatsapp-templates.create',
+        'title' => ['actions.add', 'dashboard.whatsapp-templates']
+    ]);
+
+
+    Route::get('whatsapp-templates/{id}/show', [
+        'uses' => 'WhatsappMessageTemplateController@show',
+        'as' => 'whatsapp-templates.show',
+        'title' => ['actions.show', 'dashboard.whatsapp-templates']
+    ]);
+
+    Route::post('whatsapp-templates/store', [
+        'uses' => 'WhatsappMessageTemplateController@store',
+        'as' => 'whatsapp-templates.store',
+        'title' => ['actions.add', 'dashboard.whatsapp-templates']
+    ]);
+
+    Route::get('whatsapp-templates/{id}/edit', [
+        'uses' => 'WhatsappMessageTemplateController@edit',
+        'as' => 'whatsapp-templates.edit',
+        'title' => ['actions.edit', 'dashboard.whatsapp-templates']
+    ]);
+
+    Route::put('whatsapp-templates/{id}', [
+        'uses' => 'WhatsappMessageTemplateController@update',
+        'as' => 'whatsapp-templates.update',
+        'title' => ['actions.edit', 'dashboard.whatsapp-templates']
+    ]);
+
+    Route::delete('whatsapp-templates/{id}', [
+        'uses' => 'WhatsappMessageTemplateController@destroy',
+        'as' => 'whatsapp-templates.destroy',
+        'title' => ['actions.delete', 'dashboard.whatsapp-templates']
+    ]);
+
+    Route::post('whatsapp-templates/{id}/toggle-status', [
+        'uses' => 'WhatsappMessageTemplateController@toggleStatus',
+        'as' => 'whatsapp-templates.toggle-status',
+        'title' => ['actions.toggle-status', 'dashboard.whatsapp-templates']
+    ]);
+
+
+    Route::get('manual-whatsapp-sends', [
+        'uses' => 'ManualWhatsappSendController@index',
+        'as' => 'manual-whatsapp-sends.index',
+        'title' => 'dashboard.manual-whatsapp-sends',
+        'type' => 'parent',
+        'child' => ['manual-whatsapp-sends.create', 'manual-whatsapp-sends.store', 'manual-whatsapp-sends.show', 'manual-whatsapp-sends.edit', 'manual-whatsapp-sends.update', 'manual-whatsapp-sends.destroy', 'manual-whatsapp-sends.search-customers']
+    ]);
+
+    Route::get('manual-whatsapp-sends/create', [
+        'uses' => 'ManualWhatsappSendController@create',
+        'as' => 'manual-whatsapp-sends.create',
+        'title' => ['actions.add', 'dashboard.manual-whatsapp-sends']
+    ]);
+
+    Route::get('manual-whatsapp-sends/{id}/show', [
+        'uses' => 'ManualWhatsappSendController@show',
+        'as' => 'manual-whatsapp-sends.show',
+        'title' => ['actions.show', 'dashboard.manual-whatsapp-sends']
+    ]);
+
+    Route::post('manual-whatsapp-sends/store', [
+        'uses' => 'ManualWhatsappSendController@store',
+        'as' => 'manual-whatsapp-sends.store',
+        'title' => ['actions.add', 'dashboard.manual-whatsapp-sends']
+    ]);
+
+    Route::get('manual-whatsapp-sends/{id}/edit', [
+        'uses' => 'ManualWhatsappSendController@edit',
+        'as' => 'manual-whatsapp-sends.edit',
+        'title' => ['actions.edit', 'dashboard.manual-whatsapp-sends']
+    ]);
+
+    Route::put('manual-whatsapp-sends/{id}', [
+        'uses' => 'ManualWhatsappSendController@update',
+        'as' => 'manual-whatsapp-sends.update',
+        'title' => ['actions.edit', 'dashboard.manual-whatsapp-sends']
+    ]);
+
+    Route::delete('manual-whatsapp-sends/{id}', [
+        'uses' => 'ManualWhatsappSendController@destroy',
+        'as' => 'manual-whatsapp-sends.destroy',
+        'title' => ['actions.delete', 'dashboard.manual-whatsapp-sends']
+    ]);
+
+    Route::get('manual-whatsapp-sends/search-customers', [
+        'uses' => 'ManualWhatsappSendController@searchCustomers',
+        'as' => 'manual-whatsapp-sends.search-customers',
+        'title' => ['actions.search', 'dashboard.manual-whatsapp-sends']
+    ]);
+
+
+    Route::post('service-site-customer-service', [ServiceSiteAndCustomerServiceController::class, 'store'])->name('bookings.service-site-customer-service.store');
+    Route::get('service-site-customer-service/{id}/edit', [ServiceSiteAndCustomerServiceController::class, 'edit'])->name('bookings.service-site-customer-service.edit');
+    Route::get('service-site-customer-service/create', [ServiceSiteAndCustomerServiceController::class, 'create'])->name('bookings.service-site-customer-service.create');
+    Route::delete('service-site-customer-service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('bookings.service-site-customer-service.delete');
+    Route::put('service-site-customer-service/{id}', [ServiceSiteAndCustomerServiceController::class, 'update'])->name('bookings.service-site-customer-service.update');
 });
 
 /*** update route if i added new routes  */
@@ -1717,7 +1840,7 @@ Route::post('orders/{order}/internal-notes', [OrderController::class, 'updateInt
 Route::get('orders/{order}/internal-notes', [OrderController::class, 'getInternalNotes'])
     ->name('orders.internal-notes.index')
     ->middleware(['auth']);
-    
+
 Route::delete('orders/{order}/internal-notes/{note}', [OrderController::class, 'deleteInternalNote'])
     ->name('orders.internal-notes.destroy')
     ->middleware(['auth']);
@@ -1784,11 +1907,11 @@ Route::post('orders/{id}/send-email', [OrderController::class, 'sendEmail'])->na
 Route::post('orders/{id}/send-whatsapp', [OrderController::class, 'sendWhatsApp'])->name('orders.sendWhatsApp');
 
 // WhatsApp Message Templates Routes
-Route::group(['prefix' => 'dashboard', 'as' => 'dashboard.', 'middleware' => ['auth', 'admin']], function () {
-    Route::resource('whatsapp-templates', WhatsappMessageTemplateController::class);
-    Route::post('whatsapp-templates/{id}/toggle-status', [WhatsappMessageTemplateController::class, 'toggleStatus'])
-        ->name('whatsapp-templates.toggle-status');
-});
+// Route::group(['prefix' => 'dashboard', 'as' => 'dashboard.', 'middleware' => ['auth', 'admin']], function () {
+//     Route::resource('whatsapp-templates', WhatsappMessageTemplateController::class);
+//     Route::post('whatsapp-templates/{id}/toggle-status', [WhatsappMessageTemplateController::class, 'toggleStatus'])
+//         ->name('whatsapp-templates.toggle-status');
+// });
 
 // Manual WhatsApp Sends Routes
 Route::group(['prefix' => 'dashboard', 'as' => 'dashboard.', 'middleware' => ['auth', 'admin']], function () {
@@ -1824,18 +1947,17 @@ Route::get('survey/{order}', [SurveyController::class, 'showPublic'])->name('sur
 Route::get('stocks/available', [StockController::class, 'getAvailableStocks'])->name('stocks.available');
 
 // Named routes for ServiceSiteAndCustomerServiceController CRUD actions
-Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function() {
+Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
     Route::post('service_site_customer_service', [ServiceSiteAndCustomerServiceController::class, 'store'])->name('service_site_customer_service.store');
     Route::get('service_site_customer_service/{id}/edit', [ServiceSiteAndCustomerServiceController::class, 'edit'])->name('service_site_customer_service.edit');
     Route::get('service_site_customer_service/create', [ServiceSiteAndCustomerServiceController::class, 'create'])->name('service_site_customer_service.create');
     Route::delete('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('service_site_customer_service.destroy');
     Route::put('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'update'])->name('service_site_customer_service.update');
-    
+
     // Internal notes CRUD (dashboard)
-Route::resource('internal-notes', InternalNoteController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('internal-notes', InternalNoteController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
 });
 
-Route::middleware(['web', 'auth'])->group(function(){
+Route::middleware(['web', 'auth'])->group(function () {
     Route::resource('pages', PageController::class)->except(['show']);
 });
-

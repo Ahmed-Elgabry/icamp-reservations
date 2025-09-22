@@ -89,7 +89,7 @@
 
                 </div>
 
-                
+
 
                 <!--end::Menu item-->
 
@@ -501,10 +501,10 @@
 
     @can('admins.index')
         <!--begin::Menu item-->
-        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['dashboard.whatsapp-templates.index', 'dashboard.whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['whatsapp-templates.index', 'whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}"
              data-kt-menu-trigger="click">
             <!--begin::Menu link-->
-            <a href="#" class="menu-link py-3 {{areActiveRoutes(['dashboard.whatsapp-templates.index', 'dashboard.whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}">
+            <a href="#" class="menu-link py-3 {{areActiveRoutes(['whatsapp-templates.index', 'whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}">
                 <span class="menu-icon">
                     <img src="{{ asset('images/whatsapp.png') }}" style="width:25px;height:25px">
                 </span>
@@ -517,7 +517,7 @@
             <div class="menu-sub menu-sub-accordion pt-3">
                 <!--begin::Menu item-->
                 <div class="menu-item">
-                    <a href="{{ route('dashboard.whatsapp-templates.index') }}" class="menu-link py-3  {{ isActiveRoute('dashboard.whatsapp-templates.index') }}">
+                    <a href="{{ route('whatsapp-templates.index') }}" class="menu-link py-3  {{ isActiveRoute('whatsapp-templates.index') }}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
@@ -529,7 +529,7 @@
                 @can('admins.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
-                        <a href="{{route('dashboard.whatsapp-templates.create')}}" class="menu-link py-3 {{ isActiveRoute('dashboard.whatsapp-templates.create') }}">
+                        <a href="{{route('whatsapp-templates.create')}}" class="menu-link py-3 {{ isActiveRoute('whatsapp-templates.create') }}">
                             <span class="menu-bullet">
                                 <span class="bullet bullet-dot"></span>
                             </span>
@@ -669,7 +669,7 @@
                 <!--end::Menu item-->
                     <div class="menu-item">
 
-                        <a href="{{route('item-issue-and-return-create')}}" class="menu-link py-3 {{ isActiveRoute('item-issue-and-return-create') }}">
+                        <a href="{{route('stocks.item-issue-and-return.create')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-issue-and-return.create') }}">
 
                             <span class="menu-bullet">
 
@@ -686,7 +686,7 @@
                     </div>
                     <div class="menu-item">
 
-                        <a href="{{route('item-issue')}}" class="menu-link py-3 {{ isActiveRoute('item-issue') }}">
+                        <a href="{{route('stocks.item-issue.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-issue.index') }}">
 
                             <span class="menu-bullet">
 
@@ -701,7 +701,7 @@
                     </div>
                     <div class="menu-item">
 
-                        <a href="{{route('item-return')}}" class="menu-link py-3 {{ isActiveRoute('item-return') }}">
+                        <a href="{{route('stocks.item-return.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-return.index') }}">
 
                             <span class="menu-bullet">
 
@@ -718,7 +718,7 @@
                     </div>
                      <div class="menu-item">
 
-                        <a href="{{route('stockTaking.create')}}" class="menu-link py-3 {{ isActiveRoute('stockTaking.create') }}">
+                        <a href="{{route('stocks.stockTaking.create')}}" class="menu-link py-3 {{ isActiveRoute('stocks.stockTaking.create') }}">
 
                             <span class="menu-bullet">
 
@@ -735,7 +735,7 @@
                     </div>
                      <div class="menu-item">
 
-                        <a href="{{route('stockTaking.index')}}" class="menu-link py-3 {{ isActiveRoute('stockTaking.index') }}">
+                        <a href="{{route('stocks.stockTaking.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.stockTaking.index') }}">
 
                             <span class="menu-bullet">
 
@@ -958,7 +958,7 @@
 
         <!--begin::Menu item-->
 
-        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['orders.index', 'orders.reports', 'payments.show', 'expenses.show', 'orders.orders-by-status', 'orders.create', 'orders.edit', 'orders.show' , 'orders.registeration-forms'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['orders.index', 'orders.reports', 'payments.show', 'expenses.show', 'orders.orders-by-status', 'orders.create', 'orders.edit', 'orders.show' , 'bookings.registeration-forms.index'])}}"
 
              data-kt-menu-trigger="click">
 
@@ -1006,11 +1006,11 @@
 
                 </div>
 
- 
+
 
                 <div class="menu-item">
 
-                    <a href="{{route('orders.registeration-forms')}}" class="menu-link py-3 {{isActiveRoute('orders.registeration-forms')}}">
+                    <a href="{{route('bookings.registeration-forms.index')}}" class="menu-link py-3 {{isActiveRoute('bookings.registeration-forms.index')}}">
 
                         <span class="menu-bullet">
 
@@ -1175,7 +1175,7 @@
                     <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.service_site_customer_service')])</span>
                 </a>
             </div>
-            
+
             <div class="menu-item">
                 <a href="{{ route('internal-notes.index') }}#internal-note-form" class="menu-link py-3">
                     <span class="menu-bullet">
@@ -2534,7 +2534,7 @@
     </span>
 
     <span class="menu-title">@lang('dashboard.orders') - @lang('dashboard.upcoming')</span>
-    
+
 </a>
 
 </div>
@@ -2574,7 +2574,7 @@
         <!--end::Menu item-->
     <!-- @endcan -->
 
-  
+
 </div>
 
 @endauth
