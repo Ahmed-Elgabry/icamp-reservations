@@ -1806,6 +1806,7 @@ return [
     "contacts_list" => 'جهات الاتصال',
     "generated_on" => 'تم إنشاء في',
     "use_template" => 'إستخدام النموذج',
+    "A new registration form has been submitted." => 'تم إرسال إستمارة حجز جديده'
 
 ];
  
