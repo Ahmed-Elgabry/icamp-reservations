@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ContactGuide;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\App;
 
 class ContactGuideController extends Controller
 {
@@ -26,8 +28,8 @@ class ContactGuideController extends Controller
             'entity_name' => 'required|string|max:255',
             'contact_person_name' => 'required|string|max:255',
             'primary_phone' => 'required|string|max:50',
-            'secondary_phone' => 'required|string|max:50',
-            'fixed_phone' => 'required|string|max:50',
+            'secondary_phone' => 'nullable|string|max:50',
+            'fixed_phone' => 'nullable|string|max:50',
             'email' => 'required|email|max:255',
             'photo' => 'nullable|image|max:10000',
             'notes' => 'nullable|string',
@@ -41,8 +43,8 @@ class ContactGuideController extends Controller
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-            'success' => true,
-            'message' => __('dashboard.item_created_successfully'),
+                'success' => true,
+                'message' => __('dashboard.item_created_successfully'),
             ]);
         }
 
@@ -56,11 +58,10 @@ class ContactGuideController extends Controller
 
     public function update(Request $request, ContactGuide $contact_guide)
     {
-
         $validated = $request->validate([
             'entity_name' => 'required|string|max:255',
             'contact_person_name' => 'nullable|string|max:255',
-            'primary_phone' => 'nullable|string|max:50',
+            'primary_phone' => 'required|string|max:50',
             'secondary_phone' => 'nullable|string|max:50',
             'fixed_phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
@@ -79,8 +80,8 @@ class ContactGuideController extends Controller
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-            'success' => true,
-            'message' => __('dashboard.item_updated_successfully'),
+                'success' => true,
+                'message' => __('dashboard.item_updated_successfully'),
             ]);
         }
 
@@ -94,5 +95,28 @@ class ContactGuideController extends Controller
         }
         $contact_guide->delete();
         return redirect()->route('contact-guides.index')->with('success', __('dashboard.item_deleted_successfully'));
+    }
+
+    /**
+     * Export contacts to PDF
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function exportPdf()
+    {
+        $contacts = ContactGuide::latest()->get();
+        
+        // Set locale for PDF generation
+        $locale = App::getLocale();
+        $pdf = PDF::loadView('dashboard.contact_guides.pdf', compact('contacts', 'locale'));
+        
+        // Set paper size and orientation
+        $pdf->setPaper('a4', 'landscape');
+        
+        // Set filename with current date
+        $filename = 'contacts_export_' . now()->format('Y-m-d') . '.pdf';
+        
+        // Stream the PDF to the browser
+        return $pdf->download($filename);
     }
 }

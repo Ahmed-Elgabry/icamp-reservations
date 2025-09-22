@@ -30,14 +30,14 @@
             @endif
           </form>
           <ul class="nav nav-tabs nav-line-tabs ms-4">
-            <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'today' ? '' : '' }}" href="{{ route('reservations.board', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.today')</a>
+          <li class="nav-item">
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'today' ? 'active' : '' }}" href="{{ route('reservations.board', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.today_reservations')</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? '' : '' }}" href="{{ route('reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? 'active' : '' }}" href="{{ route('reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming_reservations')</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="{{ route('orders.tasks.index', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.tasks')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'tasks' ? 'active' : '' }}" href="{{ route('orders.tasks.index') }}">@lang('dashboard.tasks')</a>
             </li>
           </ul>
         </div>

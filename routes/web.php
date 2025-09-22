@@ -1573,6 +1573,11 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::resource('contact-guides', App\Http\Controllers\Dashboard\ContactGuideController::class)
         ->middleware(['auth', 'admin'])
         ->except(['show']);
+
+    // Export Contact Guides as PDF
+    Route::get('contact-guides/export/pdf', [App\Http\Controllers\Dashboard\ContactGuideController::class, 'exportPdf'])
+        ->name('contact-guides.export-pdf')
+        ->middleware(['auth', 'admin']);
 });
 
 // Employee routes
