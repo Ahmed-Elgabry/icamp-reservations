@@ -15,13 +15,13 @@
                             <li class="breadcrumb-item">
                                 <a href="{{ route('home') }}">{{ __('dashboard.home') }}</a>
                             </li>
-                         
+
                             <li class="breadcrumb-item active">{{ __('dashboard.create_payment_link') }}</li>
                         </ol>
                     </nav>
                 </div>
                 <div>
-                    <a href="{{ route('payment-links.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('bookings.payment-links.index') }}" class="btn btn-secondary">
                         <i class="fa fa-arrow-left"></i> {{ __('dashboard.back_to_list') }}
                     </a>
                 </div>
@@ -29,42 +29,42 @@
 
             <!-- Error Messages -->
             @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
             @endif
 
-            <form action="{{ route('payment-links.store') }}" method="POST">
+            <form action="{{ route('bookings.payment-links.store') }}" method="POST">
                 @csrf
 
                 <!-- Hidden fields for order_id if passed via URL -->
                 @if(request('order_id'))
-                    <input type="hidden" name="order_id" value="{{ request('order_id') }}">
+                <input type="hidden" name="order_id" value="{{ request('order_id') }}">
                 @endif
 
                 <!-- Order Information Display -->
                 @if(isset($selectedOrder) && $selectedOrder)
-                    <div class="alert alert-info mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>{{ __('dashboard.order_id') }}:</strong> {{ $selectedOrder->id }}
-                            </div>
-                            <div class="col-md-6">
-                                <strong>{{ __('dashboard.customer') }}:</strong> {{ $selectedOrder->customer->name ?? __('dashboard.no_description') }}
-                            </div>
+                <div class="alert alert-info mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>{{ __('dashboard.order_id') }}:</strong> {{ $selectedOrder->id }}
                         </div>
-                        @if($selectedOrder->customer->phone)
-                            <div class="row mt-2">
-                                <div class="col-md-6">
-                                    <strong>{{ __('dashboard.phone') }}:</strong> {{ $selectedOrder->customer->phone }}
-                                </div>
-                            </div>
-                        @endif
+                        <div class="col-md-6">
+                            <strong>{{ __('dashboard.customer') }}:</strong> {{ $selectedOrder->customer->name ?? __('dashboard.no_description') }}
+                        </div>
                     </div>
+                    @if($selectedOrder->customer->phone)
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>{{ __('dashboard.phone') }}:</strong> {{ $selectedOrder->customer->phone }}
+                        </div>
+                    </div>
+                    @endif
+                </div>
                 @endif
 
                 <!-- Main Container with Light Grey Border -->
@@ -75,16 +75,16 @@
                         <div class="col-md-8">
                             <label class="form-label fw-bold">{{ __('dashboard.payment_link_amount') }}</label>
                             <input type="number"
-                                   name="amount"
-                                   class="form-control form-control-lg @error('amount') is-invalid @enderror"
-                                   step="0.01"
-                                   min="0.01"
-                                   value="{{ old('amount') }}"
-                                   placeholder="{{ __('dashboard.payment_link_amount_placeholder') }}"
-                                   required
-                                   style="background-color: white; border: 1px solid #e4e6ea;" />
+                                name="amount"
+                                class="form-control form-control-lg @error('amount') is-invalid @enderror"
+                                step="0.01"
+                                min="0.01"
+                                value="{{ old('amount') }}"
+                                placeholder="{{ __('dashboard.payment_link_amount_placeholder') }}"
+                                required
+                                style="background-color: white; border: 1px solid #e4e6ea;" />
                             @error('amount')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-4">
@@ -104,7 +104,7 @@
                     </div>
 
                     <!-- Third Row: QR Code -->
-                    
+
 
                 </div>
 
@@ -114,38 +114,38 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{{ __('dashboard.payment_link_expires_at') }}</label>
                             <input type="datetime-local"
-                                   name="expires_at"
-                                   class="form-control @error('expires_at') is-invalid @enderror"
-                                   value="{{ old('expires_at') }}" />
+                                name="expires_at"
+                                class="form-control @error('expires_at') is-invalid @enderror"
+                                value="{{ old('expires_at') }}" />
                             @error('expires_at')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{{ __('dashboard.payment_link_description') }}</label>
                             <textarea name="description"
-                                      class="form-control @error('description') is-invalid @enderror"
-                                      rows="3"
-                                      placeholder="{{ __('dashboard.payment_link_description_placeholder') }}">{{ old('description') }}</textarea>
+                                class="form-control @error('description') is-invalid @enderror"
+                                rows="3"
+                                placeholder="{{ __('dashboard.payment_link_description_placeholder') }}">{{ old('description') }}</textarea>
                             @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
                 </div>
 
-           
+
 
                 <!-- Email Notification Option -->
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="form-check">
-                            <input type="checkbox" 
-                                   class="form-check-input" 
-                                   id="send_email" 
-                                   name="send_email" 
-                                   value="1" 
-                                   {{ old('send_email', true) ? 'checked' : '' }}>
+                            <input type="checkbox"
+                                class="form-check-input"
+                                id="send_email"
+                                name="send_email"
+                                value="1"
+                                {{ old('send_email', true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="send_email">
                                 <i class="fa fa-envelope me-2"></i> {{ __('dashboard.send_email_to_customer') }}
                             </label>
@@ -160,12 +160,12 @@
                 <div class="row mt-3">
                     <div class="col-12">
                         <div class="form-check">
-                            <input type="checkbox" 
-                                   class="form-check-input" 
-                                   id="send_whatsapp" 
-                                   name="send_whatsapp" 
-                                   value="1" 
-                                   {{ old('send_whatsapp', false) ? 'checked' : '' }}>
+                            <input type="checkbox"
+                                class="form-check-input"
+                                id="send_whatsapp"
+                                name="send_whatsapp"
+                                value="1"
+                                {{ old('send_whatsapp', false) ? 'checked' : '' }}>
                             <label class="form-check-label" for="send_whatsapp">
                                 <i class="fab fa-whatsapp me-2 text-success"></i> {{ __('dashboard.send_whatsapp_to_customer') }}
                             </label>
@@ -182,20 +182,22 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
-    // Toggle Additional Fields
-    $('#toggleFields').click(function() {
-        $('#additionalFields').toggle();
-        const isVisible = $('#additionalFields').is(':visible');
-        $(this).html(isVisible ? '<i class="fa fa-eye-slash"></i> {{ __('dashboard.hide_options') }}' : '<i class="fa fa-cog"></i> {{ __('dashboard.additional_options') }}');
-    });
+    $(document).ready(function() {
+        // Toggle Additional Fields
+        $('#toggleFields').click(function() {
+            $('#additionalFields').toggle();
+            const isVisible = $('#additionalFields').is(':visible');
+            $(this).html(isVisible ? '<i class="fa fa-eye-slash"></i> {{ __('
+                dashboard.hide_options ') }}' : '<i class="fa fa-cog"></i> {{ __('
+                dashboard.additional_options ') }}');
+        });
 
-    // Remove validation errors on input
-    $('input, textarea').on('input change', function() {
-        $(this).removeClass('is-invalid');
-        $(this).next('.invalid-feedback').remove();
+        // Remove validation errors on input
+        $('input, textarea').on('input change', function() {
+            $(this).removeClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+        });
     });
-});
 </script>
 @endpush
 @endsection

@@ -37,7 +37,7 @@ class MeetingController extends Controller
         $users = User::all();
         $topics = OrderRate::pluck('review', 'id');
         $locations = MeetingLocation::where('is_active', true)->get();
-        return view('dashboard.meetings.create', compact('users', 'topics','locations'));
+        return view('dashboard.meetings.create', compact('users', 'topics', 'locations'));
     }
 
     public function store(Request $request)
@@ -127,7 +127,7 @@ class MeetingController extends Controller
         $users = User::all();
         $topics = OrderRate::pluck('review', 'id');
         $locations = MeetingLocation::where('is_active', true)->get();
-        return view('dashboard.meetings.create', compact('meeting', 'users', 'topics','locations'));
+        return view('dashboard.meetings.create', compact('meeting', 'users', 'topics', 'locations'));
     }
 
     public function update(Request $request, Meeting $meeting)
@@ -286,5 +286,4 @@ class MeetingController extends Controller
         $filename = __('dashboard.meeting') . "-{$meeting->meeting_number}-" . date('Y-m-d') . ".pdf";
         return $mpdf->Output($filename, 'D');
     }
-
 }

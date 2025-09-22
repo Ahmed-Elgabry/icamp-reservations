@@ -33,17 +33,17 @@ class HomeController extends Controller
     {
         // Get dashboard data from the service
         $dashboardData = $this->paymentSummaryService->getDashboardData();
-        
+
         // Get additional stats
         $totalCustomersCount = Customer::count();
         $totalOrdersCount = Order::count();
-        
+
         // Get orders count by status
         $ordersCountByStatus = Order::selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->get()
             ->pluck('count', 'status');
-            
+
         // Get upcoming reservations
         $upcomingReservations = Order::whereDate('date', '>=', now()->addDay()->startOfDay())
             ->with('customer')
@@ -71,7 +71,7 @@ class HomeController extends Controller
 
     public function reprots()
     {
- 
+
 
         $topServices = Service::whereHas('orders', function ($query) {
             $query->where('status', 'completed');
@@ -94,7 +94,7 @@ class HomeController extends Controller
         $totalPayments = Payment::where('verified', '1')->sum('price');
         // الحصول على المدفوعات العامة من صفحة إضافة الأموال
         $payments = GeneralPayment::with(['account', 'order.customer', 'transaction'])
-            ->whereHas('transaction', function($query) {
+            ->whereHas('transaction', function ($query) {
                 $query->where('source', 'add_funds_page');
             })
             ->where('verified', true) // Also include by statement type
@@ -105,7 +105,7 @@ class HomeController extends Controller
             ->where('verified', '1')
             ->orderBy('id', 'desc')
             ->limit(7)
-            ->get(['id','price','created_at'])
+            ->get(['id', 'price', 'created_at'])
             ->reverse() // oldest first for chart
             ->values();
 
@@ -120,6 +120,6 @@ class HomeController extends Controller
             ->groupBy('month')
             ->get();
 
-    return view('dashboard.reports', compact('topServices', 'payments', 'totalPayments', 'bankAccounts', 'expenses', 'monthlyPayments', 'reservations_revenues'));
+        return view('dashboard.reports', compact('topServices', 'payments', 'totalPayments', 'bankAccounts', 'expenses', 'monthlyPayments', 'reservations_revenues'));
     }
 }

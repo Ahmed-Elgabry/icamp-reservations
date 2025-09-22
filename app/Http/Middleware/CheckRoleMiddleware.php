@@ -18,12 +18,8 @@ class CheckRoleMiddleware
     public function handle($request, Closure $next)
     {
         // Super Admin bypass - User ID 1 only has all permissions
-        if (isset(auth()->user()->id) && auth()->user()->id == 1) {
+        if (auth()->user()->id == 1) {
             return $next($request);
-        }else if (Page::where('url', $request->url())->exists()) {
-            return $next($request);
-        }else{
-            return redirect(route('show.login'));
         }
 
         if (!auth()->user()->is_active) {
@@ -67,6 +63,12 @@ class CheckRoleMiddleware
             $currunt_route = str_replace('store', 'create', $currunt_route);
             $currunt_route = str_replace('adminsfile.destroy', 'admins.destroy', $currunt_route);
             $currunt_route = str_replace('update.reports', 'orders.reports', $currunt_route);
+            $currunt_route = str_replace('bookingsStore.addons', 'bookings.addons', $currunt_route);
+            $currunt_route = str_replace('ordersStore.addons', 'orders.addons', $currunt_route);
+            $currunt_route = str_replace('orders.removeAddon', 'orders.addons', $currunt_route);
+            $currunt_route = str_replace('bookings.removeAddon', 'bookings.addons', $currunt_route);
+            $currunt_route = str_replace('ordersUpdate.addons', 'orders.addons', $currunt_route);
+            $currunt_route = str_replace('bookingsUpdate.addons', 'bookings.addons', $currunt_route);
             $currunt_route = str_replace('ordersStore.addons', 'orders.addons', $currunt_route);
             $currunt_route = str_replace('orders.removeAddon', 'orders.addons', $currunt_route);
             $currunt_route = str_replace('ordersUpdate.addons', 'orders.addons', $currunt_route);
@@ -143,7 +145,7 @@ class CheckRoleMiddleware
 
             if (count($permissions) <= 2) {
                 // User has no permissions except home and logout
-                session()->flash('danger', 'You have no permissions assigned. Please contact administrator.');
+                session()->flash('danger', trans('auth.not_authorized'));
                 return redirect()->route('home');
             }
 

@@ -24,7 +24,7 @@ class WhatsappMessageTemplateController extends Controller
         }
 
         $templates = $query->orderBy('type')->orderBy('created_at', 'desc')->paginate(10);
-        
+
         // Preserve filters in pagination links
         $templates->appends($request->query());
 

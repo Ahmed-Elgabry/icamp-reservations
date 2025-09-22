@@ -31,14 +31,14 @@ class PaymentsController extends Controller
         $endDate = request('end_date');
 
         $transactions = Transaction::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-                return $query->whereBetween('date', [$startDate, $endDate]);
-            })
+            return $query->whereBetween('date', [$startDate, $endDate]);
+        })
             ->orderBy('created_at', 'desc')
             ->where(function ($query) {
                 $query->where('verified', "1");
-                    //   ->whereHas('payment', fn($q) => $q->whereNot('insurance_status', 'returned'))
-                    //   ->orWhere("source", "charge_account")//they will have verificaion button 
-                    //   ->orWhere("source", "general_payments_deposit");//they will have verificaion button 
+                //   ->whereHas('payment', fn($q) => $q->whereNot('insurance_status', 'returned'))
+                //   ->orWhere("source", "charge_account")//they will have verificaion button
+                //   ->orWhere("source", "general_payments_deposit");//they will have verificaion button
             }) // this is the transaction source for the page which have not approved button
             ->where("amount", ">", 0)
             ->get();
@@ -59,7 +59,7 @@ class PaymentsController extends Controller
         // Only refund the amount to the bank account if the transaction was verified
         if ($payment->verified) {
             $bankAccount->update([
-            'balance' => $bankAccount->balance + $disccountFormAccount
+                'balance' => $bankAccount->balance + $disccountFormAccount
             ]);
         }
 
@@ -111,17 +111,17 @@ class PaymentsController extends Controller
         $this->authorize('create', Payment::class);
         $selectedBank = $bankAccount ? BankAccount::findOrFail($bankAccount) : null;
         $bankAccounts = BankAccount::all();
-        
+
         // Fetch recent account charges instead of general payments
         $recentAccountCharges = GeneralPayment::with(['account', 'transaction'])
             ->whereHas('transaction', function ($q) {
                 $q->where('source', 'account_charge');
             })
-            ->where("account_id" , $bankAccount)
+            ->where("account_id", $bankAccount)
             ->latest()
             ->limit(10)
             ->get();
-            
+
         return view('dashboard.payments.create', [
             'bankAccount' => $selectedBank,
             'bankAccounts' => $bankAccounts,
@@ -138,7 +138,7 @@ class PaymentsController extends Controller
             'bankAccounts' => $bankAccounts
         ]);
     }
-    
+
 
     public function edit($id)
     {
@@ -153,83 +153,81 @@ class PaymentsController extends Controller
         ]);
     }
 
-public function accountsStore(Request $request)
-{
-    $validatedData = $request->validate([
-        'amount' => 'required|numeric|min:0',
-        'receiver_id' => 'nullable|exists:bank_accounts,id',
-        'account_id' => 'required|exists:bank_accounts,id',
-        'date' => 'nullable|date',
-        'source' => 'nullable|string',
-        'description' => 'nullable|string',
-        'image' => 'nullable|image',
-    ]);
-    
-    DB::beginTransaction();
-    
-    try {
-        $validatedData = array_merge($validatedData, [
-            'type' => "deposit"
-                ]);
-        // Handle optional photo
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('payments/images', 'public');
-            $validatedData['image_path'] = $path;
-        }
-        $validatedData["price"] = $validatedData["amount"];
-        $payment = GeneralPayment::create($validatedData);
-        $transaction = $payment->transaction()->create($validatedData);
-
-        if ($request->filled('receiver_id')) {
-            $transfareTo = BankAccount::find($request->receiver_id);
-            $transfareTo->increment('balance', $request->amount);
-        }
-
-        DB::commit();
-        return response()->json(['message' => 'Transaction successful'], 200);
-        
-    } catch (\Exception $e) {
-        DB::rollback();
-        \Log::error('Account store transaction failed: ' . $e->getMessage());
-        return response()->json(['message' => 'Transaction failed'], 500);
-    }
-}
-
-public function moneyTransfer(Request $request)
-{
-    $validatedData = $request->validate([
-        'amount' => 'required|numeric|min:0',
-        'receiver_id' => 'required|exists:bank_accounts,id',
-        'sender_account_id' => 'required|exists:bank_accounts,id',
-        "type" => "required|in:deposit,debit,transfer",
-        'date' => 'required|date',
-        'description' => 'nullable|string',
-    ]);
-    
-    DB::beginTransaction();
-    
-    try {
-        \Log::info(json_encode($validatedData));
-        $validatedData = array_merge($validatedData, [
-            'verified' => true , 
+    public function accountsStore(Request $request)
+    {
+        $validatedData = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'receiver_id' => 'nullable|exists:bank_accounts,id',
+            'account_id' => 'required|exists:bank_accounts,id',
+            'date' => 'nullable|date',
+            'source' => 'nullable|string',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image',
         ]);
-        
-        Transaction::create($validatedData);
-        $receiverBankAccount = BankAccount::find($request->receiver_id);
-        $receiverBankAccount->increment('balance', $request->amount);
 
-        $senderBankAccount = BankAccount::find($request->sender_account_id);
-        $senderBankAccount->decrement('balance', $request->amount);
+        DB::beginTransaction();
 
-        DB::commit();
-        return response()->json(['message' => 'Transaction successful'], 200);
-        
-    } catch (\Exception $e) {
-        DB::rollback();
-        \Log::error('Money transfer transaction failed: ' . $e->getMessage());
-        return response()->json(['message' => 'Transaction failed'], 500);
+        try {
+            $validatedData = array_merge($validatedData, [
+                'type' => "deposit"
+            ]);
+            // Handle optional photo
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('payments/images', 'public');
+                $validatedData['image_path'] = $path;
+            }
+            $validatedData["price"] = $validatedData["amount"];
+            $payment = GeneralPayment::create($validatedData);
+            $transaction = $payment->transaction()->create($validatedData);
+
+            if ($request->filled('receiver_id')) {
+                $transfareTo = BankAccount::find($request->receiver_id);
+                $transfareTo->increment('balance', $request->amount);
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Transaction successful'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Account store transaction failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Transaction failed'], 500);
+        }
     }
-}
+
+    public function moneyTransfer(Request $request)
+    {
+        $validatedData = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'receiver_id' => 'required|exists:bank_accounts,id',
+            'sender_account_id' => 'required|exists:bank_accounts,id',
+            "type" => "required|in:deposit,debit,transfer",
+            'date' => 'required|date',
+            'description' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            \Log::info(json_encode($validatedData));
+            $validatedData = array_merge($validatedData, [
+                'verified' => true,
+            ]);
+
+            Transaction::create($validatedData);
+            $receiverBankAccount = BankAccount::find($request->receiver_id);
+            $receiverBankAccount->increment('balance', $request->amount);
+
+            $senderBankAccount = BankAccount::find($request->sender_account_id);
+            $senderBankAccount->decrement('balance', $request->amount);
+
+            DB::commit();
+            return response()->json(['message' => 'Transaction successful'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Money transfer transaction failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Transaction failed'], 500);
+        }
+    }
 
 
     public function accountsUpdate(Request $request, $id)
@@ -251,14 +249,14 @@ public function moneyTransfer(Request $request)
         ]);
 
         DB::beginTransaction();
-        
+
         try {
             // Handle optional replacement image
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('payments/images', 'public');
                 $validatedData['image_path'] = $path;
             }
-            
+
             $payment = GeneralPayment::findOrFail($id);
             if ($payment->verified) {
                 $oldAccount = BankAccount::find($account_id);
@@ -278,7 +276,7 @@ public function moneyTransfer(Request $request)
                 if ($newAccount) {
                     $newAccount->increment('balance', $amount);
                 }
-                
+
                 // If receiver changed, remove money from old receiver
                 if ($receiver && $receiver != $request->receiver_id) {
                     $oldReceiver = BankAccount::find($receiver);
@@ -289,9 +287,8 @@ public function moneyTransfer(Request $request)
             }
 
             DB::commit();
-            
+
             return response()->json(['message' => 'Update successful'], 200);
-            
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Account update transaction failed: ' . $e->getMessage());
@@ -337,13 +334,13 @@ public function moneyTransfer(Request $request)
             'statement' => 'required',
             'notes' => 'nullable|string',
         ]);
-        
+
         DB::beginTransaction();
-        
+
         try {
 
             $payment = Payment::create($validatedData);
-            
+
             if ($request->source) {
                 if ($request->statement == 'deposit' || $request->statement == 'complete the amount') {
                     $source = 'reservation_payments';
@@ -351,12 +348,12 @@ public function moneyTransfer(Request $request)
                     $source = 'insurances';
                 }
             }
-            
+
             Transaction::create([
                 'account_id' => $request->account_id,
                 'amount' => $request->price,
                 'type' => 'deposit',
-                'source'=> $source ? $source : $request->source,
+                'source' => $source ? $source : $request->source,
                 'date' => now(),
                 'description' => 'Payment: ' . $request->statement,
                 'payment_id' => $payment->id,
@@ -364,9 +361,9 @@ public function moneyTransfer(Request $request)
                 'order_id' => $payment->order_id,
                 'customer_id' => $payment->customer_id ?? null
             ]);
-            
+
             DB::commit();
-             // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations
+            // If it's an AJAX/JSON request, return JSON to satisfy front-end expectations
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -374,7 +371,6 @@ public function moneyTransfer(Request $request)
                 ], 200);
             }
             return back()->withSuccess(__('dashboard.success'));
-            
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Payment store transaction failed: ' . $e->getMessage());
@@ -426,10 +422,10 @@ public function moneyTransfer(Request $request)
             'account_id' => $request->account_id,
             'amount' => $request->price,
             'type' => 'deposit',
-            'source'=> $request->source,
+            'source' => $request->source,
             'date' => now(),
             'description' => 'Payment: ' . $request->statement,
-            'verified' => 0, 
+            'verified' => 0,
         ]);
 
         return back()->withSuccess(__('dashboard.success'));
@@ -447,7 +443,7 @@ public function moneyTransfer(Request $request)
         $this->authorize('delete', $payment);
 
         DB::beginTransaction();
-        
+
         try {
             // If payment is verified, discount from the bank account
             if ($payment->verified) {
@@ -458,8 +454,7 @@ public function moneyTransfer(Request $request)
             }
             $payment->delete();
             DB::commit();
-            return response()->json(["success" => true,"deleted_amount" => $payment->price]);
-            
+            return response()->json(["success" => true, "deleted_amount" => $payment->price]);
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Payment destroy transaction failed: ' . $e->getMessage());
@@ -469,29 +464,28 @@ public function moneyTransfer(Request $request)
 
 
     public function deleteAll(Request $request)
-    { 
+    {
         DB::beginTransaction();
-        
+
         try {
             $this->authorize('delete', Payment::class);
-    
+
             $requestIds = json_decode($request->data);
-    
+
             foreach ($requestIds as $id) {
                 $payment = Payment::findOrFail($id);
-                    // If payment is verified, discount from the bank account
-                    if ($payment->verified) {
-                        $bankAccount = BankAccount::find($payment->account_id);
-                        if ($bankAccount) {
-                            $bankAccount->decrement('balance', $payment->price);
-                        }
+                // If payment is verified, discount from the bank account
+                if ($payment->verified) {
+                    $bankAccount = BankAccount::find($payment->account_id);
+                    if ($bankAccount) {
+                        $bankAccount->decrement('balance', $payment->price);
                     }
-                    $payment->delete();
+                }
+                $payment->delete();
             }
-            
+
             DB::commit();
             return response()->json('success');
-            
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Payment delete all transaction failed: ' . $e->getMessage());

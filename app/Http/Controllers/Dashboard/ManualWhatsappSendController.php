@@ -90,7 +90,6 @@ class ManualWhatsappSendController extends Controller
 
             return redirect()->route('dashboard.manual-whatsapp-sends.index')
                 ->with('success', __('dashboard.manual_whatsapp_send_created_successfully'));
-
         } catch (\Exception $e) {
             Log::error('Manual WhatsApp send creation failed', [
                 'error' => $e->getMessage(),
@@ -109,7 +108,6 @@ class ManualWhatsappSendController extends Controller
     public function show(ManualWhatsappSend $manualWhatsappSend)
     {
         $manualWhatsappSend->load(['template', 'creator']);
-        
         return view('dashboard.manual_whatsapp_sends.show', compact('manualWhatsappSend'));
     }
 
@@ -132,7 +130,6 @@ class ManualWhatsappSendController extends Controller
                 try {
                     // Prepare message
                     $message = $template->getBilingualMessage($phoneData['name']);
-                    
                     // Add custom message if provided
                     if ($manualSend->custom_message) {
                         $message .= "\n\n" . $manualSend->custom_message;
@@ -176,7 +173,6 @@ class ManualWhatsappSendController extends Controller
                             'message' => 'Failed to send message'
                         ];
                     }
-
                 } catch (\Exception $e) {
                     $failedCount++;
                     $sendResults[] = [
@@ -195,7 +191,6 @@ class ManualWhatsappSendController extends Controller
                 'sent_count' => $sentCount,
                 'failed_count' => $failedCount,
             ]);
-
         } catch (\Exception $e) {
             Log::error('Manual WhatsApp send processing failed', [
                 'manual_send_id' => $manualSend->id,
@@ -216,21 +211,21 @@ class ManualWhatsappSendController extends Controller
     public function searchCustomers(Request $request)
     {
         $query = $request->get('q', '');
-        
+
         $customers = Customer::with(['orders'])
             ->whereNotNull('phone')
-            ->where(function($q) use ($query) {
+            ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('phone', 'like', "%{$query}%");
+                    ->orWhere('phone', 'like', "%{$query}%");
             })
             ->limit(20)
             ->get()
-            ->map(function($customer) {
+            ->map(function ($customer) {
                 $latestOrder = $customer->orders()->latest()->first();
                 return [
                     'id' => $customer->id,
-                    'text' => $customer->name . ' (' . $customer->phone . ')' . 
-                             ($latestOrder ? ' - Order: ' . $latestOrder->order_number : ''),
+                    'text' => $customer->name . ' (' . $customer->phone . ')' .
+                        ($latestOrder ? ' - Order: ' . $latestOrder->order_number : ''),
                     'name' => $customer->name,
                     'phone' => $customer->phone,
                     'order_number' => $latestOrder ? $latestOrder->order_number : null

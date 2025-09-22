@@ -45,35 +45,35 @@
     .dotted-pending {
         background-color: #009ef7;
         color: white;
-        padding:6px 16px;
+        padding: 6px 16px;
         border-radius: 9px;
     }
 
     .dotted-approved {
         background-color: green;
         color: white;
-        padding:6px 16px;
+        padding: 6px 16px;
         border-radius: 9px;
     }
 
     .dotted-canceled {
         background-color: red;
         color: white;
-        padding:6px 16px;
+        padding: 6px 16px;
         border-radius: 9px;
     }
 
     .dotted-delayed {
         background-color: orange;
         color: white;
-        padding:6px 16px;
+        padding: 6px 16px;
         border-radius: 9px;
     }
 
     .dotted-completed {
         background-color: gray;
         color: white;
-        padding:6px 16px;
+        padding: 6px 16px;
         border-radius: 9px;
     }
 
@@ -88,25 +88,26 @@
 @section('scripts')
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             locale: `{{ app()->getLocale() }}`,
             events: [
-                @foreach($orders as $order)
-                        {
-                        id: "{{ $order->id }}",
-                        title: `{{ $order->customer->name ?? 'عميل غير محدد' }} `,
-                        start: "{{ $order->date }}",
-                        end: "{{ $order->date }}",
-                        url: `{{ route('orders.edit', $order->id) }}`,
-                        extendedProps: {
-                            status: "{{ $order->status }}"
-                        }
-                    },
+                @foreach($orders as $order) {
+                    id: "{{ $order->id }}",
+                    title: `{{ $order->customer->name ?? 'عميل غير محدد' }} `,
+                    start: "{{ $order->date }}",
+                    end: "{{ $order->date }}",
+                    @can('scheduling.edit')
+                    url: `{{ route('orders.edit', $order->id) }}`,
+                    @endcan
+                    extendedProps: {
+                        status: "{{ $order->status }}"
+                    }
+                },
                 @endforeach
             ],
-            eventDidMount: function (info) {
+            eventDidMount: function(info) {
                 var status = info.event.extendedProps.status;
                 var titleElement = info.el.querySelector('.fc-event-title');
                 console.log(status);
@@ -134,9 +135,11 @@
                     titleElement.style.color = 'white';
                 }
             },
-            dateClick: function (info) {
+            @can('scheduling.create')
+            dateClick: function(info) {
                 window.location.href = `{{ route('orders.create') }}?date=${info.dateStr}`;
             }
+            @endcan
         });
         calendar.render();
     });

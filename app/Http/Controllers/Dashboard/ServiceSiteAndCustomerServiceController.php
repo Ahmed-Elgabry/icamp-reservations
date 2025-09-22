@@ -44,10 +44,10 @@ class ServiceSiteAndCustomerServiceController extends Controller
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-            'success' => true,
-            'message' => __('item_added_successfully'),
+                'success' => true,
+                'message' => __('item_added_successfully'),
 
-            'data' => $validatedData,
+                'data' => $validatedData,
             ], 201);
         }
 
@@ -81,8 +81,8 @@ class ServiceSiteAndCustomerServiceController extends Controller
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-            'success' => true,
-            'message' => __('item_updated_successfully'),
+                'success' => true,
+                'message' => __('item_updated_successfully'),
             ]);
         }
 
@@ -102,8 +102,8 @@ class ServiceSiteAndCustomerServiceController extends Controller
 
         if (request()->ajax() || request()->wantsJson()) {
             return response()->json([
-            'success' => true,
-            'message' => __('item_deleted_successfully'),
+                'success' => true,
+                'message' => __('item_deleted_successfully'),
             ]);
         }
 
