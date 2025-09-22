@@ -2112,4 +2112,7 @@ return [
     "contacts_list" => 'Contacts List',
     "generated_on" => 'Generated On',
     "use_template" => 'Use Template',
+    "amount_details" => 'Amount Details',
+     "A new registration form has been submitted." => 'New Registration Form Submitted',
+    "New Registration Form Submitted" => 'New Registration Form Submitted',
 ];
