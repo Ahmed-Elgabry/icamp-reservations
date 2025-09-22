@@ -44,7 +44,7 @@
         <!--begin::Container-->
         <div id="kt_content_container" class="container-xxl">
 
-            
+
             <div class="row">
                 <!-- Customers Count -->
                 @can('bookings.index')
@@ -59,7 +59,7 @@
                     </a>
                 </div>
                 @endcan
-                
+
                 @can('bookings.index')
                     <!-- Total Orders Card -->
                     <div class="col-md-4 mb-4">
@@ -90,7 +90,7 @@
                     @endforeach
                 @endcan
             </div>
-       
+
              <div class="row mt-10">
 
 
@@ -220,12 +220,12 @@
                                                 } elseif ($payment->orderAddon) {
                                                     $source = $payment->orderAddon->addon->name;
                                                     $paymentMethod = $payment->orderAddon->payment_method;
-                                                    $link = route('orders.addons', $payment->order->id);
+                                                    $link = route('bookings.addons', $payment->order->id);
                                                 } elseif ($payment->orderItem) {
                                                     $source = $payment->orderItem->stock->name;
                                                     $paymentMethod = $payment->orderItem->payment_method;
                                                     $link = route('warehouse_sales.show', $payment->order->id);
-                                                } 
+                                                }
                                             @endphp
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>

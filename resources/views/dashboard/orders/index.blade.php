@@ -25,6 +25,7 @@
 
                     </div>
                     <!--end::Search-->
+                @can('bookings.scan-qr')
 
                     <!--QR Scanner:Start-->
                     <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal"
@@ -32,6 +33,7 @@
                         <i class="fas fa-qrcode me-2"></i>@lang('dashboard.scan_qr')
                     </button>
                     <!--QR Scanner:End-->
+                    @endcan
                 </div>
                 <!--end::Card title-->
                 <!--begin::Card toolbar-->
@@ -99,7 +101,7 @@
                                             @else
                                             <span>{{$order->id }}</span>
                                             @endcan
-                                            
+
                                         </td>
 
                                     <!--begin::Customer Name-->
@@ -182,7 +184,7 @@
                                 <!--begin::Order Status-->
 
                                 <td>
-                                    <span 
+                                    <span
                                         @class([
                                             'badge text-white',
                                             'bg-success' => $order->insurance_status === 'returned',
@@ -273,7 +275,7 @@
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
                                         data-kt-menu="true">
 
-                                        @can('bookings.show')
+                                        @can('bookings.view')
                                             <div class="menu-item px-3">
                                                 <a href="{{route('orders.show', $order->id)}}"
                                                     class="menu-link px-3">{{__('dashboard.show')}}</a>
@@ -463,27 +465,27 @@
                     form.method = 'POST';
                     form.action = deleteUrl;
                     form.style.display = 'none';
-                    
+
                     // Add CSRF token
                     const csrfTokenField = document.createElement('input');
                     csrfTokenField.type = 'hidden';
                     csrfTokenField.name = '_token';
                     csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
                     form.appendChild(csrfTokenField);
-                    
+
                     // Add DELETE method
                     const methodField = document.createElement('input');
                     methodField.type = 'hidden';
                     methodField.name = '_method';
                     methodField.value = 'DELETE';
                     form.appendChild(methodField);
-                    
+
                     document.body.appendChild(form);
                     form.submit();
                 }
                 return;
             }
-            
+
             Swal.fire({
                 title: '{{ __("dashboard.confirm_delete") ?? "Confirm Delete" }}',
                 text: '{{ __("dashboard.delete_warning_message") ?? "Are you sure you want to delete this item? This action cannot be undone." }}',
@@ -501,21 +503,21 @@
                     form.method = 'POST';
                     form.action = deleteUrl;
                     form.style.display = 'none';
-                    
+
                     // Add CSRF token
                     const csrfTokenField = document.createElement('input');
                     csrfTokenField.type = 'hidden';
                     csrfTokenField.name = '_token';
                     csrfTokenField.value = csrfToken || '{{ csrf_token() }}';
                     form.appendChild(csrfTokenField);
-                    
+
                     // Add DELETE method
                     const methodField = document.createElement('input');
                     methodField.type = 'hidden';
                     methodField.name = '_method';
                     methodField.value = 'DELETE';
                     form.appendChild(methodField);
-                    
+
                     document.body.appendChild(form);
                     form.submit();
                 }

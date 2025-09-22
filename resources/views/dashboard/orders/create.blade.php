@@ -17,9 +17,11 @@
                         </h3>
                     </div>
                     <div class="card-toolbar">
+                        @can('bookings.retrieve-data')
                         <button type="button" class="btn btn-light-primary" id="btnRetrieveRf">
                             <i class="bi bi-cloud-download"></i> {{ __('dashboard.retrieve_data') }}
                         </button>
+                        @endcan
                     </div>
                 </div>
 
@@ -310,19 +312,22 @@
 
                             <div class="d-flex justify-content-end gap-2">
                                 @if(isset($order))
+                                    @can('bookings.send-email')
                                     <!--begin::Email Button-->
                                     <button type="button" id="send-email-btn" class="btn btn-secondary d-flex align-items-center gap-2">
                                         <img src="{{ asset('imgs/gmail.png') }}" alt="Email Icon" width="20" height="20">
                                         <span class="indicator-label">@lang('dashboard.send_email')</span>
                                     </button>
                                     <!--end::Email Button-->
-
+                                    @endcan
+                                    @can('bookings.send-whatsapp')
                                     <!--begin::WhatsApp Button-->
                                     <button type="button" id="send-whatsapp-btn" class="btn btn-success d-flex align-items-center gap-2 ms-2">
                                         <img src="{{ asset('images/whatsapp.png') }}" alt="WhatsApp Icon" width="20" height="20">
                                         <span class="indicator-label">@lang('dashboard.send_whatsapp')</span>
                                     </button>
                                     <!--end::WhatsApp Button-->
+                                    @endcan
                                 @endif
                                 <!--begin::Additional Notes Button-->
                                 <button type="button" id="additional-notes-btn" class="btn btn-secondary">

@@ -20,11 +20,12 @@ class CheckRoleMiddleware
         // Super Admin bypass - User ID 1 only has all permissions
         if (isset(auth()->user()->id) && auth()->user()->id == 1) {
             return $next($request);
-        }else if (Page::where('url', $request->url())->exists()) {
-            return $next($request);
-        }else{
-            return redirect(route('show.login'));
         }
+        // else if (Page::where('url', $request->url())->exists()) {
+        //     return $next($request);
+        // }else{
+        //     return redirect(route('show.login'));
+        // }
 
         if (!auth()->user()->is_active) {
             auth()->logout();
@@ -63,13 +64,16 @@ class CheckRoleMiddleware
         }
 
         if (!in_array($currunt_route, $excpetions) && !$isWildcardException) {
-            $currunt_route = str_replace('update-settings', 'settings', $currunt_route);
+           $currunt_route = str_replace('update-settings', 'settings', $currunt_route);
             $currunt_route = str_replace('store', 'create', $currunt_route);
             $currunt_route = str_replace('adminsfile.destroy', 'admins.destroy', $currunt_route);
             $currunt_route = str_replace('update.reports', 'orders.reports', $currunt_route);
+            $currunt_route = str_replace('bookingsStore.addons', 'bookings.addons', $currunt_route);
             $currunt_route = str_replace('ordersStore.addons', 'orders.addons', $currunt_route);
             $currunt_route = str_replace('orders.removeAddon', 'orders.addons', $currunt_route);
+            $currunt_route = str_replace('bookings.removeAddon', 'bookings.addons', $currunt_route);
             $currunt_route = str_replace('ordersUpdate.addons', 'orders.addons', $currunt_route);
+            $currunt_route = str_replace('bookingsUpdate.addons', 'bookings.addons', $currunt_route);
             $currunt_route = str_replace('orders.updateInsurance', 'orders.insurance', $currunt_route);
             $currunt_route = str_replace('orders.updatesignin', 'orders.signin', $currunt_route);
             $currunt_route = str_replace('orders.uploadTemporaryImage', 'orders.signin', $currunt_route);

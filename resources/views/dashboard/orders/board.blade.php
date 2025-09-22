@@ -27,7 +27,7 @@
               <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? 'active' : '' }}" href="{{ route('reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming_reservations')</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'tasks' ? 'active' : '' }}" href="{{ route('orders.tasks.index') }}">@lang('dashboard.tasks')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'tasks' ? 'active' : '' }}" href="{{ route('bookings.tasks.index') }}">@lang('dashboard.tasks')</a>
             </li>
           </ul>
         </div>
@@ -266,7 +266,7 @@ const POLL_INTERVAL = 1000; // 1 second
   }
   tick();
   setInterval(tick, 1000);
-  
+
   // Start polling for updates
   function pollForUpdates() {
     const orderIds = Array.from(new Set(
@@ -356,9 +356,9 @@ const POLL_INTERVAL = 1000; // 1 second
   // Helper function to format date time
   function formatDateTime(datetimeString) {
     if (!datetimeString) return '';
-    const options = { 
-      year: 'numeric', 
-      month: 'short', 
+    const options = {
+      year: 'numeric',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
