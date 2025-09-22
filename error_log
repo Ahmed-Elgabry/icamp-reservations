@@ -1,0 +1,9 @@
+[25-Aug-2025 04:40:05 UTC] PHP Warning:  require(/home/funcam5/system.funcamp.ae/vendor/composer/../symfony/polyfill-intl-grapheme/bootstrap.php): Failed to open stream: No such file or directory in /home/funcam5/system.funcamp.ae/vendor/composer/autoload_real.php on line 41
+[25-Aug-2025 04:40:05 UTC] PHP Warning:  require(/home/funcam5/system.funcamp.ae/vendor/composer/../symfony/polyfill-intl-grapheme/bootstrap.php): Failed to open stream: No such file or directory in /home/funcam5/system.funcamp.ae/vendor/composer/autoload_real.php on line 41
+[25-Aug-2025 04:40:05 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/funcam5/system.funcamp.ae/vendor/composer/../symfony/polyfill-intl-grapheme/bootstrap.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/funcam5/system.funcamp.ae/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/funcam5/system.funcamp.ae/vendor/composer/autoload_real.php(45): {closure}('8825ede83f2f289...', '/home/funcam5/s...')
+#1 /home/funcam5/system.funcamp.ae/vendor/autoload.php(25): ComposerAutoloaderInitab8fd1760e4abf7d3265cb79c73104f0::getLoader()
+#2 /home/funcam5/system.funcamp.ae/artisan(18): require('/home/funcam5/s...')
+#3 {main}
+  thrown in /home/funcam5/system.funcamp.ae/vendor/composer/autoload_real.php on line 41
