@@ -12,8 +12,18 @@ return array(
     |
     */
     'show_warnings' => false,   // Throw an Exception on warnings from dompdf
-
     'public_path' => null,  // Override the public path if needed
+    'default_font' => 'cairo',
+    'enable_html5_parser' => true,
+    'enable_remote' => true,
+    'enable_php' => true,
+    'is_remote_enabled' => true,
+    'is_html5_parser_enabled' => true,
+    'is_php_enabled' => true,
+    'font_cache' => storage_path('fonts/'),
+    'font_dir' => storage_path('fonts/'),
+    'temp_dir' => storage_path('app/dompdf/'),
+    'chroot' => realpath(base_path()),
 
     /*
      * Dejavu Sans font is missing glyphs for converted entities, turn it off if you need to show € and £.
@@ -22,10 +32,12 @@ return array(
 
     'fontdata' => [
         'cairo' => [
-            'R'  => 'fonts/Cairo-Regular.ttf',    // Regular font
-            'B'  => 'fonts/Cairo-Bold.ttf',       // Bold font
-            'useOTL' => 0xFF,                    // Required for complex scripts like Arabic
-            'useKashida' => 75,                  // Enable kashida justification for Arabic text
+            'R'  => 'Cairo-Regular.ttf',
+            'B'  => 'Cairo-Bold.ttf',
+            'I'  => 'Cairo-Italic.ttf',
+            'BI' => 'Cairo-BoldItalic.ttf',
+            'useOTL' => 0xFF,
+            'useKashida' => 75,
         ],
     ],
 
