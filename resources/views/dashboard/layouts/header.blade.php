@@ -31,7 +31,8 @@
                 <div class="header-menu align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="end" data-kt-drawer-toggle="#kt_header_menu_mobile_toggle" data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_body', lg: '#kt_header_nav'}">
                     <!--begin::Menu-->
                     <div class="menu menu-lg-rounded menu-column menu-lg-row menu-state-bg menu-title-gray-700 menu-state-title-primary menu-state-icon-primary menu-state-bullet-primary menu-arrow-gray-400 fw-bold my-5 my-lg-0 align-items-stretch" data-kt-menu="true">
-                        <div data-kt-menu-placement="bottom-start" class="menu-item here show menu-lg-down-accordion me-lg-1">
+                        <div d
+                            <div data-kt-menu-placement="bottom-start" class="menu-item here show menu-lg-down-accordion me-lg-1">
                             <span class="menu-link py-3">
                                 <span class="menu-title"><a href="{{route('home')}}">@lang('dashboard.back_to_home')</a></span>
                                 <span class="menu-arrow d-lg-none"></span>
@@ -100,9 +101,9 @@
                                                 <a href="{{ $data['url'] ?? '#' }}"
                                                     class="text-gray-800 text-hover-primary fw-bold"
                                                     onclick="event.preventDefault(); markNotificationAsRead('{{ $notification->id }}', '{{ isset($data['url']) ? $data['url'] : '' }}')">
-                                                    {{ isset($data['title']) ? trim($data['title']) : '' }}
+                                                    {{ isset($data['title']) ? __("dashboard.".$data['title']) : '' }}
                                                 </a>
-                                                <div class="text-gray-500 fs-7">{{ isset($data['message']) ? $data['message'] : ''}}</div>
+                                                <div class="text-gray-500 fs-7">{{ isset($data['message']) ? __("dashboard.".$data['message']) : ''}}</div>
                                             </div>
                                             <!--end::Title-->
                                         </div>
