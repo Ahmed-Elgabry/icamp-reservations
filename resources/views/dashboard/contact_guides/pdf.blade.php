@@ -106,6 +106,8 @@
                 <th>{{ __('dashboard.secondary_phone') }}</th>
                 <th>{{ __('dashboard.fixed_phone') }}</th>
                 <th>{{ __('dashboard.email') }}</th>
+                <th>{{ __('dashboard.notes') }}</th>
+
             </tr>
         </thead>
         <tbody>
@@ -118,10 +120,11 @@
                     <td dir="ltr">{{ $contact->secondary_phone }}</td>
                     <td dir="ltr">{{ $contact->fixed_phone }}</td>
                     <td>{{ $contact->email }}</td>
+                    <td>{{ $contact->notes }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" style="text-align: center;">{{ __('dashboard.no_contacts_found') }}</td>
+                    <td colspan="8" style="text-align: center;">{{ __('dashboard.no_contacts_found') }}</td>
                 </tr>
             @endforelse
         </tbody>
