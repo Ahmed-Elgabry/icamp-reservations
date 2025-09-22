@@ -10,7 +10,10 @@
           <h3 class="fw-bolder m-0">@lang('dashboard.contacts')</h3>
         </div>
         <div class="card-toolbar">
-          <a href="{{ route('contact-guides.create') }}" class="btn btn-primary">@lang('dashboard.add_title', ['page_title' => __('dashboard.contact')])</a>
+          <a href="{{ route('contact-guides.create') }}" class="btn btn-primary me-2">@lang('dashboard.add_title', ['page_title' => __('dashboard.contact')])</a>
+          <a href="{{ route('contact-guides.export-pdf') }}" class="btn btn-danger" target="_blank">
+            <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
+          </a>
         </div>
       </div>
 
@@ -85,7 +88,10 @@
                 </td>
                 <td class="text-center">
                   @if($c->photo)
-                    <a href="#" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#photoModal" data-photo="{{ Storage::url($c->photo) }}" title="@lang('dashboard.view')">
+                    @php
+                        $photoUrl = Storage::exists($c->photo) ? Storage::url($c->photo) : asset('storage/' . $c->photo);
+                    @endphp
+                    <a href="#" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#photoModal" data-photo="{{ $photoUrl }}" title="@lang('dashboard.view')">
                       <i class="bi bi-eye"></i>
                     </a>
                   @else
@@ -132,6 +138,7 @@
 @push('scripts')
 <script>
   // Handle photo modal
+  document.addEventListener('DOMContentLoaded', function() {
   const photoModalEl = document.getElementById('photoModal');
   if (photoModalEl) {
     photoModalEl.addEventListener('show.bs.modal', function (event) {
@@ -140,6 +147,7 @@
       document.getElementById('photoModalImg').setAttribute('src', url);
     });
   }
+});
 
   // Delete confirmation is handled globally in app.blade.php
 </script>

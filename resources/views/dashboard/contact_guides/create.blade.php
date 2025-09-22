@@ -22,17 +22,28 @@
             <label class="form-label">@lang('dashboard.contact_person_name')</label>
             <input type="text" name="contact_person_name" class="form-control" value="{{ old('contact_person_name', $contact->contact_person_name ?? '') }}" required>
           </div>
+          <!-- Primary Phone -->
           <div class="col-md-4">
-            <label class="form-label">@lang('dashboard.primary_phone')</label>
-            <input type="tel" name="primary_phone" class="form-control" value="{{ old('primary_phone', $contact->primary_phone ?? '') }}" required>
+            <label class="form-label">@lang('dashboard.primary_phone') <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="tel" name="primary_phone" class="form-control" value="{{ $contact->primary_phone ?? '' }}" data-dial="{{ isset($contact) && $contact->primary_phone ? substr($contact->primary_phone, 0, 4) : '971' }}" required>
+            </div>
           </div>
+
+          <!-- Secondary Phone -->
           <div class="col-md-4">
             <label class="form-label">@lang('dashboard.secondary_phone')</label>
-            <input type="tel" name="secondary_phone" class="form-control" value="{{ old('secondary_phone', $contact->secondary_phone ?? '') }}"   required>
+            <div class="input-group">
+              <input type="tel" name="secondary_phone" class="form-control" value="{{ $contact->secondary_phone ?? '' }}" data-dial="{{ isset($contact) && $contact->secondary_phone ? substr($contact->secondary_phone, 0, 4) : '971' }}">
+            </div>
           </div>
+
+          <!-- Fixed Phone -->
           <div class="col-md-4">
             <label class="form-label">@lang('dashboard.fixed_phone')</label>
-            <input type="tel" name="fixed_phone" class="form-control" value="{{ old('fixed_phone', $contact->fixed_phone ?? '') }}" required>
+            <div class="input-group">
+              <input type="tel" name="fixed_phone" class="form-control" value="{{ $contact->fixed_phone ?? '' }}" data-dial="{{ isset($contact) && $contact->fixed_phone ? substr($contact->fixed_phone, 0, 4) : '971' }}">
+            </div>
           </div>
           <div class="col-md-6">
             <label class="form-label">@lang('dashboard.email')</label>

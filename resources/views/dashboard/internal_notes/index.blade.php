@@ -113,8 +113,7 @@
                     clipboard: {
                         matchVisual: false
                     }
-                },
-                placeholder: '{{ __('dashboard.note_content') }}'
+                }
             });
 
             // If there's initial HTML in the hidden textarea, load it into Quill

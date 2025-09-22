@@ -681,7 +681,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">@lang('dashboard.cancel')</button>
-                    <button type="button" id="updateInternalNoteBtn" class="btn btn-primary">@lang('dashboard.update')</button>
+                    <button type="button" id="updateInternalNoteBtn" class="btn btn-primary">@lang('dashboard.update_button')</button>
                 </div>
             </div>
         </div>
@@ -1726,44 +1726,7 @@
                         }
                     });
 
-                    // Initialize client notes editor if it exists
-                    const clientNotesElement = document.querySelector('textarea[name="client_notes"]');
-                    if (clientNotesElement) {
-                        ClassicEditor
-                            .create(clientNotesElement, {
-                                toolbar: {
-                                    items: [
-                                        'heading', '|',
-                                        'bold', 'italic', 'underline', 'strikethrough', '|',
-                                        'fontSize', 'fontColor', 'fontBackgroundColor', '|',
-                                        'bulletedList', 'numberedList', '|',
-                                        'outdent', 'indent', '|',
-                                        'alignment', '|',
-                                        'link', 'blockQuote', 'insertTable', '|',
-                                        'undo', 'redo'
-                                    ],
-                                    shouldNotGroupWhenFull: false
-                                },
-                                language: '{{ app()->getLocale() }}',
-                                table: {
-                                    contentToolbar: [
-                                        'tableColumn', 'tableRow', 'mergeTableCells',
-                                        'tableProperties', 'tableCellProperties'
-                                    ]
-                                },
-                                heading: {
-                                    options: [
-                                        { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-                                        { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-                                        { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-                                        { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
-                                    ]
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error initializing CKEditor for client notes:', error);
-                            });
-                    }
+                    // Client notes is a simple textarea without rich text editor
 
                     // Initialize refunds notes editor if it exists
                     const refundsNotesElement = document.querySelector('textarea[name="refunds_notes"]');

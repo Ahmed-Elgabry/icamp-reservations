@@ -313,7 +313,11 @@ class OrderController extends Controller
             $this->handleInventoryWithdrawal($order);
         }
 
-        return response()->json();
+        return response()->json([
+            'success' => true,
+            'message' => __('Order created successfully'),
+            'redirect' => route('orders.edit', $order->id)
+        ]);
     }
 
     public function addHoursCount()
@@ -496,7 +500,7 @@ class OrderController extends Controller
             
             \DB::commit();
 
-            return response()->json(['message' => 'Order updated successfully']);
+            return response()->json(['success' => true, 'message' => 'Order updated successfully']);
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('Order update failed: ' . $e->getMessage());

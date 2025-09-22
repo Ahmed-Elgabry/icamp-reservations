@@ -1,3 +1,4 @@
+@if(auth()->check())
 <div id="kt_header" style="" class="header align-items-stretch">
     <!--begin::Container-->
     <div class="container-fluid d-flex align-items-stretch justify-content-between">
@@ -258,3 +259,34 @@
         }
     </script>
 @endauth
+@else
+{{-- Header --}}
+    <div class="glass header mb-3">
+        <div class="d-flex align-items-center gap-3">
+            <img src="{{ asset('images/logo.png') }}" class="logo" alt="Logo"
+                 onerror="this.replaceWith(Object.assign(document.createElement('div'),{textContent:'Company',className:'fw-bold fs-4'}));">
+            <div>
+                <div class="fw-bold">
+                    @switch(app()->getLocale())
+                        @case('en')
+                                {{ settings('app_name_en') }}
+                            @break
+                        @case('ar')
+                                {{ settings('app_name_ar') }}
+                            @break
+                        @default
+                                {{ settings('app_name_en') }}
+                    @endswitch
+                </div>
+                <div class="text-muted">{{ __('booking.brand_sub') }}</div>
+            </div>
+        </div>
+        <div class="lang-switch btn-group" role="group" aria-label="Language">
+            @if(app()->getLocale()==='ar')
+                <a href="{{ route('set-lang' , 'en') }}" class=" @if(app()->getLocale()==='en') active @endif"><span class="badge bg-primary">EN</span></a>
+            @else
+                <a href="{{ route('set-lang' , 'ar') }}" class="@if(app()->getLocale()==='ar') active @endif"><span class="badge bg-primary">عربي</span></a>
+            @endif
+        </div>
+    </div>
+@endif
