@@ -73,7 +73,7 @@ class WhatsappMessageTemplate extends Model
     public function getProcessedMessage($language = 'ar', $customerName = '', $evaluationLink = '', $serviceSiteData = null)
     {
         $message = $language === 'en' ? $this->message_en : $this->message_ar;
-        
+
         return $this->processMessageContent($message, $customerName, $evaluationLink, $serviceSiteData);
     }
 
@@ -82,7 +82,7 @@ class WhatsappMessageTemplate extends Model
     {
         $arabicMessage = $this->processMessageContent($this->message_ar, $customerName, $evaluationLink, $serviceSiteData);
         $englishMessage = $this->processMessageContent($this->message_en, $customerName, $evaluationLink, $serviceSiteData);
-        
+
         // Combine both messages with a separator
         return $arabicMessage . "\n\n" . "━━━━━━━━━━━━━" . "\n\n" . $englishMessage;
     }
@@ -99,7 +99,7 @@ class WhatsappMessageTemplate extends Model
         $message = str_replace('[🔗 رابط التقييم]', $evaluationLink, $message); // Arabic with emoji
         $message = str_replace('[🔗 Evaluation Link]', $evaluationLink, $message);
         $message = str_replace('[Evaluation Link]', $evaluationLink, $message);
-        
+
         // Replace service site placeholders if data is provided
         if ($serviceSiteData) {
             $message = str_replace('[موقع المخيم]', $serviceSiteData['service_site'] ?? '', $message);
@@ -109,7 +109,7 @@ class WhatsappMessageTemplate extends Model
             $message = str_replace('[رقم هاتف العامل]', $serviceSiteData['workerphone'] ?? '', $message);
             $message = str_replace('[Worker Phone]', $serviceSiteData['workerphone'] ?? '', $message);
         }
-        
+
         // Convert HTML tags to WhatsApp formatting
         $message = str_replace(["<b>", "</b>"], "*", $message); // Bold
         $message = str_replace(["<strong>", "</strong>"], "*", $message); // Strong (bold)
@@ -119,29 +119,29 @@ class WhatsappMessageTemplate extends Model
         $message = str_replace(["<s>", "</s>"], "~", $message); // Strikethrough
         $message = str_replace(["<strike>", "</strike>"], "~", $message); // Strikethrough alternative
         $message = str_replace(["<del>", "</del>"], "~", $message); // Delete (strikethrough)
-        
+
         // Handle HTML entities from CKEditor first
         $message = str_replace("&nbsp;", " ", $message); // Non-breaking spaces
         $message = html_entity_decode($message, ENT_QUOTES | ENT_HTML5, 'UTF-8'); // Decode all HTML entities
-        
+
         // Handle paragraphs and line breaks
         $message = str_replace(["<p>", "</p>"], ["", "\n"], $message); // Paragraphs
         $message = str_replace("<br>", "\n", $message); // Line breaks
         $message = str_replace("<br/>", "\n", $message); // Self-closing line breaks
         $message = str_replace("<br />", "\n", $message); // Spaced self-closing line breaks
-        
+
         // Clean up extra spaces at the beginning of lines (from CKEditor &nbsp;)
         $message = preg_replace('/\n\s+/', "\n", $message); // Remove spaces after newlines
         $message = ltrim($message); // Remove leading spaces from the entire message
-        
+
         // Handle lists
         $message = str_replace(["<ul>", "</ul>"], ["", ""], $message); // Unordered lists
         $message = str_replace(["<ol>", "</ol>"], ["", ""], $message); // Ordered lists
         $message = str_replace(["<li>", "</li>"], ["• ", "\n"], $message); // List items
-        
+
         // Handle links (preserve the link text and URL)
         $message = preg_replace('/<a[^>]*href=["\']([^"\']*)["\'][^>]*>([^<]*)<\/a>/', '$2 ($1)', $message);
-        
+
         // Handle headings (convert to bold with line breaks)
         $message = str_replace(["<h1>", "</h1>"], ["*", "*\n"], $message);
         $message = str_replace(["<h2>", "</h2>"], ["*", "*\n"], $message);
@@ -149,21 +149,21 @@ class WhatsappMessageTemplate extends Model
         $message = str_replace(["<h4>", "</h4>"], ["*", "*\n"], $message);
         $message = str_replace(["<h5>", "</h5>"], ["*", "*\n"], $message);
         $message = str_replace(["<h6>", "</h6>"], ["*", "*\n"], $message);
-        
+
         // Handle blockquotes
         $message = str_replace(["<blockquote>", "</blockquote>"], ["", ""], $message);
-        
+
         // Handle code (use monospace formatting)
         $message = str_replace(["<code>", "</code>"], "```", $message);
         $message = str_replace(["<pre>", "</pre>"], ["```\n", "\n```"], $message);
-        
+
         // Clean up any remaining HTML tags
         $message = strip_tags($message);
-        
+
         // Clean up extra line breaks
         $message = preg_replace('/\n{3,}/', "\n\n", $message); // Max 2 consecutive line breaks
         $message = trim($message); // Remove leading/trailing whitespace
-        
+
         return $message;
     }
 }

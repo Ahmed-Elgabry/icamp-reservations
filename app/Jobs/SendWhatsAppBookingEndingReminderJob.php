@@ -58,14 +58,14 @@ class SendWhatsAppBookingEndingReminderJob implements ShouldQueue
             $customerName = $this->order->customer->name;
             $reservationNumber = $this->order->order_number;
             $checkoutTime = $this->order->time_to ?: '[وقت الخروج]';
-            
+
             // Get worker phone from service site data
             $serviceSiteData = ServiceSiteAndCustomerService::getLatestForWhatsApp();
             $receptionPhone = $serviceSiteData['workerphone'] ?? '+971501234567'; // Use worker phone or default
 
             // Get bilingual message with placeholders replaced
             $message = $template->getBilingualMessage($customerName);
-            
+
             // Replace additional placeholders specific to booking ending reminder
             $message = str_replace(['[رقم الحجز]', '[Reservation Number]'], $reservationNumber, $message);
             $message = str_replace(['[وقت الخروج]', '[check-out time]'], $checkoutTime, $message);
@@ -90,7 +90,6 @@ class SendWhatsAppBookingEndingReminderJob implements ShouldQueue
                     'customer_phone' => $this->order->customer->phone
                 ]);
             }
-
         } catch (\Exception $e) {
             Log::error('WhatsApp booking ending reminder job failed', [
                 'order_id' => $this->order->id,

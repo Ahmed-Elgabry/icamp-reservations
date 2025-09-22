@@ -67,14 +67,14 @@ class SendWhatsAppBookingReminderJob implements ShouldQueue
             $serviceSiteData = ServiceSiteAndCustomerService::getLatestForWhatsApp();
             $receptionName = $serviceSiteData['workername_ar'] ?? 'Funcamp'; // Use worker name in Arabic
             $receptionPhone = $serviceSiteData['workerphone'] ?? '+971501234567'; // Use worker phone
-            
+
             // Generate location link from service site data
             $serviceSite = $serviceSiteData['service_site'] ?? 'مخيم الوادي الأخضر - دبي';
             $locationLink = $serviceSite; // Generate Google Maps link
 
             // Get bilingual message with placeholders replaced
             $message = $template->getBilingualMessage($customerName);
-            
+
             // Replace additional placeholders specific to booking reminder
             $message = str_replace(['[رقم الحجز]', '[Reservation Number]'], $reservationNumber, $message);
             $message = str_replace(['[التاريخ]', '[Date]'], $date, $message);
@@ -106,7 +106,6 @@ class SendWhatsAppBookingReminderJob implements ShouldQueue
                     'customer_phone' => $this->order->customer->phone
                 ]);
             }
-
         } catch (\Exception $e) {
             Log::error('WhatsApp booking reminder job failed', [
                 'order_id' => $this->order->id,

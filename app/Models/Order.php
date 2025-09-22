@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Order extends Model
 {
     use HasFactory, UploadTrait;
-    
+
     protected $fillable = [
         'customer_id',
         'price',
@@ -60,7 +60,7 @@ class Order extends Model
         'people_count',
         "client_notes"
     ];
-    
+
     // Alternatively, you can keep using guarded if you prefer
     // protected $guarded = [];
 
@@ -79,7 +79,7 @@ class Order extends Model
 
         return null; // Return null if one of the time fields is null
     }
-    
+
     /**
      * Get all internal notes for this order
      */
@@ -128,7 +128,7 @@ class Order extends Model
         return $this->belongsToMany(Service::class, 'order_service')->withPivot('price');
     }
 
- 
+
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'order_stock')
@@ -172,12 +172,12 @@ class Order extends Model
     {
         return $this->belongsToMany(Addon::class, 'order_addon')
             ->using(OrderAddon::class)
-            ->withPivot('verified','count', 'price', 'description', 'id' , 'account_id' , 'payment_method')
+            ->withPivot('verified', 'count', 'price', 'description', 'id', 'account_id', 'payment_method')
             ->withTimestamps();
     }
     public function verifiedAddons()
     {
-       return $this->addons()->wherePivot('verified', true);
+        return $this->addons()->wherePivot('verified', true);
     }
     public function verifiedInsurance()
     {
@@ -205,7 +205,7 @@ class Order extends Model
     {
         return $this->hasOne(OrderInternalNote::class)->latestOfMany();
     }
-    
+
     public function internalNoteTemplates()
     {
         return $this->hasManyThrough(
@@ -238,7 +238,7 @@ class Order extends Model
             return asset('storage/' . $value);
         }
     }
-    
+
     public function setImageAfterDeliveryAttribute($value)
     {
         if ($value) {
@@ -265,47 +265,53 @@ class Order extends Model
         });
     }
 
-     public function items() { 
+    public function items()
+    {
         return $this->hasMany(OrderItem::class);
-     }
-     // after partial confiscated the confiscated amount is set to  transaction related to any payment to order
+    }
+    // after partial confiscated the confiscated amount is set to  transaction related to any payment to order
     public function insuranceFromTransaction()
     {
         $payment = $this->verifiedPayments()->where('statement', 'the_insurance')->first();
         return $payment && $payment->transaction ? $payment->transaction->amount : 0;
-     }
-     public function verifiedInsuranceAmount()
-     {
-         return $this->verifiedPayments()->where('statement', 'the_insurance')->sum('price');
-     }
-     public function verifiedWarehouseSalesAmount(){
+    }
+    public function verifiedInsuranceAmount()
+    {
+        return $this->verifiedPayments()->where('statement', 'the_insurance')->sum('price');
+    }
+    public function verifiedWarehouseSalesAmount()
+    {
         return OrderItem::where('verified', true)->where("order_id", $this->id)->sum('total_price');
-     }
-     // the total payment calucate the amount of payments except the deposit and addons and warehouse sales
-     public function totalPaymentsPrice() {
+    }
+    // the total payment calucate the amount of payments except the deposit and addons and warehouse sales
+    public function totalPaymentsPrice()
+    {
         $deposit = $this->payments()->where('statement', 'deposit')->where("verified", "1")->sum('price');
-        $insurances = $this->payments()->where('statement','the_insurance')->where("verified", "1")->sum('price');
+        $insurances = $this->payments()->where('statement', 'the_insurance')->where("verified", "1")->sum('price');
         $addons = $this->verifiedAddons()->sum('order_addon.price');
         $warehouseSales = $this->verifiedWarehouseSalesAmount();
         return $this->price - $deposit + $insurances + $addons + $warehouseSales;
-     }
+    }
     //  totalPaidAmount is the total of payments that is paid
-     public function totalPaidAmount() {
+    public function totalPaidAmount()
+    {
         $totalPayment = $this->payments()->sum('price');
         $totalWareHouse = OrderItem::where("order_id", $this->id)->sum('total_price');
         $addons = $this->addons()->sum('order_addon.price');
 
         return $totalPayment + $totalWareHouse + $addons;
-     }
-     public function verifiedItems() {
+    }
+    public function verifiedItems()
+    {
         return $this->items(OrderItem::class)->where('verified', true);
-     } 
-     public function stocksItems() { 
-         return $this->belongsToMany(Stock::class, 'order_items')
-             ->withPivot(['unit_price','quantity'])
-             ->using(OrderItemPivot::class)
-             ->withTimestamps();
-     }
+    }
+    public function stocksItems()
+    {
+        return $this->belongsToMany(Stock::class, 'order_items')
+            ->withPivot(['unit_price', 'quantity'])
+            ->using(OrderItemPivot::class)
+            ->withTimestamps();
+    }
 
     public function getItemsTotalAttribute()
     {

@@ -29,7 +29,7 @@
                 <!--begin::Primary button-->
                 @can('orders.create')
                 <a href="{{ route('orders.create') }}" class="btn btn-sm btn-primary">
-                     @lang('dashboard.create_title', ['page_title' => __('dashboard.orders')])
+                    @lang('dashboard.create_title', ['page_title' => __('dashboard.orders')])
                 </a>
                 <!--end::Primary button-->
                 @endcan
@@ -44,7 +44,7 @@
         <!--begin::Container-->
         <div id="kt_content_container" class="container-xxl">
 
-            
+
             <div class="row">
                 <!-- Customers Count -->
                 @can('bookings.index')
@@ -59,39 +59,39 @@
                     </a>
                 </div>
                 @endcan
-                
-                @can('bookings.index')
-                    <!-- Total Orders Card -->
-                    <div class="col-md-4 mb-4">
-                        <a href="{{ route('orders.index') }}">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <h3 class="fs-4 fw-bold text-gray-800">{{ __('dashboard.total_orders') }}</h3>
-                                    <h5 class="fs-2x fw-bolder text-primary">{{ number_format($totalOrdersCount) }}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
 
-                    <!-- Status Cards -->
-                    @foreach(getOrderedStatuses() as $status)
-                    <div class="col-md-4 mb-4">
-                        <a href="{{ route('orders.index', ['status' => $status]) }}">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <h3 class="fs-4 fw-bold text-gray-800">{{ __('dashboard.order_status.' . $status) }}</h3>
-                                    @if(isset($ordersCountByStatus[$status]))
-                                    <h5 class="fs-2x fw-bolder {{ getStatusBadgeColor($status) ? 'text-' . getStatusBadgeColor($status) : '' }}">{{ number_format($ordersCountByStatus[$status]) ?? "0" }}</h5>
-                                    @endif
-                                </div>
+                @can('bookings.index')
+                <!-- Total Orders Card -->
+                <div class="col-md-4 mb-4">
+                    <a href="{{ route('orders.index') }}">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h3 class="fs-4 fw-bold text-gray-800">{{ __('dashboard.total_orders') }}</h3>
+                                <h5 class="fs-2x fw-bolder text-primary">{{ number_format($totalOrdersCount) }}</h5>
                             </div>
-                        </a>
-                    </div>
-                    @endforeach
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Status Cards -->
+                @foreach(getOrderedStatuses() as $status)
+                <div class="col-md-4 mb-4">
+                    <a href="{{ route('orders.index', ['status' => $status]) }}">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h3 class="fs-4 fw-bold text-gray-800">{{ __('dashboard.order_status.' . $status) }}</h3>
+                                @if(isset($ordersCountByStatus[$status]))
+                                <h5 class="fs-2x fw-bolder {{ getStatusBadgeColor($status) ? 'text-' . getStatusBadgeColor($status) : '' }}">{{ number_format($ordersCountByStatus[$status]) ?? "0" }}</h5>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
                 @endcan
             </div>
-       
-             <div class="row mt-10">
+
+            <div class="row mt-10">
 
 
                 @can('bookings.index')
@@ -134,28 +134,28 @@
                                     <!--begin::Table body-->
                                     <tbody>
                                         @forelse($upcomingReservations as $key => $order)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>
-                                                    <a href="{{ route('orders.show', $order->id) }}" class="text-primary">
-                                                        #{{ $order->id }}
-                                                    </a>
-                                                </td>
-                                                <td>{{ $order->customer->name ?? 'N/A' }}</td>
-                                                <td dir="ltr">{{ $order->customer->phone ?? 'N/A' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($order->date)->format('Y-m-d') }}</td>
-                                                <td>
-                                                    <span class="badge badge-light-{{ getStatusBadgeColor($order->status) }}">
-                                                        {{ __('dashboard.' . $order->status) }}
-                                                    </span>
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td>{{ $key + 1 }}</td>
+                                            <td>
+                                                <a href="{{ route('orders.show', $order->id) }}" class="text-primary">
+                                                    #{{ $order->id }}
+                                                </a>
+                                            </td>
+                                            <td>{{ $order->customer->name ?? 'N/A' }}</td>
+                                            <td dir="ltr">{{ $order->customer->phone ?? 'N/A' }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($order->date)->format('Y-m-d') }}</td>
+                                            <td>
+                                                <span class="badge badge-light-{{ getStatusBadgeColor($order->status) }}">
+                                                    {{ __('dashboard.' . $order->status) }}
+                                                </span>
+                                            </td>
+                                        </tr>
                                         @empty
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted py-4">
-                                                    @lang('dashboard.no_upcoming_reservations')
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                @lang('dashboard.no_upcoming_reservations')
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                     <!--end::Table body-->
@@ -208,62 +208,62 @@
                                     <!--begin::Table body-->
                                     <tbody>
                                         @forelse($paymentRecords as $index => $payment)
-                                            @php
-                                                $reservationId = $payment->order_id;
-                                                $createdAt = \Carbon\Carbon::parse($payment->created_at);
-                                                $date = $createdAt->format('Y-m-d');
-                                                $time = $createdAt->format('h:i A');
-                                                if ($payment->payment) {
-                                                    $source = $payment->payment->statement;
-                                                    $paymentMethod = $payment->payment->payment_method;
-                                                    $link = route('payments.show', $payment->order->id);
-                                                } elseif ($payment->orderAddon) {
-                                                    $source = $payment->orderAddon->addon->name;
-                                                    $paymentMethod = $payment->orderAddon->payment_method;
-                                                    $link = route('orders.addons', $payment->order->id);
-                                                } elseif ($payment->orderItem) {
-                                                    $source = $payment->orderItem->stock->name;
-                                                    $paymentMethod = $payment->orderItem->payment_method;
-                                                    $link = route('warehouse_sales.show', $payment->order->id);
-                                                } 
-                                            @endphp
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <span class="text-dark fw-bold d-block">{{ $date }}</span>
-                                                    <span class="text-muted">{{ $time }}</span>
-                                                </td>
-                                                <td>
-                                                    @if($reservationId)
-                                                        <a href="{{ route('orders.show', $reservationId) }}" class="text-primary fw-bold">
-                                                            #{{ $reservationId }}
-                                                        </a>
-                                                    @else
-                                                        <span class="text-muted">N/A</span>
-                                                    @endif
-                                                </td>
-                                                <td class="text-nowrap">{{ number_format($payment->amount, 2) }} {{ __('dashboard.currency') }}</td>
-                                                <td>
-                                                    <a href="{{ $link }}" class="text-primary fw-bold">
-                                                        <div class="d-flex flex-column">
-                                                            <span class="text-muted fs-8">{{ __('dashboard.' . $payment->source) }}</span>
-                                                            <!-- check if there translation -->
-                                                            <span class="text-muted fs-8">{{ __("dashboard.".$source) == "dashboard.$source" ? $source : __("dashboard.".$source) }}  - {{$payment->order ? $payment->order->id : ''}}</span>
-                                                        </div>
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-light">
-                                                        {{ ucfirst(__("dashboard.".$paymentMethod)) }}
-                                                    </span>
-                                                </td>
-                                            </tr>
+                                        @php
+                                        $reservationId = $payment->order_id;
+                                        $createdAt = \Carbon\Carbon::parse($payment->created_at);
+                                        $date = $createdAt->format('Y-m-d');
+                                        $time = $createdAt->format('h:i A');
+                                        if ($payment->payment) {
+                                        $source = $payment->payment->statement;
+                                        $paymentMethod = $payment->payment->payment_method;
+                                        $link = route('payments.show', $payment->order->id);
+                                        } elseif ($payment->orderAddon) {
+                                        $source = $payment->orderAddon->addon->name;
+                                        $paymentMethod = $payment->orderAddon->payment_method;
+                                        $link = route('bookings.addons', $payment->order->id);
+                                        } elseif ($payment->orderItem) {
+                                        $source = $payment->orderItem->stock->name;
+                                        $paymentMethod = $payment->orderItem->payment_method;
+                                        $link = route('warehouse_sales.show', $payment->order->id);
+                                        }
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>
+                                                <span class="text-dark fw-bold d-block">{{ $date }}</span>
+                                                <span class="text-muted">{{ $time }}</span>
+                                            </td>
+                                            <td>
+                                                @if($reservationId)
+                                                <a href="{{ route('orders.show', $reservationId) }}" class="text-primary fw-bold">
+                                                    #{{ $reservationId }}
+                                                </a>
+                                                @else
+                                                <span class="text-muted">N/A</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-nowrap">{{ number_format($payment->amount, 2) }} {{ __('dashboard.currency') }}</td>
+                                            <td>
+                                                <a href="{{ $link }}" class="text-primary fw-bold">
+                                                    <div class="d-flex flex-column">
+                                                        <span class="text-muted fs-8">{{ __('dashboard.' . $payment->source) }}</span>
+                                                        <!-- check if there translation -->
+                                                        <span class="text-muted fs-8">{{ __("dashboard.".$source) == "dashboard.$source" ? $source : __("dashboard.".$source) }} - {{$payment->order ? $payment->order->id : ''}}</span>
+                                                    </div>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-light">
+                                                    {{ ucfirst(__("dashboard.".$paymentMethod)) }}
+                                                </span>
+                                            </td>
+                                        </tr>
                                         @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center text-muted py-4">
-                                                    @lang('dashboard.no_payments_found')
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                @lang('dashboard.no_payments_found')
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                     <!--end::Table body-->
@@ -271,14 +271,14 @@
                             </div>
                             <!--end::Table container-->
                             @if($paymentRecords->count() > 0)
-                                <div class="d-flex justify-content-between align-items-center mt-4">
-                                    <div class="text-muted">
-                                        @lang('dashboard.showing') {{ $paymentRecords->firstItem() }} @lang('dashboard.to') {{ $paymentRecords->lastItem() }} @lang('dashboard.of') {{ $paymentRecords->total() }} @lang('dashboard.entries')
-                                    </div>
-                                    <div>
-                                        @include('dashboard.pagination.pagination', ['transactions' => $paymentRecords])
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                <div class="text-muted">
+                                    @lang('dashboard.showing') {{ $paymentRecords->firstItem() }} @lang('dashboard.to') {{ $paymentRecords->lastItem() }} @lang('dashboard.of') {{ $paymentRecords->total() }} @lang('dashboard.entries')
                                 </div>
+                                <div>
+                                    @include('dashboard.pagination.pagination', ['transactions' => $paymentRecords])
                                 </div>
+                            </div>
                             @endif
                         </div>
                         <!--end::Card body-->
@@ -310,41 +310,41 @@
                                     </thead>
                                     <tbody>
                                         @forelse($surveyResponses as $index => $response)
-                                            @php
-                                                $createdAt = \Carbon\Carbon::parse($response->created_at);
-                                                $date = $createdAt->format('Y-m-d');
-                                                $time = $createdAt->format('h:i A');
-                                            @endphp
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <span class="text-dark fw-bold d-block">{{ $date }}</span>
-                                                    <span class="text-muted">{{ $time }}</span>
-                                                </td>
-                                                <td>
-                                                    @if($response->reservation_id)
-                                                        <a href="{{ route('orders.show', $response->reservation_id) }}" class="text-primary fw-bold">
-                                                            #{{ $response->reservation_id }}
-                                                        </a>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($response->order && $response->order->customer)
-                                                        <span class="text-dark fw-bold">{{ $response->order->customer->name ?? '' }}</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <a href="{{ route('surveys.answer', $response->id) }}" class="text-primary fw-bold">
-                                                        {{ $response->survey->title ?? '' }}
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                        @php
+                                        $createdAt = \Carbon\Carbon::parse($response->created_at);
+                                        $date = $createdAt->format('Y-m-d');
+                                        $time = $createdAt->format('h:i A');
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>
+                                                <span class="text-dark fw-bold d-block">{{ $date }}</span>
+                                                <span class="text-muted">{{ $time }}</span>
+                                            </td>
+                                            <td>
+                                                @if($response->reservation_id)
+                                                <a href="{{ route('orders.show', $response->reservation_id) }}" class="text-primary fw-bold">
+                                                    #{{ $response->reservation_id }}
+                                                </a>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($response->order && $response->order->customer)
+                                                <span class="text-dark fw-bold">{{ $response->order->customer->name ?? '' }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('surveys.answer', $response->id) }}" class="text-primary fw-bold">
+                                                    {{ $response->survey->title ?? '' }}
+                                                </a>
+                                            </td>
+                                        </tr>
                                         @empty
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted py-4">
-                                                    @lang('dashboard.no_survey_responses_found')
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">
+                                                @lang('dashboard.no_survey_responses_found')
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -376,32 +376,32 @@
                                     </thead>
                                     <tbody>
                                         @forelse($lowStockItems as $index => $stock)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <a href="{{ route('dashboard.stock.report', $stock->id) }}">
-                                                        <span class="text-dark fw-bold">{{ $stock->name ?? 'N/A' }}</span>
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    <span class="fw-bold">{{ $stock->quantity }}</span>
-                                                </td>
-                                                <td>
-                                                    @php
-                                                        $statusClass = $stock->quantity <= 5 ? 'danger' : 'warning';
-                                                        $statusText = $stock->quantity <= 5 ? 'Very Low' : 'Low';
-                                                    @endphp
-                                                    <span class="badge badge-light-{{ $statusClass }}">
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>
+                                                <a href="{{ route('dashboard.stock.report', $stock->id) }}">
+                                                    <span class="text-dark fw-bold">{{ $stock->name ?? 'N/A' }}</span>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold">{{ $stock->quantity }}</span>
+                                            </td>
+                                            <td>
+                                                @php
+                                                $statusClass = $stock->quantity <= 5 ? 'danger' : 'warning' ;
+                                                    $statusText=$stock->quantity <= 5 ? 'Very Low' : 'Low' ;
+                                                        @endphp
+                                                        <span class="badge badge-light-{{ $statusClass }}">
                                                         {{ __('dashboard.' . $statusText) }}
-                                                    </span>
-                                                </td>
-                                            </tr>
+                                                        </span>
+                                            </td>
+                                        </tr>
                                         @empty
-                                            <tr>
-                                                <td colspan="4" class="text-center text-muted py-4">
-                                                    @lang('dashboard.no_low_stock_items')
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">
+                                                @lang('dashboard.no_low_stock_items')
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -435,48 +435,48 @@
                                     </thead>
                                     <tbody>
                                         @forelse($recentExpenses as $index => $expense)
-                                            @php
-                                                $createdAt = \Carbon\Carbon::parse($expense->date ?? $expense->created_at);
-                                                $date = $createdAt->format('Y-m-d');
-                                                $time = $createdAt->format('h:i A');
-                                                $link = $expense->source == 'reservation_expenses' ? route('expenses.show', $expense->order->id) : route('expenses.index');
-                                            @endphp
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <span class="text-dark fw-bold d-block">{{ $date }}</span>
-                                                    <span class="text-muted">{{ $time }}</span>
-                                                </td>
-                                                <td class="text-end">
-                                                    <span class="text-danger fw-bold">- {{ number_format($expense->amount, 2) }} </span>
-                                                </td>
-                                                <td>
-                                                    <span class="text-dark fw-bold">{{ __("dashboard.".$expense->source ?? '') }}</span>
-                                                    <!-- check if translation available -->
-                                                    @php
-                                                        $statement = "dashboard.".$expense->expense->statement != __('dashboard.'.$expense->expense->statement) ? __('dashboard.'.$expense->expense->statement) : $expense->expense->statement;
-                                                    @endphp
-                                                    <span class="text-muted d-block">{{ $statement  }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-light-primary">
-                                                        {{ ucfirst(__('dashboard.' . $expense->expense->payment_method)) ?? "" }}
+                                        @php
+                                        $createdAt = \Carbon\Carbon::parse($expense->date ?? $expense->created_at);
+                                        $date = $createdAt->format('Y-m-d');
+                                        $time = $createdAt->format('h:i A');
+                                        $link = $expense->source == 'reservation_expenses' ? route('expenses.show', $expense->order->id) : route('expenses.index');
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>
+                                                <span class="text-dark fw-bold d-block">{{ $date }}</span>
+                                                <span class="text-muted">{{ $time }}</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="text-danger fw-bold">- {{ number_format($expense->amount, 2) }} </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-dark fw-bold">{{ __("dashboard.".$expense->source ?? '') }}</span>
+                                                <!-- check if translation available -->
+                                                @php
+                                                $statement = "dashboard.".$expense->expense->statement != __('dashboard.'.$expense->expense->statement) ? __('dashboard.'.$expense->expense->statement) : $expense->expense->statement;
+                                                @endphp
+                                                <span class="text-muted d-block">{{ $statement  }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-light-primary">
+                                                    {{ ucfirst(__('dashboard.' . $expense->expense->payment_method)) ?? "" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ $link }}">
+                                                    <span class="badge badge-light-info">
+                                                        {{ __('dashboard.' . $expense->source) }} {{ $expense->order ? " - ".$expense->order->id : ''}}
                                                     </span>
-                                                </td>
-                                                <td>
-                                                    <a href="{{ $link }}">
-                                                        <span class="badge badge-light-info">
-                                                            {{ __('dashboard.' . $expense->source) }} {{ $expense->order ? " - ".$expense->order->id : ''}}
-                                                        </span>
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                                </a>
+                                            </td>
+                                        </tr>
                                         @empty
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted py-4">
-                                                    @lang('dashboard.no_expenses_found')
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                @lang('dashboard.no_expenses_found')
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -510,42 +510,42 @@
                                     </thead>
                                     <tbody>
                                         @forelse($recentAddFunds as $index => $fund)
-                                            @php
-                                                $createdAt = \Carbon\Carbon::parse($fund->date ?? $fund->created_at);
-                                                $date = $createdAt->format('Y-m-d');
-                                                $time = $createdAt->format('h:i A');
-                                            @endphp
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <span class="text-dark fw-bold d-block">{{ $date }}</span>
-                                                    <span class="text-muted">{{ $time }}</span>
-                                                </td>
-                                                <td class="text-end">
-                                                    <span class="text-success fw-bold">+ {{ number_format($fund->amount, 2) }} </span>
-                                                </td>
-                                                <td>
-                                                    <span class="text-dark fw-bold">{{ __('dashboard.'.$fund->source) ?? '' }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-light-success">
-                                                        {{ ucfirst(__('dashboard.' . $fund->generalPayment?->payment_method)) ?? '' }}
+                                        @php
+                                        $createdAt = \Carbon\Carbon::parse($fund->date ?? $fund->created_at);
+                                        $date = $createdAt->format('Y-m-d');
+                                        $time = $createdAt->format('h:i A');
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>
+                                                <span class="text-dark fw-bold d-block">{{ $date }}</span>
+                                                <span class="text-muted">{{ $time }}</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="text-success fw-bold">+ {{ number_format($fund->amount, 2) }} </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-dark fw-bold">{{ __('dashboard.'.$fund->source) ?? '' }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-light-success">
+                                                    {{ ucfirst(__('dashboard.' . $fund->generalPayment?->payment_method)) ?? '' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('general_payments.create_add_funds') }}">
+                                                    <span class="badge badge-light-info">
+                                                        {{ __('dashboard.' . $fund->source) }}
                                                     </span>
-                                                </td>
-                                                <td>
-                                                    <a href="{{ route('general_payments.create_add_funds') }}">
-                                                        <span class="badge badge-light-info">
-                                                            {{ __('dashboard.' . $fund->source) }}
-                                                        </span>
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                                </a>
+                                            </td>
+                                        </tr>
                                         @empty
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted py-4">
-                                                    @lang('dashboard.no_funds_found')
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                @lang('dashboard.no_funds_found')
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -567,29 +567,32 @@
 @endsection
 
 @push('css')
-    <style>
-        #kt_content_container .card {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-        .badge {
-            font-weight: 600;
-            padding: 0.5em 0.75em;
-        }
-    </style>
+<style>
+    #kt_content_container .card {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .table th,
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-weight: 600;
+        padding: 0.5em 0.75em;
+    }
+</style>
 @endpush
 
 @push('scripts')
-    <script>
-        // Initialize tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    </script>
+    });
+</script>
 @endpush

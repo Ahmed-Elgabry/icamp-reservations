@@ -17,19 +17,19 @@ class Authenticate extends Middleware
     {
         $url = $request->url();
         $page = Page::where('url', $url)->first();
-        
+
         if ($page) {
             // If page is not available, return 404
             if (!$page->is_available) {
                 abort(404);
             }
-            
+
             // If page doesn't require authentication, skip auth check and continue
             if (!$page->is_authenticated) {
                 return $next($request);
             }
         }
-        
+
         // If page requires auth or no page found, run standard authentication
         return parent::handle($request, $next, ...$guards);
     }

@@ -51,6 +51,13 @@ trait Roles
             'camp-reports' => ['title_ar' => 'تقارير حالة المخيمات', 'title_en' => 'Camps Status Reports'],
             'terms-settings' => ['title_ar' => 'إعدادات الشروط', 'title_en' => 'Terms Settings'],
             'other' => ['title_ar' => 'أخرى', 'title_en' => 'Other'],
+            'whatsapp-templates' => ['title_ar' => 'نماذج واتساب', 'title_en' => 'Whatsapp Templates'],
+            'manual-whatsapp-sends' => ['title_ar' => 'ارسال واتساب يدوي', 'title_en' => 'Manual Whatsapp Sends'],
+            'general_payments' => ['title_ar' => 'المدفوعات العامة', 'title_en' => 'General Payments'],
+            'bank-accounts' => ['title_ar' => 'الحسابات البنكية', 'title_en' => 'Bank Accounts'],
+            'transactions' => ['title_ar' => 'المعاملات', 'title_en' => 'Transactions'],
+            'pages' => ['title_ar' => 'الصفحات', 'title_en' => 'Pages'],
+            'contact-guides' => ['title_ar' => 'جهات الاتصال', 'title_en' => 'Contact Guides'],
         ];
 
         // Special mappings for permissions that don't follow the standard prefix pattern
@@ -62,7 +69,6 @@ trait Roles
             'orders.registeration-forms' => 'bookings',
             'orders.customers.check' => 'bookings',
             'order.verified' => 'bookings',
-            
             // Services internal delete should appear in camp-types
             'services.delete.internal' => 'camp-types',
 
@@ -109,7 +115,7 @@ trait Roles
                         break;
                     }
                 }
-                
+
                 // Special handling for questions - move to surveys group
                 if (strpos($permissionName, 'questions.') === 0) {
                     $groupKey = 'surveys';
@@ -269,8 +275,15 @@ trait Roles
                                     <input type="checkbox" class="checkChilds checkChilds_' . $parent_class . '" data-parent="' . $parent_class . '">
                                 </div>
                         </div>
+                        <div class="p-2" style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                            <input type="text"
+                                class="form-control form-control-sm permission-search"
+                                data-group="' . $parent_class . '"
+                                placeholder="' . __("dashboard.search_permissions") . '..."
+                                style="border: 1px solid #dee2e6;">
+                        </div>
                         <div class="card permissionCard bg-white shadow">
-                            <ul class="list-unstyled">';
+                            <ul class="list-unstyled permission-list" data-group="' . $parent_class . '">';
 
             foreach ($group['permissions'] as $permissionName => $permissionTitle) {
                 $isSelected = in_array($permissionName, $selectedPermissions) ? 'checked' : '';
@@ -278,7 +291,7 @@ trait Roles
                 $title = app()->getLocale() == 'ar' ? $permissionTitle['ar'] : $permissionTitle['en'];
 
                 $html .= '
-                            <li>
+                            <li class="permission-item" data-permission-text="' . strtolower($title) . '" data-permission-name="' . strtolower($permissionName) . '">
                                 <div class="form-group clearfix">
                                     <div class="icheck-primary d-inline">
                                 <input type="checkbox" name="permissions[]" data-parent="' . $parent_class . '" value="' . $permissionName . '" id="' . $permissionName . '" class="childs ' . $parent_class . '" ' . $isSelected . '>

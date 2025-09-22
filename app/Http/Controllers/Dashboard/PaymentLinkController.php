@@ -182,7 +182,7 @@ class PaymentLinkController extends Controller
             if (filter_var($request->send_whatsapp, FILTER_VALIDATE_BOOLEAN) && $customer->phone) {
                 try {
                     $this->sendPaymentLinkWhatsApp($customer, $result['checkout_url'], $request->amount, $request->description);
-                    
+
                     Log::info('Payment link WhatsApp message sent successfully', [
                         'customer_phone' => $customer->phone,
                         'payment_link_id' => $paymentLink->id,
@@ -449,7 +449,7 @@ class PaymentLinkController extends Controller
         return response()->json([
             'success' => true,
             'url' => $paymentLink->payment_url,
-           
+
         ]);
     }
 
@@ -562,7 +562,7 @@ class PaymentLinkController extends Controller
 
         // Get bilingual message
         $message = $template->getBilingualMessage($customer->name);
-        
+
         // Replace payment link placeholder
         $message = str_replace(['[🔗 رابط الدفع]', '[🔗 Payment Link]'], $paymentUrl, $message);
 
@@ -582,7 +582,7 @@ class PaymentLinkController extends Controller
     {
         try {
             $paymentLink = PaymentLink::with(['customer', 'order'])->findOrFail($id);
-            
+
             if (!$paymentLink->customer || !$paymentLink->customer->phone) {
                 return response()->json([
                     'success' => false,
@@ -601,7 +601,7 @@ class PaymentLinkController extends Controller
 
             // Get bilingual message
             $message = $template->getBilingualMessage($paymentLink->customer->name);
-            
+
             // Replace payment link placeholder
             $paymentUrl = $request->input('payment_url', $paymentLink->payment_url);
             $message = str_replace(['[🔗 رابط الدفع]', '[🔗 Payment Link]'], $paymentUrl, $message);
@@ -626,7 +626,6 @@ class PaymentLinkController extends Controller
                     'message' => __('dashboard.payment_link_whatsapp_resent_error')
                 ]);
             }
-
         } catch (\Exception $e) {
             Log::error('Payment link WhatsApp resend failed', [
                 'payment_link_id' => $id,

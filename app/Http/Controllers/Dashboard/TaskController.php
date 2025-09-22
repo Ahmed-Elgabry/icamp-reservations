@@ -40,8 +40,7 @@ class TaskController extends Controller
         $status = $request->query('status', 'all');
         if (isset($status) && $status == "all") {
             $query->where('status', '!=', 'completed');
-        }
-        elseif ($status && $status !== 'completed') {
+        } elseif ($status && $status !== 'completed') {
             $query->where('status', $status);
         }
 

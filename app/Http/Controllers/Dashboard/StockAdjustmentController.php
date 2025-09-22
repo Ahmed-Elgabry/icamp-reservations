@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
@@ -19,19 +20,21 @@ class StockAdjustmentController extends Controller
         $this->stockAdjustmentService = $stockAdjustmentService;
     }
 
-    public function issuedItemsIndex() {
+    public function issuedItemsIndex()
+    {
         $issuedStocks = StockAdjustment::with('stock')
             ->where('type', 'item_decrement')
             ->latest()->paginate(10);
         return view('dashboard.services.manual_item_withdrawal_and_return', compact('issuedStocks'));
     }
-    public function returnedItemsIndex(){
+    public function returnedItemsIndex()
+    {
         $returnedStocks = StockAdjustment::with('stock')
             ->where('type', 'item_increment')
             ->latest()
             ->paginate(10);
 
-         return view('dashboard.services.manual_item_withdrawal_and_return', compact('returnedStocks'));
+        return view('dashboard.services.manual_item_withdrawal_and_return', compact('returnedStocks'));
     }
     public function create()
     {
@@ -69,7 +72,7 @@ class StockAdjustmentController extends Controller
 
     public function update(StockAdjustmentUpdateRequest $request, StockAdjustment $adjustment)
     {
-          if (isset($request['quantity_to_discount']) && $request['quantity_to_discount'] ) {
+        if (isset($request['quantity_to_discount']) && $request['quantity_to_discount']) {
             $newQty = (int) $request['quantity_to_discount'];
         } elseif (isset($request['correct_quantity']) && $request['correct_quantity']) {
             $newQty = (int) $request['correct_quantity'];
@@ -104,7 +107,7 @@ class StockAdjustmentController extends Controller
         if (!$adjustment->image) {
             return response()->json(['error' => 'No image found for this adjustment.'], 404);
         }
-      
+
         return \Storage::disk('public')->download($adjustment->image, basename($adjustment->image));
     }
     /**
@@ -122,22 +125,22 @@ class StockAdjustmentController extends Controller
         return view('dashboard.stocks.stockTaking', compact('stockTakingItems', 'stocks'));
     }
 
-        /**
-         * Display a listing of stock taking adjustments.
-         */
-        public function stockTakingIndex()
-        {
-            $query = StockAdjustment::with('stock');
-            $dateFrom = request('date_from');
-            $dateTo = request('date_to');
-            if ($dateFrom) {
-                $query->whereDate('date_time', '>=', $dateFrom);
-            }
-            if ($dateTo) {
-                $query->whereDate('date_time', '<=', $dateTo);
-            }
-
-            $stockTakingReport = $query->latest()->paginate(10);
-            return view('dashboard.stocks.stockTaking', compact('stockTakingReport'));
+    /**
+     * Display a listing of stock taking adjustments.
+     */
+    public function stockTakingIndex()
+    {
+        $query = StockAdjustment::with('stock');
+        $dateFrom = request('date_from');
+        $dateTo = request('date_to');
+        if ($dateFrom) {
+            $query->whereDate('date_time', '>=', $dateFrom);
         }
+        if ($dateTo) {
+            $query->whereDate('date_time', '<=', $dateTo);
+        }
+
+        $stockTakingReport = $query->latest()->paginate(10);
+        return view('dashboard.stocks.stockTaking', compact('stockTakingReport'));
+    }
 }
