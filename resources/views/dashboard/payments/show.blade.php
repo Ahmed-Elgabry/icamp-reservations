@@ -298,7 +298,30 @@
                                         <label class="required form-label">{{ __('dashboard.statement') }}</label>
                                         <select name="statement" id="" class="form-select" required>
 
-                                            <option value="">{{ __('dashboard.select') }}</option>
+                                            <div class="mb-5 fv-row col-md-12">
+                                                <label class="required form-label">{{ __('dashboard.price') }}</label>
+                                                <input type="number" name="price" id="price" value="{{   $payment->price }}"
+                                                    class="form-control mb-2" required
+                                                    value="" />
+                                            </div>
+                                            <div class="mb-5 fv-row col-md-12">
+                                                <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
+                                                <select name="payment_method" id="edit_payment_method_{{$payment->id}}" class="form-select" required>
+                                                    <option value="">{{ __('dashboard.select_payment_method') }}</option>
+                                                    @foreach(paymentMethod() as $paymentSelect)
+                                                    <option {{$payment->payment_method == $paymentSelect ? 'selected' : ''}} value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mb-5 fv-row col-md-12">
+                                                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                                                <select name="account_id" id="edit_account_id_{{$payment->id}}" class="form-select" required>
+                                                    <option value="">{{ __('dashboard.choose_account') }}</option>
+                                                    @foreach($bankAccounts as $bankAccount)
+                                                    <option {{$payment->account_id == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
                                             @foreach(statements() as $statement)
                                             <option value="{{$statement}}">{{__('dashboard.'. $statement )}}</option>
@@ -346,11 +369,52 @@
 
 
             </div>
-            <!--end::Card body-->
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.price') }}</label>
+                <input type="number" name="price" id="price" value="{{   old('price') }}"
+                    class="form-control mb-2" required
+                    value="" />
+            </div>
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
+                <select name="payment_method" id="payment_method" class="form-select" required>
+                    <option value="">{{ __('dashboard.select_payment_method') }}</option>
+                    @foreach(paymentMethod() as $paymentSelect)
+                    <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                <select name="account_id" id="account_id" class="form-select" required>
+                    <option value="">{{ __('dashboard.choose_account') }}</option>
+                    @foreach($bankAccounts as $bankAccount)
+                    <option {{old('account_id') == $bankAccount->id ? 'selected' : ''}} value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!--begin::Input group-->
+            <div class="mb-5 fv-row col-md-12">
+                <label class=" form-label">{{ __('dashboard.notes') }}</label>
+                <textarea name="notes" id="" class="form-control mb-2">{{ old('notes') }}</textarea>
+            </div>
+            </form>
         </div>
-        <!--end::Category-->
+        <div class="modal-footer">
+            <button type="submit" form="saveCountDetails" class="btn btn-primary">@lang('dashboard.save_changes')</button>
+        </div>
     </div>
-    <!--end::Container-->
+</div>
+</div>
+
+
+</div>
+<!--end::Card body-->
+</div>
+<!--end::Category-->
+</div>
+<!--end::Container-->
 </div>
 <!--end::Post-->
 

@@ -22,6 +22,7 @@ use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\StockAdjustmentController;
 use App\Http\Controllers\Dashboard\ServiceSiteAndCustomerServiceController;
 use App\Http\Controllers\Dashboard\InternalNoteController;
+use App\Http\Controllers\Dashboard\SettingController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{Dashboard\CampReportController, OrderSignatureController, RegistrationformController};
@@ -88,7 +89,7 @@ Route::get('check-permissions', function () {
 })->middleware('auth');
 /*------------ start Of Settings----------*/
 Route::get('set-lang/{lang}', [
-    'uses' => 'SettingController@SetLanguage',
+    'uses' => 'Dashboard\SettingController@SetLanguage',
     'as' => 'set-lang',
     'title' => 'dashboard.set_lang'
 ]);
@@ -1950,14 +1951,14 @@ Route::get('survey/{order}', [SurveyController::class, 'showPublic'])->name('sur
 Route::get('stocks/available', [StockController::class, 'getAvailableStocks'])->name('stocks.available');
 
 // Named routes for ServiceSiteAndCustomerServiceController CRUD actions
-Route::post('service_site_customer_service', [ServiceSiteAndCustomerServiceController::class, 'store'])->name('service_site_customer_service.store');
-Route::get('service_site_customer_service/{id}/edit', [ServiceSiteAndCustomerServiceController::class, 'edit'])->name('service_site_customer_service.edit');
-Route::get('service_site_customer_service/create', [ServiceSiteAndCustomerServiceController::class, 'create'])->name('service_site_customer_service.create');
-Route::delete('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('service_site_customer_service.destroy');
-Route::put('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'update'])->name('service_site_customer_service.update');
-
-// Internal notes CRUD (dashboard)
 Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
+    Route::post('service_site_customer_service', [ServiceSiteAndCustomerServiceController::class, 'store'])->name('service_site_customer_service.store');
+    Route::get('service_site_customer_service/{id}/edit', [ServiceSiteAndCustomerServiceController::class, 'edit'])->name('service_site_customer_service.edit');
+    Route::get('service_site_customer_service/create', [ServiceSiteAndCustomerServiceController::class, 'create'])->name('service_site_customer_service.create');
+    Route::delete('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('service_site_customer_service.destroy');
+    Route::put('service_site_customer_service/{id}', [ServiceSiteAndCustomerServiceController::class, 'update'])->name('service_site_customer_service.update');
+
+    // Internal notes CRUD (dashboard)
     Route::resource('internal-notes', InternalNoteController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
 });
 

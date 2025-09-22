@@ -80,6 +80,7 @@ return [
     'from_account' => 'From Account',
     'to_account' => 'To Account',
     'choose_from_account' => 'Choose From Account',
+    'choose_account' => 'Choose Account',
     'choose_to_account' => 'Choose To Account',
     'financial_reports' => 'Financial Reports',
     'switch_accounts' => 'Switch Accounts',
@@ -2113,4 +2114,7 @@ return [
     "contacts_list" => 'Contacts List',
     "generated_on" => 'Generated On',
     "use_template" => 'Use Template',
+    "amount_details" => 'Amount Details',
+    "NewRegistrationTitle" => 'New Registration Form Submitted',
+    "NewRegistrationMessage" => 'New Registration Form Submitted',
 ];

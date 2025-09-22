@@ -65,7 +65,13 @@
                             </div>
                         </div>
 
-
+                    <!-- Image Upload -->
+                    <div class="row mb-3">
+                        <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.upload_or_take_image') }}</label>
+                        <div class="col-lg-12">
+                            <input type="file" name="image" id="editChargeImage" class="form-control form-control-lg form-control-solid" accept="image/*" capture="environment">
+                        </div>
+                    </div>
 
                         <!-- Notes input -->
                         <div class="row mb-6">

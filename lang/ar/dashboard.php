@@ -316,6 +316,7 @@ return [
     'stop_recording_video' => 'إيقاف تسجيل الفيديو',
     'delete_video_note' => 'حذف مقطع الفيديو ',
     'payment_method' => 'طريقة الدفع',
+    'choose_account' => 'اختر الحساب',
     'choose_payment_method' => 'اختر طريقة الدفع',
     'date' => 'التاريخ',
     'all_questions' => 'جميع الأسئلة',
@@ -1806,5 +1807,6 @@ return [
     "contacts_list" => 'جهات الاتصال',
     "generated_on" => 'تم إنشاء في',
     "use_template" => 'إستخدام النموذج',
-
+    "NewRegistrationTitle" => 'تم إرسال إستمارة حجز جديده',
+    "NewRegistrationMessage" => 'تم إرسال إستمارة حجز جديده',
 ];

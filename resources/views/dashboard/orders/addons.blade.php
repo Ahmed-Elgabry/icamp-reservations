@@ -144,84 +144,70 @@
                             <!--end::Action=-->
                         </tr>
 
-                        <!-- Modal for editing an addon -->
-                        <div class="modal fade" id="editAddonModal-{{ $orderAddon->pivot->id }}" tabindex="-1" role="dialog" aria-labelledby="editAddonModalLabel-{{ $orderAddon->pivot->id }}" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editAddonModalLabel-{{ $orderAddon->pivot->id }}">{{ __('dashboard.edit') }}</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="editAddonForm-{{ $orderAddon->pivot->id }}" action="{{ route('bookingsUpdate.addons', $orderAddon->pivot->id) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-
-                                            <input type="hidden" name="order_id" value="{{ $order->id }}">
-                                            <input type="hidden" name="source" value="reservation_addon">
-                                            <div class="form-group">
-                                                <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
-                                                <select name="addon_id" id="edit_addon_id_{{ $orderAddon->pivot->id }}" class="form-control select2 " required>
-                                                    <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
-                                                    @foreach ($addons as $addon)
-                                                    <option value="{{ $addon->id }}" data-price="{{ $addon->price }}" {{ $orderAddon->id == $addon->id ? 'selected' : '' }}>{{ $addon->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="form-group mt-3">
-                                                <label for="edit_service_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.addon_price') }}</label>
-                                                <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->price }}">
-                                            </div>
-                                            <div class="form-group mt-3">
-                                                <label for="edit_count_{{ $orderAddon->id }}">{{ __('dashboard.quantity') }}</label>
-                                                <input type="number" name="count" id="edit_count_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->count }}">
-                                            </div>
-                                            <div class="form-group mt-3">
-                                                <label for="edit_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.total_price') }}</label>
-                                                <input type="number" step="0.01" name="price" id="edit_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->price }}">
-                                            </div>
-                                            <div class="mb-5 fv-row col-md-12">
-                                                <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                                                <select name="payment_method" id="edit_payment_method_{{ $orderAddon->pivot->id }}" class="form-select " required>
-                                                    <option value="">{{__('dashboard.select_payment_method')}}</option>
-                                                    @foreach(paymentMethod() as $paymentSelect)
-                                                    <option @selected($orderAddon->pivot->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="mb-5 fv-row col-md-12">
-                                                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                                                <select name="account_id" id="edit_account_id_{{ $orderAddon->pivot->id }}" class="form-select " required>
-                                                    <option value="">{{__('dashboard.select_bank_account')}}</option>
-                                                    @foreach($bankAccounts as $bankAccount)
-                                                    <option @selected($orderAddon->pivot->account_id === $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="form-group mt-3">
-                                                <label for="edit_description_{{ $orderAddon->pivot->id }}">{{ __('dashboard.notes') }}</label>
-                                                <textarea name="description" id="edit_description_{{ $orderAddon->pivot->id }}" class="form-control">{{ $orderAddon->pivot->description }}</textarea>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" form="editAddonForm-{{ $orderAddon->pivot->id }}" class="btn btn-primary">{{ __('dashboard.save_changes') }}</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <input type="hidden" name="order_id" value="{{ $order->id }}">
+                        <input type="hidden" name="source" value="reservation_addon">
+                        <div class="form-group">
+                            <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
+                            <select name="addon_id" id="edit_addon_id_{{ $orderAddon->pivot->id }}" class="form-control select2 " required>
+                                <option value="" data-price="0">{{ __('dashboard.choose') }} {{ __('dashboard.addon') }}</option>
+                                @foreach ($addons as $addon)
+                                <option value="{{ $addon->id }}" data-price="{{ $addon->price }}" {{ $orderAddon->id == $addon->id ? 'selected' : '' }}>{{ $addon->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        @endforeach
-                    </tbody>
-                </table>
-
+                        <div class="form-group mt-3">
+                            <label for="edit_service_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.addon_price') }}</label>
+                            <input type="number" step="0.01" name="service_price" id="edit_service_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->price }}">
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="edit_count_{{ $orderAddon->id }}">{{ __('dashboard.quantity') }}</label>
+                            <input type="number" name="count" id="edit_count_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->count }}">
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="edit_price_{{ $orderAddon->pivot->id }}">{{ __('dashboard.total_price') }}</label>
+                            <input type="number" step="0.01" name="price" id="edit_price_{{ $orderAddon->pivot->id }}" class="form-control" value="{{ $orderAddon->pivot->price }}">
+                        </div>
+                        <div class="mb-5 fv-row col-md-12">
+                            <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
+                            <select name="payment_method" id="edit_payment_method_{{ $orderAddon->pivot->id }}" class="form-select " required>
+                                <option value="">{{__('dashboard.select_payment_method')}}</option>
+                                @foreach(paymentMethod() as $paymentSelect)
+                                <option @selected($orderAddon->pivot->payment_method == $paymentSelect) value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-5 fv-row col-md-12">
+                            <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                            <select name="account_id" id="edit_account_id_{{ $orderAddon->pivot->id }}" class="form-select " required>
+                                <option value="">{{__('dashboard.choose_account')}}</option>
+                                @foreach($bankAccounts as $bankAccount)
+                                <option @selected($orderAddon->pivot->account_id === $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="edit_description_{{ $orderAddon->pivot->id }}">{{ __('dashboard.notes') }}</label>
+                            <textarea name="description" id="edit_description_{{ $orderAddon->pivot->id }}" class="form-control">{{ $orderAddon->pivot->description }}</textarea>
+                        </div>
+                        </form>
             </div>
-            <!--end::Card body-->
+            <div class="modal-footer">
+                <button type="submit" form="editAddonForm-{{ $orderAddon->pivot->id }}" class="btn btn-primary">{{ __('dashboard.save_changes') }}</button>
+            </div>
         </div>
-        <!--end::Category-->
     </div>
-    <!--end::Container-->
+</div>
+</div>
+@endforeach
+</tbody>
+</table>
+
+</div>
+<!--end::Card body-->
+</div>
+<!--end::Category-->
+</div>
+<!--end::Container-->
 </div>
 <!--end::Post-->
 
@@ -260,37 +246,47 @@
                         <input type="number" step="0.01" name="price" id="price" class="form-control" value="0">
                     </div>
 
-                    <div class="mb-5 fv-row col-md-12">
-                        <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
-                        <select name="payment_method" id="payment_method" class="form-select " required>
-                            <option value="">{{__('dashboard.select_payment_method')}}</option>
-
-                            @foreach(paymentMethod() as $paymentSelect)
-                            <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-5 fv-row col-md-12">
-                        <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
-                        <select name="account_id" id="account_id" class="form-select " required>
-                            <option value="">{{__('dashboard.select_bank_account')}}</option>
-                            @foreach($bankAccounts as $bankAccount)
-                            <option value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group mt-3">
-                        <label for="description">{{ __('dashboard.notes') }}</label>
-                        <textarea name="description" id="description" class="form-control"></textarea>
-                    </div>
-                </form>
+                    @foreach(paymentMethod() as $paymentSelect)
+                    <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+                    @endforeach
+                    </select>
             </div>
-            <div class="modal-footer">
-                <button type="submit" form="addAddonForm" class="btn btn-primary">{{ __('dashboard.save_changes') }}</button>
+            <div class="mb-5 fv-row col-md-12">
+                <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+                <select name="account_id" id="account_id" class="form-select " required>
+                    <option value="">{{__('dashboard.choose_account')}}</option>
+                    @foreach($bankAccounts as $bankAccount)
+                    <option value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                    @endforeach
+                </select>
             </div>
+
+            @foreach(paymentMethod() as $paymentSelect)
+            <option value="{{$paymentSelect}}">{{__('dashboard.'. $paymentSelect )}}</option>
+            @endforeach
+            </select>
         </div>
+        <div class="mb-5 fv-row col-md-12">
+            <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
+            <select name="account_id" id="account_id" class="form-select " required>
+                <option value="">{{__('dashboard.select_bank_account')}}</option>
+                @foreach($bankAccounts as $bankAccount)
+                <option value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="description">{{ __('dashboard.notes') }}</label>
+            <textarea name="description" id="description" class="form-control"></textarea>
+        </div>
+        </form>
     </div>
+    <div class="modal-footer">
+        <button type="submit" form="addAddonForm" class="btn btn-primary">{{ __('dashboard.save_changes') }}</button>
+    </div>
+</div>
+</div>
 </div>
 
 @endsection
