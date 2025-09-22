@@ -45,7 +45,54 @@
         <div id="kt_content_container" class="container-xxl">
 
             
-               <div class="row mt-10">
+            <div class="row">
+                <!-- Customers Count -->
+                @can('bookings.index')
+                <div class="col-md-4 mb-4">
+                    <a href="{{route('customers.index') }}">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h3 class="fs-4 fw-bold text-gray-800">{{ __('dashboard.total_customers') }}</h3>
+                                <h5 class="fs-2x fw-bolder text-primary">{{ number_format($totalCustomersCount) }}</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endcan
+                
+                @can('bookings.index')
+                    <!-- Total Orders Card -->
+                    <div class="col-md-4 mb-4">
+                        <a href="{{ route('orders.index') }}">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h3 class="fs-4 fw-bold text-gray-800">{{ __('dashboard.total_orders') }}</h3>
+                                    <h5 class="fs-2x fw-bolder text-primary">{{ number_format($totalOrdersCount) }}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Status Cards -->
+                    @foreach(getOrderedStatuses() as $status)
+                    <div class="col-md-4 mb-4">
+                        <a href="{{ route('orders.index', ['status' => $status]) }}">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h3 class="fs-4 fw-bold text-gray-800">{{ __('dashboard.order_status.' . $status) }}</h3>
+                                    @if(isset($ordersCountByStatus[$status]))
+                                    <h5 class="fs-2x fw-bolder {{ getStatusBadgeColor($status) ? 'text-' . getStatusBadgeColor($status) : '' }}">{{ number_format($ordersCountByStatus[$status]) ?? "0" }}</h5>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    @endforeach
+                @endcan
+            </div>
+       
+            <!-- Tables Container -->
+            <div class="flex-column d-flex">
 
 
                 @can('bookings.index')
