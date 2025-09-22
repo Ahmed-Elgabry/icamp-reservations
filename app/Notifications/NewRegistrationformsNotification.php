@@ -56,8 +56,8 @@ class NewRegistrationformsNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'title' => __('dashboard.New Registration Form Submitted'),
-            'message'  => __('dashboard.A new registration form has been submitted.'),
+            'title' => __('dashboard.NewRegistrationTitle'),
+            'message'  => __('dashboard.NewRegistrationMessage'),
             'url'  => route('orders.registeration-forms'),
         ];
     }

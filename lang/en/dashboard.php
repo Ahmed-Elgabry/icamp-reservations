@@ -2113,6 +2113,6 @@ return [
     "generated_on" => 'Generated On',
     "use_template" => 'Use Template',
     "amount_details" => 'Amount Details',
-     "A new registration form has been submitted." => 'New Registration Form Submitted',
-    "New Registration Form Submitted" => 'New Registration Form Submitted',
+    "NewRegistrationTitle" => 'New Registration Form Submitted',
+    "NewRegistrationMessage" => 'New Registration Form Submitted',
 ];
