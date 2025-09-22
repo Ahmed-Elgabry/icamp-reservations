@@ -1753,7 +1753,7 @@ return [
     'contacts' => 'جهات الاتصال',
     'contact' => 'جهة اتصال',
     'entity_name' => 'اسم الجهة',
-    'contact_person_name' => 'اسم شخص التواصل',
+    'contact_person_name' => 'اسم الشخص المعني',
     'primary_phone' => 'الهاتف الأساسي',
     'secondary_phone' => 'الهاتف الثانوي',
     'fixed_phone' => 'هاتف ثابت',
