@@ -22,10 +22,11 @@ return array(
 
     'fontdata' => [
         'cairo' => [
-            'R'  => 'arabic/Cairo-Regular.ttf',    // Regular font
-            'B'  => 'arabic/Cairo-Bold.ttf',       // Bold font
+            'R'  => 'fonts/Cairo-Regular.ttf',    // Regular font
+            'B'  => 'fonts/Cairo-Bold.ttf',       // Bold font
+            'useOTL' => 0xFF,                    // Required for complex scripts like Arabic
+            'useKashida' => 75,                  // Enable kashida justification for Arabic text
         ],
-        // ... خطوط أخرى إن وجدت
     ],
 
 

@@ -2,17 +2,21 @@
 <html lang="{{ $locale }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="{{ app()->getLocale() }}">
     <title>{{ __('dashboard.contacts_export') }}</title>
     <style>
         @if(app()->getLocale() == 'ar')
             @font-face {
-                font-family: 'Cairo', sans-serif;
+                font-family: 'Cairo';
                 font-style: normal;
                 font-weight: 400;
-                src: url('{{ public_path('fonts/Cairo-Regular.ttf') }}') format('truetype');
+                src: local('Cairo'), local('Cairo-Regular'),
+                     url('{{ public_path('fonts/Cairo-Regular.ttf') }}') format('truetype');
+                font-display: swap;
+                unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFF;
             }
             body {
-                font-family: 'Cairo', sans-serif;
+                font-family: 'Cairo', Arial, sans-serif;
             }
         @else
             body {
