@@ -105,18 +105,37 @@ class ContactGuideController extends Controller
     public function exportPdf()
     {
         $contacts = ContactGuide::latest()->get();
-        
-        // Set locale for PDF generation
         $locale = App::getLocale();
-        $pdf = PDF::loadView('dashboard.contact_guides.pdf', compact('contacts', 'locale'));
         
-        // Set paper size and orientation
-        $pdf->setPaper('a4', 'landscape');
+        // HTML content for PDF
+        $html = view('dashboard.contact_guides.pdf', compact('contacts', 'locale'))->render();
+        
+        // Initialize mPDF
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4-L', // Landscape orientation
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+            'default_font' => 'cairo',
+            'tempDir' => storage_path('app/mpdf')
+        ]);
+        
+        // Set RTL if Arabic
+        if ($locale === 'ar') {
+            $mpdf->SetDirectionality('rtl');
+        }
+        
+        // Write HTML content
+        $mpdf->WriteHTML($html);
         
         // Set filename with current date
         $filename = 'contacts_export_' . now()->format('Y-m-d') . '.pdf';
         
-        // Stream the PDF to the browser
-        return $pdf->download($filename);
+        // Output the PDF
+        return response($mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }
