@@ -316,6 +316,7 @@ return [
     'stop_recording_video' => 'إيقاف تسجيل الفيديو',
     'delete_video_note' => 'حذف مقطع الفيديو ',
     'payment_method' => 'طريقة الدفع',
+    'choose_account' => 'اختر الحساب',
     'choose_payment_method' => 'اختر طريقة الدفع',
     'date' => 'التاريخ',
     'all_questions' => 'جميع الأسئلة',
