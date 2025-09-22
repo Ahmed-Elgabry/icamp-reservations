@@ -24,11 +24,10 @@ class NewDailyReportNotification extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
-            'title' => __('dashboard.new_daily_report_title'),
-            'message' => __('dashboard.new_daily_report_message', [
-                'name' => $this->report->employee->name
-            ]),
+            'title' => 'new_daily_report_title',
+            'message' => 'new_daily_report_message',
             'report_id' => $this->report->id,
+            'employee_name' => $this->report->employee->name,
             'employee_id' => $this->report->employee_id,
             'url' => route('daily-reports.show', $this->report),
         ];

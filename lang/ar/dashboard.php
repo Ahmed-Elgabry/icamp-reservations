@@ -1808,5 +1808,8 @@ return [
     "use_template" => 'إستخدام النموذج',
     "NewRegistrationTitle" => 'تم إرسال إستمارة حجز جديده',
     "NewRegistrationMessage" => 'تم إرسال إستمارة حجز جديده',
+    "updated_successfully" => 'تم التحديث بنجاح',
+    "created_successfully" => 'تم الإنشاء بنجاح',
+    "deleted_successfully" => 'تم الحذف بنجاح',
 ];
  

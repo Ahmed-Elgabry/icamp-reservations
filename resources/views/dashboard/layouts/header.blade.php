@@ -102,7 +102,13 @@
                                                        onclick="event.preventDefault(); markNotificationAsRead('{{ $notification->id }}', '{{ isset($data['url']) ? $data['url'] : '' }}')">
                                                         {{ isset($data['title']) ? __("dashboard.".$data['title']) : '' }}
                                                     </a>
+                                                    @if(isset($data['employee_name']))
+                                                    <div class="text-gray-500 fs-7">{{ isset($data['message']) ? __("dashboard.".$data['message'] , ['name' => $data['employee_name']]) : ''}}</div>
+                                                    @elseif(isset($data['task_title']))
+                                                    <div class="text-gray-500 fs-7">{{ isset($data['message']) ? __("dashboard.".$data['message'] , ['title' => $data['task_title']]) : ''}}</div>
+                                                    @else
                                                     <div class="text-gray-500 fs-7">{{ isset($data['message']) ? __("dashboard.".$data['message']) : ''}}</div>
+                                                    @endif
                                                 </div>
                                                 <!--end::Title-->
                                             </div>

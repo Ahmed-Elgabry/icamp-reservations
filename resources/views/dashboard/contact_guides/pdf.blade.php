@@ -55,15 +55,16 @@
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
-            text-align: {{ app()->getLocale() == 'ar' ? 'right' : 'left' }};
+            text-align: center;
         }
         
         th {
             background-color: #f8f9fa;
             color: #2c3e50;
-            font-weight: bold;
+            font-weight: 900;
             text-transform: uppercase;
-            font-size: 10px;
+            font-size: 15px;
+            padding: 12px 8px;
         }
         
         tr:nth-child(even) {
@@ -82,7 +83,7 @@
         .logo {
             max-width: 150px;
             margin-bottom: 10px;
-        }
+        }   
     </style>
 </head>
 <body>
@@ -96,7 +97,7 @@
         </div>
     </div>
     
-    <table>
+    <table style="text-align: center;">
         <thead>
             <tr>
                 <th>#</th>

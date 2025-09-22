@@ -6,7 +6,7 @@
         <div class="card-body">
             <form class="form {{ isset($page) ? 'update' : 'store' }}" id="kt_ecommerce_add_product_form"
                   action="{{ isset($page) ? route('pages.update', $page) : route('pages.store') }}"
-                  method="POST" data-kt-redirect="{{ route('pages.index') }}">
+                  method="POST" data-kt-redirect="{{ route('pages.index') }}" data-success-message="{{ isset($page) ? __('dashboard.updated_successfully') : __('dashboard.created_successfully') }}">
                 @csrf
                 @if(isset($page)) @method('PUT') @endif
 

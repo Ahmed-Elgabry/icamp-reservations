@@ -2115,4 +2115,7 @@ return [
     "amount_details" => 'Amount Details',
     "NewRegistrationTitle" => 'New Registration Form Submitted',
     "NewRegistrationMessage" => 'New Registration Form Submitted',
+    "updated_successfully" => 'Updated Successfully',
+    "created_successfully" => 'Created Successfully',
+    "deleted_successfully" => 'Deleted Successfully',
 ];

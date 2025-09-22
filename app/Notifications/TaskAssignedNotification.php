@@ -28,8 +28,9 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
     {
         return [
             'task_id' => $this->task->id,
-            'title' => __('dashboard.new_task_assigned'),
-            'message' => __('dashboard.you_have_been_assigned_to_task', ['title' => $this->task->title]),
+            'title' => 'new_task_assigned',
+            'message' => 'you_have_been_assigned_to_task',
+            "task_title" => $this->task->title,
             'url' => route('employee.tasks'),
         ];
     }

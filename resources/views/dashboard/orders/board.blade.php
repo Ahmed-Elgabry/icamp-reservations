@@ -38,7 +38,7 @@
           <!-- Today -->
           <div class="tab-pane fade {{ ($activeTab ?? 'today') === 'today' ? 'show active' : '' }}" id="tab_today" role="tabpanel">
             <div class="table-responsive">
-              <table class="table table-row-dashed align-middle">
+              <table class="table table-row-dashed align-middle mx-auto">
                 <thead>
                   <tr class="text-muted fw-bold">
                     <th>@lang('dashboard.reservation_date')</th>
@@ -147,7 +147,7 @@
           <!-- Upcoming -->
           <div class="tab-pane fade {{ ($activeTab ?? 'today') === 'upcoming' ? 'show active' : '' }}" id="tab_upcoming" role="tabpanel">
             <div class="table-responsive">
-              <table class="table table-row-dashed align-middle">
+              <table class="table table-row-dashed align-middle mx-auto">
                 <thead>
                   <tr class="text-muted fw-bold">
                     <th>@lang('dashboard.reservation_date')</th>
