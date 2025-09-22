@@ -5,33 +5,30 @@
     <meta http-equiv="Content-Language" content="{{ app()->getLocale() }}">
     <title>{{ __('dashboard.contacts_export') }}</title>
     <style>
-        @if(app()->getLocale() == 'ar')
-            @font-face {
-                font-family: 'Cairo';
-                font-style: normal;
-                font-weight: 400;
-                src: local('Cairo'), local('Cairo-Regular'),
-                     url('{{ public_path('fonts/Cairo-Regular.ttf') }}') format('truetype');
-                font-display: swap;
-                unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFF;
-            }
-            body {
-                font-family: 'Cairo', Arial, sans-serif;
-            }
-        @else
-            body {
-                font-family: Arial, sans-serif;
-            }
-        @endif
-        
-        body {
-            direction: {{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }};
-            margin: 0;
-            padding: 20px;
-            color: #333;
-            font-size: 12px;
+        @font-face {
+            font-family: 'cairo';
+            font-style: normal;
+            font-weight: 400;
+            src: url('{{ public_path('fonts/Cairo-Regular.ttf') }}') format('truetype');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'cairo';
+            font-style: normal;
+            font-weight: 700;
+            src: url('{{ public_path('fonts/Cairo-Bold.ttf') }}') format('truetype');
+            font-display: swap;
         }
         
+        body {
+            font-family: 'cairo', Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            direction: {{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }};
+        }
+                
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -135,17 +132,6 @@
     <div class="footer">
         {{ config('app.name') }} - {{ now()->format('Y') }} | {{ __('dashboard.page') }} <span class="page"></span>
     </div>
-    
-    <script type="text/php">
-        if (isset($pdf)) {
-            $text = "{PAGE_NUM} / {PAGE_COUNT}";
-            $size = 8;
-            $font = $fontMetrics->getFont("Arial");
-            $width = $fontMetrics->get_text_width($text, $font, $size) / 2;
-            $x = ($pdf->get_width() - $width) / 2;
-            $y = $pdf->get_height() - 20;
-            $pdf->page_text($x, $y, $text, $font, $size);
-        }
-    </script>
+
 </body>
 </html>

@@ -108,27 +108,7 @@ class ContactGuideController extends Controller
         
         // Set locale for PDF generation
         $locale = App::getLocale();
-        
-        // Configure PDF options
-        $pdf = PDF::setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'defaultFont' => 'cairo',
-            'fontDir' => public_path('fonts/'),
-            'fontCache' => storage_path('fonts/'),
-            'tempDir' => storage_path('temp/'),
-            'chroot' => public_path(),
-            'debugKeepTemp' => true,
-            'debugCss' => false,
-            'debugLayout' => false,
-            'debugLayoutLines' => false,
-            'debugLayoutBlocks' => false,
-            'debugLayoutInline' => false,
-            'debugLayoutPaddingBox' => false,
-            'enable_remote' => true,
-        ]);
-        
-        $pdf = $pdf->loadView('dashboard.contact_guides.pdf', compact('contacts', 'locale'));
+        $pdf = PDF::loadView('dashboard.contact_guides.pdf', compact('contacts', 'locale'));
         
         // Set paper size and orientation
         $pdf->setPaper('a4', 'landscape');
