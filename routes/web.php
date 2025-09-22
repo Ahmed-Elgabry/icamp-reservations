@@ -89,7 +89,7 @@ Route::get('check-permissions', function () {
 })->middleware('auth');
     /*------------ start Of Settings----------*/
     Route::get('set-lang/{lang}', [
-        'uses' => 'SettingController@SetLanguage',
+        'uses' => 'Dashboard\SettingController@SetLanguage',
         'as' => 'set-lang',
         'title' => 'dashboard.set_lang'
     ]);
