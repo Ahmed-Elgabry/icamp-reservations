@@ -100,9 +100,9 @@
                                                     <a href="{{ $data['url'] ?? '#' }}"
                                                        class="text-gray-800 text-hover-primary fw-bold"
                                                        onclick="event.preventDefault(); markNotificationAsRead('{{ $notification->id }}', '{{ isset($data['url']) ? $data['url'] : '' }}')">
-                                                        {{ isset($data['title']) ? trim($data['title']) : '' }}
+                                                        {{ isset($data['title']) ? __("dashboard.".$data['title']) : '' }}
                                                     </a>
-                                                    <div class="text-gray-500 fs-7">{{ isset($data['message']) ? trim($data['message']) : ''}}</div>
+                                                    <div class="text-gray-500 fs-7">{{ isset($data['message']) ? __("dashboard.".$data['message']) : ''}}</div>
                                                 </div>
                                                 <!--end::Title-->
                                             </div>
