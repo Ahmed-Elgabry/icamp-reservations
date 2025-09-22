@@ -114,9 +114,9 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $contact->entity_name }}</td>
                     <td>{{ $contact->contact_person_name }}</td>
-                    <td>{{ $contact->primary_phone }}</td>
-                    <td>{{ $contact->secondary_phone }}</td>
-                    <td>{{ $contact->fixed_phone }}</td>
+                    <td dir="ltr">{{ $contact->primary_phone }}</td>
+                    <td dir="ltr">{{ $contact->secondary_phone }}</td>
+                    <td dir="ltr">{{ $contact->fixed_phone }}</td>
                     <td>{{ $contact->email }}</td>
                 </tr>
             @empty
