@@ -9,15 +9,13 @@
             font-family: 'cairo';
             font-style: normal;
             font-weight: 400;
-            src: url('{{ public_path('fonts/Cairo-Regular.ttf') }}') format('truetype');
-            font-display: swap;
+            src: url('{{ storage_path('fonts/Cairo-Regular.ttf') }}') format('truetype');
         }
         @font-face {
             font-family: 'cairo';
             font-style: normal;
             font-weight: 700;
-            src: url('{{ public_path('fonts/Cairo-Bold.ttf') }}') format('truetype');
-            font-display: swap;
+            src: url('{{ storage_path('fonts/Cairo-Bold.ttf') }}') format('truetype');
         }
         
         body {
