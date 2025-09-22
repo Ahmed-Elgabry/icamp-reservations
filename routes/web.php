@@ -86,7 +86,12 @@ Route::get('check-permissions', function () {
 
     return '';
 })->middleware('auth');
-
+    /*------------ start Of Settings----------*/
+    Route::get('set-lang/{lang}', [
+        'uses' => 'SettingController@SetLanguage',
+        'as' => 'set-lang',
+        'title' => 'dashboard.set_lang'
+    ]);
 Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'namespace' => 'Dashboard'], function () {
 
 
@@ -1374,12 +1379,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     /*------------ end Of expenses ----------*/
-    /*------------ start Of Settings----------*/
-    Route::get('set-lang/{lang}', [
-        'uses' => 'SettingController@SetLanguage',
-        'as' => 'set-lang',
-        'title' => 'dashboard.set_lang'
-    ]);
+
 
     Route::get('calender', [
         'uses' => 'HomeController@calender',
