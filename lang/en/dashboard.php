@@ -2101,5 +2101,11 @@ return [
     'no_low_stock_items' => 'No Low Stock Items',
     'recent_add_funds' => 'Recently Added Funds',
     'no_expenses_found' => 'No Expenses Found',
-
+    'paid_partially' => 'paid partially',
+    'paid_totaly' => 'paid totally',
+    'note_name' => 'Note Name',
+    'note_content' => 'Note Content',
+    "edit_internal_note" => 'Edit Internal Note',
+    "note_updated" => 'Note Updated Successfully',
+    "confirm_delete_note" => 'Are you sure you want to delete this note?',
 ];
