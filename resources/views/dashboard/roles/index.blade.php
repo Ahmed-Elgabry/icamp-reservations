@@ -31,15 +31,17 @@
                 <!--end::Card title-->
                 <!--begin::Card toolbar-->
                 <div class="card-toolbar">
+                    @can('roles.create')
                     <!--begin::Add customer-->
                     <a href="{{ route('roles.create')}}" class="btn btn-primary">@lang('dashboard.create_title', ['page_title' => __('dashboard.role')])</a>
                     <!--end::Add customer-->
-
+                    @endcan
                     <span class="w-5px h-2px"></span>
+                    @can('roles.deleteAll')
                     <button type="button" data-route="{{route('roles.deleteAll')}}"
                     class="btn btn-danger delete_all_button">
                         <i class="feather icon-trash"></i>@lang('dashboard.delete_selected')</button>
-
+                        @endcan
                 </div>
                 <!--end::Card toolbar-->
             </div>
@@ -118,16 +120,20 @@
                                     <!--end::Svg Icon--></a>
                                     <!--begin::Menu-->
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
+                                        @can('roles.edit')
                                         <!--begin::Menu item-->
                                         <div class="menu-item px-3">
                                             <a href="{{route('roles.edit', $role->id)}}" class="menu-link px-3">@lang('dashboard.edit')</a>
                                         </div>
+                                        @endcan
                                         <!--end::Menu item-->
+                                        @can('roles.destroy')
                                         <!--begin::Menu item-->
                                         <div class="menu-item px-3">
                                             <a href="#" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('roles.destroy', $role->id)}}" data-id="{{$role->id}}">@lang('dashboard.delete')</a>
                                         </div>
                                         <!--end::Menu item-->
+                                        @endcan
                                     </div>
                                     <!--end::Menu-->
                                 </td>

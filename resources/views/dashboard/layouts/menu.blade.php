@@ -2226,11 +2226,11 @@
             <!--end::Menu link-->
 
 
-
             <!--begin::Menu sub-->
 
             <div class="menu-sub menu-sub-accordion pt-3">
 
+                @can('meeting-locations.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -2248,9 +2248,10 @@
                     </a>
 
                 </div>
-
+                @endcan
                 <!--end::Menu item-->
 
+                @can('meetings.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -2270,7 +2271,7 @@
                 </div>
 
                 <!--end::Menu item-->
-
+                @endcan
 
 
 
@@ -2336,11 +2337,11 @@
             <!--end::Menu link-->
 
 
-
             <!--begin::Menu sub-->
 
             <div class="menu-sub menu-sub-accordion pt-3">
 
+                @can('violation-types.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -2360,8 +2361,10 @@
                 </div>
 
                 <!--end::Menu item-->
-
+                @endcan
                 <!--begin::Menu item-->
+
+                @can('violations.index')
 
                 <div class="menu-item">
 
@@ -2380,7 +2383,7 @@
                 </div>
 
                 <!--end::Menu item-->
-
+                @endcan
 
 
                 @can('violations.create')
@@ -2417,13 +2420,13 @@
 
     @endcan
 
-    @can('reprots')
+    @can('financial-reports.index')
 
         <div class="menu-item">
 
             <!--begin::Menu link-->
 
-            <a href="{{ route('reprots') }}" class="menu-link py-3 {{areActiveRoutes(['reprots'])}}">
+            <a href="{{ route('financial-reports.index') }}" class="menu-link py-3 {{areActiveRoutes(['reprots'])}}">
 
                 <span class="menu-icon">
 

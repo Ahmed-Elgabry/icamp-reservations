@@ -16,9 +16,11 @@
                         <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
                     </a>
                 @endcan
+                @can('camp-reports.create')
                 <a href="{{ route('camp-reports.create') }}" class="btn btn-primary">
                     @lang('dashboard.create_report')
                 </a>
+                @endcan
             </div>
         </div>
 
@@ -41,18 +43,24 @@
                         <td>{{ $report->camp_name ?? '' }}</td>
                         <td>{{ $report->creator->name }}</td>
                         <td>
+                            @can('camp-reports.show')
                             <a href="{{ route('camp-reports.show', $report) }}" class="btn btn-sm btn-info">
                                 @lang('dashboard.view')
                             </a>
+                            @endcan
+                            @can('camp-reports.edit')
                             <a href="{{ route('camp-reports.edit', $report) }}" class="btn btn-sm btn-primary">
                                 @lang('dashboard.edit')
                             </a>
+                            @endcan
+                            @can('camp-reports.destroy')
                             <form action="{{ route('camp-reports.destroy', $report) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                     @lang('dashboard.delete')
                                 </button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

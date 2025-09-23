@@ -105,13 +105,13 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'home',
         'title' => 'dashboard.home',
         'type' => 'parent',
-        'child' => ['reprots']
+        'child' => ['financial-reports']
     ]);
 
     # roles store
-    Route::get('reprots', [
+    Route::get('financial-reports', [
         'uses' => 'HomeController@reprots',
-        'as' => 'reprots',
+        'as' => 'financial-reports.index',
         'type' => 'child',
         'title' => ['', 'dashboard.reprots']
     ]);

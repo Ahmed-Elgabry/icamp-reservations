@@ -130,9 +130,11 @@
         <h1 class="mb-3">@lang('dashboard.Analytics')</h1>
 
         <div class="stats mb-4">
+            @can('statistics.export')
             <button class="btn btn-primary col-1 custom-print-btn" onclick="window.print()">
                 @lang('dashboard.Print')
             </button>
+            @endcan
         </div>
         <table class="table align-middle table-row-dashed fs-6 gy-5" style="max-width:1200px ;"
             id="kt_ecommerce_category_table">
