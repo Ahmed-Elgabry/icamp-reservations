@@ -129,17 +129,19 @@
                         @foreach($bankAccounts as $bankAccount)
                             @if($payment->account_id == $bankAccount->id)
                             <td>{{__($bankAccount->name )}}</td>
-    
+
                             @endif
                         @endforeach
                         @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
                             <td>
                                 {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                                @can('payments.approve')
                                 @if($payment->verified)
                                         <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                     @else
                                         <a href="{{ route('order.verified' , [$payment->id , 'payment']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                                     @endif
+                                    @endcan
                             </td>
                         @endif
                         <td  data-kt-ecommerce-category-filter="category_name" >
@@ -175,6 +177,7 @@
                             <!--end::Svg Icon--></a>
                             <!--begin::Menu-->
                             <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
+                                        @can('payments.print')
                                 <div class="menu-item px-3">
                                     <a href="#"
                                        class="menu-link px-3 payment-receipt-link"
@@ -183,6 +186,7 @@
                                         {{ __('dashboard.receipt') }}
                                     </a>
                                 </div>
+                                @endcan
                                 @can('payments.edit')
                                 <div class="menu-item px-3">
                                     <a href="#" type="button" data-toggle="modal" data-target="#editCount-{{$payment->id}}" class="menu-link px-3">{{ __('actions.edit') }}</a>
@@ -225,7 +229,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                
+
                                 <!--begin::Card body-->
                                  <input type="hidden" value="reservation_payments" name="source">
 
@@ -294,7 +298,7 @@
             <div class="mb-5 fv-row col-md-12">
                 <label class="required form-label">{{ __('dashboard.statement') }}</label>
                 <select name="statement" id="" class="form-select" required>
-                                                        
+
                     <option value="">{{ __('dashboard.select') }}</option>
 
                     @foreach(statements() as $statement)
@@ -450,6 +454,6 @@
 +                this.setCustomValidity('');
 +            }
 +        });
-        
+
     </script>
 @endpush

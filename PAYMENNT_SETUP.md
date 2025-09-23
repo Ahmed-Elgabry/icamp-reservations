@@ -39,7 +39,7 @@ composer require simplesoftwareio/simple-qrcode
 ```php
 <!-- Payment Links -->
 <li class="nav-item">
-    <a href="{{ route('payment-links.index') }}" class="nav-link {{ isActiveRoute('payment-links.*') }}">
+    <a href="{{ route('bookings.payment-links.index') }}" class="nav-link {{ isActiveRoute('payment-links.*') }}">
         <span class="nav-icon">
             <i class="fa fa-link"></i>
         </span>

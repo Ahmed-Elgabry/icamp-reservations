@@ -25,28 +25,32 @@
     </li>
     @endcan
 
-    <!-- روابط الدفع -->
+    @can('bookings.payment-links.create')
     <li class="nav-item">
         <a href="{{ route('bookings.payment-links.create') }}?order_id={{ $order->id }}"
-            class="nav-link text-active-primary pb-4 {{ isActiveRoute('payment-links.*') }}">
+            class="nav-link text-active-primary pb-4 {{ isActiveroute('bookings.payment-links.*') }}">
             {{ __('dashboard.payment-links') }} <span class="badge badge-success">+</span>
         </a>
     </li>
+    @endcan
 
-    <!-- عرض روابط الدفع المرتبطة بالطلب -->
+    @can('bookings.payment-links.index')
     <li class="nav-item">
         <a href="{{ route('bookings.payment-links.index') }}?order_id={{ $order->id }}"
             class="nav-link text-active-primary pb-4">
             {{ __('dashboard.view_payment_links') }} <span class="badge badge-info">{{ $order->paymentLinks->count() ?? 0 }}</span>
         </a>
     </li>
+    @endcan
 
+    @can('bookings.warehouse-sales.show')
     <li class="nav-item">
         <a href="{{ route('warehouse_sales.show',$order->id) }}"
             class="nav-link text-active-primary pb-4 {{ isActiveRoute('warehouse_sales.show') }}">
             {{ __('dashboard.warehouse_sales') }} <span class="badge badge-primary">{{$order->items->count()}}</span>
         </a>
     </li>
+    @endcan
     @can('expenses.show')
     <li class="nav-item">
         <a href="{{ route('expenses.show',$order->id) }}"
@@ -89,6 +93,7 @@
     @endcan
 
     @if($order->status == 'approved')
+    @can('bookings.view')
     <li class="nav-item">
         <a href="{{ route('orders.client-pdf', $order->id) }}"
             class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.client-pdf') }}"
@@ -96,29 +101,35 @@
             {{ __('dashboard.client_pdf') }}
         </a>
     </li>
+    @endcan
     @endif
 
+    @can('bookings.offer.show')
     <li class="nav-item">
         <a href="{{ route('orders.quote',$order->id) }}"
             class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.quote') }}" target="_blank">
             {{__('dashboard.Offer Price')}}
         </a>
     </li>
+    @endcan
 
+    @can('bookings.invoice.show')
     <li class="nav-item">
         <a href="{{ route('orders.invoice',$order->id) }}"
             class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.invoice') }}" target="_blank">
             {{__('dashboard.invoice')}}
         </a>
     </li>
+    @endcan
 
+    @can('bookings.accept-terms.index')
     <li class="nav-item">
-        <a href="{{ route('orders.accept_terms',$order->id) }}"
-            class="nav-link text-active-primary pb-4 {{ isActiveRoute('orders.accept_terms') }}">
+        <a href="{{ route('bookings.accept-terms.index',$order->id) }}"
+            class="nav-link text-active-primary pb-4 {{ isActiveRoute('bookings.accept-terms.index') }}">
             {{__('dashboard.accept_terms')}}
         </a>
     </li>
-
+    @endcan
 
     @endif
     <!--end:::Tab item-->

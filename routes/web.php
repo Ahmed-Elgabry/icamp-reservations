@@ -628,7 +628,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'title' => 'dashboard.orders',
         'type' => 'parent',
         'middleware' => ['auth'],
-        'child' => ['orders.store', 'bookings.signin', 'orders.signin', 'orders/{id}/terms_form', 'bookings.logout', 'orders.logout', 'orders.receipt', 'orders.show', 'bookings.reports', 'orders.reports', 'orders.edit', 'bookings.removeAddon', 'orders.removeAddon', 'orders.update', 'bookings.addons', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'orders.accept_terms', 'orders.updateNotes', 'bookings.registeration-forms.index', 'bookings.registeration-forms.edit', 'bookings.registeration-forms.destroy', 'bookings.registeration-forms.fetch', 'bookings.registeration-forms.fetch', 'orders.customers.check']
+        'child' => ['orders.store', 'bookings.signin', 'orders.signin', 'orders/{id}/terms_form', 'bookings.logout', 'orders.logout', 'orders.receipt', 'orders.show', 'bookings.reports', 'orders.reports', 'orders.edit', 'bookings.removeAddon', 'orders.removeAddon', 'orders.update', 'bookings.addons', 'orders.addons', 'user-orders', 'orders.destroy', 'orders.deleteAll', 'order.verified', 'bookings.accept_terms', 'orders.updateNotes', 'bookings.registeration-forms.index', 'bookings.registeration-forms.edit', 'bookings.registeration-forms.destroy', 'bookings.registeration-forms.fetch', 'bookings.registeration-forms.fetch', 'orders.customers.check']
     ]);
 
     // Reservations board (today default, upcoming as separate route)
@@ -871,7 +871,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 
     Route::get('order/accept-terms/{order_id}', [
         'uses' => 'OrderController@acceptTerms',
-        'as' => 'orders.accept_terms',
+        'as' => 'bookings.accept-terms.index',
         'title' => ['actions.accept_terms', 'dashboard.orders']
     ]);
 

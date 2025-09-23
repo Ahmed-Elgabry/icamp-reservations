@@ -47,9 +47,11 @@
 
                     <!--begin::Card toolbar-->
                     <div class="card-toolbar">
+                    @can('bookings.addons.create')
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAddonModal">
                             @lang('dashboard.create_title', ['page_title' => __('dashboard.addons')])
                         </button>
+                        @endcan
                     </div>
                     <!--end::Card toolbar-->
                 </div>
@@ -82,18 +84,20 @@
                                 <td>{{ $orderAddon->pivot->account->name }}</td>
                                 <td>
                                     {{ $orderAddon->pivot->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
-                                    @if($orderAddon->pivot->verified)
-                                        <a href="{{ route('order.verified' , [$orderAddon->pivot->id , 'addon']) }}" class="btn btn-sm btn-danger" >{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
-                                    @else
-                                        <a href="{{ route('order.verified' , [$orderAddon->pivot->id , 'addon']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
-                                    @endif
+                                    @can('bookings.addons.approve')
+                                @if($orderAddon->pivot->verified)
+                                <a href="{{ route('order.verified' , [$orderAddon->pivot->id , 'addon']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
+                                @else
+                                <a href="{{ route('order.verified' , [$orderAddon->pivot->id , 'addon']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
+                                @endif
+                                @endcan
                                 </td>
                                 <td>{{ $orderAddon->pivot->description }}</td>
 
 
                                 <!--begin::Action=-->
-                                <td class="text-end">
-                                    <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                            <td class="text-end">
+                                <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                     {{ __('dashboard.actions') }}
                                     <!--begin::Svg Icon | path: icons/duotune/arrows/arr072.svg-->
                                     <span class="svg-icon svg-icon-5 m-0">
@@ -102,36 +106,42 @@
                                         </svg>
                                     </span>
                                     <!--end::Svg Icon--></a>
-                                    <!--begin::Menu-->
-                                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
-                                        <div class="menu-item px-3">
-                                            <a href="#"
-                                               class="menu-link px-3 receipt-link"
-                                               data-verified="{{ $orderAddon->pivot->verified == 1 ? '1' : '0' }}"
-                                               data-url="{{ route('addons.receipt', ['order' => $order->id, 'addon' => $orderAddon->pivot->id]) }}">
-                                                {{ __('dashboard.receipt') }}
-                                            </a>
-                                        </div>
-                                        <div class="menu-item px-3">
-                                           <form action="{{ route('orders.removeAddon', $orderAddon->pivot->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn" onclick="return confirm('@lang('dashboard.confirm_delete')')">
-                                                    {{ __('dashboard.delete') }}
-                                                </button>
-                                            </form>
-                                        </div>
-                                        <!--begin::Menu item-->
-                                        <div class="menu-item px-3">
-                                            <button class="btn" data-toggle="modal" data-target="#editAddonModal-{{ $orderAddon->pivot->id }}">
-                                                {{ __('dashboard.edit') }}
-                                            </button>
-                                        </div>
-                                    <!--end::Menu item-->
+                                <!--begin::Menu-->
+                                <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
+                                    <div class="menu-item px-3">
+                                        @can('bookings.addons.reciept')
+                                        <a href="#"
+                                            class="menu-link px-3 receipt-link"
+                                            data-verified="{{ $orderAddon->pivot->verified == 1 ? '1' : '0' }}"
+                                            data-url="{{ route('addons.receipt', ['order' => $order->id, 'addon' => $orderAddon->pivot->id]) }}">
+                                            {{ __('dashboard.receipt') }}
+                                        </a>
+                                        @endcan
                                     </div>
-                                    <!--end::Menu-->
-                                </td>
-                                <!--end::Action=-->
+                                    <div class="menu-item px-3">
+                                        @can('bookings.removeAddon')
+                                        <form action="{{ route('bookings.removeAddon', $orderAddon->pivot->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn" onclick="return confirm('@lang('dashboard.confirm_delete')')">
+                                                {{ __('dashboard.delete') }}
+                                            </button>
+                                        </form>
+                                        @endcan
+                                    </div>
+                                    <!--begin::Menu item-->
+                                    <div class="menu-item px-3">
+                                        @can('bookings.addons.edit')
+                                        <button class="btn" data-toggle="modal" data-target="#editAddonModal-{{ $orderAddon->pivot->id }}">
+                                            {{ __('dashboard.edit') }}
+                                        </button>
+                                        @endcan
+                                    </div>
+                                    <!--end::Menu item-->
+                                </div>
+                                <!--end::Menu-->
+                            </td>
+                            <!--end::Action=-->
                             </tr>
 
                             <!-- Modal for editing an addon -->
@@ -145,7 +155,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <form id="editAddonForm-{{ $orderAddon->pivot->id }}" action="{{ route('ordersUpdate.addons', $orderAddon->pivot->id) }}" method="POST">
+                                            <form id="editAddonForm-{{ $orderAddon->pivot->id }}" action="{{ route('bookingsUpdate.addons', $orderAddon->pivot->id) }}" method="POST">
                                                 @csrf
                                                 @method('PUT')
 
@@ -226,7 +236,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="addAddonForm" action="{{ route('ordersStore.addons', $order->id) }}" method="POST">
+                    <form id="addAddonForm" action="{{ route('bookingsStore.addons', $order->id) }}" method="POST">
                         @csrf
                         <div class="form-group">
                             <label for="addon_id">{{ __('dashboard.addon_type') }} <span class="text-danger">*</span></label>
@@ -249,7 +259,7 @@
                             <label for="price">{{ __('dashboard.total_price') }}</label>
                             <input type="number" step="0.01" name="price" id="price" class="form-control" value="0">
                         </div>
-        
+
                         <div class="mb-5 fv-row col-md-12">
                             <label class="required form-label">{{ __('dashboard.payment_method') }}</label>
                             <select name="payment_method" id="payment_method" class="form-select " required>
@@ -412,7 +422,7 @@
                  let formId = $(this).attr('id');
                  let addonId = formId.split('-')[1];
                  let selectedAddon = $('#edit_addon_id_' + addonId).val();
-                 
+
                  if (!selectedAddon || selectedAddon === '') {
                      // Set custom validity message and trigger HTML5 validation
                      document.getElementById('edit_addon_id_' + addonId).setCustomValidity('{{ __("dashboard.please_select_addon") }}');
@@ -425,7 +435,7 @@
                  }
                  return true;
              });
-         
+
          $(document).on('click', '.receipt-link', function(e) {
              e.preventDefault();
 
