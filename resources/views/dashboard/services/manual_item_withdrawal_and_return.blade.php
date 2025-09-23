@@ -104,7 +104,7 @@
                         <td>{{ isset($adj->stock->percentage) ? $adj->stock->percentage . ' %' : ($adj->stock->quantity ?? '-') }}</td>
                         <td>{{ isset($adj->stock->percentage) ? abs($adj->percentage - $adj->available_percentage_before) . ' %' : abs($adj->available_quantity_after - $adj->available_quantity_before) }}</td>
                         @if($adj->order_id)
-                        
+
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }} {{ " - ".$adj->order_id}}</td>
                         @elseif(isset($adj->custom_reason) && $adj->custom_reason)
                             <td>{{ __("dashboard.manual_item_withdrawal_and_return.reason_options.".$adj->reason) }}  {{ " - ".$adj->custom_reason }}</td>
@@ -241,7 +241,7 @@
             @endif
         </div>
     @else
-    <form method="POST" action="{{ route('stock.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
+    <form method="POST" action="{{ route('stocks.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
         @csrf
         <input type="hidden" name="type" value="item_decrement">
         <div class="scrollable-table-wrapper">
@@ -290,8 +290,8 @@
                     <td>
                         <select name="reason" class="form-control reason-select " required>
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_reason') }}</option>
-                            
-                        <input type="text" name="custom_reason" class="form-control mt-2 custom-reason-input  d-none" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.specify_reason') }}"> 
+
+                        <input type="text" name="custom_reason" class="form-control mt-2 custom-reason-input  d-none" placeholder="{{ __('dashboard.manual_item_withdrawal_and_return.specify_reason') }}">
                         <select name="order_id" class="form-control mt-2 orders-select  d-none">
                             <option value="">{{ __('dashboard.manual_item_withdrawal_and_return.select_order') }}</option>
                                 @if(isset($orders) && $orders->count())
@@ -662,7 +662,7 @@ if (!window.Swal) {
         });
     });
 
- 
+
 
     // Ensure edit modal toggles when opening (in case values are prefilled differently)
     $('#editAdjustmentModal').on('shown.bs.modal', function () {

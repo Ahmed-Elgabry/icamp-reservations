@@ -12,9 +12,11 @@
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <h3 class="card-title">{{ __('dashboard.general_payments') }}</h3>
                 <div class="col-3 mt-3">
+                                    @can('general_payments.create')
 
                     <a href="{{route('general_payments.create')}}"
                         class="btn btn-primary">{{ __('dashboard.add') }}</a>
+                        @endcan
                 </div>
                 <!--begin::Card title-->
                 <div class="card-title w-100">

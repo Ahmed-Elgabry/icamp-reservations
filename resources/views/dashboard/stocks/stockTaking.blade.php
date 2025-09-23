@@ -85,7 +85,7 @@
         <div class="mb-3">
             <input type="text" id="stock-search-input" class="form-control min-w-200 px-4" placeholder="{{ __('dashboard.search_stock') }}">
         </div>
-     
+
         <!-- Filter/Search Modal Trigger Button -->
         <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#filterModal">
             {{ __('dashboard.filter_by_date') }}
@@ -115,7 +115,7 @@
                     </form>
                 </div>
             </div>
-        </div>   
+        </div>
         <h2>{{ __('dashboard.stockTakingReport') }}</h2>
         <div class="scrollable-table-wrapper">
             <table class="table table-responsive" id="stock-table">
@@ -199,7 +199,7 @@
             <div class="mb-3">
                 <input type="text" id="stock-search-input" class="form-control min-w-200 px-4" placeholder="{{ __('dashboard.search_stock') }}">
             </div>
-            <form method="POST" action="{{ route('stock.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
+            <form method="POST" action="{{ route('stocks.adjustments.store') }}" enctype="multipart/form-data" class="update" data-success-message="{{ __('dashboard.stock_updated_successfully') }}" data-kt-redirect="{{ url()->current() }}">
                 @csrf
                 <input type="hidden" name="type" value="item_decrement">
                 <div class="scrollable-table-wrapper">
@@ -318,7 +318,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                        @if( $stockTakingItems->count() > 0) 
+                        @if( $stockTakingItems->count() > 0)
                             @foreach($stockTakingItems as $adj)
                                     <tr data-id="{{ $adj->id }}">
                                     <td><a href="{{ route('dashboard.stock.report', $adj->stock->id) }}">{{ $adj->stock->name ?? '-' }}</a></td>
@@ -549,7 +549,7 @@ if (!window.Swal) {
         $(this).closest('form').find('input[name="available_quantity"]').val(available);
         $(this).closest('.scrollable-table-wrapper').find('input[name="available_quantity"]').val(available);
     });
-       
+
     $(document).on('click', '.btn-edit-adjustment', function () {
         var id = $(this).data('id');
         $('#editAdjustmentModal').modal('show');
@@ -578,7 +578,7 @@ if (!window.Swal) {
                      const $reasonDropdown = $('select[name="reason"]');
 
 
-          
+
                 // Explicitly select the correct reason option
                 $('#edit-reason option').each(function() {
                     if ($(this).val() === data.reason) {
@@ -732,7 +732,7 @@ if (!window.Swal) {
         });
     });
 
- 
+
 
     // Ensure edit modal toggles when opening (in case values are prefilled differently)
     $('#editAdjustmentModal').on('shown.bs.modal', function () {
@@ -829,7 +829,7 @@ $(function() {
         }
     });
 
-   
+
     $('#btn-approved-switch').on('click', function() {
         $('#verified-input').val('1');
         updateSwitchButtons();

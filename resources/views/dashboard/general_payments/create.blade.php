@@ -80,7 +80,7 @@
                                     <option value="">{{ __('dashboard.select_order') }}</option>
                                     @foreach(App\Models\Order::all() as $order)
                                         @if ($order->status == "approved" || $order->status == "delayed" || $order->status == "completed")
-                                            <option value="{{ $order->id }}" 
+                                            <option value="{{ $order->id }}"
                                             {{ isset($payment) && $payment->order_id == $order->id ? 'selected' : '' }}>
                                             {{ __('dashboard.order') }} #{{$order->id }} - {{ optional($order->customer)->first_name ?? '' }} {{ optional($order->customer)->last_name ?? '' }}</option>
                                         @endif
@@ -88,7 +88,7 @@
                                 </select>
                                 </div>
                             </div>
-                            
+
                             <!-- Image upload field -->
                             <div class="col-12 mb-6">
                                 <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.upload_or_take_image') }}</label>
@@ -109,7 +109,7 @@
                                     @endif
                                 </div>
                             </div>
-                            
+
                             <!-- Notes input -->
                             <div class="col-12 mb-6">
                                 <label
@@ -205,18 +205,22 @@
                                 <!--begin::Verified-->
                                 <td>
                                     {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                                    @can('general_payments.approve')
                                     @if($payment->verified)
                                         <a href="{{ route('order.verified', ['Id' => $payment->id, 'type' => 'general_revenue_deposit']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                     @else
                                         <a href="{{ route('order.verified', ['Id' => $payment->id, 'type' => 'general_revenue_deposit']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                                     @endif
+                                    @endcan
                                 </td>
                                 <!--begin::Attached-->
                                 <td>
                                     @if($payment->image_path)
+                                    @can('general_payments.show')
                                         <button type="button" class="btn btn-sm btn-primary" onclick="previewImage('{{ asset('storage/' . $payment->image_path) }}', '{{ $payment->id }}')">
                                             <i class="fas fa-eye"></i>
                                         </button>
+                                        @endcan
                                     @else
                                         <span class="text-muted">{{ __('dashboard.no_data') }}</span>
                                     @endif
@@ -377,13 +381,13 @@
                 width: '100%',
                 placeholder: "{{ __('dashboard.choose_receiver') }}"
             });
-            
+
             // Initialize Select2 for account dropdown
             $('#account_id').select2({
                 width: '100%',
                 placeholder: "{{ __('dashboard.choose_bank_account') }}"
             });
-            
+
             // Initialize Select2 for order dropdown with search functionality
             $('#order_id').select2({
                 width: '100%',
@@ -428,7 +432,7 @@
         function previewImage(imageSrc, paymentId = null) {
             document.getElementById('previewImage').src = imageSrc;
             document.getElementById('downloadImageBtn').href = imageSrc;
-            
+
             // If paymentId is provided, update download link to use the controller route
             if (paymentId) {
                 const downloadUrl = "{{ route('general_payments.download', ':id') }}".replace(':id', paymentId);
@@ -437,7 +441,7 @@
             } else {
                 document.getElementById('downloadImageBtn').setAttribute('download', '');
             }
-            
+
             // Show the modal
             var modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
             modal.show();

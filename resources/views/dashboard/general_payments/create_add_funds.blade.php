@@ -23,15 +23,15 @@
                 action="{{ isset($payment) ? route('general_payments.update_add_funds', $payment->id) : route('general_payments.store_add_funds') }}"
                 method="post" enctype="multipart/form-data"
                 class="form d-flex flex-column flex-lg-row store">
-                @csrf 
+                @csrf
                 @if(isset($payment)) @method('PUT') @endif
-                
+
                 <div class="card-body border-top p-9">
                         @if(isset($bankAccount))
                             <!-- Scenario 1: Direct account ID passed -->
                             <input type="hidden" name="account_id" id="account_id" value="{{ $bankAccount->id }}">
                             <input type="hidden" name="source"  value="charge_account">
-                            
+
                             <!-- Show selected account info -->
                             <div class="row mb-6">
                                 <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.bank_account') }}</label>
@@ -61,7 +61,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <!-- Image upload field for list scenario -->
                             <div class="form-group row my-2 mb-6 mx-1 col-12">
                                 <label for="image">@lang('dashboard.upload_or_take_image')</label>
@@ -73,7 +73,7 @@
                                     <small id="imageDetails"></small>
                                 </div>
                             </div>
-                            
+
                             <!-- Source for add funds page -->
                             <input type="hidden" name="source" value="add_funds_page">
                         @endif
@@ -99,7 +99,7 @@
                             <div class="col-lg-12">
                                 <select name="payment_method" class="form-select form-select-lg form-select-solid">
                                     @foreach(paymentMethod() as $paymentSelect)
-                                        <option value="{{ $paymentSelect }}" 
+                                        <option value="{{ $paymentSelect }}"
                                             {{ old('payment_method', 'bank_transfer') == $paymentSelect ? 'selected' : '' }}>
                                             {{ __('dashboard.'. $paymentSelect) }}
                                         </option>
@@ -200,11 +200,13 @@
                                     <!--begin::Verification-->
                                     <td>
                                         {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                                        @can('general_payments.approve')
                                         @if($payment->verified)
                                             <a href="{{ route('order.verified' , [$payment->id , 'general_revenue_deposit']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                         @else
                                             <a href="{{ route('order.verified' , [$payment->id , 'general_revenue_deposit']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                                         @endif
+                                        @endcan
                                     </td>
                                     <!--begin::Attached-->
                                     <td>
@@ -247,12 +249,12 @@
                                                 </a>
                                             </div>
                                             @endif
-                                            @can('payments.edit')
+                                            @can('general_payments.update_add_funds')
                                             <div class="menu-item px-3">
                                                 <a  class="menu-link px-3" onclick="openEditModal({{ $payment->id }}, '{{ $payment->amount }}', '{{ $payment->date }}', '{{ $payment->payment_method }}', '{{ $payment->description }}', '{{ $payment->account_id }}')">{{ __('actions.edit') }}</a>
                                             </div>
                                             @endcan
-                                            @can('payments.destroy')
+                                            @can('general_payments.destroy_add_funds')
                                             <!--begin::Menu item-->
                                             <div class="menu-item px-3">
                                                 <a  class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('general_payments.destroy', $payment->id)}}" data-id="{{$payment->id}}"> @lang('dashboard.delete')</a>
@@ -313,7 +315,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <!-- Amount and Date Row -->
                     <div class="row mb-3">
                         <div class="col-6">
@@ -357,7 +359,7 @@
                         <label class="col-lg-12 col-form-label fw-bold fs-6">{{ __('dashboard.upload_or_take_image') }}</label>
                         <div class="col-lg-12">
                             <input type="file" name="image" id="editImage" class="form-control form-control-lg form-control-solid" accept="image/*" capture="environment">
-                    
+
                         </div>
                     </div>
                 </div>
@@ -415,7 +417,7 @@
             // Initialize Select2 for edit modal account dropdown
             var $editAccount = $('#editAccountId');
             if ($editAccount.length && $editAccount.is('select')) {
-                $editAccount.select2({ 
+                $editAccount.select2({
                     width: '100%',
                     dropdownParent: $('#editPaymentModal')
                 });
@@ -495,7 +497,7 @@
         function previewImage(imageSrc, paymentId) {
             document.getElementById('previewImage').src = imageSrc;
             document.getElementById('downloadImageBtn').href = imageSrc;
-            
+
             // Show the modal
             var modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
             modal.show();
@@ -506,14 +508,14 @@
             // Set form action URL
             const form = document.getElementById('editPaymentForm');
             form.action = "{{ route('general_payments.update_add_funds', ':id') }}".replace(':id', paymentId);
-            
+
             // Fill form fields
             document.getElementById('editAmount').value = amount;
             document.getElementById('editDate').value = date;
             document.getElementById('editPaymentMethod').value = paymentMethod;
             document.getElementById('editDescription').value = description;
             document.getElementById('editAccountId').value = accountId;
-            
+
             // Show the modal
             const modal = new bootstrap.Modal(document.getElementById('editPaymentModal'));
             modal.show();
@@ -522,20 +524,20 @@
         // Handle edit form submission
         $(document).on('submit', '#editPaymentForm', function(e) {
             e.preventDefault();
-            
+
             const form = $(this);
             const submitBtn = form.find('button[type="submit"]');
             const submitLabel = submitBtn.find('.indicator-label');
             const submitProgress = submitBtn.find('.indicator-progress');
-            
+
             // Show loading state
             submitLabel.addClass('d-none');
             submitProgress.removeClass('d-none');
             submitBtn.prop('disabled', true);
-            
+
             // Create FormData to handle file uploads
             const formData = new FormData(form[0]);
-            
+
             $.ajax({
                 url: form.attr('action'),
                 type: 'POST',
@@ -546,7 +548,7 @@
                     // Hide modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editPaymentModal'));
                     modal.hide();
-                    
+
                     // Show success message
                     Swal.fire({
                         title: '{{ __("dashboard.success") }}',
@@ -555,7 +557,7 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
-                    
+
                     // Reload page to show updated data
                     setTimeout(() => {
                         window.location.reload();
@@ -563,11 +565,11 @@
                 },
                 error: function(xhr, status, error) {
                     let errorMessage = '{{ __("dashboard.error_occurred") }}';
-                    
+
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     }
-                    
+
                     Swal.fire({
                         title: '{{ __("dashboard.error") }}',
                         text: errorMessage,
@@ -590,7 +592,7 @@
                 const file = e.target.files[0];
                 const imageInfo = $('#imageInfo');
                 const imageDetails = $('#imageDetails');
-                
+
                 if (file) {
                     console.log('Image selected:', {
                         name: file.name,
@@ -598,7 +600,7 @@
                         type: file.type,
                         lastModified: file.lastModified
                     });
-                    
+
                     // Show file information to user
                     imageDetails.html(`
                         <strong>File selected:</strong> ${file.name}<br>
@@ -606,12 +608,12 @@
                         <strong>Type:</strong> ${file.type}
                     `);
                     imageInfo.show();
-                    
+
                     // Validate file
                     if (file.size > 2048 * 1024) { // 2MB limit
                         imageDetails.append('<br><span class="text-danger">⚠️ File size exceeds 2MB limit</span>');
                     }
-                    
+
                     if (!file.type.startsWith('image/')) {
                         imageDetails.append('<br><span class="text-danger">⚠️ File must be an image</span>');
                     }
@@ -625,7 +627,7 @@
                 const file = e.target.files[0];
                 const imageInfo = $('#editImageInfo');
                 const imageDetails = $('#editImageDetails');
-                
+
                 if (file) {
                     console.log('Edit modal image selected:', {
                         name: file.name,
@@ -633,7 +635,7 @@
                         type: file.type,
                         lastModified: file.lastModified
                     });
-                    
+
                     // Show file information to user
                     imageDetails.html(`
                         <strong>File selected:</strong> ${file.name}<br>
@@ -641,12 +643,12 @@
                         <strong>Type:</strong> ${file.type}
                     `);
                     imageInfo.show();
-                    
+
                     // Validate file
                     if (file.size > 2048 * 1024) { // 2MB limit
                         imageDetails.append('<br><span class="text-danger">⚠️ File size exceeds 2MB limit</span>');
                     }
-                    
+
                     if (!file.type.startsWith('image/')) {
                         imageDetails.append('<br><span class="text-danger">⚠️ File must be an image</span>');
                     }
@@ -659,11 +661,11 @@
         // Delete functionality
         $(document).on('click', '[data-kt-ecommerce-category-filter="delete_row"]', function(e) {
             e.preventDefault();
-            
+
             const deleteUrl = $(this).data('url');
             const itemId = $(this).data('id');
             const row = $(this).closest('tr');
-            
+
             Swal.fire({
                 title: '{{ __("dashboard.are_you_sure") }}',
                 text: '{{ __("dashboard.you_wont_be_able_to_revert_this") }}',
@@ -686,7 +688,7 @@
                             Swal.showLoading();
                         }
                     });
-                    
+
                     // Send delete request
                     $.ajax({
                         url: deleteUrl,
@@ -702,11 +704,11 @@
                                 timer: 2000,
                                 showConfirmButton: false
                             });
-                            
+
                             // Remove the row from table
                             row.fadeOut(500, function() {
                                 $(this).remove();
-                                
+
                                 // Check if table is empty
                                 const table = $('#kt_ecommerce_category_table');
                                 if (table.find('tbody tr').length === 0) {
@@ -716,11 +718,11 @@
                         },
                         error: function(xhr, status, error) {
                             let errorMessage = '{{ __("dashboard.error_occurred") }}';
-                            
+
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMessage = xhr.responseJSON.message;
                             }
-                            
+
                             Swal.fire({
                                 title: '{{ __("dashboard.error") }}',
                                 text: errorMessage,

@@ -499,7 +499,7 @@
 
     @endcan
 
-    @can('admins.index')
+    @can('whatsapp-templates.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['whatsapp-templates.index', 'whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}"
              data-kt-menu-trigger="click">
@@ -526,7 +526,7 @@
                 </div>
                 <!--end::Menu item-->
 
-                @can('admins.create')
+                @can('whatsapp-templates.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{route('whatsapp-templates.create')}}" class="menu-link py-3 {{ isActiveRoute('whatsapp-templates.create') }}">
@@ -544,7 +544,7 @@
         <!--end::Menu item-->
     @endcan
 
-    @can('admins.index')
+    @can('manual-whatsapp-sends.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['dashboard.manual-whatsapp-sends.index', 'dashboard.manual-whatsapp-sends.create', 'dashboard.manual-whatsapp-sends.show'])}}"
              data-kt-menu-trigger="click">
@@ -568,7 +568,7 @@
                 </div>
                 <!--end::Menu item-->
 
-                @can('admins.create')
+                @can('manual-whatsapp-sends.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{route('dashboard.manual-whatsapp-sends.create')}}" class="menu-link py-3 {{ isActiveRoute('dashboard.manual-whatsapp-sends.create') }}">
@@ -665,7 +665,7 @@
                     </div>
 
                 @endcan
-
+                @can('stocks.item-issue-and-return.create')
                 <!--end::Menu item-->
                     <div class="menu-item">
 
@@ -684,6 +684,8 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.item-issue.index')
                     <div class="menu-item">
 
                         <a href="{{route('stocks.item-issue.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-issue.index') }}">
@@ -699,6 +701,8 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.item-return.index')
                     <div class="menu-item">
 
                         <a href="{{route('stocks.item-return.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-return.index') }}">
@@ -716,6 +720,8 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.stockTaking.create')
                      <div class="menu-item">
 
                         <a href="{{route('stocks.stockTaking.create')}}" class="menu-link py-3 {{ isActiveRoute('stocks.stockTaking.create') }}">
@@ -733,6 +739,8 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.stockTaking.index')
                      <div class="menu-item">
 
                         <a href="{{route('stocks.stockTaking.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.stockTaking.index') }}">
@@ -750,6 +758,7 @@
                         </a>
 
                     </div>
+                    @endcan
             </div>
 
             <!--end::Menu sub-->
@@ -1683,7 +1692,7 @@
                 <!--end::Menu item-->
 
 
-
+                @can('general_payments.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -1703,10 +1712,10 @@
                 </div>
 
                 <!--end::Menu item-->
+                @endcan
 
 
-
-                @can('payments.create')
+                @can('general_payments.create_add_funds')
 
                     <!--begin::Menu item-->
 

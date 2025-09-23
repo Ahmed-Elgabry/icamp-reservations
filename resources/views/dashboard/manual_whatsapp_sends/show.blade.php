@@ -31,7 +31,7 @@
                 <div class="col-md-6">
                     <div class="mb-4">
                         <label class="form-label fw-bold">@lang('dashboard.template')</label>
-                        <p class="text-gray-800">{{ $manualWhatsappSend->template->name }}</p>
+                        <p class="text-gray-800">{{ $manualWhatsappSend->template ? $manualWhatsappSend->template->name : ''}}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -47,19 +47,19 @@
                 <div class="col-md-6">
                     <div class="mb-4">
                         <label class="form-label fw-bold">@lang('dashboard.created_by')</label>
-                        <p class="text-gray-800">{{ $manualWhatsappSend->creator->name }}</p>
+                        <p class="text-gray-800">{{ $manualWhatsappSend->creator ? $manualWhatsappSend->creator->name : ''}}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="mb-4">
                         <label class="form-label fw-bold">@lang('dashboard.created_at')</label>
-                        <p class="text-gray-800">{{ $manualWhatsappSend->created_at->format('Y-m-d H:i:s') }}</p>
+                        <p class="text-gray-800">{{ $manualWhatsappSend->created_at ? $manualWhatsappSend->created_at->format('Y-m-d H:i:s') : '' }}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="mb-4">
                         <label class="form-label fw-bold">@lang('dashboard.updated_at')</label>
-                        <p class="text-gray-800">{{ $manualWhatsappSend->updated_at->format('Y-m-d H:i:s') }}</p>
+                        <p class="text-gray-800">{{ $manualWhatsappSend->updated_at ? $manualWhatsappSend->updated_at->format('Y-m-d H:i:s') : '' }}</p>
                     </div>
                 </div>
             </div>
@@ -121,8 +121,8 @@
                                         <div class="card-body text-center">
                                             <i class="fa-solid fa-file fs-1 text-primary mb-3"></i>
                                             <p class="mb-2">{{ basename($attachment) }}</p>
-                                            <a href="{{ Storage::disk('public')->url($attachment) }}" 
-                                               target="_blank" 
+                                            <a href="{{ Storage::disk('public')->url($attachment) }}"
+                                               target="_blank"
                                                class="btn btn-sm btn-primary">
                                                 <i class="fa-solid fa-download"></i>
                                                 @lang('dashboard.download')
