@@ -9,10 +9,10 @@
     @endif
     <div class="d-flex flex-coulmn">
 
-        <form id="kt_ecommerce_add_product_form" 
-        data-kt-redirect="{{ isset($item) ? route('service_site_customer_service.edit', $item->id) : route('service_site_customer_service.create') }}" 
-        action="{{ isset($item) ? route('service_site_customer_service.update', $item->id) : route('service_site_customer_service.store') }}" 
-        method="POST" enctype="multipart/form-data" 
+        <form id="kt_ecommerce_add_product_form"
+        data-kt-redirect="{{ isset($item) ? route('bookings.service-site-customer-service.edit', $item->id) : route('bookings.service-site-customer-service.create') }}"
+        action="{{ isset($item) ? route('bookings.service-site-customer-service.update', $item->id) : route('bookings.service-site-customer-service.store') }}"
+        method="POST" enctype="multipart/form-data"
                 class="form d-flex flex-column store" dir="rtl">
                 @csrf
                 @if(isset($item))
@@ -30,7 +30,7 @@
                             <div id="editor-workername-en" class="w-100" dir="ltr" style="min-height:120px; direction: ltr; text-align: left;">{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}</div>
                             <input type="hidden" name="workername_en" id="input-workername-en" value="{!! old('workername_en', isset($item) ? $item->workername_en : '') !!}">
                         </div>
-    
+
                         <div class="form-group mb-15 w-45">
                             <label for="workername_ar">{{ __('dashboard.worker_name_ar') }}</label>
                             <div id="editor-workername-ar" class="w-100" dir="rtl" style="min-height:120px; direction: rtl; text-align: right;">{!! old('workername_ar', isset($item) ? $item->workername_ar : '') !!}</div>
@@ -52,7 +52,7 @@
                 </button>
             </form>
     </div>
-        
+
         <div class="col-md-12">
             <div class="table-responsive">
                 <table class="table table-bordered table-striped">
@@ -73,12 +73,16 @@
                                 <td>{!! $row->workername_ar !!}</td>
                                 <td>{{ $row->workerphone }}</td>
                                 <td class="text-center d-flex flex-row flex-nowrap">
-                                    <a href="{{ route('service_site_customer_service.edit', $row->id) }}" class="btn btn-sm btn-secondary">{{ __('dashboard.edit') }}</a>
-                                    <form action="{{ route('service_site_customer_service.destroy', $row->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('{{ __('dashboard.delete_confirmation') }}');">
+                                    @can('bookings.service-site-customer-service.edit')
+                                    <a href="{{ route('bookings.service-site-customer-service.edit', $row->id) }}" class="btn btn-sm btn-secondary">{{ __('dashboard.edit') }}</a>
+                                    @endcan
+                                    @can('bookings.service-site-customer-service.destroy')
+                                    <form action="{{ route('bookings.service-site-customer-service.destroy', $row->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('{{ __('dashboard.delete_confirmation') }}');">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-danger">{{ __('dashboard.delete') }}</button>
                                     </form>
+                                    @endcan
                         @empty
                             <tr>
                                 <td colspan="5" class="text-center">{{ __('dashboard.no_data_found') }}</td>

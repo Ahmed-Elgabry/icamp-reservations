@@ -1029,7 +1029,7 @@
                 </div>
                 @endcan
 
-                @can('orders.create')
+                @can('bookings.create')
 
                     <!--begin::Menu item-->
 
@@ -1188,8 +1188,7 @@
                 </a>
             </div>
             @endcan
-            @can('bookings.internal-notes.index')
-
+            @can('internal-notes.create')
             <div class="menu-item">
                 <a href="{{ route('internal-notes.index') }}#internal-note-form" class="menu-link py-3">
                     <span class="menu-bullet">
@@ -1198,6 +1197,8 @@
                     <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.internal_notes')])</span>
                 </a>
             </div>
+            @endcan
+            @can('bookings.internal-notes.index')
                 <div class="menu-item">
                     <a href="{{ route('internal-notes.index') }}" class="menu-link py-3 {{ isActiveRoute('internal-notes.index') }}">
                         <span class="menu-bullet">
@@ -1369,15 +1370,15 @@
 
                                 @endcan
 
-                                @can('payments.create')
+                                @can('bank-accounts.transfer')
 
                                     <!--begin::Menu item-->
 
                                     <div class="menu-item">
 
-                                        <a href="{{route('payments.transfer')}}"
+                                        <a href="{{route('bank-accounts.transfer')}}"
 
-                                            class="menu-link py-3 {{ isActiveRoute('payments.create') }}">
+                                            class="menu-link py-3 {{ isActiveRoute('bank-accounts.transfer') }}">
 
                                             <span class="menu-bullet">
 

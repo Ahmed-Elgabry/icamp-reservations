@@ -10,10 +10,14 @@
           <h3 class="fw-bolder m-0">@lang('dashboard.contacts')</h3>
         </div>
         <div class="card-toolbar">
+            @can('contact-guides.create')
           <a href="{{ route('contact-guides.create') }}" class="btn btn-primary me-2">@lang('dashboard.add_title', ['page_title' => __('dashboard.contact')])</a>
+          @endcan
+            @can('contact-guides.export-pdf')
           <a href="{{ route('contact-guides.export-pdf') }}" class="btn btn-danger" target="_blank">
             <i class="bi bi-file-earmark-pdf"></i> @lang('dashboard.export_pdf')
           </a>
+          @endcan
         </div>
       </div>
 
@@ -76,7 +80,7 @@
                 </td>
                 <td class="text-center">
                   @if($c->email)
-                    
+
                     <!-- @php $emailRoute = Route::has('emails.compose') ? route('emails.compose', ['to' => $c->email]) : 'mailto:'.$c->email; @endphp -->
                     <a title="@lang('dashboard.send_email')" href="https://ngx343.inmotionhosting.com:2096/" class="btn btn-sm btn-light-primary">
                       <i class="bi bi-envelope"></i>
@@ -100,11 +104,15 @@
                 </td>
                 <td>{{ Str::limit($c->notes, 60) }}</td>
                 <td class="text-end">
+            @can('contact-guides.edit')
                   <a href="{{ route('contact-guides.edit', $c->id) }}" class="btn btn-sm btn-light-primary me-1">@lang('dashboard.edit')</a>
-                  <button type="button" class="btn btn-sm btn-light-danger" 
+                  @endcan
+            @can('contact-guides.destroy')
+                  <button type="button" class="btn btn-sm btn-light-danger"
                           onclick="confirmDelete('{{ route('contact-guides.destroy', $c->id) }}', '{{ csrf_token() }}')">
                     @lang('dashboard.delete')
                   </button>
+                  @endcan
                 </td>
               </tr>
               @empty

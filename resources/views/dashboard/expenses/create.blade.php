@@ -60,7 +60,7 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
-                        
+
                                                     <input type="hidden" name="source" id="source" value="general_expenses">
                                                     <div class="form-group col-6 mt-5">
                                                         <label for="expense_item_id" class="required">{{ __('dashboard.expense_item') }}</label>
@@ -229,11 +229,13 @@
                                     <td>{{$expense->account->name ?? '-'}}</td>
                                     <td>
                                         {{ $expense->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
+                                        @can('expenses.approve')
                                         @if($expense->verified)
                                             <a href="{{ route('order.verified' , [$expense->id , 'expense']) }}" class="btn btn-sm btn-danger">{{ __('dashboard.mark') }} {{ __('dashboard.unverifyed') }}</a>
                                         @else
                                             <a href="{{ route('order.verified' , [$expense->id , 'expense']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                                         @endif
+                                        @endcan
                                     </td>
                                     <td>
                                         @if($expense->image_path || $expense->image)
@@ -415,7 +417,7 @@
             </form>
         </div>
     </div>
-    
+
 </div>
 @push('css')
     <style>
@@ -461,7 +463,7 @@
     function previewImage(imageSrc, expenseId) {
         document.getElementById('previewImage').src = imageSrc;
         document.getElementById('downloadImageBtn').href = imageSrc;
-        
+
         // Show the modal
         var modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
         modal.show();

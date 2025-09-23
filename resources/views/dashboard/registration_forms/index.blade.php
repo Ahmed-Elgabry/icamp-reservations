@@ -8,7 +8,7 @@
                 <div class="card card-flush">
                     <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                         <div class="card-title">
-                            <form method="GET" action="{{ route('orders.registeration-forms') }}"
+                            <form method="GET" action="{{ route('bookings.registeration-forms.index') }}"
                                 class="d-flex align-items-center position-relative my-1" role="search">
                                 <span class="svg-icon svg-icon-1 position-absolute ms-4">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -107,11 +107,13 @@
                                             </td>
                                             <td><i class="bi bi-envelope me-1"></i>{{ $rf->email ?? '—' }}</td>
                                             <td class="text-center">
+                                                 @can('bookings.registeration-forms.index')
                                                 <button type="button"
                                                     class="btn btn-icon btn-light btn-active-light-primary btn-sm rf-view"
                                                     data-details='@json($details)' title="{{ __('dashboard.view_rest') }}">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
+                                                @endcan
                                             </td>
                                             <td class="text-center">
                                                 {{ $rf->created_at->format('Y-m-d') }}
@@ -121,19 +123,24 @@
                                             </td>
                                             <td class="text-end">
                                                 <div class="btn-group" role="group">
+                                                 @can('bookings.create')
+
                                                     <button type="button"
                                                         class="btn btn-icon btn-light-primary btn-sm rf-book"
                                                         data-href="{{ $ordersCreateUrl . '?' . $prefillQuery }}"
                                                         title="{{ __('dashboard.make_reservation') }}">
                                                     <i class="bi bi-journal-plus"></i>
                                                 </button>
-
-                                                    <a href="{{ route('orders.registeration-forms.edit', $rf->id) }}"
+                                                    @endcan
+                                                 @can('bookings.registeration-forms.edit')
+                                                    <a href="{{ route('bookings.registeration-forms.edit', $rf->id) }}"
                                                         class="btn btn-icon btn-light-warning btn-sm"
                                                         title="{{ __('dashboard.edit') }}">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
-                                                    <form action="{{ route('orders.registeration-forms.destroy', $rf->id) }}"
+                                                 @can('bookings.registeration-forms.destroy')
+                                                    @endcan
+                                                    <form action="{{ route('bookings.registeration-forms.destroy', $rf->id) }}"
                                                         method="POST" class="d-inline rf-delete-form">
                                                         @csrf
                                                         @method('DELETE')
@@ -143,6 +150,7 @@
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
+                                                    @endcan
                                                 </div>
                                             </td>
                                         </tr>

@@ -951,7 +951,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payments.index',
         'title' => 'dashboard.payments',
         'type' => 'parent',
-        'child' => ['payments.create', 'payments.transfer', 'money-transfer', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
+        'child' => ['payments.create','bank-accounts.transfer', 'payments.transfer', 'money-transfer', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
     ]);
     # payments store
     Route::get('transactions', [
@@ -1010,7 +1010,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
 
     Route::get('payments/transfer', [
         'uses' => 'PaymentsController@transfer',
-        'as' => 'payments.transfer',
+        'as' => 'bank-accounts.transfer',
         'title' => ['actions.add', 'dashboard.payments']
     ]);
 
@@ -1585,7 +1585,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     Route::post('service-site-customer-service', [ServiceSiteAndCustomerServiceController::class, 'store'])->name('bookings.service-site-customer-service.store');
     Route::get('service-site-customer-service/{id}/edit', [ServiceSiteAndCustomerServiceController::class, 'edit'])->name('bookings.service-site-customer-service.edit');
     Route::get('service-site-customer-service/create', [ServiceSiteAndCustomerServiceController::class, 'create'])->name('bookings.service-site-customer-service.create');
-    Route::delete('service-site-customer-service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('bookings.service-site-customer-service.delete');
+    Route::delete('service-site-customer-service/{id}', [ServiceSiteAndCustomerServiceController::class, 'destroy'])->name('bookings.service-site-customer-service.destroy');
     Route::put('service-site-customer-service/{id}', [ServiceSiteAndCustomerServiceController::class, 'update'])->name('bookings.service-site-customer-service.update');
 });
 

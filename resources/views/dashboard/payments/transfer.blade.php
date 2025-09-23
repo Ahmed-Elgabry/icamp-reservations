@@ -36,28 +36,28 @@
 
             <!-- <div id="kt_account_settings_profile_details" class="collapse show">
 
-                <form id="kt_ecommerce_add_product_form" 
+                <form id="kt_ecommerce_add_product_form"
 
-                      data-kt-redirect="{{ route('payments.transfer') }}" 
+                      data-kt-redirect="{{ route('bank-accounts.transfer') }}"
 
-                      action="{{ route('money-transfer') }}" 
+                      action="{{ route('money-transfer') }}"
 
-                      method="post" enctype="multipart/form-data" 
+                      method="post" enctype="multipart/form-data"
 
                       class="form d-flex flex-column flex-lg-row store"> -->
                 <div id="kt_account_settings_profile_details" class="collapse show">
-                <form id="kt_ecommerce_add_product_form" 
-                      data-kt-redirect="{{ route('payments.transfer') }}" 
-                      action="{{route('money-transfer') }}" 
-                      method="post" enctype="multipart/form-data" 
+                <form id="kt_ecommerce_add_product_form"
+                      data-kt-redirect="{{ route('bank-accounts.transfer') }}"
+                      action="{{route('money-transfer') }}"
+                      method="post" enctype="multipart/form-data"
                       class="form d-flex flex-column flex-lg-row store">
-                      
-                      @csrf 
-                      
+
+                      @csrf
+
                       <div class="card-body border-top p-9">
-                          
+
                           <!-- Input group for Total amount -->
-                          
+
                           <div class="row mb-5">
                             <div class="row mb-5">
                                 <div class="col-6">
