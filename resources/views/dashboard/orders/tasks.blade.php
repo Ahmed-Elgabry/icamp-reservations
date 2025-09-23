@@ -30,15 +30,21 @@
             @endif
           </form>
           <ul class="nav nav-tabs nav-line-tabs ms-4">
+            @can('bookings.reservations.board')
           <li class="nav-item">
               <a class="nav-link {{ ($activeTab ?? 'today') === 'today' ? 'active' : '' }}" href="{{ route('bookings.reservations.board', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.today_reservations')</a>
             </li>
+            @endcan
+            @can('bookings.reservations.board.upcoming')
             <li class="nav-item">
               <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? 'active' : '' }}" href="{{ route('bookings.reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming_reservations')</a>
             </li>
+            @endcan
+            @can('bookings.tasks.index')
             <li class="nav-item">
               <a class="nav-link {{ ($activeTab ?? 'today') === 'tasks' ? 'active' : '' }}" href="{{ route('bookings.tasks.index') }}">@lang('dashboard.tasks')</a>
             </li>
+            @endcan
           </ul>
         </div>
       </div>

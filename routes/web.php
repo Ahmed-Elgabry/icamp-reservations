@@ -1684,8 +1684,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 
     // Orders -> Tasks listing with filters
     Route::get('orders/tasks', 'Dashboard\TaskController@ordersTasksIndex')
-        ->name('bookings.tasks.index')
-        ->middleware(['auth']);
+        ->name('bookings.tasks.index');
 
     Route::get('tasks/reports', 'Dashboard\TaskController@reports')
         ->name('tasks.reports');
