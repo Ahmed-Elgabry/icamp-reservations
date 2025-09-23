@@ -9,23 +9,23 @@
       <div class="card-header border-0 align-items-center justify-content-between">
         <div class="card-title m-0 d-flex align-items-center gap-3 flex-wrap">
           <h3 class="fw-bolder m-0">@lang('dashboard.reservations_board')</h3>
-          <form method="get" action="{{ $formAction ?? route('reservations.board.today') }}" class="d-flex align-items-center gap-2">
+          <form method="get" action="{{ $formAction ?? route('bookings.reservations.board.today') }}" class="d-flex align-items-center gap-2">
             <label class="form-label m-0">@lang('dashboard.from')</label>
             <input type="date" name="from" value="{{ $selectedFrom ?? now()->toDateString() }}" class="form-control form-control-sm" onchange="this.form.submit()" />
             <label class="form-label m-0">@lang('dashboard.to')</label>
             <input type="date" name="to" value="{{ $selectedTo ?? '' }}" class="form-control form-control-sm" onchange="this.form.submit()" />
             @if(!empty($selectedFrom) || !empty($selectedTo))
-              <a href="{{ route('reservations.board.today') }}" class="btn btn-sm btn-light">@lang('dashboard.clear')</a>
+              <a href="{{ route('bookings.reservations.board.today') }}" class="btn btn-sm btn-light">@lang('dashboard.clear')</a>
             @endif
           </form>
         </div>
         <div class="card-toolbar">
           <ul class="nav nav-tabs nav-line-tabs">
             <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'today' ? 'active' : '' }}" href="{{ route('reservations.board.today', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.today')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'today' ? 'active' : '' }}" href="{{ route('bookings.reservations.board.today', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.today')</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? 'active' : '' }}" href="{{ route('reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? 'active' : '' }}" href="{{ route('bookings.reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming')</a>
             </li>
             <li class="nav-item">
               <a class="nav-link {{ ($activeTab ?? 'today') === 'tasks' ? 'active' : '' }}" href="#tab_tasks" data-bs-toggle="tab">@lang('dashboard.tasks')</a>

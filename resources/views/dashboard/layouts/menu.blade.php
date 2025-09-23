@@ -2526,11 +2526,11 @@
                         <span class="menu-title">@lang('dashboard.all_pages')</span>
                     </a>
                 </div>
-@can('reservations.board.upcoming')
+@can('bookings.reservations.board.today')
 
                 <div class="menu-item">
 
-<a href="{{ route('reservations.board.today') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.today') }} {{ isActiveRoute('reservations.board') }}">
+<a href="{{ route('bookings.reservations.board.today') }}" class="menu-link py-3 {{ isActiveroute('bookings.reservations.board.today') }} {{ isActiveroute('bookings.reservations.board') }}">
 
     <span class="menu-bullet">
 
@@ -2544,12 +2544,12 @@
 
 </div>
 @endcan
-@can('reservations.board.upcoming')
+@can('bookings.reservations.board.upcoming')
 
 
 <div class="menu-item">
 
-<a href="{{ route('reservations.board.upcoming') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.upcoming') }}">
+<a href="{{ route('bookings.reservations.board.upcoming') }}" class="menu-link py-3 {{ isActiveroute('bookings.reservations.board.upcoming') }}">
 
     <span class="menu-bullet">
 

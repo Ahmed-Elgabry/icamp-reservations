@@ -634,17 +634,17 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     // Reservations board (today default, upcoming as separate route)
     Route::get('reservations/board', [
         'uses' => 'OrderController@boardToday',
-        'as' => 'reservations.board',
+        'as' => 'bookings.reservations.board',
         'title' => ['actions.view', 'dashboard.reservations_board']
     ]);
     Route::get('reservations/board/today', [
         'uses' => 'OrderController@boardToday',
-        'as' => 'reservations.board.today',
+        'as' => 'bookings.reservations.board.today',
         'title' => ['actions.view', 'dashboard.reservations_board']
     ]);
     Route::get('reservations/board/upcoming', [
         'uses' => 'OrderController@boardUpcoming',
-        'as' => 'reservations.board.upcoming',
+        'as' => 'bookings.reservations.board.upcoming',
         'title' => ['actions.view', 'dashboard.reservations_board']
     ]);
 
