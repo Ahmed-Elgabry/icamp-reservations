@@ -213,6 +213,7 @@
                                                 $createdAt = \Carbon\Carbon::parse($payment->created_at);
                                                 $date = $createdAt->format('Y-m-d');
                                                 $time = $createdAt->format('h:i A');
+                                                $link = '' ;
                                                 if ($payment->payment) {
                                                     $source = $payment->payment->statement;
                                                     $paymentMethod = $payment->payment->payment_method;
