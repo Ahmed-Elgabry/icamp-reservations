@@ -25,6 +25,7 @@ return new class extends Migration
             $table->unsignedBigInteger('expense_id')->nullable();
             $table->unsignedBigInteger('general_payment_id')->nullable();
             $table->unsignedBigInteger('stock_id')->nullable();
+            $table->unsignedBigInteger('account_id')->nullable(); // ID of the sender account
             $table->date('date')->nullable();
             $table->decimal('amount', 10, 2); // Transaction amount
             $table->text('description')->nullable(); // Description of the transaction
@@ -32,7 +33,6 @@ return new class extends Migration
             $table->enum('verified', [0, 1])->default(0);
             
             // Foreign key constraints
-            $table->unsignedBigInteger('account_id')->nullable(); // ID of the sender account
             $table->foreign('stock_id')->references('id')->on('stocks')->onDelete('cascade');
             $table->foreign('expense_id')->references('id')->on('expenses')->onDelete('cascade');
             $table->foreign('general_payment_id')->references('id')->on('general_payments')->onDelete('cascade');
