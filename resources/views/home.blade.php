@@ -457,7 +457,7 @@
                                                     <span class="text-dark fw-bold">{{ __("dashboard.".$expense->source ?? '') }}</span>
                                                     <!-- check if translation available -->
                                                     @php
-                                                        $statement = "dashboard.".$expense->expense->statement != __('dashboard.'.$expense->expense->statement) ? __('dashboard.'.$expense->expense->statement) : $expense->expense->statement;
+                                                        $statement = "dashboard.".$expense->expense?->statement != __('dashboard.'.$expense->expense?->statement) ? __('dashboard.'.$expense->expense?->statement) : $expense->expense?->statement;
                                                     @endphp
                                                     <span class="text-muted d-block">{{ $statement  }}</span>
                                                 </td>
