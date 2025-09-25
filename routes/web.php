@@ -634,17 +634,17 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     // Reservations board (today default, upcoming as separate route)
     Route::get('reservations/board', [
         'uses' => 'OrderController@boardToday',
-        'as' => 'bookings.reservations.board',
+        'as' => 'pages.reservations.board',
         'title' => ['actions.view', 'dashboard.reservations_board']
     ]);
     Route::get('reservations/board/today', [
         'uses' => 'OrderController@boardToday',
-        'as' => 'bookings.reservations.board.today',
+        'as' => 'pages.reservations.board.today',
         'title' => ['actions.view', 'dashboard.reservations_board']
     ]);
     Route::get('reservations/board/upcoming', [
         'uses' => 'OrderController@boardUpcoming',
-        'as' => 'bookings.reservations.board.upcoming',
+        'as' => 'pages.reservations.board.upcoming',
         'title' => ['actions.view', 'dashboard.reservations_board']
     ]);
 
@@ -951,7 +951,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'payments.index',
         'title' => 'dashboard.payments',
         'type' => 'parent',
-        'child' => ['payments.create','bank-accounts.transfer', 'payments.transfer', 'money-transfer', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
+        'child' => ['payments.create', 'bank-accounts.transfer', 'payments.transfer', 'money-transfer', 'transactions.index', 'transactions.destroy', 'accounts.store', 'accounts.update', 'payments.show', 'payments.edit', 'payments.update', 'payments.destroy', 'payments.deleteAll']
     ]);
     # payments store
     Route::get('transactions', [
@@ -1684,7 +1684,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 
     // Orders -> Tasks listing with filters
     Route::get('orders/tasks', 'Dashboard\TaskController@ordersTasksIndex')
-        ->name('bookings.tasks.index');
+        ->name('pages.tasks.index');
 
     Route::get('tasks/reports', 'Dashboard\TaskController@reports')
         ->name('tasks.reports');

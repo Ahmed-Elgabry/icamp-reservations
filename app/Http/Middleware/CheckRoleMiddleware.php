@@ -64,7 +64,7 @@ class CheckRoleMiddleware
         }
 
         if (!in_array($currunt_route, $excpetions) && !$isWildcardException) {
-           $currunt_route = str_replace('update-settings', 'settings', $currunt_route);
+            $currunt_route = str_replace('update-settings', 'settings', $currunt_route);
             $currunt_route = str_replace('store', 'create', $currunt_route);
             $currunt_route = str_replace('adminsfile.destroy', 'admins.destroy', $currunt_route);
             $currunt_route = str_replace('update.reports', 'orders.reports', $currunt_route);
