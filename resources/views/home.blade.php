@@ -463,7 +463,7 @@
                                                 </td>
                                                 <td>
                                                     <span class="badge badge-light-primary">
-                                                        {{ ucfirst(__('dashboard.' . $expense->expense->payment_method)) ?? "" }}
+                                                        {{ ucfirst(__('dashboard.' . $expense->expense?->payment_method)) ?? "" }}
                                                     </span>
                                                 </td>
                                                 <td>
