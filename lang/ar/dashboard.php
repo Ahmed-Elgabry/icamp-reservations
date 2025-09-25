@@ -273,7 +273,7 @@ return [
     'terms' => ' الأحكام والشروط',
     'stocks' => 'المخزون',
     'filter_higher_selling' => 'تصفية حسب العناصر الأكثر استهلاكا',
-    
+
     'latest_payments' => 'أحدث المدفوعات',
     'select_payment_method' => "اختر طريقة الدفع",
     'select_bank_account' => "اختر الحساب البنكي",
@@ -1120,7 +1120,7 @@ return [
     'Reservation_info' => 'بيانات الحجز',
     'reservation_expenses' => 'الحجوزات - المصاريف',
     'add_expenses' => 'إضافة مصاريف',
-    "recent_expenses" => "المصاريف حديثة", 
+    "recent_expenses" => "المصاريف حديثة",
     "insurance_returned" => 'تم رد التأمين',
     "insurance_null" => "لا يوجد تأمين مدفوع",
     "insurance_not_returned" => 'لم يتم رد التأمين',
@@ -1187,7 +1187,7 @@ return [
     'create_survey' => 'البناء',
     'survey_builder' => 'بناء الاستبيان',
     'survey_results' => 'الإجابات',
-    
+
     // Survey Builder Translation Keys
     'add_question' => 'إضافة سؤال',
     'text_field' => 'نص',
@@ -1236,7 +1236,7 @@ return [
     'enter_help_text_en' => 'Additional help text in English',
     'option_label_ar' => 'تسمية الخيار بالعربية',
     'option_label_en' => 'Option label in English',
-    
+
     // Default question labels
     'default_text_question' => 'سؤال نصي',
     'default_textarea_question' => 'منطقة نص',
@@ -1322,7 +1322,7 @@ return [
     'single_choice' => 'اختيار واحد',
     'multiple_choice' => 'اختيار متعدد',
     'dropdown_list' => 'قائمة منسدلة',
-    
+
 
     'question_text' => 'نص السؤال',
     'question_type' => 'نوع السؤال',
@@ -1380,7 +1380,7 @@ return [
     'attached' => 'مرفق',
     'select_order' => 'اختر الحجز',
     'AED' => ' درهم ',
-    
+
     // Signature page translations
     'signature_title' => 'توقيع الحجز رقم :id',
     'management_system' => 'نظام الإدارة',
@@ -1396,7 +1396,7 @@ return [
     'please_draw_signature' => 'من فضلك ارسم توقيعك أولاً.',
     'warning' => 'تنبيه:',
     'notice' => 'Notice:',
-    
+
     // Already signed page translations
     'signature_completed_title' => 'تم التوقيع - حجز :id',
     'signature_success' => 'تم التوقيع بنجاح',
@@ -1404,11 +1404,11 @@ return [
     'open_image' => 'فتح الصورة',
     'reservation_number' => 'رقم الحجز',
     'signature_date' => 'تاريخ التوقيع',
-    
+
     // Language switcher translations
     'switch_to_arabic' => 'العربية',
     'switch_to_english' => 'English',
-    
+
     // Additional page titles
     'create_user' => 'إنشاء مستخدم',
     'edit_user' => 'تعديل مستخدم',
@@ -1447,7 +1447,7 @@ return [
     "completed" => 'مكتمل',
     "pending_and_Initial_reservation" => 'معلق - حجز مبدئي',
     "pending_and_show_price" => 'معلق - عرض السعر',
-    "approved" => 'معتمد',  
+    "approved" => 'معتمد',
     "canceled" => 'ملغي',
     "cancelled" => 'ملغي',
     "delayed" => 'مؤجل',
@@ -1501,8 +1501,8 @@ return [
             'stockTaking' => 'جرد المخزون',
         ],
     ],
-    
-  
+
+
     'stock_updated_successfully' => 'تم تحديث المخزون بنجاح',
     "stockTakingReport" => "تقرير جرد المخزون",
     'item_status_report_title' => 'تقرير حالة العنصر',
@@ -1722,7 +1722,7 @@ return [
     'item_deleted_successfully' => 'تم حذف العنصر بنجاح ',
     'update_item' => 'تحديث العنصر',
     'create_item' => 'إنشاء العنصر',
-    
+
     // Payment Summary
     'today_payments' => 'المدفوعات اليوم',
     'this_month_payments' => 'مدفوعات هذا الشهر',
@@ -1765,7 +1765,7 @@ return [
     'Very Low' => 'منخفض جدا',
     'Low' => 'منخفض',
     'amount_details' => 'تفاصيل المبلغ',
-    
+
     // Internal Notes
     'internal_notes' => 'ملاحظات داخلية',
     'select_internal_note' => 'اختر ملاحظة داخلية',
@@ -1799,7 +1799,7 @@ return [
     'paid_partially' => 'مدفوع جزئياً',
     'paid_totaly' => 'مدفوع بالكامل',
     'note_name' => 'اسم الملاحظة',
-    'note_content' => 'محتوى الملاحظة', 
+    'note_content' => 'محتوى الملاحظة',
     "edit_internal_note" => 'تعديل الملاحظة الداخلية',
     "note_updated" => 'تم تحديث الملاحظة بنجاح',
     "confirm_delete_note" => 'هل أنت متأكد من رغبتك في حذف هذه الملاحظة؟',
@@ -1811,5 +1811,6 @@ return [
     "updated_successfully" => 'تم التحديث بنجاح',
     "created_successfully" => 'تم الإنشاء بنجاح',
     "deleted_successfully" => 'تم الحذف بنجاح',
+    "search_permissions" => 'ابحث في الصلاحيات',
 ];
- 
+

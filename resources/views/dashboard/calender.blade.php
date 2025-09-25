@@ -99,7 +99,9 @@
                         title: `{{ $order->customer->name ?? 'عميل غير محدد' }} `,
                         start: "{{ $order->date }}",
                         end: "{{ $order->date }}",
+                    @can('scheduling.edit')
                         url: `{{ route('orders.edit', $order->id) }}`,
+                        @endcan
                         extendedProps: {
                             status: "{{ $order->status }}"
                         }
@@ -134,9 +136,11 @@
                     titleElement.style.color = 'white';
                 }
             },
+            @can('scheduling.create')
             dateClick: function (info) {
                 window.location.href = `{{ route('orders.create') }}?date=${info.dateStr}`;
             }
+                @endcan
         });
         calendar.render();
     });

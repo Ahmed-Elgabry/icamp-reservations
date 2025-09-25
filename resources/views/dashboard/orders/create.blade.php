@@ -17,9 +17,11 @@
                         </h3>
                     </div>
                     <div class="card-toolbar">
+                        @can('bookings.retrieve-data')
                         <button type="button" class="btn btn-light-primary" id="btnRetrieveRf">
                             <i class="bi bi-cloud-download"></i> {{ __('dashboard.retrieve_data') }}
                         </button>
+                        @endcan
                     </div>
                 </div>
 
@@ -144,16 +146,16 @@
                                         </label>
                                         <input class="form-check-input" type="checkbox" id="toggleInternalNote" checked>
                                     </div>
-                                    
+
                                     <input type="hidden" name="internal_note_id" id="internal_note_id" value="{{ $selectedInternalNote->id ?? '' }}">
-                                    
+
                                     <!-- Container for the selected note -->
                                     <div id="templateNoteContainer">
                                         <select id="internalNoteSelect" name="internal_note_id" class="form-select form-select-lg form-select-solid" data-placeholder="@lang('dashboard.choose')">
                                             <option value="">@lang('dashboard.choose')</option>
                                             @if(isset($internalNotes) && count($internalNotes))
                                                 @foreach($internalNotes as $in)
-                                                    <?php 
+                                                    <?php
                                                         $isSelected = (isset($selectedInternalNote) && (is_object($selectedInternalNote) ? $selectedInternalNote->id : $selectedInternalNote) == $in->id);
                                                         if ($isSelected) {
                                                             $noteContent = $in->note_content;
@@ -162,8 +164,8 @@
                                                             $selectedAttr = '';
                                                         }
                                                     ?>
-                                                    <option value="{{ $in->id }}" 
-                                                        data-name="{{ $in->note_name }}" 
+                                                    <option value="{{ $in->id }}"
+                                                        data-name="{{ $in->note_name }}"
                                                         data-content="{!! $in->note_content !!}"
                                                         {!! $selectedAttr !!}>
                                                         {{ $in->note_name }}
@@ -310,19 +312,22 @@
 
                             <div class="d-flex justify-content-end gap-2">
                                 @if(isset($order))
+                                    @can('bookings.send-email')
                                     <!--begin::Email Button-->
                                     <button type="button" id="send-email-btn" class="btn btn-secondary d-flex align-items-center gap-2">
                                         <img src="{{ asset('imgs/gmail.png') }}" alt="Email Icon" width="20" height="20">
                                         <span class="indicator-label">@lang('dashboard.send_email')</span>
                                     </button>
                                     <!--end::Email Button-->
-                                    
+                                    @endcan
+                                    @can('bookings.send-whatsapp')
                                     <!--begin::WhatsApp Button-->
                                     <button type="button" id="send-whatsapp-btn" class="btn btn-success d-flex align-items-center gap-2 ms-2">
                                         <img src="{{ asset('images/whatsapp.png') }}" alt="WhatsApp Icon" width="20" height="20">
                                         <span class="indicator-label">@lang('dashboard.send_whatsapp')</span>
                                     </button>
                                     <!--end::WhatsApp Button-->
+                                    @endcan
                                 @endif
                                 <!--begin::Additional Notes Button-->
                                 <button type="button" id="additional-notes-btn" class="btn btn-secondary">
@@ -473,7 +478,7 @@
                     <form id="sendWhatsAppForm" class="form">
                         @csrf
                         <input type="hidden" name="order_id" value="{{ isset($order) ? $order->id : '' }}">
-                        
+
                         <!-- Customer Phone Display -->
                         @if(isset($order) && $order->customer)
                             <div class="row mb-6">
@@ -495,10 +500,10 @@
                                         'invoice' => __('dashboard.invoice'),
                                         'evaluation' => __('dashboard.evaluation')
                                     ];
-                                    
+
                                     $allTemplateTypes = array_merge($checkboxTypes, ['receipt' => __('dashboard.receipt')]);
                                 @endphp
-                                
+
                                 @foreach($checkboxTypes as $type => $label)
                                     @if(\App\Models\WhatsappMessageTemplate::active()->ofType($type)->exists())
                                         <label class="checkbox">
@@ -508,7 +513,7 @@
                                         </label>
                                     @endif
                                 @endforeach
-                                
+
                                 @if(!\App\Models\WhatsappMessageTemplate::active()->whereIn('type', array_keys($allTemplateTypes))->exists())
                                     <div class="alert alert-warning">
                                         <i class="fas fa-exclamation-triangle"></i>
@@ -629,7 +634,7 @@
         </div>
     </div>
     <!--end::Modal - Additional Notes-->
-    
+
     <!--begin::Modal - Edit Internal Note (Quill) -->
     <div class="modal fade" id="internalNoteEditModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered mw-900px">
@@ -694,7 +699,7 @@
         </div>
     </div>
     <!--end::Modal - Edit Internal Note (Quill) -->
-    
+
     <!-- Inline styles for internal note Select2 positioning and sizing -->
     <style>
         /* Allow the rendered content to define the height and wrap lines */
@@ -740,7 +745,7 @@
         const $templateContainer = $('#templateNoteContainer');
         const $customContainer = $('#customNoteContainer');
         const $notesTextarea = $('#internalNoteField');
-        
+
         if ($(this).is(':checked')) {
             // Show template select, hide custom notes
             $templateContainer.removeClass('d-none');
@@ -751,7 +756,7 @@
             $notesTextarea.removeClass('d-none');
         }
     });
-    
+
     // Initialize the toggle state on page load
     $(document).ready(function() {
         const $toggle = $('#toggleInternalNote');
@@ -762,7 +767,7 @@
     });
         (function(){
             const isRTL = "{{ app()->getLocale() }}" === "ar";
-            
+
             // Initialize Select2 for all js-select2 elements
             $('.js-select2').each(function(){
                 $(this).select2({
@@ -784,7 +789,7 @@
                     $('#expired_price_offer,#delayed_reson').addClass('d-none');
                 }
             });
-            let first = false ; 
+            let first = false ;
             // Price recalculation
             function recalcPrice() {
                 console.log(first);
@@ -800,13 +805,13 @@
                     console.log(total);
                     first = false ;
             }
-            
+
             // Recalculate only on user-initiated changes
             $('#service_id').on('change', function(e){
                 // if (!e.originalEvent) return;
                 recalcPrice();
             });
-            
+
             // Retrieve Registration Form functionality
             $('#btnRetrieveRf').on('click', ()=>{
                 const el = document.getElementById('retrieveRfModal');
@@ -826,7 +831,7 @@
                     allowClear: true,
                     minimumInputLength: 1,
                     ajax: {
-                        url: @json(route('orders.registeration-forms.search')),
+                        url: @json(route('bookings.registeration-forms.search')),
                         dataType: 'json',
                         delay: 250,
                         data: params => ({ q: params.term || '' }),
@@ -847,7 +852,7 @@
                         : alert(@json(__('dashboard.select_required')));
                 }
 
-                const ask = () => $.get(@json(route('orders.registeration-forms.fetch', ['id' => '___ID___'])).replace('___ID___', id))
+                const ask = () => $.get(@json(route('bookings.registeration-forms.fetch', ['id' => '___ID___'])).replace('___ID___', id))
                     .done(fillFormFromPayload)
                     .fail((xhr)=>{
                         window.Swal
@@ -1340,55 +1345,55 @@
             let currentNoteContent = '';
             let currentNoteDirection = 'ltr';
             const isEditingOrder = "{{ isset($order) && $order->exists }}" === "1";
-            
+
             // Initialize internal note system
             function initializeInternalNoteSystem() {
                 const $select = $('#internalNoteSelect');
                 const $hiddenNoteField = $('#internalNoteField');
                 const $noteIdField = $('#internal_note_id');
-                
+
                 // Initialize Select2
                 initializeInternalNoteSelect2($select);
-                
+
                 // Initialize Quill editor when modal opens
                 initializeQuillEditor();
-                
+
                 // Set initial values if editing an order
                 if (isEditingOrder) {
                     loadExistingOrderNote();
                 }
-                
+
                 // Bind event handlers
                 bindInternalNoteEventHandlers();
             }
-            
+
             // Initialize Select2 with custom templates for internal notes
             function initializeInternalNoteSelect2($select) {
                 if ($select.data('select2')) {
                     $select.select2('destroy');
                 }
-                
+
                 $select.select2({
                     width: '100%',
                     placeholder: "{{ __('dashboard.choose') }}",
                     allowClear: true,
                     dir: isRTL ? 'rtl' : 'ltr',
-                    
+
                     // Template for dropdown items
                     templateResult: function(state) {
                         if (!state.id) return state.text;
                         return $('<span>').text(state.text);
                     },
-                    
+
                     // Template for selected item (with edit/delete buttons)
                     templateSelection: function(state) {
                         if (!state.id) {
                             return $('<span>').text(state.text || "{{ __('dashboard.choose') }}");
                         }
-                        
+
                         const $element = $(state.element);
                         const name = $element.data('name') || state.text;
-                        
+
                         const $badge = $('<span class="d-inline-flex align-items-center gap-2">');
                         $badge.html(`
                             <span class="badge bg-secondary text-dark px-2 py-1 d-inline-flex align-items-center gap-2">
@@ -1403,23 +1408,23 @@
                                 </span>
                             </span>
                         `);
-                        
+
                         return $badge;
                     },
-                    
+
                     escapeMarkup: function(markup) {
                         return markup;
                     }
                 });
             }
-            
+
             // Initialize Quill editor
             function initializeQuillEditor() {
                 const modalEl = document.getElementById('internalNoteEditModal');
                 if (!modalEl) return;
-                
+
                 const modal = new bootstrap.Modal(modalEl);
-                
+
                 modalEl.addEventListener('shown.bs.modal', function() {
                     if (!internalNoteQuill) {
                         const quillEl = document.getElementById('internalNoteQuill');
@@ -1432,7 +1437,7 @@
                                 placeholder: "{{ __('dashboard.enter_note_content') }}",
                                 bounds: document.body
                             });
-                            
+
                             loadContentIntoQuill();
                         }
                     } else {
@@ -1440,73 +1445,73 @@
                     }
                 });
             }
-            
+
             // Load content into Quill editor
             function loadContentIntoQuill() {
                 if (!internalNoteQuill) return;
-                
+
                 const editorEl = internalNoteQuill.root;
-                
+
                 if (currentNoteContent) {
                     internalNoteQuill.clipboard.dangerouslyPasteHTML(currentNoteContent);
                 } else {
                     internalNoteQuill.setText('');
                 }
-                
+
                 editorEl.style.direction = currentNoteDirection;
                 $('#toggleDirection').toggleClass('active', currentNoteDirection === 'rtl');
             }
-            
+
             // Load existing order note if editing
             function loadExistingOrderNote() {
                 @if(isset($order) && $order->exists && !empty($order->notes))
                     currentNoteContent = `{!! addslashes($order->notes) !!}`;
                     currentNoteDirection = "{{ $order->internal_note_direction ?? 'ltr' }}";
-                    
+
                     $('#internalNoteField').val(currentNoteContent);
-                    
+
                     @if(isset($order->internal_note_id))
                         $('#internalNoteSelect').val("{{ $order->internal_note_id }}").trigger('change');
                     @endif
                 @endif
             }
-            
+
             // Bind all internal note event handlers
             function bindInternalNoteEventHandlers() {
                 const $select = $('#internalNoteSelect');
-                
+
                 // Handle selection change
                 $select.on('change', handleNoteSelectionChange);
-                
+
                 // Function to handle edit/remove actions without opening dropdown
                 function handleActionButtonClick(e, isRemove = false) {
                     // Prevent default and stop propagation
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
-                    
+
                     // Get the select2 instance
                     const $select = $('#internalNoteSelect');
                     const select2 = $select.data('select2');
-                    
+
                     // If select2 is open, close it first
                     if (select2 && select2.isOpen()) {
                         $select.select2('close');
                     }
-                    
+
                     // Prevent the dropdown from opening
                     const preventOpen = function(e) {
                         e.preventDefault();
                         $select.off('select2:opening', preventOpen);
                     };
-                    
+
                     $select.on('select2:opening', preventOpen);
-                    
+
                     // Handle the action after a small delay
                     setTimeout(() => {
                         // Remove the event handler
                         $select.off('select2:opening', preventOpen);
-                        
+
                         if (isRemove) {
                             // Handle remove action
                             if (confirm("{{ __('dashboard.confirm_remove_note') }}")) {
@@ -1515,7 +1520,7 @@
                                 currentNoteDirection = 'ltr';
                                 $('#internal_note_id').val('');
                                 $('#internalNoteField').val('');
-                                
+
                                 if (internalNoteQuill) {
                                     internalNoteQuill.setText('');
                                 }
@@ -1529,37 +1534,37 @@
                             }
                         }
                     }, 10);
-                    
+
                     return false;
                 }
-                
+
                 // Edit button handler
                 $(document).on('mousedown', '.btn-edit-internal', function(e) {
                     return handleActionButtonClick(e, false);
                 });
-                
+
                 // Remove button handler
                 $(document).on('mousedown', '.btn-remove-internal', function(e) {
                     return handleActionButtonClick(e, true);
                 });
-                
+
                 // Handle direction toggle
                 $(document).on('click', '#toggleDirection', handleDirectionToggle);
-                
+
                 // Handle update button in modal
                 $('#updateInternalNoteBtn').on('click', handleUpdateNote);
-                
+
                 // Handler for edit/remove buttons
                 $(document).on('mousedown', '.btn-edit-internal, .btn-remove-internal', function(e) {
                     // Prevent default and stop propagation
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
-                    
+
                     // Get the action type (edit or remove)
                     const isRemove = $(this).hasClass('btn-remove-internal');
                     const $select = $('#internalNoteSelect');
-                    
+
                     // Handle the action
                     if (isRemove) {
                         if (confirm("{{ __('dashboard.confirm_remove_note') }}")) {
@@ -1568,7 +1573,7 @@
                             currentNoteDirection = 'ltr';
                             $('#internal_note_id').val('');
                             $('#internalNoteField').val('');
-                            
+
                             if (internalNoteQuill) {
                                 internalNoteQuill.setText('');
                             }
@@ -1580,10 +1585,10 @@
                             modal.show();
                         }
                     }
-                    
+
                     return false;
                 });
-                
+
                 // Prevent Select2 from opening when clicking on the badge
                 $(document).on('select2:opening', '#internalNoteSelect', function(e) {
                     const target = e.originalEvent && e.originalEvent.target;
@@ -1593,21 +1598,21 @@
                     }
                 });
             }
-            
+
             // Handle note selection change
             function handleNoteSelectionChange() {
                 const $select = $('#internalNoteSelect');
                 const noteId = $select.val();
-                
+
                 $('#internal_note_id').val(noteId || '');
-                
+
                 if (noteId) {
                     const $option = $select.find('option:selected');
-                    
+
                     if (!isEditingOrder || !currentNoteContent) {
                         currentNoteContent = $option.data('content') || '';
                         currentNoteDirection = $option.data('direction') || 'ltr';
-                        
+
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = currentNoteContent;
                         const plainText = tempDiv.textContent || tempDiv.innerText || '';
@@ -1619,43 +1624,43 @@
                     $('#internalNoteField').val('');
                 }
             }
-            
+
             // Handle direction toggle
             function handleDirectionToggle() {
                 if (!internalNoteQuill) return;
-                
+
                 const editorEl = internalNoteQuill.root;
                 currentNoteDirection = (currentNoteDirection === 'ltr') ? 'rtl' : 'ltr';
                 editorEl.style.direction = currentNoteDirection;
-                
+
                 $(this).toggleClass('active', currentNoteDirection === 'rtl');
             }
-            
+
             // Handle update note from modal
             function handleUpdateNote() {
                 if (!internalNoteQuill) return;
-                
+
                 currentNoteContent = internalNoteQuill.root.innerHTML;
                 const plainText = internalNoteQuill.getText().trim();
-                
+
                 $('#internalNoteField').val(plainText);
-                
+
                 if (!$('#internal_note_html_content').length) {
                     $('<input type="hidden" id="internal_note_html_content" name="internal_note_content">').appendTo('form');
                 }
                 $('#internal_note_html_content').val(currentNoteContent);
-                
+
                 if (!$('#internal_note_direction').length) {
                     $('<input type="hidden" id="internal_note_direction" name="internal_note_direction">').appendTo('form');
                 }
                 $('#internal_note_direction').val(currentNoteDirection);
-                
+
                 const modalEl = document.getElementById('internalNoteEditModal');
                 const modal = bootstrap.Modal.getInstance(modalEl);
                 if (modal) {
                     modal.hide();
                 }
-                
+
                 if (window.Swal) {
                     Swal.fire({
                         icon: 'success',
@@ -1667,7 +1672,7 @@
                     });
                 }
             }
-            
+
             // Helper function to escape HTML
             function escapeHtml(text) {
                 const map = {
@@ -1679,7 +1684,7 @@
                 };
                 return text.replace(/[&<>"']/g, m => map[m]);
             }
-            
+
             // Initialize internal note system when ready
             $(document).ready(function() {
                 // Initialize internal note system only if the element exists

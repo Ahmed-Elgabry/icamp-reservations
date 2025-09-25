@@ -8,9 +8,11 @@
                 <h3>@lang('dashboard.meeting_locations')</h3>
             </div>
             <div class="card-toolbar">
+                @can('meeting-locations.create')
                 <a href="{{ route('meeting-locations.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>@lang('dashboard.create_location')
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-body pt-0">
@@ -38,15 +40,19 @@
                                 {{--                            <a href="{{ route('meeting-locations.show', $location) }}" class="btn btn-sm btn-info">--}}
                                 {{--                                <i class="fas fa-eye me-1"></i>@lang('dashboard.view')--}}
                                 {{--                            </a>--}}
+                                @can('meeting-locations.edit')
                                 <a href="{{ route('meeting-locations.edit', $location) }}" class="btn btn-sm btn-warning">
                                     <i class="fas fa-edit me-1"></i>@lang('dashboard.edit')
                                 </a>
+                                @endcan
+                                @can('meeting-locations.destroy')
                                 <form action="{{ route('meeting-locations.destroy', $location) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                         <i class="fas fa-trash me-1"></i>@lang('dashboard.delete')
                                     </button>
                                 </form>
+                                @endcan
                             </td>
                         </tr>
                     @endforeach

@@ -44,7 +44,7 @@
         <!--begin::Container-->
         <div id="kt_content_container" class="container-xxl">
 
-            
+
             <div class="row">
                 <!-- Customers Count -->
                 @can('bookings.index')
@@ -59,7 +59,7 @@
                     </a>
                 </div>
                 @endcan
-                
+
                 @can('bookings.index')
                     <!-- Total Orders Card -->
                     <div class="col-md-4 mb-4">
@@ -90,7 +90,7 @@
                     @endforeach
                 @endcan
             </div>
-       
+
              <div class="row mt-10">
 
 
@@ -213,6 +213,9 @@
                                                 $createdAt = \Carbon\Carbon::parse($payment->created_at);
                                                 $date = $createdAt->format('Y-m-d');
                                                 $time = $createdAt->format('h:i A');
+                                                $link = '' ;
+                                                $source = '' ;
+                                                $paymentMethod = '' ;           
                                                 if ($payment->payment) {
                                                     $source = $payment->payment->statement;
                                                     $paymentMethod = $payment->payment->payment_method;
@@ -220,12 +223,12 @@
                                                 } elseif ($payment->orderAddon) {
                                                     $source = $payment->orderAddon->addon->name;
                                                     $paymentMethod = $payment->orderAddon->payment_method;
-                                                    $link = route('orders.addons', $payment->order->id);
+                                                    $link = route('bookings.addons', $payment->order->id);
                                                 } elseif ($payment->orderItem) {
                                                     $source = $payment->orderItem->stock->name;
                                                     $paymentMethod = $payment->orderItem->payment_method;
                                                     $link = route('warehouse_sales.show', $payment->order->id);
-                                                } 
+                                                }
                                             @endphp
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
@@ -454,13 +457,13 @@
                                                     <span class="text-dark fw-bold">{{ __("dashboard.".$expense->source ?? '') }}</span>
                                                     <!-- check if translation available -->
                                                     @php
-                                                        $statement = "dashboard.".$expense->expense->statement != __('dashboard.'.$expense->expense->statement) ? __('dashboard.'.$expense->expense->statement) : $expense->expense->statement;
+                                                        $statement = "dashboard.".$expense->expense?->statement != __('dashboard.'.$expense->expense?->statement) ? __('dashboard.'.$expense->expense?->statement) : $expense->expense?->statement;
                                                     @endphp
                                                     <span class="text-muted d-block">{{ $statement  }}</span>
                                                 </td>
                                                 <td>
                                                     <span class="badge badge-light-primary">
-                                                        {{ ucfirst(__('dashboard.' . $expense->expense->payment_method)) ?? "" }}
+                                                        {{ ucfirst(__('dashboard.' . $expense->expense?->payment_method)) ?? "" }}
                                                     </span>
                                                 </td>
                                                 <td>

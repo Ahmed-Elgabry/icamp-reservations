@@ -136,7 +136,7 @@ class OrderController extends Controller
                 }
                 $insuranceAmounts = $remainingAmount;
                 break;
-                
+
             case 'confiscated_full':
                 foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
                     $insurance->update([
@@ -151,11 +151,11 @@ class OrderController extends Controller
                 }
                 $insuranceAmounts = 0; // No insurance remaining after full confiscation
                 break;
-                
+
             default:
                 $insuranceAmounts = $originalInsuranceAmount;
         }
-        
+
         $order->update([
             'insurance_status' => $insuranceStatus,
             'confiscation_description' => $confiscationDescription,
@@ -198,7 +198,7 @@ class OrderController extends Controller
         ]);
         return redirect()->back()->withErrors(['insurance_amount' => 'لا يوجد تأمين معتمد']);
         }
-        
+
         if (!$order->insurance_approved) {
             return redirect()->back();
         }
@@ -286,7 +286,7 @@ class OrderController extends Controller
         }
 
         $order = Order::create($validatedData);
-        
+
         // Create or update the internal note if one was selected
         if (!empty($validatedData['internal_note_id'])) {
             $internalNote = InternalNote::find($validatedData['internal_note_id']);
@@ -353,19 +353,19 @@ class OrderController extends Controller
     {
         $order = $this->orderRepository->findOne($id);
         $this->authorize('update', $order);
-        
+
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
         $addonsPrice = OrderAddon::where('order_id', $order->id)->sum('price');
         $internalNotes = InternalNote::orderBy('created_at', 'desc')->get();
-        
+
         // Get the order's internal note if it exists
         $orderInternalNote = OrderInternalNote::with('internalNote')
             ->where('order_id', $order->id)
             ->first();
-            
+
         $selectedInternalNote = $orderInternalNote ? $orderInternalNote->internal_note_id : null;
-        
+
         // If we have an internal note, use its content, otherwise use the order notes
         $notes = $order->notes;
         if ($orderInternalNote && $orderInternalNote->content) {
@@ -382,10 +382,10 @@ class OrderController extends Controller
             'receipt' => $order->receipt,
             'internal_note_content' => $notes
         ];
-        
+
         // Pass the notes to the order object so they'll be displayed in the form
         $order->notes = $notes;
-        
+
         return view('dashboard.orders.create', [
             'order' => $order,
             'customers' => $customers,
@@ -490,14 +490,14 @@ class OrderController extends Controller
                 // Remove the internal note if none is selected
                 OrderInternalNote::where('order_id', $order->id)->delete();
             }
-            
+
             $order->save();
-            
+
             // Send WhatsApp reservation data message if status changed to approved
             if ($request->status === 'approved' && $order->wasChanged('status')) {
                 $this->sendReservationDataWhatsApp($order);
             }
-            
+
             \DB::commit();
 
             return response()->json(['success' => true, 'message' => 'Order updated successfully']);
@@ -514,12 +514,12 @@ class OrderController extends Controller
         $order = $this->orderRepository->findOne($id);
         $this->authorize('delete', $order);
         $this->orderRepository->forceDelete($id);
-        
+
         // Check if redirect_back parameter is present
         if ($request->has('redirect_back')) {
             return redirect($request->redirect_back)->with('success', __('dashboard.deleted_successfully'));
         }
-        
+
         return response()->json();
     }
 
@@ -631,7 +631,7 @@ class OrderController extends Controller
                     'verified' => 0, // Reset verified status on update
                 ]);
             }
-        
+
         return back()->with('success', __('dashboard.success'));
     }
 
@@ -655,7 +655,7 @@ class OrderController extends Controller
         }
         // Calculate the price difference
         $priceDifference = $existingAddon->price;
-        
+
 
         // Delete the pivot record
         DB::table('order_addon')->where('id', $pivotId)->delete();
@@ -779,7 +779,7 @@ class OrderController extends Controller
             'upcomingOrders' => collect(),
             'selectedFrom' => $today,
             'selectedTo' => null,
-            'formAction' => route('reservations.board.today'),
+            'formAction' => route('bookings.reservations.board.today'),
         ]);
     }
 
@@ -807,7 +807,7 @@ class OrderController extends Controller
             'upcomingOrders' => $upcomingOrders,
             'selectedFrom' => $dateFrom,
             'selectedTo' => $dateTo,
-            'formAction' => route('reservations.board.upcoming'),
+            'formAction' => route('bookings.reservations.board.upcoming'),
         ]);
     }
 
@@ -944,7 +944,7 @@ class OrderController extends Controller
                 return [
                     'content' => $notice->notice,
                     'created_at' => $notice->created_at->format('Y-m-d H:i'),
-                    'created_by' => $notice->creator->name  
+                    'created_by' => $notice->creator->name
                 ];
             })
         ]);
@@ -968,10 +968,10 @@ class OrderController extends Controller
                 $item = StockAdjustment::findOrFail($id);
 
             }elseif ($type == 'insurance') {
-                    $item = Order::findOrFail($id);                    
-                    event(new \App\Events\VerificationStatusChanged('insurance', $item, $item->insurance_approved));                    
+                    $item = Order::findOrFail($id);
+                    event(new \App\Events\VerificationStatusChanged('insurance', $item, $item->insurance_approved));
                     return redirect()->back()->with('success', __('dashboard.success'));
-                    
+
             }
             elseif ($type == 'expense') {
                 $item = Expense::findOrFail($id);
@@ -999,7 +999,7 @@ class OrderController extends Controller
                 'warehouse_sales' => 'warehouse_sales',
                 default => $type,
             }, $item, $newVerifiedStatus));
-            
+
             return redirect()->back()->with('success', __('dashboard.success'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -1343,7 +1343,7 @@ class OrderController extends Controller
 
         $order = Order::with(['customer', 'addons', 'payments', 'items.stock'])->findOrFail($id);
         $whatsAppService = new WhatsAppService();
-        
+
         if (!$order->customer || !$order->customer->phone) {
             return response()->json(['success' => false, 'message' => 'لا يوجد رقم هاتف للعميل'], 400);
         }
@@ -1359,7 +1359,7 @@ class OrderController extends Controller
             foreach ($request->templates as $templateType) {
                 try {
                     $template = WhatsappMessageTemplate::getByType($templateType);
-                    
+
                     if (!$template) {
                         $errors[] = "Template not found for type: {$templateType}";
                         continue;
@@ -1370,7 +1370,7 @@ class OrderController extends Controller
                         // Send evaluation with survey link (public route that doesn't require auth)
                         $surveyUrl = route('surveys.public', ['order' => $order->id]);
                         $message = $template->getBilingualMessage($order->customer->name, $surveyUrl, $serviceSiteData);
-                        
+
                         // Log the generated URL and message for debugging
                         Log::info('Evaluation message prepared', [
                             'order_id' => $order->id,
@@ -1378,13 +1378,13 @@ class OrderController extends Controller
                             'customer_name' => $order->customer->name,
                             'message_preview' => substr($message, 0, 100) . '...'
                         ]);
-                        
+
                         // Validate that the message contains the evaluation link
                         if (empty($surveyUrl) || strpos($message, 'undefined') !== false) {
                             $errors[] = "Failed to generate evaluation link for order {$order->id}";
                             continue;
                         }
-                        
+
                         // Use link preview for evaluation messages
                         $success = $whatsAppService->sendLinkPreview(
                             $order->customer->phone,
@@ -1394,7 +1394,7 @@ class OrderController extends Controller
                     } else {
                         // Get bilingual message for non-evaluation templates
                         $message = $template->getBilingualMessage($order->customer->name, '', $serviceSiteData);
-                        
+
                         // Send message with PDF file
                         $pdfPath = $this->generateTempPdf($order, $templateType);
                         if ($pdfPath && file_exists($pdfPath)) {
@@ -1457,7 +1457,7 @@ class OrderController extends Controller
                             if (file_exists($pdfPath)) {
                                 unlink($pdfPath);
                             }
-                            
+
                             if ($success) {
                                 $messagesCount++;
                             } else {
@@ -1472,20 +1472,20 @@ class OrderController extends Controller
         }
 
         if ($messagesCount > 0) {
-            $message = $messagesCount === 1 
+            $message = $messagesCount === 1
                 ? 'تم إرسال رسالة واتساب واحدة بنجاح'
                 : "تم إرسال {$messagesCount} رسائل واتساب بنجاح";
-                
+
             if (!empty($errors)) {
                 $message .= ' مع بعض الأخطاء: ' . implode(', ', $errors);
             }
-            
+
             return response()->json(['success' => true, 'message' => $message]);
         } else {
-            $errorMessage = !empty($errors) 
+            $errorMessage = !empty($errors)
                 ? 'فشل في إرسال رسائل الواتساب: ' . implode(', ', $errors)
                 : 'لم يتم إرسال أي رسائل واتساب';
-                
+
             return response()->json(['success' => false, 'message' => $errorMessage], 500);
         }
     }
@@ -1613,23 +1613,23 @@ class OrderController extends Controller
 
             // Get service site data for placeholders
             $serviceSiteData = ServiceSiteAndCustomerService::getLatestForWhatsApp();
-            
+
             // Get bilingual message
             $message = $template->getBilingualMessage($order->customer->name, '', $serviceSiteData);
 
             // Generate PDF
             $pdfPath = $this->generateTempPdf($order, 'reservation_data');
-            
+
             // Send WhatsApp message
             $whatsAppService = new WhatsAppService();
-            
+
             if ($pdfPath && file_exists($pdfPath)) {
                 $success = $whatsAppService->sendFile(
                     $order->customer->phone,
                     $pdfPath,
                     $message
                 );
-                
+
                 // Clean up temp file
                 if (file_exists($pdfPath)) {
                     unlink($pdfPath);

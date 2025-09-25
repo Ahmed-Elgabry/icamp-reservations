@@ -10,7 +10,7 @@
             </div>
         </div>
 
-        <form action="{{ route('dashboard.whatsapp-templates.store') }}" method="POST">
+        <form action="{{ route('whatsapp-templates.store') }}" method="POST">
             @csrf
             <div class="card-body">
 
@@ -18,11 +18,11 @@
                     <div class="col-md-6">
                         <div class="fv-row mb-7">
                             <label class="required fw-semibold fs-6 mb-2">@lang('dashboard.template_name')</label>
-                            <input type="text" name="name" class="form-control form-control-solid mb-3 mb-lg-0" 
+                            <input type="text" name="name" class="form-control form-control-solid mb-3 mb-lg-0"
                                    placeholder="@lang('dashboard.enter_template_name')" value="{{ old('name') }}" required />
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <div class="fv-row mb-7">
                             <label class="required fw-semibold fs-6 mb-2">@lang('dashboard.template_type')</label>
@@ -40,7 +40,7 @@
 
                 <div class="fv-row mb-7">
                     <label class="fw-semibold fs-6 mb-2">@lang('dashboard.description')</label>
-                    <textarea name="description" class="form-control form-control-solid" rows="3" 
+                    <textarea name="description" class="form-control form-control-solid" rows="3"
                               placeholder="@lang('dashboard.enter_description')">{{ old('description') }}</textarea>
                 </div>
 
@@ -51,7 +51,7 @@
                             <textarea id="message_ar" name="message_ar" class="form-control form-control-solid" style="min-height: 200px;">{{ old('message_ar') }}</textarea>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <div class="fv-row mb-7">
                             <label class="required fw-semibold fs-6 mb-2">@lang('dashboard.english_message')</label>
@@ -62,7 +62,7 @@
 
                 <div class="fv-row mb-7">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active" 
+                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
                                style="width: 3rem !important; height: 1.5rem !important;"
                                {{ old('is_active', true) ? 'checked' : '' }}>
                         <label class="form-check-label fw-semibold fs-6" for="is_active">
@@ -85,7 +85,7 @@
 
             <div class="card-footer">
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('dashboard.whatsapp-templates.index') }}" class="btn btn-light me-3">
+                    <a href="{{ route('whatsapp-templates.index') }}" class="btn btn-light me-3">
                         @lang('dashboard.cancel')
                     </a>
                     <button type="submit" class="btn btn-primary">

@@ -4,7 +4,9 @@
 <div class="container-xxl">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h3 class="fw-bolder m-0">@lang('dashboard.pages')</h3>
+        @can('pages.create')
         <a href="{{ route('pages.create') }}" class="btn btn-primary">@lang('dashboard.create_item')</a>
+        @endcan
     </div>
 
     <div class="card">
@@ -37,8 +39,12 @@
                                     </span>
                                 </td>
                                 <td>
+                                    @can('pages.edit')
                                     <a href="{{ route('pages.edit', $page) }}" class="btn btn-sm btn-light-primary">@lang('dashboard.edit')</a>
+                                    @endcan
+                                    @can('pages.destroy')
                                     <button type="button" class="btn btn-sm btn-light-danger" data-kt-ecommerce-category-filter="delete_row" data-id="{{ $page->id }}" data-url="{{ route('pages.destroy', $page) }}">@lang('dashboard.delete')</button>
+                                    @endcan
                                 </td>
                             </tr>
                             @endforeach
@@ -49,7 +55,7 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div> 
+            </div>
         </div>
     </div>
 </div>

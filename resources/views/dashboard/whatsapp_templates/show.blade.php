@@ -9,10 +9,12 @@
                 <h3 class="fw-bold">{{ $template->name }}</h3>
             </div>
             <div class="card-toolbar">
-                <a href="{{ route('dashboard.whatsapp-templates.edit', $template->id) }}" class="btn btn-sm btn-primary">
+                    @can('whatsapp-templates.edit')
+                <a href="{{ route('whatsapp-templates.edit', $template->id) }}" class="btn btn-sm btn-primary">
                     <i class="fa-solid fa-pencil"></i>
                     @lang('dashboard.edit')
                 </a>
+                @endcan
             </div>
         </div>
 
@@ -67,7 +69,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6">
                     <div class="card card-bordered">
                         <div class="card-header">
@@ -101,7 +103,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6">
                     <div class="card card-bordered">
                         <div class="card-header">
@@ -121,21 +123,24 @@
 
         <div class="card-footer">
             <div class="d-flex justify-content-between">
-                <a href="{{ route('dashboard.whatsapp-templates.index') }}" class="btn btn-light">
+                <a href="{{ route('whatsapp-templates.index') }}" class="btn btn-light">
                     <i class="fa-solid fa-arrow-left"></i>
                     @lang('dashboard.back_to_list')
                 </a>
-                
+
                 <div>
-                    <a href="{{ route('dashboard.whatsapp-templates.edit', $template->id) }}" class="btn btn-primary me-2">
+                    @can('whatsapp-templates.edit')
+                    <a href="{{ route('whatsapp-templates.edit', $template->id) }}" class="btn btn-primary me-2">
                         <i class="fa-solid fa-pencil"></i>
                         @lang('dashboard.edit')
                     </a>
-                    
+                    @endcan
+                    @can('whatsapp-templates.destroy')
                     <button type="button" class="btn btn-danger" id="deleteTemplate" data-id="{{ $template->id }}">
                         <i class="fa-solid fa-trash"></i>
                         @lang('dashboard.delete')
                     </button>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -186,24 +191,24 @@ $(document).ready(function() {
 
     $('#confirmDelete').click(function() {
         const templateId = $('#deleteTemplate').data('id');
-        
+
         const form = $('<form>', {
             method: 'POST',
             action: `/dashboard/whatsapp-templates/${templateId}`
         });
-        
+
         form.append($('<input>', {
             type: 'hidden',
             name: '_token',
             value: '{{ csrf_token() }}'
         }));
-        
+
         form.append($('<input>', {
             type: 'hidden',
             name: '_method',
             value: 'DELETE'
         }));
-        
+
         $('body').append(form);
         form.submit();
     });

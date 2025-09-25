@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <h1>{{ __('dashboard.internal_notes') }}</h1>
-
+@can('internal-notes.create')
     <div class="row mb-4">
         <div class="col-md-6">
             <form class="form store" id="internal-note-form" action="{{ isset($internalNote) ? route('internal-notes.update', $internalNote->id) : route('internal-notes.store') }}" method="POST" enctype="multipart/form-data" data-kt-redirect="{{ url()->current() }}">
@@ -23,11 +23,12 @@
                     <!-- Hidden textarea that will receive HTML from Quill on submit -->
                     <textarea name="note_content" id="note-content" class="d-none">{{ old('note_content', isset($internalNote) ? $internalNote->note_content : '') }}</textarea>
                 </div>
+
                 <button type="submit" class="btn btn-primary" id="kt_ecommerce_add_product_submit">{{ isset($internalNote) ? __('dashboard.update_item') : __('dashboard.create_item') }}</button>
             </form>
         </div>
     </div>
-
+@endcan
     <div class="row">
         <div class="col-md-12">
             <div class="table-responsive">
@@ -45,7 +46,11 @@
                                 <td class="note-name">{{ $note->note_name }}</td>
                                 <td class="note-content">{!! $note->note_content !!}</td>
                                 <td>
+                                    @can('internal-notes.edit')
+
                                     <a href="{{ route('internal-notes.edit', $note->id) }}" class="btn btn-sm btn-secondary">{{ __('dashboard.edit') }}</a>
+                                    @endcan
+                                    @can('internal-notes.destroy')
                                     <button
                                         type="button"
                                         class="btn btn-sm btn-danger"
@@ -53,6 +58,7 @@
                                         data-id="{{ $note->id }}"
                                         data-url="{{ route('internal-notes.destroy', $note->id) }}"
                                     >{{ __('dashboard.delete') }}</button>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

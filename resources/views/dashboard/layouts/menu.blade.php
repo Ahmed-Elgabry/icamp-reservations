@@ -89,7 +89,7 @@
 
                 </div>
 
-                
+
 
                 <!--end::Menu item-->
 
@@ -499,12 +499,12 @@
 
     @endcan
 
-    @can('admins.index')
+    @can('whatsapp-templates.index')
         <!--begin::Menu item-->
-        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['dashboard.whatsapp-templates.index', 'dashboard.whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['whatsapp-templates.index', 'whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}"
              data-kt-menu-trigger="click">
             <!--begin::Menu link-->
-            <a href="#" class="menu-link py-3 {{areActiveRoutes(['dashboard.whatsapp-templates.index', 'dashboard.whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}">
+            <a href="#" class="menu-link py-3 {{areActiveRoutes(['whatsapp-templates.index', 'whatsapp-templates.create', 'dashboard.whatsapp-templates.edit', 'dashboard.whatsapp-templates.show'])}}">
                 <span class="menu-icon">
                     <img src="{{ asset('images/whatsapp.png') }}" style="width:25px;height:25px">
                 </span>
@@ -517,7 +517,7 @@
             <div class="menu-sub menu-sub-accordion pt-3">
                 <!--begin::Menu item-->
                 <div class="menu-item">
-                    <a href="{{ route('dashboard.whatsapp-templates.index') }}" class="menu-link py-3  {{ isActiveRoute('dashboard.whatsapp-templates.index') }}">
+                    <a href="{{ route('whatsapp-templates.index') }}" class="menu-link py-3  {{ isActiveRoute('whatsapp-templates.index') }}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
@@ -526,10 +526,10 @@
                 </div>
                 <!--end::Menu item-->
 
-                @can('admins.create')
+                @can('whatsapp-templates.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
-                        <a href="{{route('dashboard.whatsapp-templates.create')}}" class="menu-link py-3 {{ isActiveRoute('dashboard.whatsapp-templates.create') }}">
+                        <a href="{{route('whatsapp-templates.create')}}" class="menu-link py-3 {{ isActiveRoute('whatsapp-templates.create') }}">
                             <span class="menu-bullet">
                                 <span class="bullet bullet-dot"></span>
                             </span>
@@ -544,7 +544,7 @@
         <!--end::Menu item-->
     @endcan
 
-    @can('admins.index')
+    @can('manual-whatsapp-sends.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['dashboard.manual-whatsapp-sends.index', 'dashboard.manual-whatsapp-sends.create', 'dashboard.manual-whatsapp-sends.show'])}}"
              data-kt-menu-trigger="click">
@@ -568,7 +568,7 @@
                 </div>
                 <!--end::Menu item-->
 
-                @can('admins.create')
+                @can('manual-whatsapp-sends.create')
                     <!--begin::Menu item-->
                     <div class="menu-item">
                         <a href="{{route('dashboard.manual-whatsapp-sends.create')}}" class="menu-link py-3 {{ isActiveRoute('dashboard.manual-whatsapp-sends.create') }}">
@@ -665,11 +665,11 @@
                     </div>
 
                 @endcan
-
+                @can('stocks.item-issue-and-return.create')
                 <!--end::Menu item-->
                     <div class="menu-item">
 
-                        <a href="{{route('item-issue-and-return-create')}}" class="menu-link py-3 {{ isActiveRoute('item-issue-and-return-create') }}">
+                        <a href="{{route('stocks.item-issue-and-return.create')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-issue-and-return.create') }}">
 
                             <span class="menu-bullet">
 
@@ -684,9 +684,11 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.item-issue.index')
                     <div class="menu-item">
 
-                        <a href="{{route('item-issue')}}" class="menu-link py-3 {{ isActiveRoute('item-issue') }}">
+                        <a href="{{route('stocks.item-issue.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-issue.index') }}">
 
                             <span class="menu-bullet">
 
@@ -699,9 +701,11 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.item-return.index')
                     <div class="menu-item">
 
-                        <a href="{{route('item-return')}}" class="menu-link py-3 {{ isActiveRoute('item-return') }}">
+                        <a href="{{route('stocks.item-return.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.item-return.index') }}">
 
                             <span class="menu-bullet">
 
@@ -716,9 +720,11 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.stockTaking.create')
                      <div class="menu-item">
 
-                        <a href="{{route('stockTaking.create')}}" class="menu-link py-3 {{ isActiveRoute('stockTaking.create') }}">
+                        <a href="{{route('stocks.stockTaking.create')}}" class="menu-link py-3 {{ isActiveRoute('stocks.stockTaking.create') }}">
 
                             <span class="menu-bullet">
 
@@ -733,9 +739,11 @@
                         </a>
 
                     </div>
+                    @endcan
+                @can('stocks.stockTaking.index')
                      <div class="menu-item">
 
-                        <a href="{{route('stockTaking.index')}}" class="menu-link py-3 {{ isActiveRoute('stockTaking.index') }}">
+                        <a href="{{route('stocks.stockTaking.index')}}" class="menu-link py-3 {{ isActiveRoute('stocks.stockTaking.index') }}">
 
                             <span class="menu-bullet">
 
@@ -750,6 +758,7 @@
                         </a>
 
                     </div>
+                    @endcan
             </div>
 
             <!--end::Menu sub-->
@@ -837,7 +846,7 @@
                 <!-- Orders -> Tasks -->
                 <div class="menu-item">
 
-                    <a href="{{ route('orders.tasks.index') }}" class="menu-link py-3 {{ request()->routeIs('orders.tasks.*') ? 'active' : '' }}">
+                    <a href="{{ route('bookings.tasks.index') }}" class="menu-link py-3 {{ request()->routeIs('bookings.tasks.*') ? 'active' : '' }}">
 
                         <span class="menu-bullet">
 
@@ -958,7 +967,7 @@
 
         <!--begin::Menu item-->
 
-        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['orders.index', 'orders.reports', 'payments.show', 'expenses.show', 'orders.orders-by-status', 'orders.create', 'orders.edit', 'orders.show' , 'orders.registeration-forms'])}}"
+        <div class="menu-item menu-sub-indention menu-accordion  {{areActiveRoutes(['orders.index', 'orders.reports', 'payments.show', 'expenses.show', 'orders.orders-by-status', 'orders.create', 'orders.edit', 'orders.show' , 'bookings.registeration-forms.index'])}}"
 
              data-kt-menu-trigger="click">
 
@@ -987,6 +996,7 @@
             <div class="menu-sub menu-sub-accordion pt-3">
 
                 <!--begin::Menu item-->
+                @can('bookings.index')
 
                 <div class="menu-item">
 
@@ -1005,12 +1015,13 @@
                     </a>
 
                 </div>
+                @endcan
 
- 
+                @can('bookings.registeration-forms.index')
 
                 <div class="menu-item">
 
-                    <a href="{{route('orders.registeration-forms')}}" class="menu-link py-3 {{isActiveRoute('orders.registeration-forms')}}">
+                    <a href="{{route('bookings.registeration-forms.index')}}" class="menu-link py-3 {{isActiveRoute('bookings.registeration-forms.index')}}">
 
                         <span class="menu-bullet">
 
@@ -1025,8 +1036,9 @@
                     </a>
 
                 </div>
+                @endcan
 
-                @can('orders.create')
+                @can('bookings.create')
 
                     <!--begin::Menu item-->
 
@@ -1073,6 +1085,7 @@
 
 
 
+            @can('bookings.pending')
 
                 <div class="menu-item">
 
@@ -1092,8 +1105,10 @@
 
                 </div>
 
+                @endcan
 
 
+            @can('bookings.approved')
                 <div class="menu-item">
 
                     <a href="{{ route('orders.index', ['status' => 'approved']) }}" title="@lang('dashboard.approved_desc')"
@@ -1111,7 +1126,9 @@
                     </a>
 
                 </div>
+            @endcan
 
+            @can('bookings.canceled')
                 <div class="menu-item">
 
                     <a href="{{ route('orders.index', ['status' => 'canceled']) }}" title="@lang('dashboard.canceled_desc')"
@@ -1129,7 +1146,8 @@
                     </a>
 
                 </div>
-
+@endcan
+            @can('bookings.postponed')
                 <div class="menu-item">
 
                     <a href="{{ route('orders.index', ['status' => 'delayed']) }}" title="@lang('dashboard.delayed_desc')"
@@ -1147,7 +1165,8 @@
                     </a>
 
                 </div>
-
+  @endcan
+            @can('bookings.completed')
                 <div class="menu-item">
 
                     <a href="{{ route('orders.index', ['status' => 'completed']) }}"
@@ -1167,15 +1186,18 @@
                     </a>
 
                 </div>
+                @endcan
+            @can('bookings.service-site-customer-service.create')
     		<div class="menu-item">
-                    <a href="{{ route('service_site_customer_service.create') }}" class="menu-link py-3 {{ isActiveRoute('service_site_customer_service.create') }}">
+                    <a href="{{ route('bookings.service_site_customer_service.create') }}" class="menu-link py-3 {{ isActiveRoute('bookings.service_site_customer_service.create') }}">
                     <span class="menu-bullet">
                         <span class="bullet bullet-dot"></span>
                     </span>
                     <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.service_site_customer_service')])</span>
                 </a>
             </div>
-            
+            @endcan
+            @can('internal-notes.create')
             <div class="menu-item">
                 <a href="{{ route('internal-notes.index') }}#internal-note-form" class="menu-link py-3">
                     <span class="menu-bullet">
@@ -1184,6 +1206,8 @@
                     <span class="menu-title">@lang('dashboard.create_title', ['page_title' => __('dashboard.internal_notes')])</span>
                 </a>
             </div>
+            @endcan
+            @can('bookings.internal-notes.index')
                 <div class="menu-item">
                     <a href="{{ route('internal-notes.index') }}" class="menu-link py-3 {{ isActiveRoute('internal-notes.index') }}">
                         <span class="menu-bullet">
@@ -1192,6 +1216,7 @@
                         <span class="menu-title">@lang('dashboard.internal_notes')</span>
                     </a>
                 </div>
+            @endcan
 
             </div>
 
@@ -1204,7 +1229,7 @@
     @endcan
 
 
-
+    @can('contact-guides.index')
     <!-- Contacts (Contact Guide) -->
     <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['contact-guides.index','contact-guides.create','contact-guides.edit'])}}" data-kt-menu-trigger="click">
 
@@ -1223,6 +1248,7 @@
                     <span class="menu-title">@lang('dashboard.all_title', ['page_title' => __('dashboard.contacts')])</span>
                 </a>
             </div>
+    @can('contact-guides.create')
 
             <div class="menu-item">
                 <a href="{{ route('contact-guides.create') }}" class="menu-link py-3 {{ isActiveRoute('contact-guides.create') }}">
@@ -1230,9 +1256,10 @@
                     <span class="menu-title">@lang('dashboard.add_title', ['page_title' => __('dashboard.contact')])</span>
                 </a>
             </div>
+            @endcan
         </div>
     </div>
-
+@endcan
 
     @if(Gate::allows('bank-accounts.index') || Gate::allows('expenses.index'))
 
@@ -1352,15 +1379,15 @@
 
                                 @endcan
 
-                                @can('payments.create')
+                                @can('bank-accounts.transfer')
 
                                     <!--begin::Menu item-->
 
                                     <div class="menu-item">
 
-                                        <a href="{{route('payments.transfer')}}"
+                                        <a href="{{route('bank-accounts.transfer')}}"
 
-                                            class="menu-link py-3 {{ isActiveRoute('payments.create') }}">
+                                            class="menu-link py-3 {{ isActiveRoute('bank-accounts.transfer') }}">
 
                                             <span class="menu-bullet">
 
@@ -1378,7 +1405,7 @@
 
                                 <!--end::Menu item-->
 
-                                @can('bank-accounts.index')
+                        @can('transactions.index')
 
                                     <!--begin::Menu item-->
 
@@ -1665,7 +1692,7 @@
                 <!--end::Menu item-->
 
 
-
+                @can('general_payments.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -1685,10 +1712,10 @@
                 </div>
 
                 <!--end::Menu item-->
+                @endcan
 
 
-
-                @can('payments.create')
+                @can('general_payments.create_add_funds')
 
                     <!--begin::Menu item-->
 
@@ -1829,6 +1856,7 @@
                 @endcan
 
 
+            @can('tasks.task-types.index')
 
                 <!-- Task Types -->
 
@@ -1849,6 +1877,7 @@
                 </div>
 
                 <!--end::Menu item-->
+            @endcan
 
 
 
@@ -2197,11 +2226,11 @@
             <!--end::Menu link-->
 
 
-
             <!--begin::Menu sub-->
 
             <div class="menu-sub menu-sub-accordion pt-3">
 
+                @can('meeting-locations.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -2219,9 +2248,10 @@
                     </a>
 
                 </div>
-
+                @endcan
                 <!--end::Menu item-->
 
+                @can('meetings.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -2241,7 +2271,7 @@
                 </div>
 
                 <!--end::Menu item-->
-
+                @endcan
 
 
 
@@ -2307,11 +2337,11 @@
             <!--end::Menu link-->
 
 
-
             <!--begin::Menu sub-->
 
             <div class="menu-sub menu-sub-accordion pt-3">
 
+                @can('violation-types.index')
                 <!--begin::Menu item-->
 
                 <div class="menu-item">
@@ -2331,8 +2361,10 @@
                 </div>
 
                 <!--end::Menu item-->
-
+                @endcan
                 <!--begin::Menu item-->
+
+                @can('violations.index')
 
                 <div class="menu-item">
 
@@ -2351,7 +2383,7 @@
                 </div>
 
                 <!--end::Menu item-->
-
+                @endcan
 
 
                 @can('violations.create')
@@ -2388,13 +2420,13 @@
 
     @endcan
 
-    @can('reprots')
+    @can('financial-reports.index')
 
         <div class="menu-item">
 
             <!--begin::Menu link-->
 
-            <a href="{{ route('reprots') }}" class="menu-link py-3 {{areActiveRoutes(['reprots'])}}">
+            <a href="{{ route('financial-reports.index') }}" class="menu-link py-3 {{areActiveRoutes(['reprots'])}}">
 
                 <span class="menu-icon">
 
@@ -2482,7 +2514,7 @@
 
     @endcan
 
-    <!-- @can('pages.index') -->
+    @can('pages.index')
         <!--begin::Menu item-->
         <div class="menu-item menu-sub-indention menu-accordion {{areActiveRoutes(['pages.index', 'pages.create', 'pages.edit'])}}"
              data-kt-menu-trigger="click">
@@ -2507,9 +2539,11 @@
                         <span class="menu-title">@lang('dashboard.all_pages')</span>
                     </a>
                 </div>
+@can('bookings.reservations.board.today')
+
                 <div class="menu-item">
 
-<a href="{{ route('reservations.board.today') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.today') }} {{ isActiveRoute('reservations.board') }}">
+<a href="{{ route('bookings.reservations.board.today') }}" class="menu-link py-3 {{ isActiveroute('bookings.reservations.board.today') }} {{ isActiveroute('bookings.reservations.board') }}">
 
     <span class="menu-bullet">
 
@@ -2522,10 +2556,13 @@
 </a>
 
 </div>
+@endcan
+@can('bookings.reservations.board.upcoming')
+
 
 <div class="menu-item">
 
-<a href="{{ route('reservations.board.upcoming') }}" class="menu-link py-3 {{ isActiveRoute('reservations.board.upcoming') }}">
+<a href="{{ route('bookings.reservations.board.upcoming') }}" class="menu-link py-3 {{ isActiveroute('bookings.reservations.board.upcoming') }}">
 
     <span class="menu-bullet">
 
@@ -2534,14 +2571,16 @@
     </span>
 
     <span class="menu-title">@lang('dashboard.orders') - @lang('dashboard.upcoming')</span>
-    
+
 </a>
 
 </div>
+@endcan
+@can('bookings.tasks.index')
 
 <div class="menu-item">
 
-<a href="{{ route('orders.tasks.index') }}" class="menu-link py-3 {{ request()->routeIs('orders.tasks.*') ? 'active' : '' }}">
+<a href="{{ route('bookings.tasks.index') }}" class="menu-link py-3 {{ request()->routeIs('bookings.tasks.*') ? 'active' : '' }}">
 
     <span class="menu-bullet">
 
@@ -2554,7 +2593,7 @@
 </a>
 
 </div>
-
+@endcan
 <!--end::Menu item-->
                 <!-- @can('pages.create') -->
                     <!--begin::Menu item-->
@@ -2572,9 +2611,9 @@
             <!--end::Menu sub-->
         </div>
         <!--end::Menu item-->
-    <!-- @endcan -->
+    @endcan
 
-  
+
 </div>
 
 @endauth

@@ -50,9 +50,11 @@
                         </div>
                         <!-- Submit Button -->
                         <div class="form-group">
+                            @can('terms-settings.update')
                             <button type="submit" class="btn btn-primary">
                                 {{  __('dashboard.update_terms_setting') }}
                             </button>
+                            @endcan
                         </div>
                     </div>
                 </form>

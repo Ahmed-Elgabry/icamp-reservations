@@ -12,6 +12,7 @@ use App\Models\BankAccount;
 use App\Models\GeneralPayment;
 use App\Models\Expense;
 use App\Models\Service;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -33,17 +34,17 @@ class HomeController extends Controller
     {
         // Get dashboard data from the service
         $dashboardData = $this->paymentSummaryService->getDashboardData();
-        
+
         // Get additional stats
         $totalCustomersCount = Customer::count();
         $totalOrdersCount = Order::count();
-        
+
         // Get orders count by status
         $ordersCountByStatus = Order::selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->get()
             ->pluck('count', 'status');
-            
+
         // Get upcoming reservations
         $upcomingReservations = Order::whereDate('date', '>=', now()->addDay()->startOfDay())
             ->with('customer')
@@ -71,7 +72,7 @@ class HomeController extends Controller
 
     public function reprots()
     {
- 
+
 
         $topServices = Service::whereHas('orders', function ($query) {
             $query->where('status', 'completed');

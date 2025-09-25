@@ -8,10 +8,10 @@
       <div class="card-header align-items-center py-5 gap-2 gap-md-5">
         <div class="card-title">
           <div class="ms-3 d-flex flex-wrap gap-2">
-            <a href="{{ route('orders.tasks.index', ['status' => 'all']) }}" class="btn btn-sm {{ $status === 'all' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.all')</a>
-            <a href="{{ route('orders.tasks.index', ['status' => 'in_progress']) }}" class="btn btn-sm {{ $status === 'in_progress' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.in_progress')</a>
-            <a href="{{ route('orders.tasks.index', ['status' => 'pending']) }}" class="btn btn-sm {{ $status === 'pending' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.pending')</a>
-            <a href="{{ route('orders.tasks.index', ['status' => 'failed']) }}" class="btn btn-sm {{ $status === 'failed' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.failed')</a>
+            <a href="{{ route('bookings.tasks.index', ['status' => 'all']) }}" class="btn btn-sm {{ $status === 'all' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.all')</a>
+            <a href="{{ route('bookings.tasks.index', ['status' => 'in_progress']) }}" class="btn btn-sm {{ $status === 'in_progress' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.in_progress')</a>
+            <a href="{{ route('bookings.tasks.index', ['status' => 'pending']) }}" class="btn btn-sm {{ $status === 'pending' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.pending')</a>
+            <a href="{{ route('bookings.tasks.index', ['status' => 'failed']) }}" class="btn btn-sm {{ $status === 'failed' ? 'btn-primary' : 'btn-light' }}">@lang('dashboard.failed')</a>
           </div>
         </div>
         <div class="card-toolbar">
@@ -20,25 +20,31 @@
             $selectedTo = request('to');
             $activeTab = 'tasks';
           @endphp
-          <form method="get" action="{{ route('orders.tasks.index') }}" class="d-flex align-items-center gap-2">
+          <form method="get" action="{{ route('bookings.tasks.index') }}" class="d-flex align-items-center gap-2">
             <label class="form-label m-0">@lang('dashboard.from')</label>
             <input type="date" name="from" value="{{ $selectedFrom ?? now()->toDateString() }}" class="form-control form-control-sm" onchange="this.form.submit()" />
             <label class="form-label m-0">@lang('dashboard.to')</label>
             <input type="date" name="to" value="{{ $selectedTo ?? '' }}" class="form-control form-control-sm" onchange="this.form.submit()" />
             @if(!empty($selectedFrom) || !empty($selectedTo))
-              <a href="{{ route('orders.tasks.index') }}" class="btn btn-sm btn-light">@lang('dashboard.clear')</a>
+              <a href="{{ route('bookings.tasks.index') }}" class="btn btn-sm btn-light">@lang('dashboard.clear')</a>
             @endif
           </form>
           <ul class="nav nav-tabs nav-line-tabs ms-4">
+            @can('bookings.reservations.board')
           <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'today' ? 'active' : '' }}" href="{{ route('reservations.board', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.today_reservations')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'today' ? 'active' : '' }}" href="{{ route('bookings.reservations.board', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.today_reservations')</a>
             </li>
+            @endcan
+            @can('bookings.reservations.board.upcoming')
             <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? 'active' : '' }}" href="{{ route('reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming_reservations')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'upcoming' ? 'active' : '' }}" href="{{ route('bookings.reservations.board.upcoming', ['from' => $selectedFrom ?? null, 'to' => $selectedTo ?? null]) }}">@lang('dashboard.upcoming_reservations')</a>
             </li>
+            @endcan
+            @can('bookings.tasks.index')
             <li class="nav-item">
-              <a class="nav-link {{ ($activeTab ?? 'today') === 'tasks' ? 'active' : '' }}" href="{{ route('orders.tasks.index') }}">@lang('dashboard.tasks')</a>
+              <a class="nav-link {{ ($activeTab ?? 'today') === 'tasks' ? 'active' : '' }}" href="{{ route('bookings.tasks.index') }}">@lang('dashboard.tasks')</a>
             </li>
+            @endcan
           </ul>
         </div>
       </div>

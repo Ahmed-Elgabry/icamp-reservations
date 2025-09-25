@@ -11,10 +11,12 @@
                 </div>
             </div>
             <div class="card-toolbar">
+                @can('equipment.export')
                 <a href="{{ route('equipment-directories.export') }}"
                    class="btn btn-success me-2" title="@lang('dashboard.export_pdf')">
                     <i class="fas fa-file-pdf"></i> @lang('dashboard.export_pdf')
                 </a>
+                @endcan
                 @if(Gate::allows('equipment.create'))
                 <a href="{{ route('equipment-directories.create') }}" class="btn btn-primary">
                     @lang('dashboard.create_directory')

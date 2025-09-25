@@ -8,9 +8,11 @@
                 <h3>@lang('dashboard.violation_types')</h3>
             </div>
             <div class="card-toolbar">
+                @can('violation-types.create')
                 <a href="{{ route('violation-types.create') }}" class="btn btn-primary">
                     @lang('dashboard.add_new')
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-body pt-0 table-responsive">
@@ -41,15 +43,19 @@
 {{--                            <a href="{{ route('violation-types.show', $type) }}" class="btn btn-sm btn-info">--}}
 {{--                                @lang('dashboard.view')--}}
 {{--                            </a>--}}
+                            @can('violation-types.edit')
                             <a href="{{ route('violation-types.edit', $type) }}" class="btn btn-sm btn-warning">
                                 @lang('dashboard.edit')
                             </a>
+                            @endcan
+                            @can('violation-types.destroy')
                             <form action="{{ route('violation-types.destroy', $type) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('@lang('dashboard.confirm_delete')')">
                                     @lang('dashboard.delete')
                                 </button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

@@ -1181,7 +1181,7 @@ return [
     'create_survey' => 'Create Survey',
     'survey_builder' => 'Survey Builder',
     'survey_results' => 'Results',
-    
+
     // Survey Builder Translation Keys
     'add_question' => 'Add Question',
     'text_field' => 'Text',
@@ -1230,7 +1230,7 @@ return [
     'enter_help_text_en' => 'Additional help text in English',
     'option_label_ar' => 'Option label in Arabic',
     'option_label_en' => 'Option label in English',
-    
+
     // Default question labels
     'default_text_question' => 'Text Question',
     'default_textarea_question' => 'Textarea Question',
@@ -1348,7 +1348,7 @@ return [
     'save_changes' => 'Save Changes',
     'settings_updated_successfully' => 'Settings updated successfully.',
     'none' => 'None',
-    
+
     // Missing keys from Arabic translation
     'mark_all_not_completed' => 'Mark All Incomplete',
     'Duration of hours' => 'Duration in Hours',
@@ -1442,8 +1442,8 @@ return [
     'insufficient_stock' => 'Insufficient Stock',
     'item_added_successfully' => 'Item Added Successfully',
     'add' => 'Add',
-   
-   
+
+
     'sales' => 'Sales',
     'profits' => 'Profits',
     'monthly_payments' => 'Monthly Payments',
@@ -1519,7 +1519,7 @@ return [
     'mark_all_completed' => 'Mark All Completed',
     'logout' => 'Sign Out',
     "camp_price" => 'Camp Price',
-    "available" => 'Available',       
+    "available" => 'Available',
     'This customer has already been served the selected services on this date' => 'This customer has already been served the selected services on this date',
     'has already been served the selected services on this date' => 'Services already booked on the same date',
     'hours' => 'Number of Hours',
@@ -1678,7 +1678,7 @@ return [
     'attached' => 'Attached',
     'select_order' => 'Select Order',
     'AED' => 'AED',
-    
+
     // Signature page translations
     'signature_title' => 'Reservation Signature #:id',
     'management_system' => 'Management System',
@@ -1694,7 +1694,7 @@ return [
     'please_draw_signature' => 'Please draw your signature first.',
     'warning' => 'Warning:',
     'notice' => 'Notice:',
-    
+
     // Already signed page translations
     'signature_completed_title' => 'Signed - Reservation :id',
     'signature_success' => 'Successfully Signed',
@@ -1702,11 +1702,11 @@ return [
     'open_image' => 'Open Image',
     'reservation_number' => 'Reservation Number',
     'signature_date' => 'Signature Date',
-    
+
     // Language switcher translations
     'switch_to_arabic' => 'العربية',
     'switch_to_english' => 'English',
-    
+
     // Additional page titles
     'create_user' => 'Create User',
     'edit_user' => 'Edit User',
@@ -1815,7 +1815,7 @@ return [
     'all_types' => 'All Types',
     'clear_filter' => 'Clear Filter',
     'no_templates_found' => 'No templates found',
-    
+
     // Internal Notes
     'internal_notes' => 'Internal Notes',
     'select_internal_note' => 'Select an internal note',
@@ -1826,7 +1826,7 @@ return [
     'error_deleting_note' => 'Error deleting note',
     'confirm_delete_note' => 'Are you sure you want to delete this note?',
     'note_already_added' => 'This note has already been added',
-    
+
     // Payment Summary
     'today_payments' => "Today's Payments",
     'this_month_payments' => "This Month's Payments",
@@ -1834,7 +1834,7 @@ return [
     'total_addons' => 'Total Addons',
     'total_warehouse' => 'Total Warehouse Items',
     'grand_total' => 'Grand Total',
-    'currency' => 'AED',      
+    'currency' => 'AED',
 
     // Manual WhatsApp Sends
     'manual_whatsapp_sends' => 'Manual WhatsApp Messages',
@@ -1917,7 +1917,7 @@ return [
     // ],
 
     'stock_updated_successfully' => 'Stock updated successfully',
-    'stockTakingReport' => 'Stock Taking Report', 
+    'stockTakingReport' => 'Stock Taking Report',
     //
        'manual_item_withdrawal_and_return' => [
         'title' => 'Manual Item Withdrawal',
@@ -2118,4 +2118,5 @@ return [
     "updated_successfully" => 'Updated Successfully',
     "created_successfully" => 'Created Successfully',
     "deleted_successfully" => 'Deleted Successfully',
+    "search_permissions" => "Search in permissions",
 ];

@@ -34,7 +34,7 @@
 
                 <div class="collapse show">
                     <form
-                        action="{{ route('orders.registeration-forms.update', $rf->id) }}"
+                        action="{{ route('bookings.registeration-forms.update', $rf->id) }}"
                         method="post"
                         class="form"
                         id="rfEditForm"
@@ -232,7 +232,7 @@
                         </div>
 
                         <div class="card-footer d-flex justify-content-end gap-2">
-                            <a href="{{ route('orders.registeration-forms') }}" class="btn btn-light">
+                            <a href="{{ route('bookings.registeration-forms.index') }}" class="btn btn-light">
                                 {{ __('dashboard.cancel') }}
                             </a>
                             <button type="submit" class="btn btn-primary">
