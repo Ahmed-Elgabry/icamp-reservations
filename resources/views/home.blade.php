@@ -214,6 +214,8 @@
                                                 $date = $createdAt->format('Y-m-d');
                                                 $time = $createdAt->format('h:i A');
                                                 $link = '' ;
+                                                $source = '' ;
+                                                $paymentMethod = '' ;           
                                                 if ($payment->payment) {
                                                     $source = $payment->payment->statement;
                                                     $paymentMethod = $payment->payment->payment_method;
