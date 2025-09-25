@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('stock_id')->nullable();
             $table->unsignedBigInteger('account_id')->nullable();    // sender account
             $table->unsignedBigInteger('receiver_id')->nullable();   // receiver account
+            $table->unsignedBigInteger('sender_account_id')->nullable();   // receiver account
             $table->unsignedBigInteger('customer_id')->nullable();
             $table->unsignedBigInteger('order_id')->nullable();
             $table->unsignedBigInteger('order_addon_id')->nullable();
