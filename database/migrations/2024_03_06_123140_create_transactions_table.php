@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-
+            $table->engine = "InnoDB";
             // reference ids
             $table->unsignedBigInteger('payment_id')->nullable();
             $table->unsignedBigInteger('expense_id')->nullable();
