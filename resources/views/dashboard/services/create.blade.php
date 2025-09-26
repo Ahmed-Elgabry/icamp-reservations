@@ -277,8 +277,8 @@
                                     @foreach ($service->stocks as $index => $serviceStock)
                                         <div class="table-row d-flex align-items-center stock-item-row mb-2" data-index="{{ $index + 1 }}" style="display: flex; flex-wrap: nowrap; min-width: 100%;">
                                             <div class="table-cell" style="flex: 0 0 8.33%; padding: 0.5rem;">
-                                                @if ($serviceStock->stock->image)
-                                                    <img src="{{ asset($serviceStock->stock->image) }}" alt="preview-image" class="preview-image img-fluid" style="width:50px;height:50px;object-fit:cover;">
+                                            @if ($serviceStock->pivot->stock->image )
+                                            <img src="{{ asset($serviceStock->pivot->stock->image) }}" alt="preview-image" class="preview-image img-fluid" style="width:50px;height:50px;object-fit:cover;">
                                                 @else
                                                     <img src="{{ asset('images/logo.png') }}" alt="" class="preview-image" style="width:50px;height:50px;display:none;">
                                                 @endif
