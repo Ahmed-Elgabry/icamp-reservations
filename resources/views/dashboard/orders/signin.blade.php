@@ -122,9 +122,15 @@
                     <!-- Image Upload Section -->
                     <div class="mb-3">
                         <label class="form-label">{{ __('dashboard.pre_login_image') }}</label>
-                        <div class="dropzone dropzone-previews" id="preLoginImageDropzone"></div>
-                        <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display:none;">
-                        <button type="button" class="btn btn-secondary mt-3" id="openCamera">{{ __('dashboard.capture_photo') }}</button>
+                        <div class="image-upload-zone">
+                            <div class="upload-area" id="imageUploadArea">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>{{ __('dashboard.drag_drop_images_or_click_to_browse') }}</p>
+                                <input type="file" id="imageInput" name="pre_login_images[]" multiple accept="image/*" style="display: none;">
+                            </div>
+                            <div class="image-previews" id="imagePreviews"></div>
+                        </div>
+                        <input type="file" accept="image/*" capture="camera" id="cameraInput">
                     </div>
 
                     <!-- Video Upload Section -->
@@ -242,117 +248,318 @@
 @endsection
 
 @push('css')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
 <style>
-    .dropzone {
+    /* Custom Image Upload Styles */
+    .image-upload-zone {
         border: 2px dashed #007bff;
-        padding: 20px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .upload-area {
+        padding: 40px 20px;
         text-align: center;
-        background-color: #f9f9f9;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
-    .dropzone .dz-message {
-        font-size: 18px;
+    .upload-area:hover {
+        background-color: #e3f2fd;
+    }
+
+    .upload-area.dragover {
+        background-color: #bbdefb;
+        border-color: #1976d2;
+    }
+
+    .upload-area i {
+        font-size: 48px;
         color: #007bff;
+        margin-bottom: 16px;
     }
 
-    .dropzone .dz-preview .dz-image img {
-        width: 100px;
-        height: 100px;
+    .upload-area p {
+        font-size: 16px;
+        color: #6c757d;
+        margin: 0;
     }
 
-    .media-upload-container {
-        border: 1px solid #ddd;
-        border-radius: 5px;
+    .image-previews {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
         padding: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .image-preview {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+
+    .image-preview:hover {
+        transform: scale(1.05);
+    }
+
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-preview .remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background-color 0.2s ease;
+    }
+
+    .image-preview .remove-btn:hover {
+        background: rgba(220, 53, 69, 1);
+    }
+
+    /* Media Upload Container Styles */
+    .media-upload-container {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
         background-color: #f8f9fa;
     }
 
     .recording-timer {
-        font-size: 16px;
+        font-size: 18px;
         text-align: center;
-        margin: 10px 0;
+        margin: 15px 0;
+        padding: 10px;
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        border-radius: 4px;
     }
 
     .live-preview {
-        border-radius: 5px;
-        margin-bottom: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button Styles */
+    .btn-group .btn {
+        flex: 1;
+    }
+
+    .capture-media.recording {
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { opacity: 1; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .image-preview {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn-group .btn {
+            margin-bottom: 5px;
+        }
     }
 </style>
 @endpush
 
 @section('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Dropzone
-    Dropzone.autoDiscover = false;
-    var uploadedImages = [];
+    // Image upload functionality (Custom implementation without Dropzone)
+    let uploadedImages = [];
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviewsContainer = document.getElementById('imagePreviews');
 
-    var myDropzone = new Dropzone("#preLoginImageDropzone", {
-        url: "{{ route('orders.uploadTemporaryImage') }}",
-        paramName: "pre_login_image",
-        maxFiles: 5,
-        acceptedFiles: 'image/*',
-        addRemoveLinks: true,
-        parallelUploads: 5,
-        uploadMultiple: true,
-        previewsContainer: "#preLoginImageDropzone",
-        dictDefaultMessage: "{{ __('dashboard.pre_login_image') }}",
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        init: function () {
-            var myDropzone = this;
-
-            // Add existing images to dropzone
-            @if($order->preLoginImages)
-                @foreach($order->preLoginImages as $image)
-                    var mockFile = { name: "{{ $image->image }}", size: 12345, serverId: "{{ $image->id }}" };
-                    myDropzone.emit("addedfile", mockFile);
-                    myDropzone.emit("thumbnail", mockFile, "{{ asset($image->image) }}");
-                    myDropzone.emit("complete", mockFile);
-                    myDropzone.files.push(mockFile);
-                    uploadedImages.push({ path: "{{ $image->image }}", id: "{{ $image->id }}" });
-                @endforeach
-            @endif
-
-            this.on("sending", function (file, xhr, formData) {
-                formData.append("order_id", "{{ $order->id }}");
+    // Load existing images
+    @if($order->preLoginImages)
+        @foreach($order->preLoginImages as $image)
+            uploadedImages.push({ 
+                path: "{{ $image->image }}", 
+                id: "{{ $image->id }}",
+                isExisting: true 
             });
-        },
-        success: function (file, response) {
-            file.serverId = response[0].id;
-            uploadedImages.push({ path: response[0].filePath, id: response[0].id });
-            document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
-        },
-        error: function (file, response) {
-            console.log('Error uploading: ', response);
-        },
-        removedfile: function (file) {
-            var fileId = file.serverId;
+            addImagePreview("{{ asset($image->image) }}", "{{ $image->id }}", true);
+        @endforeach
+        updateUploadedImagesInput();
+    @endif
 
-            $.ajax({
-                url: "{{ route('orders.removeImage', ['id' => 'fileId']) }}".replace('fileId', fileId),
-                type: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                },
-                success: function (response) {
-                    uploadedImages = uploadedImages.filter(function (image) {
-                        return image.id != fileId;
-                    });
-                    document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
+    // Click to browse
+    imageUploadArea.addEventListener('click', () => {
+        imageInput.click();
+    });
 
-                    var _ref;
-                    return (_ref = file.previewElement) != null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
-                },
-                error: function (response) {
-                    console.log('Error removing file:', response);
+    // Drag and drop functionality
+    imageUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        imageUploadArea.classList.add('dragover');
+    });
+
+    imageUploadArea.addEventListener('dragleave', () => {
+        imageUploadArea.classList.remove('dragover');
+    });
+
+    imageUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        imageUploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // File input change
+    imageInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    // Handle file uploads
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            if (file.type.startsWith('image/')) {
+                uploadImage(file);
+            }
+        });
+    }
+
+    // Upload image to server
+    function uploadImage(file) {
+        const formData = new FormData();
+        formData.append('pre_login_image', file);
+        formData.append('order_id', '{{ $order->id }}');
+        formData.append('_token', '{{ csrf_token() }}');
+
+        // Show loading preview
+        const tempId = 'temp_' + Date.now();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            addImagePreview(e.target.result, tempId, false, true);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload to server
+        fetch('{{ route("orders.uploadTemporaryImage") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                // Remove temp preview
+                const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
+                if (tempPreview) {
+                    tempPreview.remove();
                 }
+
+                // Add real preview
+                uploadedImages.push({ 
+                    path: data[0].filePath, 
+                    id: data[0].id,
+                    isExisting: false 
+                });
+                addImagePreview(data[0].filePath, data[0].id, false);
+                updateUploadedImagesInput();
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            // Remove temp preview on error
+            const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
+            if (tempPreview) {
+                tempPreview.remove();
+            }
+            alert('Error uploading image. Please try again.');
+        });
+    }
+
+    // Add image preview
+    function addImagePreview(src, imageId, isExisting = false, isLoading = false) {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'image-preview';
+        previewDiv.setAttribute('data-image-id', imageId);
+        
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Preview';
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = isLoading ? '<i class="fas fa-spinner fa-spin"></i>' : '<i class="fas fa-times"></i>';
+        removeBtn.type = 'button';
+        
+        if (!isLoading) {
+            removeBtn.addEventListener('click', () => removeImage(imageId, isExisting));
+        }
+        
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(removeBtn);
+        imagePreviewsContainer.appendChild(previewDiv);
+    }
+
+    // Remove image
+    function removeImage(imageId, isExisting) {
+        const preview = document.querySelector(`[data-image-id="${imageId}"]`);
+        if (preview) {
+            preview.remove();
+        }
+
+        if (isExisting) {
+            // Remove from server
+            fetch(`{{ url('dashboard/orders/remove-image') }}/${imageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Image removed from server');
+            })
+            .catch(error => {
+                console.error('Error removing image:', error);
             });
         }
-    });
+
+        // Remove from array
+        uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+        updateUploadedImagesInput();
+    }
+
+    // Update hidden input
+    function updateUploadedImagesInput() {
+        document.getElementById('uploaded_images').value = JSON.stringify(uploadedImages);
+    }
 
     // Camera capture functionality
     document.getElementById('openCamera').addEventListener('click', function() {
@@ -362,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('cameraInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            myDropzone.addFile(file);
+            uploadImage(file);
         }
     });
 
@@ -710,6 +917,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (mediaStream) {
             mediaStream.getTracks().forEach(track => track.stop());
         }
+    });
+
+    // Form validation before submit
+    document.getElementById('kt_ecommerce_add_product_form').addEventListener('submit', function(e) {
+        // Add any form validation logic here if needed
+        console.log('Form submitted with uploaded images:', uploadedImages);
     });
 });
 </script>

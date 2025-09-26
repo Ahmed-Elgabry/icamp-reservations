@@ -41,6 +41,7 @@ use App\Http\Controllers\Dashboard\PageController;
 
 
 Route::resource('registrationforms', RegistrationformController::class)->except(['index', 'edit', 'update', 'destroy']);
+Route::post('registrationforms', [RegistrationformController::class, 'store'])->name('registrationforms.store');
 
 Route::get('order-rate/{order}', "VisitorsController@rate")->name('rate');
 //  Route::post('order-rate', "VisitorsController@rateStore")->name('rate.save');
