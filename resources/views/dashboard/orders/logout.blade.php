@@ -122,21 +122,27 @@
                                 <input type="hidden" name="video_note_logout_data" class="media-data">
                                 
                                 <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <div class="btn-group w-100">
-                                        <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="video">
-                                            <i class="fas fa-video me-2"></i> Record
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-secondary upload-media">
-                                            <i class="fas fa-upload me-2"></i> Upload
-                                        </button>
-                                    </div>
-                                    
-                                    @if ($order->video_note_logout)
-                                        <button type="button" class="btn btn-danger remove-media" data-bs-toggle="modal" data-bs-target="#deleteVideoNoteModal">
-                                            <i class="fas fa-trash me-2"></i>{{ __('dashboard.delete_video_note') }}
-                                        </button>
-                                    @endif
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="video">
+                                        <i class="fas fa-video me-2"></i> Record
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-secondary upload-media">
+                                        <i class="fas fa-upload me-2"></i> Upload
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-info switch-camera d-none" data-media-type="video">
+                                        <i class="fas fa-sync-alt me-2"></i> Switch Camera
+                                    </button>
                                 </div>
+                                
+                                @if ($order->video_note_logout)
+                                    <button type="button" class="btn btn-danger remove-media" data-bs-toggle="modal" data-bs-target="#deleteVideoNoteModal">
+                                        <i class="fas fa-trash me-2"></i>{{ __('dashboard.delete_video_note') }}
+                                    </button>
+                                @endif
+                            </div>
+                            <div class="recording-timer text-danger d-none" style="font-weight: bold;">
+                                <i class="fas fa-circle me-2"></i><span>00:00</span>
+                            </div>
                                 
                                 <div class="preview-video-container" style="display: {{ $order->video_note_logout ? 'block' : 'none' }}; margin-top: 10px;">
                                     @if ($order->video_note_logout)
@@ -252,6 +258,44 @@
         .preview-audio {
             max-width: 100%;
             margin-top: 0.5rem;
+            max-height: 300px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .recording-timer {
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        
+        .recording-timer .fas.fa-circle {
+            color: #dc3545;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .switch-camera {
+            display: none;
+        }
+        
+        @media (max-width: 576px) {
+            .btn-group {
+                flex-wrap: wrap;
+            }
+            .btn-group .btn {
+                flex: 1 0 calc(50% - 5px);
+                margin-bottom: 5px;
+            }
+            .switch-camera {
+                flex: 1 0 100% !important;
+                margin-top: 5px;
+            }
         }
     </style>
 @endpush
@@ -268,6 +312,10 @@
         let mediaRecorder;
         let mediaStream;
         let recordedChunks = [];
+        let currentDeviceId = null;
+        let devices = [];
+        let recordingStartTime;
+        let recordingTimer;
 
         // Function to handle media uploads and recordings
         function initializeMediaHandlers(container) {
@@ -284,9 +332,12 @@
 
             // Handle capture/record media button click
             container.querySelectorAll('.capture-media').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', async function() {
                     const mediaContainer = this.closest('.media-upload-container');
                     const mediaType = mediaContainer.getAttribute('data-type');
+                    
+                    // Store button reference on container for easier access
+                    mediaContainer.captureBtn = this;
                     
                     if (this.classList.contains('recording')) {
                         // Stop recording
@@ -295,10 +346,19 @@
                         this.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> ${mediaType === 'audio' ? 'Record' : 'Record'}`;
                     } else {
                         // Start recording
-                        startMediaRecording(mediaType, mediaContainer);
+                        await startMediaRecording(mediaType, mediaContainer);
                         this.classList.add('recording');
                         this.innerHTML = '<i class="fas fa-stop me-2"></i> Stop';
                     }
+                });
+            });
+            
+            // Handle switch camera button click
+            container.querySelectorAll('.switch-camera').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const mediaType = mediaContainer.getAttribute('data-type');
+                    await switchCamera(mediaType, mediaContainer);
                 });
             });
 
@@ -388,14 +448,67 @@
             });
         }
 
+        // Get available video devices
+        async function getVideoDevices() {
+            try {
+                const deviceInfos = await navigator.mediaDevices.enumerateDevices();
+                return deviceInfos.filter(device => device.kind === 'videoinput');
+            } catch (error) {
+                console.error('Error getting video devices:', error);
+                return [];
+            }
+        }
+
+        // Switch camera
+        async function switchCamera(mediaType, container) {
+            if (!devices || devices.length < 2) return;
+            
+            // Get current device index and calculate next
+            const currentIndex = currentDeviceId ? 
+                devices.findIndex(device => device.deviceId === currentDeviceId) : 0;
+            const nextIndex = (currentIndex + 1) % devices.length;
+            currentDeviceId = devices[nextIndex].deviceId;
+            
+            // Restart recording with new device
+            if (container.captureBtn && container.captureBtn.classList.contains('recording')) {
+                stopMediaRecording(mediaType, container);
+                startMediaRecording(mediaType, container);
+            }
+        }
+
+        // Update recording timer
+        function updateTimer(container) {
+            if (!recordingStartTime) return;
+            
+            const now = new Date();
+            const elapsed = Math.floor((now - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            
+            const timerElement = container.querySelector('.recording-timer');
+            if (timerElement) {
+                timerElement.querySelector('span').textContent = `${minutes}:${seconds}`;
+            }
+        }
+
         // Start media recording
         async function startMediaRecording(mediaType, container) {
             try {
                 recordedChunks = [];
+                
+                // Get video devices if not already loaded
+                if (mediaType === 'video' && devices.length === 0) {
+                    devices = await getVideoDevices();
+                    const switchBtn = container.querySelector('.switch-camera');
+                    if (devices.length > 1 && switchBtn) {
+                        switchBtn.classList.remove('d-none');
+                    }
+                }
+
                 const constraints = {
                     audio: true,
                     video: mediaType === 'video' ? {
-                        facingMode: 'environment',
+                        ...(currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'environment' }),
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
                     } : false
@@ -496,6 +609,11 @@
                 // Start collecting data every 100ms
                 mediaRecorder.start(100);
                 
+                // Start recording timer
+                recordingStartTime = new Date();
+                container.timerInterval = setInterval(() => updateTimer(container), 1000);
+                container.querySelector('.recording-timer')?.classList.remove('d-none');
+                
                 // Auto-stop recording after 5 minutes (safety measure)
                 container.recordingTimeout = setTimeout(() => {
                     if (mediaRecorder && mediaRecorder.state === 'recording') {
@@ -523,6 +641,12 @@
 
         // Stop media recording
         function stopMediaRecording(mediaType, container) {
+            // Clear recording timer
+            if (container.timerInterval) {
+                clearInterval(container.timerInterval);
+            }
+            container.querySelector('.recording-timer')?.classList.add('d-none');
+            
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
                 // Clear the auto-stop timeout
@@ -539,6 +663,8 @@
             // Clean up live preview if it exists
             if (container.livePreview) {
                 container.livePreview.srcObject = null;
+                container.livePreview.remove();
+                container.livePreview = null;
             }
         }
         
