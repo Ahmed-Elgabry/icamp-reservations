@@ -215,7 +215,7 @@
                                                     </td>
                                                     <td class="text-nowrap" data-label="@lang('dashboard.image')">
                                                         @if ($report->image)
-                                                            <img src="{{ asset($report->image) }}" class="preview-image" style="width:50px;height:50px;object-fit:cover;">
+                                                            <img src="{{ asset($report->image) }}" class="preview-image" style="width:75px;height:75px;object-fit:cover;">
                                                         @else
                                                             <img src="{{ asset('images/logo.png') }}" class="preview-image" style="width:50px;height:50px;object-fit:cover;">
                                                         @endif

@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $t) {
             $t->id();
+            $t->engine = "InnoDB";
             $t->foreignId('order_id')->constrained()->cascadeOnDelete();
             $t->foreignId('stock_id')->constrained()->cascadeOnDelete();
             $t->decimal('quantity', 12, 3);
