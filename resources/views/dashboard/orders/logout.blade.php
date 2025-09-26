@@ -394,11 +394,44 @@
                 recordedChunks = [];
                 const constraints = {
                     audio: true,
-                    video: mediaType === 'video' ? { facingMode: 'environment' } : false
+                    video: mediaType === 'video' ? {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } : false
                 };
 
                 mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                mediaRecorder = new MediaRecorder(mediaStream);
+                
+                // For video, show live preview
+                if (mediaType === 'video') {
+                    const videoPreview = document.createElement('video');
+                    videoPreview.srcObject = mediaStream;
+                    videoPreview.autoplay = true;
+                    videoPreview.muted = true;
+                    videoPreview.controls = false;
+                    videoPreview.style.width = '100%';
+                    videoPreview.style.maxHeight = '300px';
+
+                    const previewContainer = container.querySelector('.preview-video-container');
+                    previewContainer.innerHTML = '';
+                    previewContainer.appendChild(videoPreview);
+                    previewContainer.style.display = 'block';
+                    container.livePreview = videoPreview;
+                }
+
+                const options = {
+                    audioBitsPerSecond: 128000,
+                    videoBitsPerSecond: mediaType === 'video' ? 2500000 : 0,
+                    mimeType: mediaType === 'video' ? 'video/webm' : 'audio/webm'
+                };
+
+                try {
+                    mediaRecorder = new MediaRecorder(mediaStream, options);
+                } catch (e) {
+                    console.warn('Using default media recorder due to:', e);
+                    mediaRecorder = new MediaRecorder(mediaStream);
+                }
 
                 mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
@@ -408,11 +441,23 @@
 
                 mediaRecorder.onstop = () => {
                     const blob = new Blob(recordedChunks, {
-                        type: mediaType === 'audio' ? 'audio/webm' : 'video/webm'
+                        type: mediaRecorder.mimeType || 
+                            (mediaType === 'video' ? 'video/webm' : 'audio/webm')
                     });
 
+                    // Clean up live preview if it exists
+                    if (container.livePreview) {
+                        container.livePreview.srcObject = null;
+                    }
+                    
+                    // Stop all tracks in the stream
+                    if (mediaStream) {
+                        mediaStream.getTracks().forEach(track => track.stop());
+                    }
+
+                    // Create a file from the blob
                     const file = new File([blob], `${mediaType}_${Date.now()}.webm`, {
-                        type: mediaType === 'audio' ? 'audio/webm' : 'video/webm'
+                        type: blob.type || (mediaType === 'video' ? 'video/webm' : 'audio/webm')
                     });
 
                     // Create a data transfer object to simulate file input
@@ -423,20 +468,17 @@
                     const fileInput = container.querySelector('.media-input');
                     fileInput.files = dataTransfer.files;
 
-                    // Create a URL for the recorded media
-                    const mediaURL = URL.createObjectURL(blob);
+                    // Update the preview
                     const previewElement = container.querySelector(`.preview-${mediaType}`);
                     const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
                     
                     // Clear previous sources
-                    while (previewElement.firstChild) {
-                        previewElement.removeChild(previewElement.firstChild);
-                    }
+                    previewElement.innerHTML = '';
                     
                     // Add new source
                     const source = document.createElement('source');
-                    source.src = mediaURL;
-                    source.type = mediaType === 'audio' ? 'audio/webm' : 'video/webm';
+                    source.src = URL.createObjectURL(blob);
+                    source.type = blob.type || (mediaType === 'video' ? 'video/webm' : 'audio/webm');
                     previewElement.appendChild(source);
                     
                     // Show preview
@@ -451,10 +493,11 @@
                     reader.readAsDataURL(blob);
                 };
 
-                mediaRecorder.start();
+                // Start collecting data every 100ms
+                mediaRecorder.start(100);
                 
                 // Auto-stop recording after 5 minutes (safety measure)
-                setTimeout(() => {
+                container.recordingTimeout = setTimeout(() => {
                     if (mediaRecorder && mediaRecorder.state === 'recording') {
                         mediaRecorder.stop();
                         const button = container.querySelector('.capture-media');
@@ -479,14 +522,23 @@
         }
 
         // Stop media recording
-        function stopMediaRecording() {
+        function stopMediaRecording(mediaType, container) {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
+                // Clear the auto-stop timeout
+                if (container.recordingTimeout) {
+                    clearTimeout(container.recordingTimeout);
+                }
             }
             
             // Stop all tracks in the stream
             if (mediaStream) {
                 mediaStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Clean up live preview if it exists
+            if (container.livePreview) {
+                container.livePreview.srcObject = null;
             }
         }
         
