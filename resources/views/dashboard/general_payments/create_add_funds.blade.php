@@ -251,7 +251,7 @@
                                             @endif
                                             @can('general_payments.update_add_funds')
                                             <div class="menu-item px-3">
-                                                <a  class="menu-link px-3" onclick="openEditModal({{ $payment->id }}, '{{ $payment->amount }}', '{{ $payment->date }}', '{{ $payment->payment_method }}', '{{ $payment->description }}', '{{ $payment->account_id }}')">{{ __('actions.edit') }}</a>
+                                                <a  class="menu-link px-3" onclick="openEditModal({{ $payment->generalPayment->id }}, '{{ $payment->amount }}', '{{ $payment->date }}', '{{ $payment->payment_method }}', '{{ $payment->description }}', '{{ $payment->account_id }}')">{{ __('actions.edit') }}</a>
                                             </div>
                                             @endcan
                                             @can('general_payments.destroy_add_funds')

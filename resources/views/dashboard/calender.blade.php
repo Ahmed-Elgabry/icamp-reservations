@@ -1,5 +1,7 @@
 @extends('dashboard.layouts.app')
-
+@section('pageTitle')
+    {{ __('dashboard.calender') }}
+@endsection
 @section('content')
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-xxl">
@@ -7,7 +9,7 @@
             <div class="card card-header d-flex" style="flex-direction: row;justify-content: center;align-items: center;">
                 <div class="pending" style="margin-left: 12px;">
                     <span class="dotted-pending"></span>
-                    <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.pending_and_show_price_desc') }}</span>
+                <span style="font-size: 14px;font-weight: 700;padding-right: 6px;">{{ __('dashboard.pending_and_show_price_desc') }}</span>
                 </div>
                 <div class="pending" style="margin-left: 12px;">
                     <span class="dotted-pending"></span>

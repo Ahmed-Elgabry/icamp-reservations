@@ -46,7 +46,7 @@ class CheckRoleMiddleware
         }
         $permissions = $permissions->toArray();
         // some exception
-        $excpetions = ['edit-profile', 'home', 'logout', 'payments.print', 'money-transfer', 'orders.quote', 'orders.invoice', 'warehouse_sales.show', 'warehouse_sales.store', 'warehouse_sales.destroy', 'warehouse_sales.update', 'order.verified', 'payment-links.*', 'payment-links.create', 'payment-links.index', 'stock.decrement', 'orders.registeration-forms', 'orders.registeration-forms.edit', 'orders.registeration-forms.destroy', 'orders.registeration-forms.fetch', 'orders.registeration-forms.search', 'orders.registeration-forms.update', 'orders.customers.check'];
+        $excpetions = ['edit-profile', 'home', 'logout', 'payments.print', 'money-transfer', 'orders.quote', 'orders.invoice', 'warehouse_sales.show', 'warehouse_sales.store', 'warehouse_sales.destroy', 'warehouse_sales.update', 'order.verified', 'payment-links.*', 'payment-links.create', 'payment-links.index', 'stock.decrement', 'orders.registeration-forms.edit', 'orders.registeration-forms.destroy', 'orders.registeration-forms.fetch', 'orders.registeration-forms.search', 'orders.registeration-forms.update', 'orders.customers.check'];
         $currunt_route = Route::currentRouteName();
         $route = Route::current();
         $actAs = $route->action['act-as'] ?? null;

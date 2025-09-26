@@ -111,7 +111,69 @@
                         
                         <div class="form-group mt-5">
                             <label for="pre_logout_image">{{ __('dashboard.pre_logout_image') }}</label>
-                            <div class="dropzone dropzone-previews" id="preLoginImageDropzone"></div>
+                            
+                            <!-- Image Upload Dropdown -->
+                            <div class="dropdown mb-3">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="imageUploadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-camera me-2"></i>{{ __('dashboard.add_image') }}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="imageUploadDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="uploadImageBtn">
+                                            <i class="fas fa-upload me-2"></i>{{ __('dashboard.upload_image') }}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="takePhotoBtn">
+                                            <i class="fas fa-camera me-2"></i>{{ __('dashboard.take_photo') }}
+                                        </a>
+                                    </li>
+                                </ul>
+                                <input type="file" id="imageInput" class="d-none" accept="image/*">
+                                <input type="hidden" id="capturedImageData" name="captured_image">
+                            </div>
+                            
+                            <!-- Image Preview Container -->
+                            <div class="row" id="imagePreviewContainer">
+                                <!-- Existing images will be shown here -->
+                            </div>
+                            
+                            <!-- Hidden dropzone for file uploads -->
+                            <div class="dropzone dropzone-previews d-none" id="preLoginImageDropzone"></div>
+                            
+                            <!-- Camera Modal -->
+                            <div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">{{ __('dashboard.take_photo') }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <div class="camera-container mb-3">
+                                                <video id="cameraPreview" class="w-100" autoplay playsinline style="max-height: 400px; background: #000;"></video>
+                                                <canvas id="cameraCanvas" class="d-none"></canvas>
+                                            </div>
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <button type="button" class="btn btn-primary" id="captureBtn">
+                                                    <i class="fas fa-camera me-2"></i>{{ __('dashboard.capture') }}
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" id="switchCameraBtn" style="display: none;">
+                                                    <i class="fas fa-sync-alt me-2"></i>{{ __('dashboard.switch_camera') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                {{ __('dashboard.cancel') }}
+                                            </button>
+                                            <button type="button" class="btn btn-primary" id="usePhotoBtn" disabled>
+                                                {{ __('dashboard.use_photo') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Video Upload Section -->
@@ -230,21 +292,32 @@
 @push('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
     <style>
+        /* Dropzone styles */
         .dropzone {
             border: 2px dashed #007bff;
             padding: 20px;
             text-align: center;
             background-color: #f9f9f9;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .dropzone:hover {
+            border-color: #0056b3;
+            background-color: #f0f7ff;
         }
 
         .dropzone .dz-message {
             font-size: 18px;
             color: #007bff;
+            margin: 0;
         }
 
         .dropzone .dz-preview .dz-image img {
             width: 100px;
             height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
         }
         
         .capture-media.recording {
@@ -253,7 +326,11 @@
         }
         
         .media-upload-container {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #e4e6ef;
+            border-radius: 8px;
+            background-color: #f8f9fa;
         }
         
         .preview-video-container,
@@ -269,11 +346,14 @@
             display: block;
             margin-left: auto;
             margin-right: auto;
+            border-radius: 6px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
         
         .recording-timer {
-            margin-top: 5px;
+            margin-top: 8px;
             font-size: 0.9em;
+            font-weight: 500;
         }
         
         .recording-timer .fas.fa-circle {
@@ -291,17 +371,147 @@
             display: none;
         }
         
+        /* Image upload and camera styles */
+        #imagePreviewContainer {
+            margin: 15px -5px 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        #imagePreviewContainer .card {
+            border: 1px solid #e4e6ef;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin: 0 5px 10px;
+            width: calc(25% - 10px);
+        }
+        
+        #imagePreviewContainer .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        #imagePreviewContainer .card-img-top {
+            height: 120px;
+            width: 100%;
+            object-fit: cover;
+        }
+        
+        #imagePreviewContainer .card-body {
+            padding: 0.75rem;
+            background: #fff;
+        }
+        
+        #imagePreviewContainer .remove-image {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        #imagePreviewContainer .remove-image:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Camera modal styles */
+        #cameraPreview, #cameraCanvas {
+            max-width: 100%;
+            height: auto;
+            background: #000;
+            margin: 0 auto;
+            display: block;
+            border-radius: 6px;
+        }
+        
+        #cameraCanvas {
+            display: none;
+        }
+        
+        .camera-container {
+            position: relative;
+            margin-bottom: 15px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Loading indicator */
+        .loading-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            #imagePreviewContainer .card {
+                width: calc(33.333% - 10px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #imagePreviewContainer .card {
+                width: calc(50% - 10px);
+            }
+            
+            .camera-container {
+                max-height: 50vh;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+        }
+        
         @media (max-width: 576px) {
             .btn-group {
                 flex-wrap: wrap;
             }
+            
             .btn-group .btn {
                 flex: 1 0 calc(50% - 5px);
                 margin-bottom: 5px;
             }
+            
             .switch-camera {
                 flex: 1 0 100% !important;
                 margin-top: 5px;
+            }
+            
+            #imagePreviewContainer .card {
+                width: calc(50% - 10px);
+            }
+            
+            #imagePreviewContainer .card-img-top {
+                height: 100px;
+            }
+            
+            .modal-dialog {
+                margin: 0.25rem;
             }
         }
     </style>
@@ -312,8 +522,200 @@
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize media upload handlers
-        initializeMediaHandlers(document.body);
+        // Initialize media upload handlers if they exist
+        if (document.body) {
+            initializeMediaHandlers(document.body);
+        }
+        
+        // Add CSRF token to all AJAX requests
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        
+        // Image upload and camera functionality
+        const imageInput = document.getElementById('imageInput');
+        const uploadImageBtn = document.getElementById('uploadImageBtn');
+        const takePhotoBtn = document.getElementById('takePhotoBtn');
+        const cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
+        const cameraPreview = document.getElementById('cameraPreview');
+        const cameraCanvas = document.getElementById('cameraCanvas');
+        const captureBtn = document.getElementById('captureBtn');
+        const usePhotoBtn = document.getElementById('usePhotoBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const capturedImageData = document.getElementById('capturedImageData');
+        
+        let stream = null;
+        let currentFacingMode = 'environment'; // Start with back camera
+        let capturedImage = null;
+
+        // Handle upload image button click
+        uploadImageBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            imageInput.click();
+        });
+
+        // Handle file selection
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    addImagePreview(event.target.result, file.name);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle take photo button click
+        takePhotoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            startCamera();
+            cameraModal.show();
+        });
+
+        // Handle camera modal hide event
+        document.getElementById('cameraModal').addEventListener('hidden.bs.modal', function() {
+            stopCamera();
+            resetCameraUI();
+        });
+
+        // Handle capture button click
+        captureBtn.addEventListener('click', function() {
+            captureImage();
+        });
+
+        // Handle use photo button click
+        usePhotoBtn.addEventListener('click', function() {
+            if (capturedImage) {
+                addImagePreview(capturedImage, 'captured_photo_' + new Date().getTime() + '.jpg');
+                cameraModal.hide();
+            }
+        });
+
+        // Handle switch camera button click
+        if (switchCameraBtn) {
+            switchCameraBtn.addEventListener('click', function() {
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                stopCamera();
+                startCamera();
+            });
+        }
+
+        // Start camera function
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                cameraPreview.srcObject = stream;
+                
+                // Show switch camera button if multiple cameras are available
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                if (videoDevices.length > 1) {
+                    switchCameraBtn.style.display = 'inline-block';
+                }
+                
+                // Enable capture button once camera is ready
+                captureBtn.disabled = false;
+                
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('Could not access the camera. Please check your permissions.');
+            }
+        }
+
+        // Stop camera function
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                cameraPreview.srcObject = null;
+                stream = null;
+            }
+        }
+
+        // Capture image from camera
+        function captureImage() {
+            if (!stream) return;
+
+            const context = cameraCanvas.getContext('2d');
+            cameraCanvas.width = cameraPreview.videoWidth;
+            cameraCanvas.height = cameraPreview.videoHeight;
+            context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
+            
+            // Convert canvas to data URL
+            capturedImage = cameraCanvas.toDataURL('image/jpeg');
+            
+            // Show preview and enable use photo button
+            cameraPreview.style.display = 'none';
+            cameraCanvas.style.display = 'block';
+            captureBtn.style.display = 'none';
+            usePhotoBtn.disabled = false;
+            
+            // Show the captured image
+            cameraCanvas.classList.remove('d-none');
+        }
+
+        // Reset camera UI
+        function resetCameraUI() {
+            cameraPreview.style.display = 'block';
+            cameraCanvas.style.display = 'none';
+            captureBtn.style.display = 'inline-block';
+            usePhotoBtn.disabled = true;
+            capturedImage = null;
+            
+            // Clear the canvas
+            const context = cameraCanvas.getContext('2d');
+            context.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
+        }
+
+        // Add image preview to the container
+        function addImagePreview(imageData, fileName) {
+            const previewId = 'preview-' + Math.random().toString(36).substr(2, 9);
+            const previewHtml = `
+                <div class="col-md-3 mb-3" id="${previewId}">
+                    <div class="card">
+                        <img src="${imageData}" class="card-img-top" alt="Preview">
+                        <div class="card-body p-2 text-center">
+                            <small class="text-muted d-block text-truncate">${fileName}</small>
+                            <button type="button" class="btn btn-sm btn-danger mt-2 remove-image" data-preview-id="${previewId}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            imagePreviewContainer.insertAdjacentHTML('beforeend', previewHtml);
+            
+            // Add event listener for remove button
+            document.querySelector(`#${previewId} .remove-image`).addEventListener('click', function() {
+                document.getElementById(previewId).remove();
+                // TODO: Handle removal from server if needed
+            });
+            
+            // Store the image data in a hidden field for form submission
+            updateHiddenImageData();
+        }
+        
+        // Update hidden field with all image data
+        function updateHiddenImageData() {
+            const images = [];
+            document.querySelectorAll('#imagePreviewContainer img').forEach(img => {
+                images.push(img.src);
+            });
+            capturedImageData.value = JSON.stringify(images);
+        }
 
         // Media recording variables
         let mediaRecorder;
@@ -787,80 +1189,74 @@
         // Initialize Dropzone for pre-login images
         Dropzone.autoDiscover = false;
         
-        var uploadedImages = [];
-
-        var myDropzone = new Dropzone("#preLoginImageDropzone", {
-            url: "{{ route('orders.uploadTemporaryImage') }}",
-            paramName: "pre_login_image",
-            maxFiles: 5,
-            acceptedFiles: 'image/*',
-            addRemoveLinks: true,
-            parallelUploads: 5,
-            uploadMultiple: true,
-            previewsContainer: "#preLoginImageDropzone",
-            dictDefaultMessage: "{{ __('dashboard.pre_logout_image') }}",
-            headers: {
-                'X-CSRF-TOKEN': "{{ csrf_token() }}"
-            },
-            init: function () {
-                var myDropzone = this;
-
-                // Add existing images to dropzone
-                @if($order->PreLogoutImages)
-                    @foreach($order->PreLogoutImages as $image)
-                        var mockFile = { name: "{{ $image->image }}", size: 12345, serverId: "{{ $image->id }}" };
-                        myDropzone.emit("addedfile", mockFile);
-                        myDropzone.emit("thumbnail", mockFile, "{{ asset($image->image) }}");
-                        myDropzone.emit("complete", mockFile);
-                        myDropzone.files.push(mockFile);
-                        uploadedImages.push({ path: "{{ $image->image }}", id: "{{ $image->id }}" });
-                    @endforeach
-                @endif
-
-                this.on("sending", function (file, xhr, formData) {
-                    formData.append("order_id", "{{ $order->id }}");
-                    formData.append("type", "logout");
-                });
-                
-                this.on("addedfile", function(file) {
-                    console.log("File added to dropzone:", file.name);
-                });
-                
-                this.on("error", function(file, errorMessage) {
-                    console.error("Dropzone error:", errorMessage);
-                });
-            },
-            success: function (file, response) {
-                console.log("Upload successful:", response);
-                if (response && response[0]) {
-                    file.serverId = response[0].id;
-                    uploadedImages.push({ path: response[0].filePath, id: response[0].id });
-                    document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
-                }
-            },
-            error: function (file, response) {
-                console.log('Error uploading: ', response);
-            },
-            removedfile: function (file) {
-                var fileId = file.serverId;
-
-                $.ajax({
-                    url: "{{ route('orders.removeImage', ['id' => 'fileId']) }}?type=logout".replace('fileId', fileId),
-                    type: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                    },
-                    success: function (response) {
-                        uploadedImages = uploadedImages.filter(function (image) {
-                            return image.id != fileId;
+        // Initialize Dropzone for pre-login image upload if the element exists
+        var preLoginDropzone = document.getElementById('preLoginImageDropzone');
+        if (preLoginDropzone) {
+            window.myDropzone = new Dropzone("#preLoginImageDropzone", {
+                url: "{{ route('orders.uploadTemporaryImage') }}",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                paramName: "pre_login_image",
+                maxFiles: 5,
+                acceptedFiles: 'image/*',
+                autoProcessQueue: true,
+                addRemoveLinks: true,
+                uploadMultiple: false,
+                timeout: 0,
+                previewsContainer: "#preLoginImageDropzone",
+                dictDefaultMessage: "{{ __('dashboard.pre_logout_image') }}",
+                init: function() {
+                    var dropzone = this;
+                    
+                    this.on("error", function(file, message) {
+                        console.error('Upload error:', message);
+                        if (message && typeof message === 'object' && message.message) {
+                            alert('Upload error: ' + message.message);
+                        } else if (typeof message === 'string' && message.startsWith('<!DOCTYPE')) {
+                            // Handle HTML response (likely a login page)
+                            alert('Session expired. Please refresh the page and log in again.');
+                            window.location.reload();
+                        } else {
+                            alert('An error occurred during upload. Please try again.');
+                        }
+                        this.removeFile(file);
+                    });
+                    
+                    this.on("success", function(file, response) {
+                        console.log("Upload successful:", response);
+                        if (response && response[0]) {
+                            file.serverId = response[0].id;
+                            uploadedImages.push({ path: response[0].filePath, id: response[0].id });
+                            document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
+                        }
+                    });
+                    
+                    this.on("removedfile", function(file) {
+                        if (!file.serverId) return;
+                        
+                        $.ajax({
+                            url: "{{ route('orders.removeImage', ['id' => '']) }}/" + file.serverId + "?type=logout",
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                uploadedImages = uploadedImages.filter(function(image) {
+                                    return image.id != file.serverId;
+                                });
+                                document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
+                                console.log('File removed successfully');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error removing file:', error);
+                                alert('Error removing file. Please try again.');
+                            }
                         });
-                        document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
-
-                        var _ref;
-                        return (_ref = file.previewElement) != null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
-                    },
-                    error: function (response) {
-                        console.log('Error removing file:', response);
+                    });
+                }
+            });
+        }
                     }
                 });
             }
@@ -872,18 +1268,23 @@
         });
 
         // Camera functionality for dropzone (if needed)
-        $("#openCamera").on('click', function () {
-            $("#cameraInput").click();
-        });
+        var openCameraBtn = document.getElementById('openCamera');
+        var cameraInput = document.getElementById('cameraInput');
+        
+        if (openCameraBtn && cameraInput) {
+            openCameraBtn.addEventListener('click', function() {
+                cameraInput.click();
+            });
 
-        // Handle the camera input change (if camera input exists)
-        $("#cameraInput").on('change', function (event) {
-            var files = event.target.files;
-            if (files.length > 0) {
-                myDropzone.addFile(files[0]);
-            }
-        });
-    });
+            // Handle the camera input change (if camera input exists)
+            cameraInput.addEventListener('change', function(event) {
+                var files = event.target.files;
+                if (files.length > 0 && window.myDropzone) {
+                    window.myDropzone.addFile(files[0]);
+                }
+            });
+        }
+    }); // End of DOMContentLoaded
     </script>
 
 @endsection
