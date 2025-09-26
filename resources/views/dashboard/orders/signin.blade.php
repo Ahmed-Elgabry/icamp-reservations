@@ -115,50 +115,77 @@
                     <!-- Audio Recording Section -->
 
 
-                    <!-- Video Recording Section -->
+                    <!-- Video Upload Section -->
                     <div class="mb-3">
-                        <label class="form-label m-3">
+                        <label class="form-label">
                             <i class="fas fa-video"></i> {{ __('dashboard.video_note') }}
                         </label>
-                        <div class="row align-items-center">
-                            <div class="col-md-12">
-                                <!-- Video Preview -->
-                                <video id="videoPreview" class="w-100 mb-3" style="max-width: 100%; background: #000;" controls></video>
-                                
-                                <!-- Video Controls -->
-                                <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <button type="button" id="recordButton" class="btn btn-primary">
-                                        <i class="fas fa-video me-2"></i>{{ __('dashboard.start_recording') }}
+                        <div class="media-upload-container" data-type="video">
+                            @if($order->video_note)
+                                <div class="preview-video-container mb-2">
+                                    <video controls class="preview-video w-100">
+                                        <source src="{{ asset('storage/' . $order->video_note) }}" type="video/mp4">
+                                    </video>
+                                    <button type="button" class="btn btn-sm btn-danger mt-2" data-bs-toggle="modal" data-bs-target="#deleteVideoNoteModal">
+                                        <i class="fas fa-trash"></i> {{ __('dashboard.delete_video_note') }}
                                     </button>
-                                    <button type="button" id="stopButton" class="btn btn-danger" disabled>
-                                        <i class="fas fa-stop me-2"></i>{{ __('dashboard.stop_recording') }}
-                                    </button>
-                                    <input type="file" id="videoInput" name="video_note" accept="video/*" class="d-none">
-                                    
-                                    @if ($order->video_note)
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVideoNoteModal">
-                                            <i class="fas fa-trash me-2"></i>{{ __('dashboard.delete_video_note') }}
-                                        </button>
-                                        <!-- Show existing video if it exists -->
-                                        <div class="w-100 mt-3">
-                                            <p class="mb-2">{{ __('dashboard.existing_video') }}:</p>
-                                            <video class="w-100" controls>
-                                                <source src="{{ asset('storage/' . $order->video_note) }}">
-                                                {{ __('dashboard.your_browser_does_not_support_video_tag') }}
-                                            </video>
-                                        </div>
-                                    @endif
                                 </div>
-                                @endif
-                                <input type="file" accept="video/*" capture="camcorder" id="videoInput"
-                                    name="video_note" class="form-control" style="display:none;">
-                                <video id="videoPlayback" class="col-5 m-3" controls style="display:none;"></video>
-                                <button type="button" id="saveVideoButton" class="btn btn-success col-3"
-                                    style="display: none;">
-                                    {{ __('dashboard.save_video') }}
-                                </button>
-                            </div>
+                                <input type="hidden" name="existing_video_note" value="{{ $order->video_note }}">
+                            @else
+                                <div class="preview-video-container mb-2" style="display: none;">
+                                    <video controls class="preview-video w-100">
+                                        <source src="">
+                                    </video>
+                                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
+                                        <i class="bi bi-trash"></i> {{ __('dashboard.remove') }}
+                                    </button>
+                                </div>
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-primary upload-media">
+                                        <i class="bi bi-upload"></i> {{ __('dashboard.upload_video') }}
+                                    </button>
+                                </div>
+                                <input type="file" name="video_note" class="media-input d-none" accept="video/*">
+                                <input type="hidden" name="video_note_data" class="media-data">
+                            @endif
                         </div>
+                    </div>
+
+                    <!-- Audio Upload Section -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-microphone"></i> {{ __('dashboard.voice_note') }}
+                        </label>
+                        <div class="media-upload-container" data-type="audio">
+                            @if($order->voice_note)
+                                <div class="preview-audio-container mb-2">
+                                    <audio controls class="preview-audio w-100">
+                                        <source src="{{ asset('storage/' . $order->voice_note) }}" type="audio/mpeg">
+                                    </audio>
+                                    <button type="button" class="btn btn-sm btn-danger mt-2" data-bs-toggle="modal" data-bs-target="#deleteVoiceNoteModal">
+                                        <i class="fas fa-trash"></i> {{ __('dashboard.delete_voice_note') }}
+                                    </button>
+                                </div>
+                                <input type="hidden" name="existing_voice_note" value="{{ $order->voice_note }}">
+                            @else
+                                <div class="preview-audio-container mb-2" style="display: none;">
+                                    <audio controls class="preview-audio w-100">
+                                        <source src="">
+                                    </audio>
+                                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
+                                        <i class="bi bi-trash"></i> {{ __('dashboard.remove') }}
+                                    </button>
+                                </div>
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-primary upload-media">
+                                        <i class="bi bi-upload"></i> {{ __('dashboard.upload_audio') }}
+                                    </button>
+                                </div>
+                                <input type="file" name="voice_note" class="media-input d-none" accept="audio/*">
+                                <input type="hidden" name="voice_note_data" class="media-data">
+                            @endif
+                        </div>
+                    </div>
                     </div>
 
                     <div class="mb-3">
@@ -198,18 +225,187 @@
             height: 100px;
         }
     </style>
-
 @endpush
 
 @section('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/recordrtc@5.6.2/dist/RecordRTC.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var uploadedImages = [];
 
+            var myDropzone = new Dropzone("#preLoginImageDropzone", {
+                url: "{{ route('orders.uploadTemporaryImage') }}",
+                paramName: "pre_login_image",
+            maxFiles: 5,
+            acceptedFiles: 'image/*',
+            addRemoveLinks: true,
+            parallelUploads: 5,
+            uploadMultiple: true,
+            previewsContainer: ".dropzone-previews",
+            dictDefaultMessage: "{{ __('dashboard.pre_login_image') }}",
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            },
+            init: function () {
+                var myDropzone = this;
+
+                // Add existing images to dropzone
+                @if($order->preLoginImages)
+                    @foreach($order->preLoginImages as $image)
+                        var mockFile = { name: "{{ $image->image }}", size: 12345, serverId: "{{ $image->id }}" };
+                        myDropzone.emit("addedfile", mockFile);
+                        myDropzone.emit("thumbnail", mockFile, "{{ asset($image->image) }}");
+                        myDropzone.emit("complete", mockFile);
+                        myDropzone.files.push(mockFile);
+                        uploadedImages.push({ path: "{{ $image->image }}", id: "{{ $image->id }}" });
+                    @endforeach
+                @endif
+
+                this.on("sending", function (file, xhr, formData) {
+                    formData.append("order_id", "{{ $order->id }}");
+                });
+            },
+            success: function (file, response) {
+                file.serverId = response[0].id;
+                uploadedImages.push({ path: response[0].filePath, id: response[0].id });
+                document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
+            },
+            error: function (file, response) {
+                console.log('Error uploading: ', response);
+            },
+            removedfile: function (file) {
+                var fileId = file.serverId;
+
+                $.ajax({
+                    url: "{{ route('orders.removeImage', ['id' => 'fileId']) }}".replace('fileId', fileId),
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        uploadedImages = uploadedImages.filter(function (image) {
+                            return image.id != fileId;
+                        });
+                        document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
+
+                        var _ref;
+                        return (_ref = file.previewElement) != null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
+                    },
+                    error: function (response) {
+                        console.log('Error removing file:', response);
+                    }
+                });
+            }
+        });
+    });
+</script>
 <script>
-    Dropzone.autoDiscover = false;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize media upload handlers
+        initializeMediaHandlers(document.body);
 
-    $(document).ready(function () {
-{{ ... }}
+        // Function to handle media uploads
+        function initializeMediaHandlers(container) {
+            // Handle upload media button click
+            container.querySelectorAll('.upload-media').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const input = mediaContainer.querySelector('.media-input');
+                    if (input) {
+                        input.click();
+                    }
+                });
+            });
+
+            // Handle file input change
+            container.querySelectorAll('.media-input').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const mediaType = mediaContainer.getAttribute('data-type');
+                    const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
+                    const previewElement = mediaContainer.querySelector(`.preview-${mediaType}`);
+                    const dataInput = mediaContainer.querySelector('.media-data');
+
+                    if (previewElement) {
+                        if (mediaType === 'photo') {
+                            // For images, create a preview
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                previewElement.src = e.target.result;
+                                previewContainer.style.display = 'block';
+                                dataInput.value = e.target.result.split(',')[1]; // Store base64 data
+                            };
+                            reader.readAsDataURL(file);
+                        } else if (mediaType === 'video' || mediaType === 'audio') {
+                            // For video/audio, create a preview with controls
+                            const url = URL.createObjectURL(file);
+                            const source = document.createElement('source');
+                            source.src = url;
+                            source.type = file.type;
+                            
+                            // Clear previous sources
+                            while (previewElement.firstChild) {
+                                previewElement.removeChild(previewElement.firstChild);
+                            }
+                            
+                            previewElement.appendChild(source);
+                            previewContainer.style.display = 'block';
+                            
+                            // Load the media to ensure it plays
+                            previewElement.load();
+                            
+                            // Store file data
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                dataInput.value = e.target.result.split(',')[1]; // Store base64 data
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                });
+            });
+
+            // Handle remove media button click
+            container.querySelectorAll('.remove-media').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const mediaType = mediaContainer.getAttribute('data-type');
+                    const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
+                    const fileInput = mediaContainer.querySelector('.media-input');
+                    const dataInput = mediaContainer.querySelector('.media-data');
+                    
+                    // Reset file input
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+                    
+                    // Clear data input
+                    if (dataInput) {
+                        dataInput.value = '';
+                    }
+                    
+                    // Hide preview
+                    if (previewContainer) {
+                        previewContainer.style.display = 'none';
+                    }
+                    
+                    // Create a hidden input to flag deletion to backend
+                    const deleteFlag = document.createElement('input');
+                    deleteFlag.type = 'hidden';
+                    deleteFlag.name = `delete_${mediaType}_flag`;
+                    deleteFlag.value = '1';
+                    mediaContainer.appendChild(deleteFlag);
+                });
+            });
+        }
+
+        // Initialize Dropzone for pre-login images
+        Dropzone.autoDiscover = false;
+        
         var uploadedImages = [];
 
         var myDropzone = new Dropzone("#preLoginImageDropzone", {
@@ -278,330 +474,6 @@
         });
     });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let videoRecorder;
-        let videoStream;
-        let videoPreview = document.getElementById('videoPreview');
-        let recordButton = document.getElementById('recordButton');
-        let stopButton = document.getElementById('stopButton');
-        let videoInput = document.getElementById('videoInput');
-        let isRecording = false;
-        
-        // Initialize RecordRTC for video recording
-        async function startVideoRecording() {
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: true
-                });
-                
-                videoPreview.srcObject = videoStream;
-                videoPreview.muted = true;
-                videoPreview.play();
-                
-                const options = {
-                    mimeType: 'video/webm;codecs=vp8,opus',
-                    audioBitsPerSecond: 128000,
-                    videoBitsPerSecond: 2500000,
-                    bitsPerSecond: 2628000
-                };
-                
-                videoRecorder = RecordRTC(videoStream, {
-                    type: 'video',
-                    mimeType: 'video/webm',
-                    recorderType: RecordRTC.MediaStreamRecorder,
-                    timeSlice: 1000,
-                    ondataavailable: function(blob) {
-                        console.log('Video chunk available');
-                    }
-                });
-                
-                videoRecorder.startRecording();
-                isRecording = true;
-                recordButton.disabled = true;
-                stopButton.disabled = false;
-                
-            } catch (error) {
-                console.error('Error accessing media devices:', error);
-                alert('Error accessing camera/microphone. Please ensure you have granted the necessary permissions.');
-            }
-        }
-        
-        async function stopVideoRecording() {
-            return new Promise((resolve) => {
-                videoRecorder.stopRecording(async function() {
-                    const blob = videoRecorder.getBlob();
-                    
-                    // Stop all tracks in the stream
-                    videoStream.getTracks().forEach(track => track.stop());
-                    
-                    // Create a file from the blob
-                    const file = new File([blob], 'video_note.webm', { type: 'video/webm' });
-                    
-                    // Create a data URL for preview
-                    const videoURL = URL.createObjectURL(blob);
-                    videoPreview.srcObject = null;
-                    videoPreview.src = videoURL;
-                    videoPreview.controls = true;
-                    
-                    // Create a file input element and set the file
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    videoInput.files = dataTransfer.files;
-                    
-                    isRecording = false;
-                    recordButton.disabled = false;
-                    stopButton.disabled = true;
-                    
-                    resolve();
-                });
-            });
-        }
-        
-        // Event listeners
-        if (recordButton) {
-            recordButton.addEventListener('click', startVideoRecording);
-        }
-        
-        if (stopButton) {
-            stopButton.addEventListener('click', stopVideoRecording);
-        }
-        
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-            if (videoRecorder && isRecording) {
-                videoRecorder.stopRecording();
-            }
-        });
 
-        // عناصر HTML
-        const recordButton = document.getElementById('recordVideoButton');
-        const videoInput = document.getElementById('videoInput');
-        const videoPlayback = document.getElementById('videoPlayback');
-        const deleteVideoButton = document.querySelector('#deleteVideoNoteModal button[type="submit"]');
-
-        // وظيفة بدء التسجيل
-        async function startRecording() {
-            try {
-                // الحصول على تدفق الفيديو والصوت
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                videoPlayback.srcObject = videoStream; // عرض الفيديو المباشر في عنصر الفيديو
-                videoPlayback.style.display = 'block';
-
-                mediaRecorder = new MediaRecorder(videoStream, { mimeType: 'video/webm' });
-                recordedChunks = [];
-
-                // تخزين البيانات المسجلة
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-
-                // عند انتهاء التسجيل
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    videoPlayback.srcObject = null; // إيقاف عرض الكاميرا المباشرة
-                    videoPlayback.src = URL.createObjectURL(blob); // عرض الفيديو المسجل
-
-                    // إعداد الفيديو للرفع
-                    const file = new File([blob], 'video_note.webm', { type: 'video/webm' });
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    videoInput.files = dataTransfer.files;
-                };
-
-                mediaRecorder.start();
-                recordButton.textContent = 'إيقاف التسجيل';
-            } catch (error) {
-                console.error('Error accessing camera:', error);
-            }
-        }
-
-        // وظيفة إيقاف التسجيل
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                videoStream.getTracks().forEach(track => track.stop()); // إيقاف الكاميرا والصوت
-                recordButton.textContent = 'بدء التسجيل';
-            }
-        }
-
-        // التعامل مع الضغط على زر بدء/إيقاف التسجيل
-        recordButton.addEventListener('click', () => {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                stopRecording();
-            } else {
-                startRecording();
-            }
-        });
-
-        // وظيفة حذف الفيديو
-        deleteVideoButton.addEventListener('click', () => {
-            videoPlayback.src = '';
-            videoPlayback.srcObject = null;
-            videoPlayback.style.display = 'none';
-            videoInput.value = ''; // حذف الفيديو من الـ input
-        });
-
-        // عرض زر حذف الفيديو إذا كان الفيديو موجودًا مسبقًا
-        if (videoPlayback.src) {
-            videoPlayback.style.display = 'block';
-        }
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let recordButton = document.getElementById('recordAudioButton');
-        let stopButton = document.getElementById('stopAudioButton');
-        let voiceInput = document.getElementById('voiceInput');
-        let audioPlayback = document.getElementById('audioPlayback');
-        let audioRecorder;
-        let audioStream;
-        let isRecording = false;
-        
-        // Initialize RecordRTC for audio recording
-        async function startAudioRecording() {
-            try {
-                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                audioRecorder = RecordRTC(audioStream, {
-                    type: 'audio',
-                    mimeType: 'audio/webm',
-                    recorderType: RecordRTC.StereoAudioRecorder,
-                    desiredSampRate: 16000,
-                    numberOfAudioChannels: 1,
-                    timeSlice: 1000,
-                    ondataavailable: function(blob) {
-                        console.log('Audio chunk available');
-                    }
-                });
-                
-                audioRecorder.startRecording();
-                isRecording = true;
-                recordButton.disabled = true;
-                stopButton.disabled = false;
-                
-            } catch (error) {
-                console.error('Error accessing microphone:', error);
-                alert('Error accessing microphone. Please ensure you have granted the necessary permissions.');
-            }
-        }
-        
-        async function stopAudioRecording() {
-            return new Promise((resolve) => {
-                audioRecorder.stopRecording(async function() {
-                    const blob = audioRecorder.getBlob();
-                    
-                    // Stop all tracks in the stream
-                    audioStream.getTracks().forEach(track => track.stop());
-                    
-                    // Create a file from the blob
-                    const file = new File([blob], 'audio_note.webm', { type: 'audio/webm' });
-                    
-                    // Create an audio URL for playback
-                    const audioURL = URL.createObjectURL(blob);
-                    audioPlayback.src = audioURL;
-                    audioPlayback.controls = true;
-                    
-                    // Create a file input element and set the file
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    voiceInput.files = dataTransfer.files;
-                    
-                    isRecording = false;
-                    recordButton.disabled = false;
-                    stopButton.disabled = true;
-                    
-                    resolve();
-                });
-            });
-        }
-        
-        // Event listeners
-        if (recordButton) {
-            recordButton.addEventListener('click', startAudioRecording);
-        }
-        
-        if (stopButton) {
-            stopButton.addEventListener('click', stopAudioRecording);
-        }
-        
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (audioStream) {
-                audioStream.getTracks().forEach(track => track.stop());
-            }
-            if (audioRecorder && isRecording) {
-                audioRecorder.stopRecording();
-            }
-        });
-
-        let mediaRecorder;
-        let audioChunks = [];
-
-        recordButton.addEventListener('click', function () {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                recordButton.innerHTML = '<i class="fas fa-circle"></i> {{ __("dashboard.start_recording") }}';
-            } else {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        mediaRecorder = new MediaRecorder(stream);
-                        mediaRecorder.start();
-
-                        recordButton.innerHTML = '<i class="fas fa-stop"></i> {{ __("dashboard.stop_recording") }}';
-
-                        mediaRecorder.ondataavailable = event => {
-                            audioChunks.push(event.data);
-                        };
-
-                        mediaRecorder.onstop = () => {
-                            let audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                            let audioUrl = URL.createObjectURL(audioBlob);
-                            audioPlayback.src = audioUrl;
-                            audioPlayback.style.display = 'block';
-                            voiceInput.files = createFileList(audioBlob);
-                            audioChunks = [];
-
-                            // Convert the Blob to a Base64 string and save to localStorage
-                            saveAudioToLocalStorage(audioBlob);
-                        };
-                    });
-            }
-        });
-
-        function createFileList(blob) {
-            let file = new File([blob], "recorded-audio.wav", { type: "audio/wav" });
-            let dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            return dataTransfer.files;
-        }
-
-        function saveAudioToLocalStorage(blob) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                localStorage.setItem('recordedAudio', reader.result);
-            };
-            reader.readAsDataURL(blob);
-        }
-
-        // Load saved audio from localStorage
-        const savedAudio = localStorage.getItem('recordedAudio');
-        if (savedAudio) {
-            audioPlayback.src = savedAudio;
-            audioPlayback.style.display = 'block';
-        }
-    });
-</script>
 
 @endsection

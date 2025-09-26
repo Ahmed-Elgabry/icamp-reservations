@@ -112,40 +112,88 @@
                             <div class="dropzone dropzone-previews" id="preLoginImageDropzone"></div>
                         <div class="mb-3">
 
-                        <!-- Video Recording Section for Logout -->
+                        <!-- Video Upload Section -->
                         <div class="mb-3">
-                            <label class="form-label m-3">
+                            <label class="form-label">
                                 <i class="fas fa-video"></i> {{ __('dashboard.video_note') }}
                             </label>
-                            <div class="row align-items-center">
-                                <div class="col-md-12">
-                                    <!-- Video Preview -->
-                                    <video id="videoPreviewLogout" class="w-100 mb-3" style="max-width: 100%; background: #000;" controls></video>
-                                    
-                                    <!-- Video Controls -->
-                                    <div class="d-flex flex-wrap gap-2 mb-3">
-                                        <button type="button" id="recordButtonLogout" class="btn btn-primary">
-                                            <i class="fas fa-video me-2"></i>{{ __('dashboard.start_recording') }}
+                            <div class="media-upload-container" data-type="video">
+                                <input type="file" class="media-input d-none" name="video_note_logout" accept="video/*">
+                                <input type="hidden" name="video_note_logout_data" class="media-data">
+                                
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <div class="btn-group w-100">
+                                        <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="video">
+                                            <i class="fas fa-video me-2"></i> Record
                                         </button>
-                                        <button type="button" id="stopButtonLogout" class="btn btn-danger" disabled>
-                                            <i class="fas fa-stop me-2"></i>{{ __('dashboard.stop_recording') }}
+                                        <button type="button" class="btn btn-sm btn-secondary upload-media">
+                                            <i class="fas fa-upload me-2"></i> Upload
                                         </button>
-                                        <input type="file" id="videoInputLogout" name="video_note_logout" accept="video/*" class="d-none">
-                                        
-                                        @if ($order->video_note_logout)
-                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVideoNoteModal">
-                                                <i class="fas fa-trash me-2"></i>{{ __('dashboard.delete_video_note') }}
-                                            </button>
-                                            <!-- Show existing video if it exists -->
-                                            <div class="w-100 mt-3">
-                                                <p class="mb-2">{{ __('dashboard.existing_video') }}:</p>
-                                                <video class="w-100" controls>
-                                                    <source src="{{ asset('storage/' . $order->video_note_logout) }}">
-                                                    {{ __('dashboard.your_browser_does_not_support_video_tag') }}
-                                                </video>
-                                            </div>
-                                        @endif
                                     </div>
+                                    
+                                    @if ($order->video_note_logout)
+                                        <button type="button" class="btn btn-danger remove-media" data-bs-toggle="modal" data-bs-target="#deleteVideoNoteModal">
+                                            <i class="fas fa-trash me-2"></i>{{ __('dashboard.delete_video_note') }}
+                                        </button>
+                                    @endif
+                                </div>
+                                
+                                <div class="preview-video-container" style="display: {{ $order->video_note_logout ? 'block' : 'none' }}; margin-top: 10px;">
+                                    @if ($order->video_note_logout)
+                                        <p class="mb-2">{{ __('dashboard.existing_video') }}:</p>
+                                        <video class="preview-video w-100" controls>
+                                            <source src="{{ asset('storage/' . $order->video_note_logout) }}">
+                                            {{ __('dashboard.your_browser_does_not_support_video_tag') }}
+                                        </video>
+                                    @else
+                                        <video class="preview-video w-100" controls>
+                                            {{ __('dashboard.no_video_selected') }}
+                                        </video>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Audio Upload Section -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-microphone"></i> {{ __('dashboard.voice_note') }}
+                            </label>
+                            <div class="media-upload-container" data-type="audio">
+                                <input type="file" class="media-input d-none" name="voice_note_logout" accept="audio/*">
+                                <input type="hidden" name="voice_note_logout_data" class="media-data">
+                                
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <div class="btn-group w-100">
+                                        <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="audio">
+                                            <i class="fas fa-microphone me-2"></i> Record
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-secondary upload-media">
+                                            <i class="fas fa-upload me-2"></i> Upload
+                                        </button>
+                                    </div>
+                                    
+                                    @if ($order->voice_note_logout)
+                                        <button type="button" class="btn btn-danger remove-media" data-bs-toggle="modal" data-bs-target="#deleteVoiceNoteModal">
+                                            <i class="fas fa-trash me-2"></i>{{ __('dashboard.delete_voice_note') }}
+                                        </button>
+                                    @endif
+                                </div>
+                                
+                                <div class="preview-audio-container" style="display: {{ $order->voice_note_logout ? 'block' : 'none' }}; margin-top: 10px;">
+                                    @if ($order->voice_note_logout)
+                                        <p class="mb-2">{{ __('dashboard.existing_audio') }}:</p>
+                                        <audio class="preview-audio w-100" controls>
+                                            <source src="{{ asset('storage/' . $order->voice_note_logout) }}">
+                                            {{ __('dashboard.your_browser_does_not_support_audio_tag') }}
+                                        </audio>
+                                    @else
+                                        <audio class="preview-audio w-100" controls>
+                                            {{ __('dashboard.no_audio_selected') }}
+                                        </audio>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
 
                         <hr>
@@ -185,19 +233,274 @@
             width: 100px;
             height: 100px;
         }
+        
+        .capture-media.recording {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .media-upload-container {
+            margin-bottom: 1rem;
+        }
+        
+        .preview-video-container,
+        .preview-audio-container {
+            margin-top: 1rem;
+        }
+        
+        .preview-video,
+        .preview-audio {
+            max-width: 100%;
+            margin-top: 0.5rem;
+        }
     </style>
 @endpush
 
 @section('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/recordrtc@5.6.2/dist/RecordRTC.min.js"></script>
+    
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize media upload handlers
+        initializeMediaHandlers(document.body);
+
+        // Media recording variables
+        let mediaRecorder;
+        let mediaStream;
+        let recordedChunks = [];
+
+        // Function to handle media uploads and recordings
+        function initializeMediaHandlers(container) {
+            // Handle upload media button click
+            container.querySelectorAll('.upload-media').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const input = mediaContainer.querySelector('.media-input');
+                    if (input) {
+                        input.click();
+                    }
+                });
+            });
+
+            // Handle capture/record media button click
+            container.querySelectorAll('.capture-media').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const mediaType = mediaContainer.getAttribute('data-type');
+                    
+                    if (this.classList.contains('recording')) {
+                        // Stop recording
+                        stopMediaRecording(mediaType, mediaContainer);
+                        this.classList.remove('recording');
+                        this.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> ${mediaType === 'audio' ? 'Record' : 'Record'}`;
+                    } else {
+                        // Start recording
+                        startMediaRecording(mediaType, mediaContainer);
+                        this.classList.add('recording');
+                        this.innerHTML = '<i class="fas fa-stop me-2"></i> Stop';
+                    }
+                });
+            });
+
+            // Handle file input change
+            container.querySelectorAll('.media-input').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const mediaType = mediaContainer.getAttribute('data-type');
+                    const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
+                    const previewElement = mediaContainer.querySelector(`.preview-${mediaType}`);
+                    const dataInput = mediaContainer.querySelector('.media-data');
+
+                    if (previewElement) {
+                        if (mediaType === 'photo') {
+                            // For images, create a preview
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                previewElement.src = e.target.result;
+                                previewContainer.style.display = 'block';
+                                dataInput.value = e.target.result.split(',')[1]; // Store base64 data
+                            };
+                            reader.readAsDataURL(file);
+                        } else if (mediaType === 'video' || mediaType === 'audio') {
+                            // For video/audio, create a preview with controls
+                            const url = URL.createObjectURL(file);
+                            const source = document.createElement('source');
+                            source.src = url;
+                            source.type = file.type;
+                            
+                            // Clear previous sources
+                            while (previewElement.firstChild) {
+                                previewElement.removeChild(previewElement.firstChild);
+                            }
+                            
+                            previewElement.appendChild(source);
+                            previewContainer.style.display = 'block';
+                            
+                            // Load the media to ensure it plays
+                            previewElement.load();
+                            
+                            // Store file data
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                dataInput.value = e.target.result.split(',')[1]; // Store base64 data
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                });
+            });
+
+            // Handle remove media button click
+            container.querySelectorAll('.remove-media').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const mediaContainer = this.closest('.media-upload-container');
+                    const mediaType = mediaContainer.getAttribute('data-type');
+                    const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
+                    const fileInput = mediaContainer.querySelector('.media-input');
+                    const dataInput = mediaContainer.querySelector('.media-data');
+                    
+                    // Reset file input
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+                    
+                    // Clear data input
+                    if (dataInput) {
+                        dataInput.value = '';
+                    }
+                    
+                    // Hide preview
+                    if (previewContainer) {
+                        previewContainer.style.display = 'none';
+                    }
+                    
+                    // Create a hidden input to flag deletion to backend
+                    const deleteFlag = document.createElement('input');
+                    deleteFlag.type = 'hidden';
+                    deleteFlag.name = `delete_${mediaType}_flag`;
+                    deleteFlag.value = '1';
+                    mediaContainer.appendChild(deleteFlag);
+                });
+            });
+        }
+
+        // Start media recording
+        async function startMediaRecording(mediaType, container) {
+            try {
+                recordedChunks = [];
+                const constraints = {
+                    audio: true,
+                    video: mediaType === 'video' ? { facingMode: 'environment' } : false
+                };
+
+                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                mediaRecorder = new MediaRecorder(mediaStream);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, {
+                        type: mediaType === 'audio' ? 'audio/webm' : 'video/webm'
+                    });
+
+                    const file = new File([blob], `${mediaType}_${Date.now()}.webm`, {
+                        type: mediaType === 'audio' ? 'audio/webm' : 'video/webm'
+                    });
+
+                    // Create a data transfer object to simulate file input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+
+                    // Set the file input files to the recorded file
+                    const fileInput = container.querySelector('.media-input');
+                    fileInput.files = dataTransfer.files;
+
+                    // Create a URL for the recorded media
+                    const mediaURL = URL.createObjectURL(blob);
+                    const previewElement = container.querySelector(`.preview-${mediaType}`);
+                    const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
+                    
+                    // Clear previous sources
+                    while (previewElement.firstChild) {
+                        previewElement.removeChild(previewElement.firstChild);
+                    }
+                    
+                    // Add new source
+                    const source = document.createElement('source');
+                    source.src = mediaURL;
+                    source.type = mediaType === 'audio' ? 'audio/webm' : 'video/webm';
+                    previewElement.appendChild(source);
+                    
+                    // Show preview
+                    previewContainer.style.display = 'block';
+                    
+                    // Store file data
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const dataInput = container.querySelector('.media-data');
+                        dataInput.value = e.target.result.split(',')[1];
+                    };
+                    reader.readAsDataURL(blob);
+                };
+
+                mediaRecorder.start();
+                
+                // Auto-stop recording after 5 minutes (safety measure)
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                        const button = container.querySelector('.capture-media');
+                        if (button) {
+                            button.classList.remove('recording');
+                            button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> ${mediaType === 'audio' ? 'Record' : 'Record'}`;
+                        }
+                    }
+                }, 5 * 60 * 1000); // 5 minutes
+
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                alert(`Error accessing ${mediaType === 'audio' ? 'microphone' : 'camera'}. Please check permissions and try again.`);
+                
+                // Reset the record button
+                const button = container.querySelector('.capture-media');
+                if (button) {
+                    button.classList.remove('recording');
+                    button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> ${mediaType === 'audio' ? 'Record' : 'Record'}`;
+                }
+            }
+        }
+
+        // Stop media recording
+        function stopMediaRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+            
+            // Stop all tracks in the stream
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+        }
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            stopMediaRecording();
+        });
+
+        // Initialize Dropzone for pre-login images
         Dropzone.autoDiscover = false;
+        
+        var uploadedImages = [];
 
-        $(document).ready(function () {
-            var uploadedImages = [];
-
-            var myDropzone = new Dropzone("#preLoginImageDropzone", {
+        var myDropzone = new Dropzone("#preLoginImageDropzone", {
                 url: "{{ route('orders.uploadTemporaryImage') }}",
                 paramName: "pre_login_image",
                 maxFiles: 5,
@@ -284,205 +587,5 @@
         });
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Video Recording Variables
-            let videoRecorder;
-            let videoStream;
-            
-            // Video Elements
-            const videoPreview = document.getElementById('videoPreviewLogout');
-            const recordButton = document.getElementById('recordButtonLogout');
-            const stopButton = document.getElementById('stopButtonLogout');
-            const videoInput = document.getElementById('videoInputLogout');
-            
-            // Start/Stop button event listeners
-            if (recordButton && stopButton) {
-                recordButton.addEventListener('click', startVideoRecording);
-                stopButton.addEventListener('click', stopVideoRecording);
-            }
-            
-            // Video file input handler
-            if (videoInput) {
-                videoInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const videoURL = URL.createObjectURL(file);
-                        videoPreview.src = videoURL;
-                        videoPreview.controls = true;
-                    }
-                });
-            }
-            
-            // Start Video Recording Function
-            async function startVideoRecording() {
-                try {
-                    videoStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: true, 
-                        audio: true 
-                    });
-                    
-                    videoPreview.srcObject = videoStream;
-                    videoPreview.muted = true; // Mute to avoid echo
-                    videoPreview.play();
-                    
-                    videoRecorder = new RecordRTC.MediaStreamRecorder(videoStream, {
-                        type: 'video',
-                        mimeType: 'video/webm;codecs=vp9',
-                        timeSlice: 1000, // Save every 1 second
-                        ondataavailable: function(blob) {
-                            // Handle data if needed
-                        }
-                    });
-                    
-                    videoRecorder.startRecording();
-                    
-                    // Update UI
-                    recordButton.disabled = true;
-                    stopButton.disabled = false;
-                    
-                } catch (error) {
-                    console.error('Error accessing camera:', error);
-                    alert('Error accessing camera. Please check permissions and try again.');
-                }
-            }
-            
-            // Stop Video Recording Function
-            function stopVideoRecording() {
-                if (!videoRecorder) return;
-                
-                videoRecorder.stopRecording(function() {
-                    // Get the recorded blob
-                    const blob = videoRecorder.getBlob();
-                    
-                    // Create a file from the blob
-                    const file = new File([blob], 'video_note_' + Date.now() + '.webm', { 
-                        type: 'video/webm' 
-                    });
-                    
-                    // Create a DataTransfer object and add the file
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    
-                    // Set the file input files to the recorded file
-                    videoInput.files = dataTransfer.files;
-                    
-                    // Create a URL for the recorded video
-                    const videoURL = URL.createObjectURL(blob);
-                    
-                    // Update the video preview
-                    videoPreview.srcObject = null;
-                    videoPreview.src = videoURL;
-                    videoPreview.muted = false;
-                    videoPreview.controls = true;
-                    
-                    // Stop all tracks in the stream
-                    if (videoStream) {
-                        videoStream.getTracks().forEach(track => track.stop());
-                    }
-                    
-                    // Update UI
-                    recordButton.disabled = false;
-                    stopButton.disabled = true;
-                });
-            }
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Audio Recording Variables
-            let audioRecorder;
-            let audioStream;
-            
-            // Audio Elements
-            const audioPlayback = document.getElementById('audioPlaybackLogout');
-            const recordAudioButton = document.getElementById('recordAudioButtonLogout');
-            const stopAudioButton = document.getElementById('stopAudioButtonLogout');
-            const voiceInput = document.getElementById('voiceInputLogout');
-            
-            // Only proceed if we're on a page with audio recording
-            if (recordAudioButton && stopAudioButton && audioPlayback && voiceInput) {
-                // Start/Stop button event listeners for audio
-                recordAudioButton.addEventListener('click', startAudioRecording);
-                stopAudioButton.addEventListener('click', stopAudioRecording);
-                
-                // Audio file input handler
-                voiceInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const audioURL = URL.createObjectURL(file);
-                        audioPlayback.src = audioURL;
-                        audioPlayback.controls = true;
-                    }
-                });
-                
-                // Start Audio Recording Function
-                async function startAudioRecording() {
-                    try {
-                        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        
-                        audioRecorder = new RecordRTC(audioStream, {
-                            type: 'audio',
-                            mimeType: 'audio/webm',
-                            recorderType: RecordRTC.MediaStreamRecorder,
-                            timeSlice: 1000, // Save every 1 second
-                            ondataavailable: function(blob) {
-                                // Handle data if needed
-                            }
-                        });
-                        
-                        audioRecorder.startRecording();
-                        
-                        // Update UI
-                        recordAudioButton.disabled = true;
-                        stopAudioButton.disabled = false;
-                        
-                    } catch (error) {
-                        console.error('Error accessing microphone:', error);
-                        alert('Error accessing microphone. Please check permissions and try again.');
-                    }
-                }
-                
-                // Stop Audio Recording Function
-                function stopAudioRecording() {
-                    if (!audioRecorder) return;
-                    
-                    audioRecorder.stopRecording(function() {
-                        // Get the recorded blob
-                        const blob = audioRecorder.getBlob();
-                        
-                        // Create a file from the blob
-                        const file = new File([blob], 'voice_note_' + Date.now() + '.webm', { 
-                            type: 'audio/webm' 
-                        });
-                        
-                        // Create a DataTransfer object and add the file
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
-                        
-                        // Set the file input files to the recorded file
-                        voiceInput.files = dataTransfer.files;
-                        
-                        // Create a URL for the recorded audio
-                        const audioURL = URL.createObjectURL(blob);
-                        
-                        // Update the audio playback
-                        audioPlayback.src = audioURL;
-                        audioPlayback.controls = true;
-                        
-                        // Stop all tracks in the stream
-                        if (audioStream) {
-                            audioStream.getTracks().forEach(track => track.stop());
-                        }
-                        
-                        // Update UI
-                        recordAudioButton.disabled = false;
-                        stopAudioButton.disabled = true;
-                    });
-                }
-            }
-        });
-    </script>
 
 @endsection
