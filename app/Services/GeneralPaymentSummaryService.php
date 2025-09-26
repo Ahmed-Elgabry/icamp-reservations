@@ -43,8 +43,8 @@ class GeneralPaymentSummaryService
             ])
             ->where(fn ($q) =>
                 $q->where('source', "insurances")
-                ->whereHas("payment", fn ($q) => $q->whereNot('insurance_status', 'returned'))
-                ->whereHas("order", fn ($q) => $q->where('insurance_status', "1")) // this is corresponding with the button in verfication in order return insurance
+                ->where("amount",">" ,0)
+                // ->whereHas("order", fn ($q) => $q->where('insurance_status', "1")) // this is corresponding with the button in verfication in order return insurance
                 ->orWhere('source', 'reservation_addon')
                 ->orWhere('source', 'warehouse_sale')
             );

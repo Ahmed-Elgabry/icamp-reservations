@@ -80,7 +80,7 @@
                     <td>{{__('dashboard.statement') }}</td>
                     <th>{{ __('dashboard.price') }}</th>
                     <th class="">{{ __('dashboard.payment_method') }}</th>
-                    <th class="">{{ __('dashboard.debit') }} {{ __('dashboard.from') }}</th>
+                    <th class="">{{ __('dashboard.debit') }}{{" "}} {{ __('dashboard.from') }}</th>
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.verified') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>

@@ -118,7 +118,10 @@ class OrderController extends Controller
 
             case 'confiscated_partial':
                 $remainingAmount = $originalInsuranceAmount - $insuranceAmount;
+                
                 foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
+                    //reset the tranaction 
+                    $insurance->transaction->update(['amount' => $insurance->price]);
                     $insurance->update([
                         'insurance_status' => 'confiscated_partial',
                     ]);
@@ -161,6 +164,7 @@ class OrderController extends Controller
             'confiscation_description' => $confiscationDescription,
             'insurance_amount' => $insuranceAmounts,
         ]);
+        \Log::info(json_encode($order));
     }
 
     public function create()
@@ -175,16 +179,16 @@ class OrderController extends Controller
         return view('dashboard.orders.create', [
             'customers' => $customers,
             'services' => $services,
-            'internalNotes' => $internalNotes,
+            'internalNotes' => $internalNotes, 
         ]);
     }
 
     public function updateInsurance(Request $request, $orderId)
     {
         $validatedData = $request->validate([
-            'insurance_status' => 'nullable|in:returned,confiscated_full,confiscated_partial',
+            'insurance_status' => 'required|in:returned,confiscated_full,confiscated_partial',
             'confiscation_description' => 'nullable|string',
-            'partial_confiscation_amount' => 'nullable|numeric|min:0',
+            'partial_confiscation_amount' => 'required_if:insurance_status,confiscated_partial|min:0',
         ]);
         $order = Order::findOrFail($orderId);
         if ($order->verifiedInsurance()->count() == 0) {
@@ -196,7 +200,7 @@ class OrderController extends Controller
             $order->update([
                 'insurance_status' => null,
             ]);
-            return redirect()->back()->withErrors(['insurance_amount' => 'لا يوجد تأمين معتمد']);
+            return redirect()->back()->withErrors(['insurance_amount' => __('dashboard.no_approved_insurance')]);
         }
 
         if (!$order->insurance_approved) {
@@ -206,11 +210,23 @@ class OrderController extends Controller
         if ($order->insurance_status == $validatedData["insurance_status"]) {
             return redirect()->back();
         }
-        $insuranceAmount = $request->input('partial_confiscation_amount', 0);
         $originalInsuranceAmount = $order->verifiedInsuranceAmount();
         $price = $order->price;
+        
         if ($originalInsuranceAmount <= 0) {
-            return back()->withErrors(['insurance_amount' => 'لا يوجد تأمين مسدد قابل للرد']);
+            return back()->withErrors(['insurance_amount' => __('dashboard.no_insurance_to_return')]);
+        }
+        
+        $insuranceAmount = 0;
+        if ($validatedData['insurance_status'] === 'confiscated_partial') {
+            $insuranceAmount = (float)$request->input('partial_confiscation_amount');
+            // Ensure the partial amount is not greater than the original amount
+            if ($insuranceAmount > $originalInsuranceAmount) {
+                return back()->withErrors(['partial_confiscation_amount' => __('dashboard.confiscation_amount_exceeds_original')]);
+            }
+            if ($insuranceAmount <= 0) {
+                return back()->withErrors(['partial_confiscation_amount' => __('dashboard.enter_valid_confiscation_amount')]);
+            }
         }
         $this->updateInsuranceStatusAndPrice($order, $price, $originalInsuranceAmount, $validatedData["insurance_status"], $validatedData["confiscation_description"],  $insuranceAmount);
         return back()->with('success', __('dashboard.success'));
@@ -273,15 +289,19 @@ class OrderController extends Controller
             return response()->json(['error' => __('dashboard.has already been served the selected services on this date')], 400);
         }
 
-        if ($request->filled('time_from') && $request->filled('time_to')) {
-            $timeFrom = Carbon::parse($request->time_from)->format('H:i:s');
+        // Handle time_from and time_to separately to ensure both are processed independently
+        if ($request->filled('time_from')) {
+            $validatedData['time_from'] = Carbon::parse($request->time_from)->format('H:i:s');
+        }
+        
+        if ($request->filled('time_to')) {
             $timeTo = Carbon::parse($request->time_to)->format('H:i:s');
-
-            if ($timeFrom > $timeTo) {
+            
+            // If time_from is set and time_to is before time_from, set time_to to 24:00:00
+            if (isset($validatedData['time_from']) && $validatedData['time_from'] > $timeTo) {
                 $timeTo = '24:00:00';
             }
-
-            $validatedData['time_from'] = $timeFrom;
+            
             $validatedData['time_to'] = $timeTo;
         }
 
@@ -972,7 +992,7 @@ class OrderController extends Controller
                 return redirect()->back()->with('success', __('dashboard.success'));
             } elseif ($type == 'expense') {
                 $item = Expense::findOrFail($id);
-                $transaction = Transaction::where('expense_id', $item->id)->first();
+                $transaction = $item->transaction()->first();
             } elseif ($type == 'warehouse_sales') {
                 $item = OrderItem::findOrFail($id);
                 $transaction = Transaction::where('order_item_id', $item->id)->first();

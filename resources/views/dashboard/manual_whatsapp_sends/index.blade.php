@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('title', __('dashboard.manual_whatsapp_sends'))
+@section('pageTitle', __('dashboard.manual_whatsapp_sends'))
 
 @section('content')
 <div class="card">

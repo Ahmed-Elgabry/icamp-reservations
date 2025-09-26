@@ -145,7 +145,7 @@ class StockController extends Controller
         $count = (int) $attached->pivot->count;
 
         \DB::transaction(function () use ($service, $stock, $count) {
-            $stock->increment('quantity', $count);
+            // $stock->increment('quantity', $count);
             $service->stocks()->detach($stock->id);
         });
 

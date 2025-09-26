@@ -42,7 +42,7 @@
         <div class="card card-flush">
             <div class="pt-5 px-9 gap-2 gap-md-5">
                 <div class="row g-3 small">
-                    <div class="col-md-1 p">
+                    <div class="col-md-1 text-center">
                         <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
                         <div class="fw-bold">{{ $order->id }}</div>
                     </div>
@@ -107,68 +107,48 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <label for="pre_login_image" class="form-label">{{ __('dashboard.pre_login_image') }}</label>
                         <div class="dropzone dropzone-previews" id="preLoginImageDropzone"></div>
                         <input type="file" accept="image/*" capture="camera" id="cameraInput" style="display:none;">
                         <button type="button" class="btn btn-secondary mt-3"
                             id="openCamera">{{ __('dashboard.capture_photo') }}</button>
                     </div>
+                    <!-- Audio Recording Section -->
+
+
+                    <!-- Video Recording Section -->
                     <div class="mb-3">
-                        <label for="voice_note" class="form-label m-3">
-                            <i class="fas fa-microphone-alt"></i> {{ __('dashboard.voice_note') }} :
+                        <label class="form-label m-3">
+                            <i class="fas fa-video"></i> {{ __('dashboard.video_note') }}
                         </label>
                         <div class="row align-items-center">
-                            <div class="col-md-12 d-flex align-items-center">
-                                <button type="button" id="recordButton" class="btn btn-info col-3 me-2"
-                                    aria-label="{{ __('dashboard.start_recording') }}">
-                                    <i class="fas fa-circle"></i> {{ __('dashboard.start_recording') }}
-                                </button>
-                                @if ($order->voice_note)
-                                    <div class="mb-3">
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                            data-bs-target="#deleteVoiceNoteModal">
-                                            {{ __('dashboard.delete_voice_note') }}
-                                        </button>
-                                    </div>
-                                @endif
-                                <input type="file" accept="audio/*" capture="microphone" id="voiceInput"
-                                    name="voice_note" class="form-control" style="display:none;">
-                                <audio id="audioPlayback" class="col-5 m-3" controls></audio>
-
-                                <small class="form-text text-muted ms-2">
-                                    {{ __('dashboard.record_voice_note_instruction') }}
-                                    <br>
-                                    <i class="fas fa-exclamation-circle"></i> {{ __('dashboard.audio_files_only') }}
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Confirmation Modal for Deleting Video Note -->
-
-
-                    <div class="mb-3">
-                        <label for="video_note" class="form-label m-3">
-                            <i class="fas fa-video"></i> {{ __('dashboard.video_note') }} :
-                        </label>
-                        <div class="row align-items-center">
-                            <div class="col-md-12 d-flex align-items-center">
-                                <button type="button" id="recordVideoButton" class="btn btn-info col-3 me-2">
-                                    <i class="fas fa-circle"></i> {{ __('dashboard.start_recording_video') }}
-                                </button>
-                                <button type="button" id="stopVideoButton" class="btn btn-warning col-3 me-2"
-                                    style="display: none;">
-                                    {{ __('dashboard.stop_recording_video') }}
-                                </button>
-                                @if ($order->video_note)
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                        data-bs-target="#deleteVideoNoteModal">
-                                        {{ __('dashboard.delete_video_note') }}
+                            <div class="col-md-12">
+                                <!-- Video Preview -->
+                                <video id="videoPreview" class="w-100 mb-3" style="max-width: 100%; background: #000;" controls></video>
+                                
+                                <!-- Video Controls -->
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <button type="button" id="recordButton" class="btn btn-primary">
+                                        <i class="fas fa-video me-2"></i>{{ __('dashboard.start_recording') }}
                                     </button>
-                                    <!-- عرض الفيديو المسجل إذا كان موجودًا -->
-                                    <video class="col-5 m-3" controls>
-                                        <source src="{{ asset('storage/' . $order->video_note) }}">
-                                        {{ __('dashboard.your_browser_does_not_support_video_tag') }}
-                                    </video>
+                                    <button type="button" id="stopButton" class="btn btn-danger" disabled>
+                                        <i class="fas fa-stop me-2"></i>{{ __('dashboard.stop_recording') }}
+                                    </button>
+                                    <input type="file" id="videoInput" name="video_note" accept="video/*" class="d-none">
+                                    
+                                    @if ($order->video_note)
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVideoNoteModal">
+                                            <i class="fas fa-trash me-2"></i>{{ __('dashboard.delete_video_note') }}
+                                        </button>
+                                        <!-- Show existing video if it exists -->
+                                        <div class="w-100 mt-3">
+                                            <p class="mb-2">{{ __('dashboard.existing_video') }}:</p>
+                                            <video class="w-100" controls>
+                                                <source src="{{ asset('storage/' . $order->video_note) }}">
+                                                {{ __('dashboard.your_browser_does_not_support_video_tag') }}
+                                            </video>
+                                        </div>
+                                    @endif
+                                </div>
                                 @endif
                                 <input type="file" accept="video/*" capture="camcorder" id="videoInput"
                                     name="video_note" class="form-control" style="display:none;">
@@ -222,13 +202,14 @@
 @endpush
 
 @section('scripts')
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/recordrtc@5.6.2/dist/RecordRTC.min.js"></script>
 
 <script>
     Dropzone.autoDiscover = false;
 
     $(document).ready(function () {
+{{ ... }}
         var uploadedImages = [];
 
         var myDropzone = new Dropzone("#preLoginImageDropzone", {
@@ -299,9 +280,107 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        let mediaRecorder;
-        let recordedChunks = [];
+        let videoRecorder;
         let videoStream;
+        let videoPreview = document.getElementById('videoPreview');
+        let recordButton = document.getElementById('recordButton');
+        let stopButton = document.getElementById('stopButton');
+        let videoInput = document.getElementById('videoInput');
+        let isRecording = false;
+        
+        // Initialize RecordRTC for video recording
+        async function startVideoRecording() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: true
+                });
+                
+                videoPreview.srcObject = videoStream;
+                videoPreview.muted = true;
+                videoPreview.play();
+                
+                const options = {
+                    mimeType: 'video/webm;codecs=vp8,opus',
+                    audioBitsPerSecond: 128000,
+                    videoBitsPerSecond: 2500000,
+                    bitsPerSecond: 2628000
+                };
+                
+                videoRecorder = RecordRTC(videoStream, {
+                    type: 'video',
+                    mimeType: 'video/webm',
+                    recorderType: RecordRTC.MediaStreamRecorder,
+                    timeSlice: 1000,
+                    ondataavailable: function(blob) {
+                        console.log('Video chunk available');
+                    }
+                });
+                
+                videoRecorder.startRecording();
+                isRecording = true;
+                recordButton.disabled = true;
+                stopButton.disabled = false;
+                
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                alert('Error accessing camera/microphone. Please ensure you have granted the necessary permissions.');
+            }
+        }
+        
+        async function stopVideoRecording() {
+            return new Promise((resolve) => {
+                videoRecorder.stopRecording(async function() {
+                    const blob = videoRecorder.getBlob();
+                    
+                    // Stop all tracks in the stream
+                    videoStream.getTracks().forEach(track => track.stop());
+                    
+                    // Create a file from the blob
+                    const file = new File([blob], 'video_note.webm', { type: 'video/webm' });
+                    
+                    // Create a data URL for preview
+                    const videoURL = URL.createObjectURL(blob);
+                    videoPreview.srcObject = null;
+                    videoPreview.src = videoURL;
+                    videoPreview.controls = true;
+                    
+                    // Create a file input element and set the file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    videoInput.files = dataTransfer.files;
+                    
+                    isRecording = false;
+                    recordButton.disabled = false;
+                    stopButton.disabled = true;
+                    
+                    resolve();
+                });
+            });
+        }
+        
+        // Event listeners
+        if (recordButton) {
+            recordButton.addEventListener('click', startVideoRecording);
+        }
+        
+        if (stopButton) {
+            stopButton.addEventListener('click', stopVideoRecording);
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            if (videoRecorder && isRecording) {
+                videoRecorder.stopRecording();
+            }
+        });
 
         // عناصر HTML
         const recordButton = document.getElementById('recordVideoButton');
@@ -382,9 +461,90 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        let recordButton = document.getElementById('recordButton');
+        let recordButton = document.getElementById('recordAudioButton');
+        let stopButton = document.getElementById('stopAudioButton');
         let voiceInput = document.getElementById('voiceInput');
         let audioPlayback = document.getElementById('audioPlayback');
+        let audioRecorder;
+        let audioStream;
+        let isRecording = false;
+        
+        // Initialize RecordRTC for audio recording
+        async function startAudioRecording() {
+            try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                audioRecorder = RecordRTC(audioStream, {
+                    type: 'audio',
+                    mimeType: 'audio/webm',
+                    recorderType: RecordRTC.StereoAudioRecorder,
+                    desiredSampRate: 16000,
+                    numberOfAudioChannels: 1,
+                    timeSlice: 1000,
+                    ondataavailable: function(blob) {
+                        console.log('Audio chunk available');
+                    }
+                });
+                
+                audioRecorder.startRecording();
+                isRecording = true;
+                recordButton.disabled = true;
+                stopButton.disabled = false;
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Error accessing microphone. Please ensure you have granted the necessary permissions.');
+            }
+        }
+        
+        async function stopAudioRecording() {
+            return new Promise((resolve) => {
+                audioRecorder.stopRecording(async function() {
+                    const blob = audioRecorder.getBlob();
+                    
+                    // Stop all tracks in the stream
+                    audioStream.getTracks().forEach(track => track.stop());
+                    
+                    // Create a file from the blob
+                    const file = new File([blob], 'audio_note.webm', { type: 'audio/webm' });
+                    
+                    // Create an audio URL for playback
+                    const audioURL = URL.createObjectURL(blob);
+                    audioPlayback.src = audioURL;
+                    audioPlayback.controls = true;
+                    
+                    // Create a file input element and set the file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    voiceInput.files = dataTransfer.files;
+                    
+                    isRecording = false;
+                    recordButton.disabled = false;
+                    stopButton.disabled = true;
+                    
+                    resolve();
+                });
+            });
+        }
+        
+        // Event listeners
+        if (recordButton) {
+            recordButton.addEventListener('click', startAudioRecording);
+        }
+        
+        if (stopButton) {
+            stopButton.addEventListener('click', stopAudioRecording);
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+            }
+            if (audioRecorder && isRecording) {
+                audioRecorder.stopRecording();
+            }
+        });
 
         let mediaRecorder;
         let audioChunks = [];

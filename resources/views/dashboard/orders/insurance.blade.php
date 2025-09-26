@@ -90,7 +90,7 @@
 
                                 @if($order->insurance_status === 'confiscated_full')
                                 <div class="mb-2">
-                                    <span class="fw-bold text-danger">تمت مصاردة التامين كلياً</span>
+                                    <span class="fw-bold text-danger">{{ __('dashboard.insurance_confiscated_full') }}</span>
                                     @if($order->partial_confiscation_amount)
                                     <span class="text-gray-700">- {{ number_format($order->insuranceFromTransaction(), 2) }} AED</span>
                                     @endif
@@ -99,10 +99,10 @@
 
                                 @if($order->insurance_status === 'confiscated_partial')
                                 <div class="mb-2">
-                                    <span class="fw-bold text-warning">تمت مصاردة التامين جزئياً</span>
+                                    <span class="fw-bold text-warning">{{ __('dashboard.insurance_confiscated_partial') }}</span>
                                     <br>
                                     @if($order->insuranceFromTransaction())
-                                    <span class="text-gray-700">المتبقي من مبلغ التأمين: </span>
+                                    <span class="text-gray-700">{{ __('dashboard.remaining_insurance') }}: </span>
                                     <span class="fw-bold text-success">{{ number_format($order->verifiedInsuranceAmount() - $order->insuranceFromTransaction(), 2) }} AED</span>
                                     @endif
                                 </div>
@@ -110,7 +110,7 @@
 
                                 @if($order->insurance_status === 'returned')
                                 <div class="mb-2">
-                                    <span class="fw-bold text-success">تم رد مبلغ التأمين</span>
+                                    <span class="fw-bold text-success">{{ __('dashboard.insurance_returned') }}</span>
                                 </div>
                                 @endif
                             </div>
@@ -140,28 +140,71 @@
     $(document).ready(function() {
         function renderStatus() {
             var insuranceStatus = $("#insurance_status").val();
+            var currentStatus = '{{ $order->insurance_status }}';
+            var verifiedAmount = parseFloat('{{ $order->verifiedInsuranceAmount() }}');
+            var currentAmount = parseFloat($('#partial_confiscation_amount').val());
+            var remainingAmount = Math.max(0, verifiedAmount - currentAmount);
 
-            // عرض/إخفاء وصف المصادرة بناءً على الحالة المختارة
+            // Show/hide confiscation description based on selected status
             if (insuranceStatus === 'confiscated_full' || insuranceStatus === 'confiscated_partial') {
                 $('#confiscation_description_group').show();
             } else {
                 $('#confiscation_description_group').hide();
             }
 
-            // عرض/إخفاء مبلغ المصادرة الجزئية إذا كانت الحالة هي "مصادرة جزئية"
+            // Show/hide partial confiscation amount field
             if (insuranceStatus === 'confiscated_partial') {
                 $('#partial_confiscation_amount_group').show();
+                
+                // Initialize the input field with the remaining amount if it's empty
+                if (isNaN(currentAmount) || currentAmount <= 0) {
+                    $('#partial_confiscation_amount').val(remainingAmount.toFixed(2));
+                }
+                
+                // Add validation to ensure amount doesn't exceed remaining amount
+                $('#partial_confiscation_amount').attr('max', remainingAmount);
+                
+                // Show error if amount is invalid
+                $('#partial_confiscation_amount').on('input', function() {
+                    var amount = parseFloat($(this).val());
+                    if (isNaN(amount) || amount <= 0) {
+                        $(this).addClass('is-invalid');
+                        $('#amount-error').remove();
+                        $(this).after('<div id="amount-error" class="invalid-feedback">' + '{{ __("dashboard.enter_valid_amount") }}' + '</div>');
+                    } else if (amount > remainingAmount) {
+                        $(this).addClass('is-invalid');
+                        $('#amount-error').remove();
+                        $(this).after('<div id="amount-error" class="invalid-feedback">' + '{{ __("dashboard.amount_exceeds_remaining") }} (' + remainingAmount.toFixed(2) + ')' + '</div>');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                        $('#amount-error').remove();
+                    }
+                });
             } else {
                 $('#partial_confiscation_amount_group').hide();
             }
         }
 
-        // استدعاء الدالة عند تحميل الصفحة لتعيين الحقول المناسبة
+        // Call the function when the page loads
         renderStatus();
 
-        // استدعاء الدالة عند تغيير حالة التأمين
+        // Call the function when insurance status changes
         $('#insurance_status').change(function() {
             renderStatus();
+        });
+
+        // Form validation before submission
+        $('form').on('submit', function(e) {
+            var status = $('#insurance_status').val();
+            var amount = parseFloat($('#partial_confiscation_amount').val());
+            var remainingAmount = Math.max(0, verifiedAmount - currentAmount);
+            
+            if (status === 'confiscated_partial' && (isNaN(amount) || amount <= 0 || amount > remainingAmount)) {
+                e.preventDefault();
+                alert('{{ __("dashboard.enter_valid_confiscation_amount") }}');
+                return false;
+            }
+            return true;
         });
     });
 </script>

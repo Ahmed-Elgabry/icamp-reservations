@@ -33,9 +33,7 @@ class StockAdjustmentService
             $available_quantity_before = $stock->quantity;
             $available_percentage_before = $stock->percentage ?? null;
 
-            // $data['status'] is refer to the transaction on the order this mean if it is 
-            // increment we need to decrement the stock and vice versa
-            $status = $data['status'] === 'increment' ? 'decrement' : 'increment';
+            $status = $data['status'] === 'increment' ? 'increment' : 'decrement';
             $availableQtyAfter = $this->computeAfterQuantity($stock, $status, $data['qty']);
 
             $available_percentage_after = $this->computeAfterPercentage($stock, $status, $data['qty']);
@@ -48,7 +46,7 @@ class StockAdjustmentService
                 'quantity' => $data['qty'],
                 "reason" => "for_orders",
                 // type  is increment to order and decremnt to stock and vice versa
-                'type' => $data['status'] === 'increment' ? 'item_decrement' : 'item_increment',
+                'type' => $data['status'] === 'increment' ? 'item_increment' : 'item_decrement',
                 'order_id' => $data['orderId'] ?? null,
                 'source' => 'Reservation',
                 'percentage' => $available_percentage_after,
@@ -104,7 +102,7 @@ class StockAdjustmentService
     protected function applyChange(Stock $stock, string $status, float $qty): void
     {
         switch ($status) {
-            case 'decrement':
+            case 'increment':
                 if ($stock->percentage) {
                     $stock->increment('percentage', $qty);
                 } else {
@@ -112,7 +110,7 @@ class StockAdjustmentService
                 }
                 break;
 
-            case 'increment':
+            case 'decrement':
                 if (!$this->checkForSufficientStock($stock->id, $qty, $status)) {
                     abort(422, __('dashboard.insufficient_stock'));
                 }

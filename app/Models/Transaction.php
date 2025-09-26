@@ -19,7 +19,6 @@ class Transaction extends Model
         'date',
         'verified',
         'description',
-        'verified',
         'order_id',
         'order_addon_id',
         'customer_id',

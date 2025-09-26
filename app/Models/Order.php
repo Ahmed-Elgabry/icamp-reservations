@@ -58,7 +58,8 @@ class Order extends Model
         'invoice_notes',
         'receipt_notes',
         'people_count',
-        "client_notes"
+        "client_notes",
+        "insurance_approved"
     ];
     
     // Alternatively, you can keep using guarded if you prefer
@@ -155,7 +156,7 @@ class Order extends Model
     }
     public function verifiedPayments()
     {
-        return $this->payments()->where('verified', true);
+        return $this->payments()->where('verified', "1");
     }
 
 

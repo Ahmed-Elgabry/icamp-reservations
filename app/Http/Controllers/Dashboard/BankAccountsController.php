@@ -97,9 +97,7 @@ class BankAccountsController extends Controller
                     ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                         return $query->whereBetween('date', [$startDate, $endDate]);
                     })
-                    ->where(function ($query) {
-                        $query->where('verified', "1");
-                    })
+                    ->where('verified', "1")
                     ->where("amount" , ">" , 0)
                     ->orderBy('created_at', 'desc')
                     ->get();

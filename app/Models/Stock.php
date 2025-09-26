@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Traits\UploadTrait;
 use App\Models\StockActivity;
 use App\Models\StockQuantity;
+use App\Models\ServiceStock;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,7 +30,13 @@ class Stock extends Model
     {
         return $value ? asset('storage/' . $value) : null;
     }
-
+    //calucate the required stock count in service stock
+    public function service_stock_count (){
+        return $this->service_stocks->sum('count');
+    }
+    public function service_stocks (){
+        return $this->hasMany(ServiceStock::class, 'stock_id' , 'id');
+    }
     // دالة لحفظ الملفات
     protected function StoreFile($directory, $file)
     {

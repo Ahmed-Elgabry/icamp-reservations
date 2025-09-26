@@ -516,7 +516,10 @@ class GeneralPaymentsController extends Controller
             'payments' => $order->payments,
         ]);
     }
-
+    public function getAddFund($id){
+        $addFund = GeneralPayment::find($id);
+        return response()->json($addFund);
+    }
 
     public function update(Request $request,  $payment)
     {
@@ -570,7 +573,7 @@ class GeneralPaymentsController extends Controller
      * @param  \App\Models\Payment  $payment
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $payment)
+    public function destroy( $payment ,Request $request)
     {
         $payment = GeneralPayment::findOrFail($payment);
         if ($payment->verified) {
@@ -585,7 +588,6 @@ class GeneralPaymentsController extends Controller
         }
         $payment->delete();
         $payment->transaction()->delete();
-
         return redirect()->back()->with('success',true);
     }
 

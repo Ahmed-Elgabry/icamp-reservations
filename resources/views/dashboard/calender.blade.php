@@ -45,36 +45,36 @@
     .dotted-pending {
         background-color: #009ef7;
         color: white;
-        padding:6px 16px;
-        border-radius: 9px;
+        padding:0px 12px;
+        border-radius: 12px;
     }
 
     .dotted-approved {
         background-color: green;
         color: white;
-        padding:6px 16px;
-        border-radius: 9px;
+        padding:0px 12px;
+        border-radius: 12px;
     }
 
     .dotted-canceled {
         background-color: red;
         color: white;
-        padding:6px 16px;
-        border-radius: 9px;
+        padding:0px 12px;
+        border-radius: 12px;
     }
 
     .dotted-delayed {
         background-color: orange;
         color: white;
-        padding:6px 16px;
-        border-radius: 9px;
+        padding:0px 12px;
+        border-radius: 12px;
     }
 
     .dotted-completed {
         background-color: gray;
         color: white;
-        padding:6px 16px;
-        border-radius: 9px;
+        padding:0px 12px;
+        border-radius: 12px;
     }
 
     .fc-event-title.fc-sticky {

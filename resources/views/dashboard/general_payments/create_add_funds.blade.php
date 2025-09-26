@@ -504,21 +504,50 @@
         }
 
         // Edit payment modal function
-        function openEditModal(paymentId, amount, date, paymentMethod, description, accountId) {
+        function openEditModal(paymentId) {
+            // Get form and modal elements
+            const $form = $('#editPaymentForm');
+            const $modal = $('#editPaymentModal');
+            const $submitBtn = $form.find('button[type="submit"]');
+            
             // Set form action URL
-            const form = document.getElementById('editPaymentForm');
-            form.action = "{{ route('general_payments.update_add_funds', ':id') }}".replace(':id', paymentId);
-
-            // Fill form fields
-            document.getElementById('editAmount').value = amount;
-            document.getElementById('editDate').value = date;
-            document.getElementById('editPaymentMethod').value = paymentMethod;
-            document.getElementById('editDescription').value = description;
-            document.getElementById('editAccountId').value = accountId;
-
-            // Show the modal
-            const modal = new bootstrap.Modal(document.getElementById('editPaymentModal'));
-            modal.show();
+            $form.attr('action', "{{ route('general_payments.update_add_funds', ':id') }}".replace(':id', paymentId));
+            
+            // Show loading state
+            const originalBtnText = $submitBtn.html();
+            $submitBtn.prop('disabled', true).html(
+                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...'
+            );
+            
+            // Fetch payment data using jQuery AJAX
+            $.ajax({
+                url: "{{ route('general_payments.get_add_fund', '') }}/" + paymentId,
+                type: 'GET',
+                dataType: 'json',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                success: function(data) {
+                    // Fill form fields with the fetched data
+                    $('#editAmount').val(data.amount || '');
+                    $('#editDate').val(data.date || '');
+                    $('#editPaymentMethod').val(data.payment_method || '');
+                    $('#editDescription').val(data.description || '');
+                    $('#editAccountId').val(data.account_id || '');
+                    
+                    // Show the modal using Bootstrap's jQuery plugin
+                    new bootstrap.Modal($modal[0]).show();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching payment data:', error);
+                    alert('Failed to load payment data. Please try again.');
+                },
+                complete: function() {
+                    // Reset button state
+                    $submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
         }
 
         // Handle edit form submission
@@ -658,80 +687,75 @@
             });
         });
 
-        // Delete functionality
-        $(document).on('click', '[data-kt-ecommerce-category-filter="delete_row"]', function(e) {
+        // Delete functionality using global confirmDelete
+        $(document).on('click', '.delete-payment', function(e) {
             e.preventDefault();
-
+            
             const deleteUrl = $(this).data('url');
-            const itemId = $(this).data('id');
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
             const row = $(this).closest('tr');
-
-            Swal.fire({
-                title: '{{ __("dashboard.are_you_sure") }}',
-                text: '{{ __("dashboard.you_wont_be_able_to_revert_this") }}',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: '{{ __("dashboard.yes_delete_it") }}',
-                cancelButtonText: '{{ __("dashboard.cancel") }}'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Show loading
-                    Swal.fire({
-                        title: '{{ __("dashboard.deleting") }}',
-                        text: '{{ __("dashboard.please_wait") }}',
-                        icon: 'info',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    // Send delete request
-                    $.ajax({
-                        url: deleteUrl,
-                        type: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            Swal.fire({
-                                title: '{{ __("dashboard.deleted") }}',
-                                text: '{{ __("dashboard.item_has_been_deleted") }}',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
-
-                            // Remove the row from table
-                            row.fadeOut(500, function() {
-                                $(this).remove();
-
-                                // Check if table is empty
-                                const table = $('#kt_ecommerce_category_table');
-                                if (table.find('tbody tr').length === 0) {
-                                    table.find('tbody').html('<tr><td colspan="10" class="text-center text-muted">{{ __("dashboard.no_data_found") }}</td></tr>');
-                                }
-                            });
-                        },
-                        error: function(xhr, status, error) {
-                            let errorMessage = '{{ __("dashboard.error_occurred") }}';
-
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                errorMessage = xhr.responseJSON.message;
+            
+            // Use the global confirmDelete function
+            window.confirmDelete(deleteUrl, csrfToken);
+            
+            // Listen for the form submission to handle the response
+            $(document).on('submit', 'form[action="' + deleteUrl + '"]', function(e) {
+                e.preventDefault();
+                
+                // Show loading
+                Swal.fire({
+                    title: '{{ __("dashboard.deleting") }}',
+                    text: '{{ __("dashboard.please_wait") }}',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => { Swal.showLoading(); }
+                });
+                
+                // Submit the form via AJAX to handle the response
+                $.ajax({
+                    url: deleteUrl,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Remove the row from table
+                        row.fadeOut(500, function() {
+                            $(this).remove();
+                            // Check if table is empty
+                            const table = $('#kt_ecommerce_category_table');
+                            if (table.find('tbody tr').length === 0) {
+                                table.find('tbody').html('<tr><td colspan="10" class="text-center text-muted">{{ __("dashboard.no_data_found") }}</td></tr>');
                             }
-
-                            Swal.fire({
-                                title: '{{ __("dashboard.error") }}',
-                                text: errorMessage,
-                                icon: 'error',
-                                confirmButtonText: '{{ __("dashboard.ok") }}'
-                            });
+                        });
+                        
+                        // Show success message
+                        Swal.fire({
+                            title: '{{ __("dashboard.deleted") }}',
+                            text: '{{ __("dashboard.item_has_been_deleted") }}',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Optional: reload the page to ensure consistency
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        let errorMessage = '{{ __("dashboard.error_occurred") }}';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
                         }
-                    });
-                }
+                        Swal.fire({
+                            title: '{{ __("dashboard.error") }}',
+                            text: errorMessage,
+                            icon: 'error',
+                            confirmButtonText: '{{ __("dashboard.ok") }}'
+                        });
+                    }
+                });
+                
+                // Prevent the default form submission
+                return false;
             });
         });
     </script>

@@ -1,6 +1,6 @@
 @extends('dashboard.layout')
 
-@section('title', trans('dashboard.survey_results') . ' - ' . $survey->title)
+@section('pageTitle', trans('dashboard.survey_results') . ' - ' . $survey->title)
 
 @section('content')
 <div class="container-fluid">

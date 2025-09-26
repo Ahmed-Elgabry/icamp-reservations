@@ -286,6 +286,7 @@ class ExpensesController extends Controller
             Transaction::where('expense_id', $expense->id)->update([
                 'account_id' => $request->account_id,
                 'amount' => $request->price,
+                "verified" => 0, 
                 'type' => 'debit',
                 'date' => $data['date'],
                 'description' => 'Expense: ' . ($request->statement ?? 'general_expenses'),

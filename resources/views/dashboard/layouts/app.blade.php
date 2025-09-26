@@ -370,6 +370,9 @@
 	.gap-25 {
 		gap: 7rem !important;
 	}
+	.select2-container .select2-selection--single {
+		height: unset !important;
+	}
 	</style>
 
 </head>

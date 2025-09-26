@@ -1,4 +1,4 @@
-@section('pageTitle' , "customers")
+@section('pageTitle' , __('dashboard.customers'))
 
 @extends('dashboard.layouts.app')
 @section('content')

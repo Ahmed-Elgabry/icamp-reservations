@@ -83,18 +83,18 @@
                                             <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}" alt="{{ $report->name }}" class="report-image">
                                             @endif
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <div>{{ $report->name }}</div>
                                         </td>
                                         @can('bookings.reports.edit')
                                         <td class="text-center">
-                                            <input type="number" name="ordered_count[{{ $report->id }}]" min="0" max="{{ $report->count }}" class="form-control text-muted" value="{{ $report->count }}" readonly>
+                                            <input type="number" name="ordered_count[{{ $report->id }}]" min="0" max="{{ $report->count }}" class="form-control text-muted" style="padding:12px 40px !important" value="{{ $report->count }}" readonly>
                                         </td>
                                         <td class="text-center">
-                                            <input type="number" name="set_qty[{{ $report->id }}]" min="0" max="{{ $report->count }}" class="form-control" value="{{ ($report->set_qty == 0) ? $report->count : $report->set_qty }}">
+                                            <input type="number" name="set_qty[{{ $report->id }}]" min="0" max="{{ $report->count }}" class="form-control" style="padding:12px 40px !important" value="{{ ($report->set_qty == 0) ? $report->count : $report->set_qty }}">
                                         </td>
-                                        <td>
-                                            <div class="d-flex flex-column gap-2">
+                                        <td class="text-center">
+                                            <div class="d-flex flex-column gap-2 align-items-center">
                                                 <div class="btn-group w-100" role="group" aria-label="Report Status">
                                                     <input type="radio" class="btn-check reports-check" name="reports[{{ $report->id }}]" id="completed-{{ $report->id }}" value="completed" data-report="{{ $report->id }}" {{ $report && $report->is_completed ? 'checked' : '' }}>
                                                     <label class="btn btn-outline-success" for="completed-{{ $report->id }}"><i class="fa fa-check me-1"></i> @lang('dashboard.completed')</label>
@@ -114,8 +114,8 @@
                                         <td class="text-center">
                                             <input disabled type="number" name="set_qty[{{ $report->id }}]" min="0" max="{{ $report->count }}" class="form-control" value="{{ ($report->set_qty == 0) ? $report->count : $report->set_qty }}">
                                         </td>
-                                        <td>
-                                            <div class="btn-group w-100" role="group" aria-label="Report Status">
+                                        <td class="text-center">
+                                            <div class="btn-group w-100 justify-content-center" role="group" aria-label="Report Status">
                                                 <input disabled type="radio" class="btn-check reports-check" name="reports[{{ $report->id }}]" id="completed-{{ $report->id }}" value="completed" data-report="{{ $report->id }}" {{ $report && $report->is_completed ? 'checked' : '' }}>
                                                 <label class="btn btn-outline-success" for="completed-{{ $report->id }}"><i class="fa fa-check me-1"></i> @lang('dashboard.completed')</label>
 
@@ -128,8 +128,7 @@
                                                 <textarea disabled class="form-control" rows="2" name="not_completed_reason[{{ $report->id }}]">{{ $report ? $report->not_completed_reason : '' }}</textarea>
                                             </div>
                                             @endcan
-                        </div>
-                        </td>
+                                        </td>
                         </tr>
                         @endforeach
                         </tbody>
@@ -146,7 +145,7 @@
                                 <th class="text-center">@lang('dashboard.image')</th>
                                 <th>@lang('dashboard.item')</th>
                                 <th class="text-center">@lang('dashboard.available')</th>
-                                <th class="text-center">@lang('dashboard.requested_qty')</th>
+                                <th class="text-center">@lang('dashboard.placed_qty')</th>
                                 <th class="text-center">@lang('dashboard.completion_status')</th>
                             </tr>
                         </thead>
@@ -155,19 +154,13 @@
                             <tr>
                                 <td class="text-center">{{ $index + 1 }}</td>
                                 <td class="text-center">
-                                    @if ($latest = $stock->image)
-                                    <a href="{{ asset($stock->image) }}" target="_blank">
-                                        <img src="{{ asset($latest) }}" alt="{{ $stock->name }}" class="report-image">
-                                    </a>
-                                    @else
-                                    <img src="{{ asset('dashboard/assets/media/avatars/blank.png') }}" alt="{{ $stock->name }}" class="report-image">
-                                    @endif
+                                    <img src="{{ asset($stock->image) }}" alt="{{ $stock->name }}" class="report-image">
                                 </td>
                                 <td>
                                     <div><a href="{{ route('dashboard.stock.report', $stock->id) }}">{{ $stock->name }}</a></div>
                                 </td>
                                 <td class="text-center">
-                                    {{ $stock->quantity ?? 0 }}
+                                    {{ $stock->service_stock_count ?? 0 }}
                                     <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}">
                                 </td>
                                 <td class="text-center">
@@ -276,8 +269,6 @@
 
     $(document).on('click', '.btn-decrement', function(e) {
         e.preventDefault();
-        console.log('.btn-decrement clicked (resources)', this);
-
         var $btn = $(this),
             pivotId = $btn.data('pivotId'),
             stockId = $btn.data('stockId'),
@@ -306,7 +297,7 @@
 
         Swal.fire({
             icon: 'warning',
-            title: status === 'decrement' ? "@lang('dashboard.increment_label')" : "@lang('dashboard.decrement_label')",
+            title: status === 'decrement' ? "@lang('dashboard.decrement_label')" : "@lang('dashboard.increment_label')",
             html: status === 'decrement' ? html : '',
             showCancelButton: true,
             confirmButtonText: "@lang('dashboard.confirm')",

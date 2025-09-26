@@ -34,12 +34,7 @@ class PaymentsController extends Controller
                 return $query->whereBetween('date', [$startDate, $endDate]);
             })
             ->orderBy('created_at', 'desc')
-            ->where(function ($query) {
-                $query->where('verified', "1");
-                    //   ->whereHas('payment', fn($q) => $q->whereNot('insurance_status', 'returned'))
-                    //   ->orWhere("source", "charge_account")//they will have verificaion button
-                    //   ->orWhere("source", "general_payments_deposit");//they will have verificaion button
-            }) // this is the transaction source for the page which have not approved button
+            ->where('verified', "1")
             ->where("amount", ">", 0)
             ->get();
         $transactions = $transactions->sortByDesc('created_at');
@@ -99,7 +94,7 @@ class PaymentsController extends Controller
             $dateTo = Carbon::parse($request->date_to)->endOfDay();
             $query->whereBetween('created_at', [$dateFrom, $dateTo]);
         }
-        $payments = $query->where('verified', "1")->get();
+        $payments = $query->where('verified', "1")->latest()->get();
 
         $orders = Order::whereNot('insurance_status', 'returned')->get();
         $customers = Customer::all();

@@ -10,9 +10,9 @@ class VerificationStatusChanged
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public string $action; // 'addon' | 'payment' | 'expense' | 'warehouse_sale'
-    public $item; // The related model instance (polymorphic)
-    public string $verified; // New verification state
+    public string $action; 
+    public $item; 
+    public string $verified; // current verification state
 
     public function __construct(string $action, $item, string $verified)
     {

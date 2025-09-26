@@ -27,6 +27,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id')->nullable();
             $table->unsignedBigInteger('order_id')->nullable();
             $table->unsignedBigInteger('order_addon_id')->nullable();
+            $table->unsignedBigInteger('order_item_id')->nullable();
 
             // transaction data
             $table->date('date')->nullable();
@@ -47,6 +48,7 @@ return new class extends Migration
             $table->foreign('receiver_id')->references('id')->on('bank_accounts')->onDelete('cascade');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
+            $table->foreign('order_item_id')->references('id')->on('order_items')->onDelete('cascade');
 
             $table->timestamps();
         });

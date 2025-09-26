@@ -1476,6 +1476,12 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
         'as' => 'general_payments.destroy_add_funds',
         'title' => ['actions.update_funds', 'dashboard.general_payments']
     ]);
+
+    Route::get('general_payments/add-funds/{id}/get', [
+        'uses' => 'GeneralPaymentsController@getAddFund',
+        'as' => 'general_payments.get_add_fund',
+        'title' => ['actions.get_fund', 'dashboard.general_payments']
+    ]);
     /*------------ end Of general payments ----------*/
 
 

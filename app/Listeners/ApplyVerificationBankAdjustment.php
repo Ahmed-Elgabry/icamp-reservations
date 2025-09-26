@@ -52,22 +52,22 @@ class ApplyVerificationBankAdjustment
                 $insurances = $item->payments()->where('statement', 'the_insurance')->get();
                 $newstatus = $verified ? "0" : "1";
                 foreach ($insurances as $insurance) {
-                if (!$insurance->account_id) continue;
-                $bankAccount = BankAccount::find($insurance->account_id);
-                if (!$bankAccount) continue;
-                if ($verified) {
-                    if ($insurance->verified == "1") {
-                    $bankAccount->increment('balance', $insurance->transaction->amount);
+                    if (!$insurance->account_id) continue;
+                    $bankAccount = BankAccount::find($insurance->account_id);
+                    if (!$bankAccount) continue;
+                    if ($verified) {
+                        if ($insurance->verified == "1") {
+                        $bankAccount->increment('balance', $insurance->transaction->amount);
+                        }
+                    } else {
+                        if ($insurance->verified == "1") {
+                        $bankAccount->decrement('balance', $insurance->transaction->amount);
+                        }
                     }
-                } else {
-                    if ($insurance->verified == "1") {
-                    $bankAccount->decrement('balance', $insurance->transaction->amount);
+                    $insurance->update(['verified' => $newstatus]);
+                    if ($insurance->transaction) {
+                        $insurance->transaction->update(['verified' => $newstatus]);
                     }
-                }
-                $insurance->update(['verified' => $newstatus]);
-                if ($insurance->transaction) {
-                    $insurance->transaction->update(['verified' => $newstatus]);
-                }
                 }
                 $item->update(['insurance_approved' => $newstatus]);
                 DB::commit();

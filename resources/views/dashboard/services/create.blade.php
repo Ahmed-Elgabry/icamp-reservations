@@ -1,4 +1,94 @@
 @extends('dashboard.layouts.app')
+
+@push('styles')
+<style>
+    /* Responsive table styles */
+    @media (max-width: 768px) {
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            background-color: transparent;
+        }
+        
+        .table thead {
+            display: none;
+        }
+        
+        .table tbody {
+            display: block;
+            width: 100%;
+        }
+        
+        .table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+        }
+        
+        .table tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border: none;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .table tbody td:before {
+            content: attr(data-label);
+            font-weight: bold;
+            margin-right: 1rem;
+            flex: 0 0 40%;
+        }
+        
+        .table tbody td:last-child {
+            border-bottom: none;
+        }
+        
+        /* For the stocks section */
+        .stock-item-row {
+            display: flex;
+            flex-wrap: wrap;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+        }
+        
+        .stock-item-row > div {
+            flex: 1 0 50%;
+            padding: 0.5rem;
+        }
+        
+        .stock-item-row > div:before {
+            content: attr(data-label);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+    }
+    
+    /* Fix for select2 in responsive mode */
+    .select2-container {
+        width: 100% !important;
+    }
+    
+    /* Make images responsive */
+    .preview-image {
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+</style>
+@endpush
 @section('pageTitle', __('dashboard.services'))
 @props(['reports' => []])
 @section('content')
@@ -104,63 +194,65 @@
                             <h3>@lang('dashboard.report')</h3>
 
                             <div id="reports-section">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
+                                <div class="table-responsive" style="overflow-x: auto;">
+                                    <table class="table table-bordered table-responsive">
+                                        <thead class="table-light">
                                             <tr>
-                                                <th>@lang('dashboard.sequence')</th>
-                                                <th>@lang('dashboard.image')</th>
-                                                <th>@lang('dashboard.item_name')</th>
-                                                <th>@lang('dashboard.required_qty')</th>
-                                                <th>@lang('dashboard.upload_image')</th>
-                                                <th>@lang('dashboard.edit_sort')</th>
-                                                <th>@lang('dashboard.controll')</th>
+                                                <th class="text-nowrap">@lang('dashboard.sequence')</th>
+                                                <th class="text-nowrap">@lang('dashboard.image')</th>
+                                                <th class="text-nowrap">@lang('dashboard.item_name')</th>
+                                                <th class="text-nowrap">@lang('dashboard.required_qty')</th>
+                                                <th class="text-nowrap">@lang('dashboard.upload_image')</th>
+                                                <th class="text-nowrap">@lang('dashboard.edit_sort')</th>
+                                                <th class="text-nowrap">@lang('dashboard.controll')</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($reports as $index => $report)
-                                                <tr data-index="{{ $index }}" class="reports-item-row">
-                                                    <td class="text-center">
+                                                <tr data-index="{{ $index }}" class="reports-item-row align-middle">
+                                                    <td class="text-center text-nowrap" data-label="@lang('dashboard.sequence')">
                                                         <span class="row-number">{{ $index + 1 }}</span>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-nowrap" data-label="@lang('dashboard.image')">
                                                         @if ($report->image)
-                                                            <img src="{{ asset($report->image) }}" class="preview-image" style="width:50px;height:50px;">
+                                                            <img src="{{ asset($report->image) }}" class="preview-image" style="width:50px;height:50px;object-fit:cover;">
                                                         @else
-                                                            <img src="{{ asset('images/logo.png') }}" class="preview-image" style="width:50px;height:50px;">
+                                                            <img src="{{ asset('images/logo.png') }}" class="preview-image" style="width:50px;height:50px;object-fit:cover;">
                                                         @endif
                                                     </td>
-                                                    <td>
-                                                        <input type="text" name="reports[]" class="form-control form-control-lg form-control-solid w-auto"
+                                                    <td class="text-nowrap" data-label="@lang('dashboard.item_name')">
+                                                        <input type="text" name="reports[]" class="form-control form-control-lg form-control-solid w-100"
                                                                value="{{ $report->name }}" placeholder="@lang('dashboard.name')" required>
                                                     </td>
-                                                    <td>
-                                                        <input type="number" name="reports_counts[]" min="1" class="form-control form-control-lg form-control-solid w-auto"
+                                                    <td class="text-nowrap" data-label="@lang('dashboard.required_qty')">
+                                                        <input type="number" name="reports_counts[]" min="1" class="form-control form-control-lg form-control-solid w-100"
                                                                value="{{ $report->count }}" placeholder="@lang('dashboard.count')" required>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-nowrap" data-label="@lang('dashboard.upload_image')">
                                                         <input type="file" name="reports_images[{{ $index }}]" accept="image/*"
-                                                               class="form-control form-control-lg form-control-solid image-upload w-auto">
+                                                               class="form-control form-control-lg form-control-solid image-upload w-100">
                                                         <div class="progress mt-2 d-none">
-                                                            <div class="progress-bar progress-bar-striped progress-bar-animated w-auto" role="progressbar"
+                                                            <div class="progress-bar progress-bar-striped progress-bar-animated w-100" role="progressbar"
                                                                  style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-sm btn-light-primary js-report-move"
-                                                                data-direction="up"
-                                                                data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
-                                                                {{ $index == 0 ? 'disabled' : '' }}>
-                                                            <i class="fa fa-arrow-up"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-light-primary js-report-move"
-                                                                data-direction="down"
-                                                                data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
-                                                                {{ $index == count($reports) - 1 ? 'disabled' : '' }}>
-                                                            <i class="fa fa-arrow-down"></i>
-                                                        </button>
+                                                    <td class="text-nowrap" data-label="@lang('dashboard.edit_sort')">
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-sm btn-light-primary js-report-move"
+                                                                    data-direction="up"
+                                                                    data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
+                                                                    {{ $index == 0 ? 'disabled' : '' }}>
+                                                                <i class="fa fa-arrow-up"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-sm btn-light-primary js-report-move"
+                                                                    data-direction="down"
+                                                                    data-url="{{ route('services.reports.move', [$service->id, $report->id]) }}"
+                                                                    {{ $index == count($reports) - 1 ? 'disabled' : '' }}>
+                                                                <i class="fa fa-arrow-down"></i>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-nowrap" data-label="@lang('dashboard.controll')">
                                                         @can('services.delete.internal')
                                                             <a href="#"
                                                                class="btn btn-danger btn-sm js-delete-stock"
@@ -180,21 +272,21 @@
 
                             <hr>
 
-                            <div id="stocks-section">
+                            <div id="stocks-section" class="table-responsive">
                                 @if (isset($service))
                                     @foreach ($service->stocks as $index => $serviceStock)
-                                        <div class="row align-items-center stock-item-row mb-2" data-index="{{ $index + 1}}">
-                                            <div class="col-1">
-                                                @if ($serviceStock->image)
-                                                    <img src="{{ asset($serviceStock->image) }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;">
+                                        <div class="table-row d-flex align-items-center stock-item-row mb-2" data-index="{{ $index + 1 }}" style="display: flex; flex-wrap: nowrap; min-width: 100%;">
+                                            <div class="table-cell" style="flex: 0 0 8.33%; padding: 0.5rem;">
+                                                @if ($serviceStock->stock->image)
+                                                    <img src="{{ asset($serviceStock->stock->image) }}" alt="preview-image" class="preview-image img-fluid" style="width:50px;height:50px;object-fit:cover;">
                                                 @else
                                                     <img src="{{ asset('images/logo.png') }}" alt="" class="preview-image" style="width:50px;height:50px;display:none;">
                                                 @endif
                                             </div>
-                                            <div class="col-1">
-                                                <span class="row-number">{{ $index + 1 }} (المخزن)</span>
+                                            <div class="table-cell" style="flex: 0 0 8.33%; padding: 0.5rem;">
+                                                <span class="d-flex flex-row">{{ $index + 1 }} (المخزن)</span>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="table-cell" style="flex: 1 0 33.33%; padding: 0.5rem;">
                                                 <select name="stocks[]" class="form-select-stock select2-custome col-12 form-select-lg form-select-solid" required>
                                                     <option value="" disabled>{{ __('dashboard.select') }}</option>
                                                     @foreach ($stocks as $stock)
@@ -202,13 +294,13 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="col-2">
+                                            <div class="table-cell" style="flex: 0 0 16.66%; padding: 0.5rem;">
                                                 <input type="number" name="counts[]" min="1"
                                                        class="form-control form-control-lg form-control-solid"
                                                        placeholder="@lang('dashboard.count')"
                                                        value="{{ $serviceStock->pivot->count }}" required>
                                             </div>
-                                            <div class="col-2">
+                                            <div class="table-cell" style="flex: 0 0 16.66%; padding: 0.5rem;">
                                                 @can('services.delete.internal')
                                                     <a href="#" class="btn btn-danger btn-sm js-delete-stock"
                                                        data-url="{{ route('stocks.destroyServiceStock', ['service' => $service->id, 'stock' => $serviceStock->id]) }}">

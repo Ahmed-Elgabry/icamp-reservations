@@ -179,7 +179,7 @@
                             </div>
 
                             <div class="row mb-6">
-                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.date')</label>
+                                <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.booking_date')</label>
                                 <div class="col-lg-8">
                                     <input type="date" name="date"
                                            class="form-control form-control-lg form-control-solid"
@@ -209,6 +209,7 @@
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.status')</label>
                                 <div class="col-lg-8">
                                     <select name="status" class="form-select form-select-lg form-select-solid" id="status">
+                                        <option value="">@lang('dashboard.choose')</option>
                                         <option value="pending_and_show_price"
                                                 title="@lang('dashboard.pending_and_show_price_desc')"
                                                 data-badge="<span class='badge badge-warning'>@lang('dashboard.pending_and_show_price_desc')</span>"
@@ -642,7 +643,12 @@
                 <div class="modal-header">
                     <h2 class="fw-bolder">@lang('dashboard.edit_internal_note')</h2>
                     <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
-                        <span class="svg-icon svg-icon-2x"></span>
+                        <span class="svg-icon svg-icon-2x">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+                                <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+                            </svg>
+                        </span>
                     </div>
                 </div>
                 <div class="modal-body py-10 px-lg-15">
@@ -779,7 +785,7 @@
 
             // Status change handler
             $('#status').on('change', function() {
-                if (this.value === 'pending_and_show_price' || this.value === 'pending_and_Initial_reservation') {
+                if (this.value === 'pending_and_show_price') {
                     $('#expired_price_offer').removeClass('d-none');
                     $('#delayed_reson').addClass('d-none');
                 } else if (this.value === 'delayed') {
@@ -792,18 +798,12 @@
             let first = false ;
             // Price recalculation
             function recalcPrice() {
-                console.log(first);
-                if ($('#price').val() > 0 && first) {
-                    first = false ;
-                    return;
-                }
                 let total = 0;
                 $('#service_id option:selected').each(function(){
                     total += parseFloat($(this).data('price')) || 0;
                 });
                 $('#price').val(total.toFixed(2));
-                    console.log(total);
-                    first = false ;
+                first = false;
             }
 
             // Recalculate only on user-initiated changes
@@ -876,13 +876,25 @@
 
             function fillFormFromPayload(payload){
                 $('#rf_id').val(payload.rf_id || '');
-                $('input[name="people_count"]').val(payload.people_count || '');
-
+                $('input[name="people_count"]').val(payload.people_count || '');                
+                // Always calculate the price from the selected services
+                if (payload.service_ids && payload.service_ids.length > 0) {
+                    // First, select the services
+                    $('#service_id').val(payload.service_ids.map(String));
+                    payload.service_ids.map(String).forEach(function(id){
+                        const $option = $('#service_id option[value="' + id + '"]');
+                        $option.prop('selected', true);
+                    });
+                }
+                
+                // Always recalculate the price to ensure it's in the correct format
+                recalcPrice();                
+                // If a specific price was provided, use it after setting the services
                 if (payload.price) {
-                    $('#price').val(payload.price);
-                } else {
-                    $('#service_id').val(payload.service_ids.map(String)).trigger('change');
-                    recalcPrice();
+                    console.log('Overriding with provided price:', payload.price);
+                    const formattedPrice = parseFloat(payload.price).toFixed(2);
+                    console.log('Formatted price:', formattedPrice);
+                    $('input[name="price"]').val(formattedPrice);
                 }
 
                 if (payload.date)      $('input[name="date"]').val(payload.date);
@@ -902,7 +914,8 @@
                     $cust.val(String(c.id)).trigger('change');
                 }
 
-                $('#service_id').trigger('change');
+                // $('#service_id').trigger('change');
+                // recalcPrice();
 
                 if (window.Swal) Swal.fire({ icon: 'success', title: @json(__('dashboard.loaded_ok')) });
                 const m = bootstrap.Modal.getInstance(document.getElementById('retrieveRfModal'));
@@ -926,6 +939,24 @@
                 const isEdit = @json(isset($order));
                 if (!hasPrefill || isEdit) return;
 
+                // Create payload object from URL parameters
+                const payload = {
+                    rf_id: url.searchParams.get('rf_id') || '',
+                    people_count: url.searchParams.get('people_count') || '',
+                    service_ids: url.searchParams.get('service_ids') ? url.searchParams.get('service_ids').split(',').map(Number) : [],
+                    date: url.searchParams.get('date') || '',
+                    time_from: url.searchParams.get('time_from') || '',
+                    time_to: url.searchParams.get('time_to') || '',
+                    notes: url.searchParams.get('notes') || '',
+                    customer: {
+                        id: url.searchParams.get('customer_id') || '',
+                        name: url.searchParams.get('customer_name') || '',
+                        email: url.searchParams.get('customer_email') || '',
+                        phone: url.searchParams.get('customer_phone') || ''
+                    }
+                };
+
+                // If we have an rf_id, fetch the customer data first
                 if (url.searchParams.has('rf_id') && "{{ Route::has('orders.customers.check') ? '1' : '0' }}" === "1") {
                     $.ajax({
                         url: "{{ route('orders.customers.check') }}",
@@ -933,29 +964,58 @@
                         dataType: "json",
                         data: { id: url.searchParams.get('rf_id') }
                     }).done(function (c) {
-                        if (!c || !c.customer || !c.customer.id) return;
-                        const $cust = $('select[name="customer_id"]');
-                        const exists = $cust.find('option[value="'+c.customer.id+'"]').length > 0;
-                        if (!exists) {
-                            const opt = new Option(c.customer.name || (c.customer.email || c.customer.phone || ('#'+c.customer.id)),
-                                c.customer.id, true, true);
-                            $(opt).attr('data-phone', c.customer.phone || '').attr('data-email', c.customer.email || '');
-                            $cust.append(opt);
+                        if (c && c.customer && c.customer.id) {
+                            // Merge the customer data with our payload
+                            payload.customer = c.customer;
                         }
-                        $cust.val(String(c.customer.id)).trigger('change');
+                        // Fill the form with the payload
+                        fillFormFromPayload(payload);
+                        
+                        // Show success message
+                        if (window.Swal) {
+                            const rfId = url.searchParams.get('rf_id');
+                            Swal.fire({
+                                title: isRTL ? 'تم سحب البيانات' : 'Prefilled',
+                                text: rfId
+                                    ? (isRTL ? `تم سحب البيانات من الاستمارة رقم #${rfId}` : `Loaded data from form #${rfId}`)
+                                    : (isRTL ? 'تم سحب البيانات من الرابط' : 'Prefilled from URL'),
+                                icon: 'success',
+                                confirmButtonText: isRTL ? 'حسناً' : 'OK',
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        }
+                    }).fail(function() {
+                        // If the AJAX call fails, still try to fill the form with what we have
+                        fillFormFromPayload(payload);
+                        
+                        // Show success message for direct URL parameters
+                        if (window.Swal) {
+                            Swal.fire({
+                                title: isRTL ? 'تم سحب البيانات' : 'Prefilled',
+                                text: isRTL ? 'تم سحب البيانات من الرابط' : 'Prefilled from URL',
+                                icon: 'success',
+                                confirmButtonText: isRTL ? 'حسناً' : 'OK',
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        }
                     });
-                }
-
-                const rfId = url.searchParams.get('rf_id');
-                if (window.Swal && rfId) {
-                    Swal.fire({
-                        title: isRTL ? 'تم سحب البيانات' : 'Prefilled',
-                        text: rfId
-                            ? (isRTL ? `تم سحب البيانات من الاستمارة رقم #${rfId}` : `Loaded data from form #${rfId}` )
-                            : (isRTL ? 'تم سحب البيانات من الاستمارة' : 'Loaded data from form'),
-                        icon: 'success',
-                        confirmButtonText: isRTL ? 'حسناً' : 'OK',
-                    });
+                } else {
+                    // No rf_id, just fill the form with the URL parameters
+                    fillFormFromPayload(payload);
+                    
+                    // Show success message for direct URL parameters
+                    if (window.Swal) {
+                        Swar.fire({
+                            title: isRTL ? 'تم سحب البيانات' : 'Prefilled',
+                            text: isRTL ? 'تم سحب البيانات من الرابط' : 'Prefilled from URL',
+                            icon: 'success',
+                            confirmButtonText: isRTL ? 'حسناً' : 'OK',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    }
                 }
             })();
 
@@ -1115,42 +1175,42 @@
             });
 
             // Customer change event to check for notices
-            $('select[name="customer_id"]').change(function() {
-                const customerId = $(this).val();
-                if (customerId) {
-                    $.get('/orders/check-customer-notices/' + customerId, function(response) {
-                        if (response.hasNotices) {
-                            const textAlign = isRTL ? 'right' : 'left';
+            // $('select[name="customer_id"]').change(function() {
+            //     const customerId = $(this).val();
+            //     if (customerId) {
+            //         $.get('/orders/check-customer-notices/' + customerId, function(response) {
+            //             if (response.hasNotices) {
+            //                 const textAlign = isRTL ? 'right' : 'left';
 
-                            let noticeContent = `<div style="text-align: ${textAlign}; font-size: 14px; line-height: 1.6;">`;
-                            response.notices.forEach(notice => {
-                                noticeContent += `
-                                    <div style="margin-bottom: 15px; padding: 12px; background: #fdfdfd; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                                        <p style="margin: 0 0 6px 0; font-weight: bold; color: #333;">
-                                            {{ __('dashboard.notice_label') }}:
-                                        </p>
-                                        <p style="margin: 0 0 8px 0; color: #555;">${notice.content}</p>
-                                        <p style="margin: 0; font-size: 12px; color: #888;">
-                                            {{ __('dashboard.created_by_at', ['name' => '${notice.created_by}', 'date' => '${notice.created_at}']) }}
-                                        </p>
-                                    </div>`;
-                            });
-                            noticeContent += '</div>';
+            //                 let noticeContent = `<div style="text-align: ${textAlign}; font-size: 14px; line-height: 1.6;">`;
+            //                 response.notices.forEach(notice => {
+            //                     noticeContent += `
+            //                         <div style="margin-bottom: 15px; padding: 12px; background: #fdfdfd; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+            //                             <p style="margin: 0 0 6px 0; font-weight: bold; color: #333;">
+            //                                 {{ __('dashboard.notice_label') }}:
+            //                             </p>
+            //                             <p style="margin: 0 0 8px 0; color: #555;">${notice.content}</p>
+            //                             <p style="margin: 0; font-size: 12px; color: #888;">
+            //                                 {{ __('dashboard.created_by_at', ['name' => '${notice.created_by}', 'date' => '${notice.created_at}']) }}
+            //                             </p>
+            //                         </div>`;
+            //                 });
+            //                 noticeContent += '</div>';
 
-                            Swal.fire({
-                                title: "{{ __('dashboard.customer_has_notices') }}",
-                                html: noticeContent,
-                                icon: 'warning',
-                                confirmButtonText: "{{ __('dashboard.ok') }}",
-                                width: '700px',
-                                customClass: {
-                                    popup: isRTL ? 'swal2-rtl' : ''
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+            //                 Swal.fire({
+            //                     title: "{{ __('dashboard.customer_has_notices') }}",
+            //                     html: noticeContent,
+            //                     icon: 'warning',
+            //                     confirmButtonText: "{{ __('dashboard.ok') }}",
+            //                     width: '700px',
+            //                     customClass: {
+            //                         popup: isRTL ? 'swal2-rtl' : ''
+            //                     }
+            //                 });
+            //             }
+            //         });
+            //     }
+            // });
 
             // Email modal functionality
             const sendEmailModal = new bootstrap.Modal(document.getElementById('sendEmailModal'));
@@ -1691,17 +1751,7 @@
                 if ($('#internalNoteSelect').length > 0) {
                     initializeInternalNoteSystem();
                 }
-   $('#status').on('change', function() {
-                if (this.value === 'pending_and_show_price' || this.value === 'pending_and_Initial_reservation') {
-                    $('#expired_price_offer').removeClass('d-none');
-                    $('#delayed_reson').addClass('d-none');
-                } else if (this.value === 'delayed') {
-                    $('#delayed_reson').removeClass('d-none');
-                    $('#expired_price_offer').addClass('d-none');
-                } else {
-                    $('#expired_price_offer,#delayed_reson').addClass('d-none');
-                }
-            });
+
 
             // function recalcPrice() {
             //     let total = 0;

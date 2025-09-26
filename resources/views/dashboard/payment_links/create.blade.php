@@ -165,7 +165,7 @@
                                 id="send_whatsapp"
                                 name="send_whatsapp"
                                 value="1"
-                                {{ old('send_whatsapp', false) ? 'checked' : '' }}>
+                                {{ old('send_whatsapp', true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="send_whatsapp">
                                 <i class="fab fa-whatsapp me-2 text-success"></i> {{ __('dashboard.send_whatsapp_to_customer') }}
                             </label>

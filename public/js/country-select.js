@@ -199,7 +199,7 @@
     $(function() {
         // Initialize a Select2 country selector next to any phone input
         $('input[type="tel"]').each(function(idx, el) {
-            var $input = $(el);
+            var $input = $(el).attr('data-phone-input', 'true');
             var $wrap = $('<div class="d-flex align-items-center country-select-wrap"></div>');
             $input.before($wrap);
             // put the input first, then the small select beside it
@@ -294,26 +294,43 @@
 
         // inject compact CSS for inline selects and wide dropdown
     var css = `
-    .country-select-wrap .country-select{ width:65px !important; height:37px !important;padding: 9px 0 0 0; }
-    .country-select-wrap .select2-container{ width:82px !important; }
-    span.select2-dropdown.country-select-dropdown.select2-dropdown--below {
-    width: 256px !important;
-}
-    .select2-dropdown.country-select-dropdown.select2-dropdown--above {
-    width: 256px !important;
+    input[data-phone-input] + .country-select-wrap .country-select{ width:65px !important; height:37px !important;padding: 9px 0 0 0; }
+    input[data-phone-input] + .country-select-wrap .select2-container{ width:82px !important; }
+    input[data-phone-input] + .country-select-wrap + .select2-container--open .select2-dropdown--below {
+        width: 256px !important;
     }
-    .country-select-wrap .select2-container--default .select2-selection--single {
-    height: 36px;
-    width: 96px !important;
-    padding: 5px 15px !important;
-    border-radius: 6px;
-}
-    .country-select-wrap .select2-selection__rendered{ font-size:12px; display:flex; align-items:center; gap:6px; padding:0 !important;     direction : ltr;
-}
-    .country-select-wrap .fi{ font-size:16px; line-height:16px; }
-    .country-select-dropdown .select2-dropdown{ min-width:300px !important; }
-    .country-select-wrap .select2-container--default .select2-selection--single .country-label{ font-size:12px; }
-    .country-select-wrap .country-dial{ font-size:11px; color:#6c757d; margin-left:6px; }
+    input[data-phone-input] + .country-select-wrap + .select2-container--open .select2-dropdown--above {
+        width: 256px !important;
+    }
+    input[data-phone-input] + .country-select-wrap .select2-container--default .select2-selection--single {
+        height: 36px;
+        width: 96px !important;
+        padding: 5px 15px !important;
+        border-radius: 6px;
+    }
+    input[data-phone-input] + .country-select-wrap .select2-selection__rendered{ 
+        font-size:12px; 
+        display:flex; 
+        align-items:center; 
+        gap:6px; 
+        padding:0 !important;     
+        direction: ltr;
+    }
+    input[data-phone-input] + .country-select-wrap .fi{ 
+        font-size:16px; 
+        line-height:16px; 
+    }
+    input[data-phone-input] + .country-select-wrap + .select2-container--open .select2-dropdown{ 
+        min-width:300px !important; 
+    }
+    input[data-phone-input] + .country-select-wrap .select2-container--default .select2-selection--single .country-label{ 
+        font-size:12px; 
+    }
+    input[data-phone-input] + .country-select-wrap .country-dial{ 
+        font-size:11px; 
+        color:#6c757d; 
+        margin-left:6px; 
+    }
     `;
     var style = document.createElement('style'); style.appendChild(document.createTextNode(css)); document.head.appendChild(style);
     });

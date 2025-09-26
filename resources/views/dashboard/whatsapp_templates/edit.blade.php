@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.app')
 
-@section('title', __('dashboard.edit_template'))
+@section('pageTitle' , __('dashboard.edit_template'))
 
 @section('content')
     <div class="card">

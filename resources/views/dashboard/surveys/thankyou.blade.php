@@ -1,7 +1,7 @@
 {{-- resources/views/surveys/thankyou.blade.php --}}
 @extends('layouts.app')
 
-@section('title', __('dashboard.thankyou'))
+@section('pageTitle', __('dashboard.thankyou'))
 
 @section('content')
 <div class="container py-5">
