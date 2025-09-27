@@ -209,7 +209,7 @@
                                     @else
                                         {{ __('dashboard.no_insurance_payment_verified') }}
                                     @endif
-                                    {{__("dashboard.by")}} {{" " . $payment->insurance_handled_by}}
+                                    {{__("dashboard.by")}} {{" " . $order->insurance_handled_by}}
                                     </span>
                                 </td>
                                 <!--begin::Order Status-->
