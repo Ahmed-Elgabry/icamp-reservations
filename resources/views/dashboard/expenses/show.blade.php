@@ -132,7 +132,7 @@
                                 <a href="{{ route('order.verified' , [$payment->id , 'expense']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                             @endif
                         </td>
-                        <td>{{ $payment->handledBy->name ?? '-' }}</td>
+                        <td>{{ $payment->handledBy?->name ?? '-' }}</td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}
                         </td>

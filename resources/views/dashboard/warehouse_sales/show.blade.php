@@ -81,7 +81,7 @@
                                 <a href="{{ route('order.verified' , [$item->id , 'warehouse_sales']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                                 @endif
                             </td>
-                            <td>{{ $item->handledBy->name ?? '-' }}</td>
+                            <td>{{ $item->handledBy?->name?? '-' }}</td>
                             <td>{{ $item?->notes }}</td>
                             <td>{{ $item?->created_at->format('Y-m-d') }}</td>
                             <td>{{ $item?->created_at->format('h:i A') }}</td>

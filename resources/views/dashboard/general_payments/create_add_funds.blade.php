@@ -224,7 +224,7 @@
                                     </td>
                                     <!--begin::By-->
                                     <td>
-                                        {{ $payment->handledBy->name ?? '-' }}
+                                        {{ $payment->handledBy?->name ?? '-' }}
                                     </td>
                                     <!--begin::Description-->
                                     <td data-kt-ecommerce-category-filter="category_name">
