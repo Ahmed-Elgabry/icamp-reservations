@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('order_addon', function (Blueprint $table) {
-            //
+            $table->foreignId('handled_by')->nullable()->constrained('users');
         });
     }
 
@@ -26,7 +26,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('order_addon', function (Blueprint $table) {
-            $table->foreignId('handled_by')->nullable()->constrained('users');
+            $table->dropForeign(['handled_by']);
+            $table->dropColumn('handled_by');
 
         });
     }
