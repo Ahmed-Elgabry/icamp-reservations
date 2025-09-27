@@ -194,6 +194,7 @@
                                 <th class="">{{ __('dashboard.bank_account') }}</th>
                                 <th class="">{{ __('dashboard.verified') }}</th>
                                 <th class="">{{ __('dashboard.attached') }}</th>
+                                <th class="">{{ __('dashboard.by') }}</th>
                                 <th class="">{{ __('dashboard.notes') }}</th>
                                 <th class="">{{ __('dashboard.date') }}</th>
                                 <th class="">{{ __('dashboard.time') }}</th>
@@ -249,6 +250,11 @@
                                             <span class="text-muted">{{ __('dashboard.no_data') }}</span>
                                         @endif
                                     </td>
+                                    <!--begin::By-->
+                                    <td>
+                                        {{ $expense->handledBy->name ?? '-' }}
+                                    </td>
+                                    <!--end::By-->
                                     <td data-kt-ecommerce-category-filter="category_name">
                                         {{$expense->notes}}
                                     </td>

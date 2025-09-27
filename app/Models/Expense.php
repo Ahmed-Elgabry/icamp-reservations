@@ -28,6 +28,10 @@ class Expense extends Model
     {
         return $this->belongsTo(ExpenseItem::class);
     }
+    public function handledBy()
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
 
     public function account()
     {

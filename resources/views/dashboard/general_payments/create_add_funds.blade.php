@@ -165,6 +165,7 @@
                             <th class="">{{ __('dashboard.bank_account') }}</th>
                             <th class="">{{ __('dashboard.verified') }}</th>
                             <th class="">{{ __('dashboard.attached') }}</th>
+                            <th class="">{{ __('dashboard.by') }}</th>
                             <th class="">{{ __('dashboard.description') }}</th>
                             <th class="">{{ __('dashboard.date') }}</th>
                             <th class="">{{ __('dashboard.time') }}</th>
@@ -220,6 +221,10 @@
                                         @else
                                             <span class="text-muted">{{ __('dashboard.no_data') }}</span>
                                         @endif
+                                    </td>
+                                    <!--begin::By-->
+                                    <td>
+                                        {{ $payment->handledBy->name ?? '-' }}
                                     </td>
                                     <!--begin::Description-->
                                     <td data-kt-ecommerce-category-filter="category_name">

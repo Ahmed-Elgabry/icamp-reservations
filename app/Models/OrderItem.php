@@ -27,4 +27,5 @@ class OrderItem extends Model
     public function order() { return $this->belongsTo(Order::class); }
     public function stock() { return $this->belongsTo(Stock::class); }
     public function account() { return $this->belongsTo(BankAccount::class, 'account_id'); }
+    public function handledBy() { return $this->belongsTo(User::class, 'handled_by'); }
 }

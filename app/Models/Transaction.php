@@ -36,6 +36,10 @@ class Transaction extends Model
     {
         return $this->belongsTo(BankAccount::class, 'account_id');
     }
+    public function handledBy()
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
         public function senderAccount()
     {
         return $this->belongsTo(BankAccount::class, 'sender_account_id');

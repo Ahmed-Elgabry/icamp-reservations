@@ -19,6 +19,10 @@ class OrderAddon extends Pivot
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
+    public function handledBy()
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
 
     public function addon()
     {

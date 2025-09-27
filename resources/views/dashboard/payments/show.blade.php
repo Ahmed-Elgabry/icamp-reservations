@@ -145,23 +145,25 @@
                                     @endcan
                             </td>
                         @endif
-                        <td>{{ $payment->handled_by ?? '-' }}</td>
+                        <td>{{ $payment->handledBy->name ?? '-' }}</td>
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
                                 @if($payment->statement == 'the_insurance' && $payment->verified == "1")
                                     @if($order->insurance_status === 'returned')
                                         <br><span class="badge badge-success">{{ __('dashboard.insurance_returned_note') }}</span>
+                                        {{__("dashboard.by")}} {{" " . $payment->insuranceHandledBy->name}}
                                     @elseif($order->insurance_status === 'confiscated_full' )
                                         <br><span class="badge badge-dark">{{ __('dashboard.insurance_confiscated_full') }}</span>
+                                        {{__("dashboard.by")}} {{" " . $payment->insuranceHandledBy->name}}
                                     @elseif($payment->insurance_status == 'confiscated_partial')
                                         <br><span class="badge badge-warning">{{ __('dashboard.insurance_confiscated_partial') }}</span>
+                                        {{__("dashboard.by")}} {{" " . $payment->insuranceHandledBy->name}}
                                     @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") < 1)
                                         <br><span class="badge badge-danger">{{ __('dashboard.insurance_null') }}</span>
                                     @elseif($order->insurance_status === null && $order->payments()->where('statement', 'the_insurance')->sum("price") > 1)
                                         <br><span class="badge badge-info">{{ __('dashboard.insurance_not_returned') }}</span>
                                     @endif
                                 @endif
-                                {{__("dashboard.by")}} {{" " . $payment->insurance_handled_by}}
                         </td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}

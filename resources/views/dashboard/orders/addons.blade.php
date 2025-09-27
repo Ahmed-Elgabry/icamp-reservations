@@ -93,7 +93,7 @@
                                 @endif
                                 @endcan
                                 </td>
-                                <td>{{ $orderAddon->pivot->handled_by ?? '-' }}</td>
+                                <td>{{ $orderAddon->pivot->handledBy->name ?? '-' }}</td>
                                 <td>{{ $orderAddon->pivot->description }}</td>
 
 

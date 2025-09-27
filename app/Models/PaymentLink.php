@@ -22,6 +22,10 @@ class PaymentLink extends Model
     {
         return $this->belongsTo(Order::class);
     }
+    public function handledBy()
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
 
     public function customer()
     {

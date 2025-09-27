@@ -81,7 +81,10 @@ class Order extends Model
 
         return null; // Return null if one of the time fields is null
     }
-    
+    public function insuranceHandledBy()
+    {
+        return $this->belongsTo(User::class, 'insurance_handled_by');
+    }
     /**
      * Get all internal notes for this order
      */

@@ -26,6 +26,10 @@ class GeneralPayment extends Model
     {
         return $this->belongsTo(Order::class);
     }
+    public function handledBy()
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
     public function transaction()
     {
         return $this->hasOne(Transaction::class , 'general_payment_id');
