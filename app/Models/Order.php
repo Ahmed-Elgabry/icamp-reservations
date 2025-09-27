@@ -177,7 +177,7 @@ class Order extends Model
     {
         return $this->belongsToMany(Addon::class, 'order_addon')
             ->using(OrderAddon::class)
-            ->withPivot('verified','count', 'price', 'description', 'id' , 'account_id' , 'payment_method')
+            ->withPivot('verified','count', 'price', 'handled_by', 'description', 'id' , 'account_id' , 'payment_method')
             ->withTimestamps();
     }
     public function verifiedAddons()
