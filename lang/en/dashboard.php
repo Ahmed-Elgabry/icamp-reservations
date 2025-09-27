@@ -2144,5 +2144,16 @@ return [
     'amount_exceeds_remaining' => 'The entered amount exceeds the remaining amount',
     'enter_valid_confiscation_amount' => 'Please enter a valid confiscation amount',
     'item_selling_price' => 'Item Selling Price',
-    'handled_by' => 'Handled By'
+    'handled_by' => 'Handled By',
+    'confirm_delete' => 'Are you sure you want to delete this item?',
+    'delete_warning_message' => 'This action cannot be undone. This will permanently delete the item.',
+    'yes_delete' => 'Yes, delete it!',
+    'cancel' => 'Cancel',
+    'processing' => 'Processing...',
+    'please_wait' => 'Please wait...',
+    'success' => 'Success',
+    'error' => 'Error',
+    'ok' => 'OK',
+    'payment_not_found' => 'Payment not found',
+    'payment_deleted_successfully' => 'Payment deleted successfully'
 ];

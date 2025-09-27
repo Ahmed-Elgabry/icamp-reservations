@@ -583,27 +583,73 @@ class GeneralPaymentsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Payment  $payment
+     * @param  int  $payment
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function destroy($payment, Request $request)
     {
-        $payment = GeneralPayment::findOrFail($payment);
-        if ($payment->verified) {
-            $bankAccount = BankAccount::find($payment->account_id);
-            if ($bankAccount) {
-            $bankAccount->update([
-                'balance' => $bankAccount->balance - $payment->price
-            ]);
+        try {
+            // Find the payment
+            $payment = GeneralPayment::find($payment);
+            
+            // If payment not found, return error response
+            if (!$payment) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('dashboard.payment_not_found')
+                    ], 404);
+                }
+                return redirect()->back()->with('error', __('dashboard.payment_not_found'));
+            }
+
+            // If payment is verified, update bank account balance
+            if ($payment->verified && $payment->account_id) {
+                $bankAccount = BankAccount::find($payment->account_id);
+                if ($bankAccount) {
+                    $bankAccount->update([
+                        'balance' => $bankAccount->balance - $payment->price
+                    ]);
+                } else {
+                    \Log::warning("BankAccount not found for Payment ID: $id, Account ID: {$payment->account_id}");
+                }
+            }
+
+            // Delete associated image if it exists
+            if ($payment->image_path) {
+                \Storage::disk('public')->delete($payment->image_path);
+            }
+
+            // Delete associated transaction
+            if ($payment->transaction) {
+                $payment->transaction()->delete();
+            }
+
+            // Delete the payment
+            $payment->delete();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('dashboard.payment_deleted_successfully')
+                ]);
+            }
+            
+            return redirect()->back()->with('success', __('dashboard.payment_deleted_successfully'));
+
+        } catch (\Exception $e) {
+            \Log::error('Error deleting payment: ' . $e->getMessage());
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error deleting payment: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()->with('error', 'Error deleting payment: ' . $e->getMessage());
         }
-        }
-        // Delete image if it exists
-        if ($payment->image_path) {
-            \Storage::disk('public')->delete($payment->image_path);
-        }
-        $payment->delete();
-        $payment->transaction()->delete();
-        return redirect()->back()->with('success',true);
     }
 
 
@@ -803,6 +849,7 @@ class GeneralPaymentsController extends Controller
                 'payment_method' => $request->payment_method,
                 'date' => $request->date,
                 'verified' => false, // Reset verification on update
+                "handled_by" => auth()->id()
             ];
 
             if ($request->hasFile('image')) {
@@ -827,6 +874,7 @@ class GeneralPaymentsController extends Controller
                     'date' => $request->date,
                     'description' => $request->description ?? 'Updated add funds to account',
                     'verified' => false, // Reset verification on update
+                    "handled_by" => auth()->id()
                 ]);
             }
             

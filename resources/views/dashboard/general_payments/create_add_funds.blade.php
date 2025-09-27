@@ -262,7 +262,9 @@
                                             @can('general_payments.destroy_add_funds')
                                             <!--begin::Menu item-->
                                             <div class="menu-item px-3">
-                                                <a href="#" class="menu-link px-3 delete-payment" data-url="{{ route('general_payments.destroy', $payment->id) }}">@lang('dashboard.delete')</a>
+                                                <a href="#" class="menu-link px-3 text-danger" data-kt-ecommerce-category-filter="delete_row" data-url="{{ route('general_payments.destroy', $payment->id) }}">
+                                                    <i class="fas fa-trash me-2"></i>@lang('dashboard.delete')
+                                                </a>
                                             </div>
                                             @endcan
                                         <!--end::Menu item-->
@@ -406,6 +408,7 @@
 @endsection
 
 @push('js')
+    <script src="{{ asset('js/general-payments.js') }}"></script>
     <script>
         // Initialize Select2 only when the element exists and is a <select>
         $(function () {
@@ -666,120 +669,76 @@
         });
 
         // Handle delete with AJAX
-        $(document).on('click', '.delete-payment', function(e) {
-            e.preventDefault();
-            
-            const deleteUrl = $(this).data('url');
-            const row = $(this).closest('tr');
-            const csrfToken = $('meta[name="csrf-token"]').attr('content');
-            
-            Swal.fire({
-                title: '@lang('dashboard.are_you_sure')',
-                text: '@lang('dashboard.you_wont_be_able_to_revert_this')',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: '@lang('dashboard.yes_delete_it')',
-                cancelButtonText: '@lang('dashboard.cancel')',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: deleteUrl,
-                        type: 'POST',
-                        data: {
-                            _token: csrfToken,
-                            _method: 'DELETE'
-                        },
-                        beforeSend: function() {
-                            // Show loading state
-                            row.addClass('table-active');
-                        },
-                        success: function(response) {
-                            // Remove the row with animation
-                            row.fadeOut(400, function() {
-                                $(this).remove();
-                                
-                                // If no more rows, show empty state
-                                if ($('#kt_ecommerce_category_table tbody tr').length === 0) {
-                                    $('#kt_ecommerce_category_table tbody').html(
-                                        '<tr><td colspan="10" class="text-center text-muted">@lang('dashboard.no_data_found')</td></tr>'
-                                    );
-                                }
-                            });
-                            
-                            // Show success message
-                            toastr.success('@lang('dashboard.deleted_successfully')');
-                        },
-                        error: function(xhr) {
-                            console.error(xhr);
-                            // Show error message
-                            toastr.error('@lang('dashboard.error_occurred_while_deleting')');
-                            row.removeClass('table-active');
-                        }
-                    });
-                }
-            });
-        });
-        
-            // Listen for the form submission to handle the response
-            $(document).on('submit', 'form[action="' + deleteUrl + '"]', function(e) {
+        // Initialize DataTable for payments
+        $(document).ready(function() {
+            if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#kt_ecommerce_category_table')) {
+                $('#kt_ecommerce_category_table').DataTable({
+                    info: false,
+                    order: [],
+                    pageLength: 10,
+                    retrieve: true,
+                    columnDefs: [
+                        { orderable: false, targets: [0, -1] } // Make first and last columns not sortable
+                    ]
+                });
+            }
+
+            // Handle edit form submission
+            $(document).on('submit', '#editPaymentForm', function(e) {
                 e.preventDefault();
                 
-                // Show loading
-                Swal.fire({
-                    title: '{{ __("dashboard.deleting") }}',
-                    text: '{{ __("dashboard.please_wait") }}',
-                    icon: 'info',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    willOpen: () => { Swal.showLoading(); }
-                });
+                const form = $(this);
+                const submitBtn = form.find('button[type="submit"]');
+                const submitLabel = submitBtn.find('.indicator-label');
+                const submitProgress = submitBtn.find('.indicator-progress');
                 
-                // Submit the form via AJAX to handle the response
+                // Show loading state
+                submitLabel.addClass('d-none');
+                submitProgress.removeClass('d-none');
+                submitBtn.prop('disabled', true);
+                
+                // Submit form via AJAX
                 $.ajax({
-                    url: deleteUrl,
+                    url: form.attr('action'),
                     type: 'POST',
-                    data: $(this).serialize(),
+                    data: form.serialize(),
                     success: function(response) {
-                        // Remove the row from table
-                        row.fadeOut(500, function() {
-                            $(this).remove();
-                            // Check if table is empty
-                            const table = $('#kt_ecommerce_category_table');
-                            if (table.find('tbody tr').length === 0) {
-                                table.find('tbody').html('<tr><td colspan="10" class="text-center text-muted">{{ __("dashboard.no_data_found") }}</td></tr>');
-                            }
-                        });
+                        // Hide modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editPaymentModal'));
+                        modal.hide();
                         
                         // Show success message
                         Swal.fire({
-                            title: '{{ __("dashboard.deleted") }}',
-                            text: '{{ __("dashboard.item_has_been_deleted") }}',
+                            title: '{{ __("dashboard.success") }}',
+                            text: '{{ __("dashboard.payment_updated_successfully") }}',
                             icon: 'success',
                             timer: 2000,
                             showConfirmButton: false
-                        }).then(() => {
-                            // Optional: reload the page to ensure consistency
-                            window.location.reload();
                         });
+                        
+                        // Reload page to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
                     },
                     error: function(xhr) {
-                        let errorMessage = '{{ __("dashboard.error_occurred") }}';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
+                        console.error(xhr);
+                        // Show error message
                         Swal.fire({
                             title: '{{ __("dashboard.error") }}',
-                            text: errorMessage,
+                            text: '{{ __("dashboard.error_occurred_while_updating") }}',
                             icon: 'error',
-                            confirmButtonText: '{{ __("dashboard.ok") }}'
+                            timer: 3000,
+                            showConfirmButton: false
                         });
+                    },
+                    complete: function() {
+                        // Reset button state
+                        submitLabel.removeClass('d-none');
+                        submitProgress.addClass('d-none');
+                        submitBtn.prop('disabled', false);
                     }
                 });
-                
-                // Prevent the default form submission
-                return false;
             });
         });
     </script>
-@endpush

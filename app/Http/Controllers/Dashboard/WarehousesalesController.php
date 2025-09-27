@@ -17,9 +17,9 @@ class WarehousesalesController extends Controller
 
         return view('dashboard.warehouse_sales.show', [
             'order' => $order,
-            'stocks' => Stock::select('id' , 'selling_price', 'name')->get(),
-            'items' => $order->items()->with('stock')->get(),
-            'bankAccounts' => \App\Models\BankAccount::pluck('name','id'),
+            'stocks' => Stock::latest()->get(),
+            'items' => $order->items()->with('stock')->latest()->get(),
+            'bankAccounts' => BankAccount::latest()->get(),
         ]);
     }
 

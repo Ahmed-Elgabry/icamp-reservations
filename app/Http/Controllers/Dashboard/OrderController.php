@@ -706,8 +706,8 @@ class OrderController extends Controller
     public function addons($id)
     {
         $order = Order::with('addons')->findOrFail($id);
-        $addons = Addon::all();
-        $bankAccounts = BankAccount::all();
+        $addons = Addon::latest()->get();
+        $bankAccounts = BankAccount::latest()->get();
 
         return view('dashboard.orders.addons', compact('order', 'addons', 'bankAccounts'));
     }

@@ -1769,6 +1769,19 @@ return [
     'Low' => 'ټیټ',
     'amount_details' => 'د اندازې تفصیلات',
 
+    // Delete confirmation and payment translations
+    'confirm_delete' => 'آیا تاسو ډاډه یاست چې غواړئ دا توکي حذف کړئ؟',
+    'delete_warning_message' => 'دا عمل بیرته راګرځیدونکی نه دی. دا به دا توکي د تل لپاره حذف کړي.',
+    'yes_delete' => 'هو، حذف یې کړه!',
+    'cancel' => 'لغوه کول',
+    'processing' => 'په پروسه کې...',
+    'please_wait' => 'لطفاً انتظار وکړئ...',
+    'success' => 'بریالیتوب',
+    'error' => 'تېروتنه',
+    'ok' => 'سمه ده',
+    'payment_not_found' => 'تادیه ونه موندل شوه',
+    'payment_deleted_successfully' => 'تادیه په بریالیتوب سره حذف شوه',
+
     // Internal Notes
     'internal_notes' => 'داخلي یادونې',
     'select_internal_note' => 'داخلي یادونه وټاکئ',

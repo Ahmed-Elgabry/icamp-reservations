@@ -23,7 +23,7 @@ class ExpensesController extends Controller
 
         $expenses = Expense::where('order_id', $id)->orderBy('created_at', 'desc')->get();
         $order = Order::findOrFail($id);
-        $bankAccounts = BankAccount::all();
+        $bankAccounts = BankAccount::latest()->get();
         return view('dashboard.expenses.show', compact('expenses', 'order', 'bankAccounts'));
     }
 

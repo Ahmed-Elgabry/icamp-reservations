@@ -392,7 +392,7 @@ public function moneyTransfer(Request $request)
         $this->authorize('viewAny', Payment::class);
 
         $order = Order::findOrFail($order);
-        $bankAccounts = BankAccount::all();
+        $bankAccounts = BankAccount::latest()->get();
 
         return view('dashboard.payments.show', [
             'order' => $order,

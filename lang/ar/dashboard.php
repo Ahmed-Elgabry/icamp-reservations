@@ -1837,6 +1837,17 @@ return [
     'amount_exceeds_remaining' => 'المبلغ المدخل يتجاوز المبلغ المتبقي',
     'enter_valid_confiscation_amount' => 'يجب إدخال مبلغ صالح للجزء المصادر',
     'item_selling_price' => 'سعر بيع العنصر',
-    'handled_by' => ' بواسطة'
+    'handled_by' => ' بواسطة',
+    'confirm_delete' => 'هل أنت متأكد أنك تريد حذف هذا العنصر؟',
+    'delete_warning_message' => 'لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر بشكل دائم.',
+    'yes_delete' => 'نعم، احذف!',
+    'cancel' => 'إلغاء',
+    'processing' => 'جاري المعالجة...',
+    'please_wait' => 'الرجاء الانتظار...',
+    'success' => 'نجاح',
+    'error' => 'خطأ',
+    'ok' => 'موافق',
+    'payment_not_found' => 'المدفعة غير موجودة',
+    'payment_deleted_successfully' => 'تم حذف المدفعة بنجاح'
 ];
 
