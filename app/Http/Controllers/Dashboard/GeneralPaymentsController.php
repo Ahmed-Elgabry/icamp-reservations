@@ -677,9 +677,7 @@ class GeneralPaymentsController extends Controller
             ->orWhere('statement', 'add_funds') // Also include by statement type
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        \Log::info('Recent add funds payments count: ' . $recentPayments->count());
-        
+                
         return view('dashboard.general_payments.create_add_funds', compact(
             'bankAccounts', 
             'orders', 

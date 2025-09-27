@@ -256,7 +256,7 @@
                                             @endif
                                             @can('general_payments.update_add_funds')
                                             <div class="menu-item px-3">
-                                                <a  class="menu-link px-3" onclick="openEditModal({{ $payment->generalPayment->id }}, '{{ $payment->amount }}', '{{ $payment->date }}', '{{ $payment->payment_method }}', '{{ $payment->description }}', '{{ $payment->account_id }}')">{{ __('actions.edit') }}</a>
+                                                <a  class="menu-link px-3" onclick="openEditModal({{ $payment->id }}, '{{ $payment->price }}', '{{ $payment->date }}', '{{ $payment->payment_method }}', '{{ $payment->description }}', '{{ $payment->account_id }}')">{{ __('actions.edit') }}</a>
                                             </div>
                                             @endcan
                                             @can('general_payments.destroy_add_funds')
@@ -509,50 +509,23 @@
         }
 
         // Edit payment modal function
-        function openEditModal(paymentId) {
+        function openEditModal(paymentId, price, date, paymentMethod, description, accountId) {
             // Get form and modal elements
             const $form = $('#editPaymentForm');
             const $modal = $('#editPaymentModal');
-            const $submitBtn = $form.find('button[type="submit"]');
             
             // Set form action URL
             $form.attr('action', "{{ route('general_payments.update_add_funds', ':id') }}".replace(':id', paymentId));
             
-            // Show loading state
-            const originalBtnText = $submitBtn.html();
-            $submitBtn.prop('disabled', true).html(
-                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...'
-            );
+            // Fill form fields with the passed data
+            $('#editAmount').val(price || '');
+            $('#editDate').val(date || '');
+            $('#editPaymentMethod').val(paymentMethod || '');
+            $('#editDescription').val(description || '');
+            $('#editAccountId').val(accountId || '');
             
-            // Fetch payment data using jQuery AJAX
-            $.ajax({
-                url: "{{ route('general_payments.get_add_fund', '') }}/" + paymentId,
-                type: 'GET',
-                dataType: 'json',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                success: function(data) {
-                    // Fill form fields with the fetched data
-                    $('#editAmount').val(data.amount || '');
-                    $('#editDate').val(data.date || '');
-                    $('#editPaymentMethod').val(data.payment_method || '');
-                    $('#editDescription').val(data.description || '');
-                    $('#editAccountId').val(data.account_id || '');
-                    
-                    // Show the modal using Bootstrap's jQuery plugin
-                    new bootstrap.Modal($modal[0]).show();
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error fetching payment data:', error);
-                    alert('Failed to load payment data. Please try again.');
-                },
-                complete: function() {
-                    // Reset button state
-                    $submitBtn.prop('disabled', false).html(originalBtnText);
-                }
-            });
+            // Show the modal using Bootstrap's jQuery plugin
+            new bootstrap.Modal($modal[0]).show();
         }
 
         // Handle edit form submission
