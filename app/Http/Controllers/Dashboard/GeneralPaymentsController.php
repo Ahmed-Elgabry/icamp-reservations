@@ -478,7 +478,10 @@ class GeneralPaymentsController extends Controller
             $imagePath = $request->file('image')->store('general_payments', 'public');
             $validatedData['image_path'] = $imagePath;
         }
+        // Add handled_by to the validated data
+        $validatedData['handled_by'] = auth()->id();
         $payment = GeneralPayment::create($validatedData);
+        
         $payment->transaction()->create([
             'amount' => $request->price,
             'source' => $request->source,
@@ -486,6 +489,8 @@ class GeneralPaymentsController extends Controller
             'type' => 'deposit',
             'description' => $request->notes,
             'order_id' => $request->order_id,
+            'handled_by' => auth()->id(),
+
         ]);
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -550,13 +555,21 @@ class GeneralPaymentsController extends Controller
             ]);
         }
         $validatedData['verified'] = 0;
+        $validatedData['handled_by'] = auth()->id(); // Add handled_by for the payment update
         $payment->update($validatedData);
-        $validatedData['type'] = "deposit";
-        $validatedData['amount'] = $validatedData['price'];
-        unset($validatedData['price']);
-        $payment->transaction()->update(
-            $validatedData
-        );
+        
+        // Prepare transaction data
+        $transactionData = [
+            'account_id' => $validatedData['account_id'],
+            'amount' => $validatedData['price'],
+            'date' => $payment->date,
+            'source' => $payment->source,
+            'description' => $validatedData['notes'] ?? null,
+            'type' => 'deposit',
+            'handled_by' => auth()->id() // Add handled_by for the transaction
+        ];
+        
+        $payment->transaction()->update($transactionData);
         if ($request->ajax() || $request->wantsJson()) { 
             return response()->json([
             'success' => true,
@@ -714,7 +727,7 @@ class GeneralPaymentsController extends Controller
                 'payment_method' => $request->payment_method,
                 'date' => $request->date,
                 'verified' => false, // Default to unverified
-
+                'handled_by' => auth()->id()
             ]);
 
             // Create corresponding transaction
@@ -727,11 +740,12 @@ class GeneralPaymentsController extends Controller
                 'description' => $request->description ?? 'Add funds to account',
                 'general_payment_id' => $payment->id,
                 'type' => 'deposit', // Funds added to account
+                'handled_by' => auth()->id()
+                
             ]);
             
             DB::commit();
             
-            // Check if this is an AJAX request
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,

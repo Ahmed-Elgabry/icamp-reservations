@@ -108,9 +108,14 @@ class OrderController extends Controller
                 foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
                     $insurance->update([
                         'insurance_status' => 'returned',
+                        'insurance_handled_by' => auth()->id()
                     ]);
                     // Set transaction amount to 0 since insurance is returned
-                    $insurance->transaction->update(['amount' => 0]);
+                    $insurance->transaction->update([
+                        'amount' => 0,
+                        'insurance_handled_by' => auth()->id()
+                    ]);
+                    
                     BankAccount::find($insurance->account_id)->decrement('balance', $insurance->price);
                 }
                 $insuranceAmounts = 0; // No insurance remaining after return
@@ -124,11 +129,15 @@ class OrderController extends Controller
                     $insurance->transaction->update(['amount' => $insurance->price]);
                     $insurance->update([
                         'insurance_status' => 'confiscated_partial',
+                        'insurance_handled_by' => auth()->id()
                     ]);
                     // Set transaction to the confiscated amount (what system keeps)
                     if ($insurance->transaction) {
                         $confiscatedPortion = ($insurance->price / $originalInsuranceAmount) * $insuranceAmount;
-                        $insurance->transaction->update(['amount' => $confiscatedPortion]);
+                        $insurance->transaction->update([
+                            'amount' => $confiscatedPortion,
+                            'insurance_handled_by' => auth()->id()
+                        ]);
                     }
 
                     // Deduct the confiscated portion from bank balance
@@ -144,9 +153,14 @@ class OrderController extends Controller
                 foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
                     $insurance->update([
                         'insurance_status' => 'confiscated_full',
+                        'insurance_handled_by' => auth()->id()
                     ]);
+
                     // Set transaction to 0 since fully confiscated
-                    $insurance->transaction->update(['amount' => $insurance->price]);
+                    $insurance->transaction->update([
+                        'amount' => $insurance->price,
+                        'insurance_handled_by' => auth()->id()
+                    ]);
                     // Deduct full amount from bank balance
                     if ($insurance->account_id) {
                         BankAccount::find($insurance->account_id)->increment('balance', $insurance->price);
@@ -156,10 +170,11 @@ class OrderController extends Controller
                 break;
 
             default:
-                $insuranceAmounts = $originalInsuranceAmount;
+                $insuranceAmounts = $originalInsuranceAmount;       
         }
 
         $order->update([
+            'insurance_handled_by' => auth()->id(),
             'insurance_status' => $insuranceStatus,
             'confiscation_description' => $confiscationDescription,
             'insurance_amount' => $insuranceAmounts,
@@ -591,6 +606,7 @@ class OrderController extends Controller
             'payment_method' => $validatedData['payment_method'] ?? null,
             'account_id' => $validatedData['account_id'] ?? null,
             'description' => $validatedData['description'] ?? '',
+            'handled_by' => auth()->id()
         ]);
         // add transaction linked to the newly created pivot row
         // Fetch the latest pivot row for this order/addon pair (assumes 'order_addon' has an auto-increment 'id')
@@ -607,7 +623,8 @@ class OrderController extends Controller
                 'amount' => $validatedData['price'],
                 'description' => $validatedData['description'],
                 'source' => 'reservation_addon',
-                'type' => 'deposit'
+                'type' => 'deposit',
+                'handled_by' => auth()->id()
             ]);
         }
         return back()->with('success', __('dashboard.success'));
@@ -622,6 +639,7 @@ class OrderController extends Controller
             'account_id' => 'nullable|exists:bank_accounts,id',
             'payment_method' => 'nullable|string',
             'description' => 'nullable|string',
+        
         ]);
 
         // Get the existing addon data to find the transaction
@@ -640,6 +658,7 @@ class OrderController extends Controller
             'price' => $validatedData['price'],
             'description' => $validatedData['description'] ?? '',
             'verified' => 0, // Reset verified status on update
+            'handled_by' => auth()->id()
         ]);
         $transaction = \App\Models\Transaction::where('order_addon_id', $pivotId)->first();
         if ($transaction) {
@@ -649,6 +668,7 @@ class OrderController extends Controller
                 'account_id' => $validatedData['account_id'] ?? $transaction->account_id,
                 'description' => $validatedData['description'] ?? $transaction->description,
                 'verified' => 0, // Reset verified status on update
+                'handled_by' => auth()->id()
             ]);
         }
 

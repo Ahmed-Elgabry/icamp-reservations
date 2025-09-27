@@ -58,7 +58,7 @@ class NewRegistrationformsNotification extends Notification
         return [
             'title' => "NewRegistrationTitle",
             'message'  => "NewRegistrationMessage",
-            'url'  => route('orders.registeration-forms'),
+            'url'  => route('bookings.registeration-forms.index'),
         ];
     }
 }

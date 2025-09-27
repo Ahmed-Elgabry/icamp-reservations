@@ -41,12 +41,16 @@ class WarehousesalesController extends Controller
             // Create item via the order relation so order_id is set consistently
             $order = Order::findOrFail($data['order_id']);
             $stock = Stock::findOrFail($data['stock_id']);
+            // Add handled_by to the data
+            $data['handled_by'] = auth()->id();
             $orderItem = $order->items()->create($data);
+            
             Transaction::create([
                 'account_id' => $data['account_id'],
                 'amount' => $data['total_price'],
                 'description' => $data['notes'],
                 'order_id' => $data['order_id'],
+                'handled_by' => auth()->id(),
                 "type" =>"deposit",
                 'source' => 'warehouse_sale',
                 "stock_id" => $data['stock_id'],

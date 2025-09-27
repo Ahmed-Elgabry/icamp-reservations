@@ -69,6 +69,7 @@
                             <th class="fw-bolder">{{ __('dashboard.payment_method') }}</th>
                             <th class="fw-bolder">{{ __('dashboard.bank_account') }}</th>
                             <th class="fw-bolder">{{ __('dashboard.verified') }}</th>
+                            <th class="fw-bolder">{{ __('dashboard.handled_by') }}</th>
                             <th class="fw-bolder">{{ __('dashboard.notes') }}</th>
                             <th class="fw-bolder">{{ __('dashboard.actions') }}</th>
                         </tr>
@@ -92,6 +93,7 @@
                                 @endif
                                 @endcan
                                 </td>
+                                <td>{{ $orderAddon->pivot->handled_by ?? '-' }}</td>
                                 <td>{{ $orderAddon->pivot->description }}</td>
 
 

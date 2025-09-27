@@ -168,12 +168,14 @@ class ExpensesController extends Controller
                 'image' => $imagePath, // Store as 'image' field
                 'image_path' => $imagePath, // Also store as 'image_path' for compatibility
                 'order_id' => $request->order_id,
-                'source' => $request->source
+                'source' => $request->source,
+                'handled_by' => auth()->id()
             ]);
 
             Transaction::create([
                 'account_id' => $request->account_id,
                 'amount' => $request->price,
+                'handled_by' => auth()->id(),
                 'order_id' => $request->order_id,
                 'type' => 'debit',
                 'date' => $date,
@@ -281,6 +283,7 @@ class ExpensesController extends Controller
                 $data['image_path'] = $imagePath;
             }
             $data["verified"] = 0 ; // Reset verified status on update
+            $data['handled_by'] = auth()->id();
             $expense->update($data);
 
             Transaction::where('expense_id', $expense->id)->update([
@@ -291,6 +294,7 @@ class ExpensesController extends Controller
                 'date' => $data['date'],
                 'description' => 'Expense: ' . ($request->statement ?? 'general_expenses'),
                 'source' => $request->source,
+                'handled_by' => auth()->id()
             ]);
 
             DB::commit();

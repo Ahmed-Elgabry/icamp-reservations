@@ -83,6 +83,7 @@
                     @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
                         <th class="">{{ __('dashboard.verified') }}</th>
                     @endif
+                    <th class="">{{ __('dashboard.handled_by') }}</th>
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
                     <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
@@ -144,6 +145,7 @@
                                     @endcan
                             </td>
                         @endif
+                        <td>{{ $payment->handled_by ?? '-' }}</td>
                         <td  data-kt-ecommerce-category-filter="category_name" >
                             {{$payment->notes}}
                                 @if($payment->statement == 'the_insurance' && $payment->verified == "1")
@@ -159,6 +161,7 @@
                                         <br><span class="badge badge-info">{{ __('dashboard.insurance_not_returned') }}</span>
                                     @endif
                                 @endif
+                                {{__("dashboard.by")}} {{" " . $payment->insurance_handled_by}}
                         </td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}

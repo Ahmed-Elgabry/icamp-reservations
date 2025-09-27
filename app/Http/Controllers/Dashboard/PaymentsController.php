@@ -331,12 +331,15 @@ public function moneyTransfer(Request $request)
             'payment_method' => 'required|string',
             'statement' => 'required',
             'notes' => 'nullable|string',
+
         ]);
 
         DB::beginTransaction();
 
         try {
 
+            // Add handled_by to the validated data
+            $validatedData['handled_by'] = auth()->id();
             $payment = Payment::create($validatedData);
 
             if ($request->source) {
@@ -357,6 +360,7 @@ public function moneyTransfer(Request $request)
                 'payment_id' => $payment->id,
                 'verified' => 0, // Changed from false to true so it appears in general payments
                 'order_id' => $payment->order_id,
+                'handled_by' => auth()->id(),
                 'customer_id' => $payment->customer_id ?? null
             ]);
 
@@ -416,6 +420,7 @@ public function moneyTransfer(Request $request)
                 $bankAccount->decrement('balance', $payment->price);
             }
         }
+        $validatedData['handled_by'] = auth()->id();
         $payment->update($validatedData);
         Transaction::where('payment_id', $payment->id)->update([
             'account_id' => $request->account_id,
@@ -425,6 +430,7 @@ public function moneyTransfer(Request $request)
             'date' => now(),
             'description' => 'Payment: ' . $request->statement,
             'verified' => 0,
+            'handled_by' =>auth()->id()
         ]);
 
         return back()->withSuccess(__('dashboard.success'));

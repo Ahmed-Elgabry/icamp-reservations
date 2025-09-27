@@ -147,6 +147,7 @@ class PaymentLinkController extends Controller
                 'expires_at' => $request->expires_at,
                 'request_id' => $result['data']['requestId'] ?? null,
                 'order_id_paymennt' => $result['data']['orderId'] ?? null,
+                'handled_by' => auth()->id()
             ]);
 
             // Send email to customer if email exists and send_email is checked

@@ -59,7 +59,8 @@ class Order extends Model
         'receipt_notes',
         'people_count',
         "client_notes",
-        "insurance_approved"
+        "insurance_approved",
+        "insurance_handled_by"
     ];
     
     // Alternatively, you can keep using guarded if you prefer

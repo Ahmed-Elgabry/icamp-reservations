@@ -83,6 +83,7 @@
                     <th class="">{{ __('dashboard.debit') }}{{" "}} {{ __('dashboard.from') }}</th>
                     <th class="">{{ __('dashboard.notes') }}</th>
                     <th class="">{{ __('dashboard.verified') }}</th>
+                    <th class="">{{ __('dashboard.handled_by') }}</th>
                     <th class="">{{ __('dashboard.created_at') }}</th>
                     <th class="text-end min-w-70px">@lang('dashboard.actions')</th>
                 </tr>
@@ -131,6 +132,7 @@
                                 <a href="{{ route('order.verified' , [$payment->id , 'expense']) }}" class="btn btn-sm btn-success">{{ __('dashboard.mark') }} {{ __('dashboard.verified') }}</a>
                             @endif
                         </td>
+                        <td>{{ $payment->handled_by ?? '-' }}</td>
                         <td>
                            {{$payment->created_at->diffForHumans() }}
                         </td>

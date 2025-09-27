@@ -55,6 +55,7 @@
                                     <th class="min-w-120px">@lang('dashboard.created_date')</th>
                                     <th class="min-w-120px">@lang('dashboard.created_time')</th>
                                     <th class="min-w-100px">{{ __('dashboard.status') }}</th>
+                                    <th class="min-w-120px">{{ __('dashboard.handled_by') }}</th>
                                     <th class="min-w-120px">{{ __('dashboard.actions') }}</th>
                                 </tr>
                             </thead>
@@ -165,6 +166,11 @@
                                     </td>
                                     <td>
                                         {!! $paymentLink->status_badge !!}
+                                    </td>
+                                    <td>
+                                        <span class="text-dark fw-bolder text-h6 d-block fs-6">
+                                            {{ $paymentLink->handled_by ?? '-' }}
+                                        </span>
                                     </td>
                                     <td>
                                         <div class="d-flex flex-sack">

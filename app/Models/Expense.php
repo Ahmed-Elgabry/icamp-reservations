@@ -9,7 +9,20 @@ class Expense extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $fillable = ['expense_item_id', 'price', 'payment_method', 'date', 'source', 'notes', 'statement', 'account_id', 'order_id', 'verified', 'image_path'];
+    protected $fillable = [
+        'expense_item_id', 
+        'price', 
+        'payment_method', 
+        'date', 
+        'source', 
+        'notes', 
+        'statement', 
+        'account_id', 
+        'order_id', 
+        'verified', 
+        'image_path',
+        'handled_by'
+    ];
 
     public function expenseItem()
     {

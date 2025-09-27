@@ -27,7 +27,8 @@ class Transaction extends Model
         'order_item_id',
         'general_payment_id',
         'image_path',
-        'stock_id'
+        'stock_id',
+        'handled_by'
         ];
     
      // Define the sender relationship
