@@ -34,9 +34,7 @@ class Stock extends Model
     public function service_stock_count (){
         return $this->service_stocks->sum('count');
     }
-    public function service_stocks (){
-        return $this->hasMany(ServiceStock::class, 'stock_id' , 'id');
-    }
+
     // دالة لحفظ الملفات
     protected function StoreFile($directory, $file)
     {

@@ -343,6 +343,46 @@
         padding: 20px;
         background-color: #f8f9fa;
     }
+    
+    /* Modal Styling Fixes */
+    #imageModal .modal-dialog {
+        max-width: 90%;
+        max-height: 90vh;
+        margin: 1.75rem auto;
+    }
+
+    #imageModal .modal-content {
+        background-color: white;
+        border: none;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    #imageModal .modal-body {
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+    }
+
+    #imageModal .modal-body img {
+        max-width: 100%;
+        max-height: 80vh;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+
+    #imageModal .modal-header {
+        border-bottom: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+    }
+
+    #imageModal .modal-footer {
+        border-top: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+    }
 
     .recording-timer {
         font-size: 18px;
@@ -392,6 +432,20 @@
     }
 </style>
 @endpush
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" class="img-fluid" src="" alt="Preview">
+            </div>
+        </div>
+    </div>
+</div>
 
 @section('scripts')
 <script>
@@ -453,7 +507,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Upload image to server
     function uploadImage(file) {
         const formData = new FormData();
-        formData.append('pre_login_image', file);
+        // Append the file as an array element
+        formData.append('pre_login_image[]', file);
         formData.append('order_id', '{{ $order->id }}');
         formData.append('_token', '{{ csrf_token() }}');
 
@@ -465,41 +520,53 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         reader.readAsDataURL(file);
 
-        // Upload to server
-        fetch('{{ route("orders.uploadTemporaryImage") }}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.length > 0) {
-                // Remove temp preview
+        // Upload to server using jQuery AJAX
+        $.ajax({
+            url: '{{ route("orders.uploadTemporaryImage") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                console.log('Server response:', response);
+                if (response && response.length > 0) {
+                    // Remove temp preview
+                    const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
+                    if (tempPreview) {
+                        tempPreview.remove();
+                    }
+
+                    // Handle each uploaded file in the response
+                    response.forEach(uploadedFile => {
+                        if (uploadedFile && uploadedFile.filePath) {
+                            uploadedImages.push({ 
+                                path: uploadedFile.filePath, 
+                                id: uploadedFile.id,
+                                isExisting: false 
+                            });
+                            addImagePreview(uploadedFile.filePath, uploadedFile.id, false);
+                        }
+                    });
+                    updateUploadedImagesInput();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Upload error:', error);
+                // Remove temp preview on error
                 const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
                 if (tempPreview) {
                     tempPreview.remove();
                 }
-
-                // Add real preview
-                uploadedImages.push({ 
-                    path: data[0].filePath, 
-                    id: data[0].id,
-                    isExisting: false 
-                });
-                addImagePreview(data[0].filePath, data[0].id, false);
-                updateUploadedImagesInput();
+                
+                if (xhr.status === 419) { // CSRF token mismatch
+                    alert('Your session has expired. Please refresh the page and try again.');
+                    window.location.reload();
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    alert('Error: ' + xhr.responseJSON.message);
+                } else {
+                    alert('Error uploading image. Please try again.');
+                }
             }
-        })
-        .catch(error => {
-            console.error('Upload error:', error);
-            // Remove temp preview on error
-            const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
-            if (tempPreview) {
-                tempPreview.remove();
-            }
-            alert('Error uploading image. Please try again.');
         });
     }
 
@@ -512,6 +579,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const img = document.createElement('img');
         img.src = src;
         img.alt = 'Preview';
+        img.className = 'img-fluid';
+        img.style.cursor = 'pointer';
+        
+        // Add click handler to open modal
+        img.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = this.src;
+            modal.show();
+        });
         
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
@@ -562,16 +639,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Camera capture functionality
-    document.getElementById('openCamera').addEventListener('click', function() {
-        document.getElementById('cameraInput').click();
-    });
+    const openCameraBtn = document.getElementById('openCamera');
+    const cameraInput = document.getElementById('cameraInput');
+    
+    if (openCameraBtn) {
+        openCameraBtn.addEventListener('click', function() {
+            if (cameraInput) {
+                cameraInput.click();
+            }
+        });
+    }
 
-    document.getElementById('cameraInput').addEventListener('change', function(e) {
+    if (cameraInput) {
+        cameraInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             uploadImage(file);
         }
     });
+    }
 
     // Media recording variables
     let mediaRecorder;
@@ -742,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             recordedChunks = [];
             
-            // Get video devices if recording video
+            // Check if we have video devices if this is a video recording
             if (mediaType === 'video') {
                 devices = await getVideoDevices();
                 const switchBtn = container.querySelector('.switch-camera');
@@ -874,7 +960,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> {{ __('dashboard.record') }}`;
                     }
                 }
-            }, 5 * 60 * 1000);
+            }, 60 * 60 * 1000);
 
         } catch (error) {
             console.error('Error accessing media devices:', error);

@@ -1589,6 +1589,7 @@ return [
     'image_after_delivery' => 'Image After Delivery',
     'customers' => 'Customers',
     'calender' => 'Calendar',
+    'Calender' => 'Calendar',
     'characters' => 'Characters',
     'terms' => 'Terms and Conditions',
     'stocks' => 'Inventory',
@@ -2142,6 +2143,6 @@ return [
     'enter_valid_amount' => 'Please enter a valid amount',
     'amount_exceeds_remaining' => 'The entered amount exceeds the remaining amount',
     'enter_valid_confiscation_amount' => 'Please enter a valid confiscation amount',
-    'item_Selling_price' => 'Item Selling Price'
+    'item_selling_price' => 'Item Selling Price'
 
 ];

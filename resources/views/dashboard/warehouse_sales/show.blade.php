@@ -150,7 +150,7 @@
                                             </div>
                                             <div class="form-group mt-3">
                                                 <label>{{ __('dashboard.item_selling_price') }}</label>
-                                                <input type="number" step="0.01" disabled class="form-control js-total" value="{{ $stock->selling_price }}">
+                                                <input type="number" step="0.01" disabled class="form-control " value="{{ $stock->selling_price }}">
                                             </div>
                                             <input type="hidden" value="warehouse_sales" name="source">
                                             <div class="form-group mt-3">

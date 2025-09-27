@@ -269,6 +269,7 @@ return [
     'image_after_delivery' => 'صورة بعد الاستلام',
     'customers' => 'العملاء',
     'calender' => 'جدولة',
+    'Calender' => 'التقويم',
     'characters' => 'الكلمات',
     'terms' => ' الأحكام والشروط',
     'stocks' => 'المخزون',
@@ -1835,6 +1836,6 @@ return [
     'enter_valid_amount' => 'يجب إدخال مبلغ صالح',
     'amount_exceeds_remaining' => 'المبلغ المدخل يتجاوز المبلغ المتبقي',
     'enter_valid_confiscation_amount' => 'يجب إدخال مبلغ صالح للجزء المصادر',
-    'item_Selling_price' => 'سعر بيع العنصر'
+    'item_selling_price' => 'سعر بيع العنصر'
 ];
 

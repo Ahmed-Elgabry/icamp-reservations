@@ -9,6 +9,7 @@
         <div id="kt_content_container" class="container-xxl">
 
             @include('dashboard.orders.nav')
+            
             @if ($order->video_note_logout)
                 <div class="modal fade" id="deleteVideoNoteModal" tabindex="-1" aria-labelledby="deleteVideoNoteModalLabel"
                     aria-hidden="true">
@@ -109,69 +110,26 @@
                                 class="form-control">{{ old('delivery_time_notes', $order->delivery_time_notes) }}</textarea>
                         </div>
                         
+                        <!-- Image Upload Section -->
                         <div class="form-group mt-5">
-                            <label for="pre_logout_image">{{ __('dashboard.pre_logout_image') }}</label>
-                            
-                            <!-- Image Upload Dropdown -->
-                            <div class="dropdown mb-3">
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="imageUploadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-camera me-2"></i>{{ __('dashboard.add_image') }}
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="imageUploadDropdown">
-                                    <li>
-                                        <a class="dropdown-item" href="#" id="uploadImageBtn">
-                                            <i class="fas fa-upload me-2"></i>{{ __('dashboard.upload_image') }}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" id="takePhotoBtn">
-                                            <i class="fas fa-camera me-2"></i>{{ __('dashboard.take_photo') }}
-                                        </a>
-                                    </li>
-                                </ul>
-                                <input type="file" id="imageInput" class="d-none" accept="image/*">
-                                <input type="hidden" id="capturedImageData" name="captured_image">
-                            </div>
-                            
-                            <!-- Image Preview Container -->
-                            <div class="row" id="imagePreviewContainer">
-                                <!-- Existing images will be shown here -->
-                            </div>
-                            
-                            <!-- Hidden dropzone for file uploads -->
-                            <div class="dropzone dropzone-previews d-none" id="preLoginImageDropzone"></div>
-                            
-                            <!-- Camera Modal -->
-                            <div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">{{ __('dashboard.take_photo') }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body text-center">
-                                            <div class="camera-container mb-3">
-                                                <video id="cameraPreview" class="w-100" autoplay playsinline style="max-height: 400px; background: #000;"></video>
-                                                <canvas id="cameraCanvas" class="d-none"></canvas>
-                                            </div>
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <button type="button" class="btn btn-primary" id="captureBtn">
-                                                    <i class="fas fa-camera me-2"></i>{{ __('dashboard.capture') }}
-                                                </button>
-                                                <button type="button" class="btn btn-secondary" id="switchCameraBtn" style="display: none;">
-                                                    <i class="fas fa-sync-alt me-2"></i>{{ __('dashboard.switch_camera') }}
+                            <label class="form-label">{{ __('dashboard.pre_logout_image') }}</label>
+                            <div class="image-upload-zone">
+                                <div class="upload-area" id="imageUploadArea">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>{{ __('dashboard.drag_drop_images_or_click_to_browse') }}</p>
+                                    <input type="file" id="imageInput" name="pre_logout_images[]" multiple accept="image/*" style="display: none;">
+                                </div>
+                                <div class="image-previews" id="imagePreviews">
+                                    @if($order->preLogoutImages->isNotEmpty())
+                                        @foreach($order->preLogoutImages as $image)
+                                            <div class="image-preview" data-image-id="existing-{{ $image->id }}">
+                                                <img src="{{ asset($image->image) }}" alt="Preview">
+                                                <button type="button" class="remove-btn" data-id="{{ $image->id }}" data-type="existing">
+                                                    <i class="fas fa-times"></i>
                                                 </button>
                                             </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                {{ __('dashboard.cancel') }}
-                                            </button>
-                                            <button type="button" class="btn btn-primary" id="usePhotoBtn" disabled>
-                                                {{ __('dashboard.use_photo') }}
-                                            </button>
-                                        </div>
-                                    </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -290,34 +248,127 @@
 @endsection
 
 @push('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
     <style>
-        /* Dropzone styles */
-        .dropzone {
+        /* Image Upload Zone */
+        .image-upload-zone {
             border: 2px dashed #007bff;
-            padding: 20px;
-            text-align: center;
-            background-color: #f9f9f9;
             border-radius: 8px;
+            background-color: #f8f9fa;
             transition: all 0.3s ease;
         }
-
-        .dropzone:hover {
-            border-color: #0056b3;
-            background-color: #f0f7ff;
+        
+        /* Modal Styling Fixes */
+        #imageModal .modal-dialog {
+            max-width: 90%;
+            max-height: 90vh;
+            margin: 1.75rem auto;
         }
 
-        .dropzone .dz-message {
-            font-size: 18px;
-            color: #007bff;
+        #imageModal .modal-content {
+            background-color: white;
+            border: none;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        #imageModal .modal-body {
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+        }
+
+        #imageModal .modal-body img {
+            max-width: 100%;
+            max-height: 80vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        #imageModal .modal-header {
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+
+        #imageModal .modal-footer {
+            border-top: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+        
+        .image-upload-zone .upload-area {
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .image-upload-zone .upload-area i {
+            font-size: 2.5rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .image-upload-zone .upload-area p {
             margin: 0;
+            color: #6c757d;
         }
-
-        .dropzone .dz-preview .dz-image img {
-            width: 100px;
-            height: 100px;
+        
+        .image-upload-zone.dragover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+        
+        .image-previews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-preview img:hover {
+            transform: scale(1.05);
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .image-preview:hover .remove-btn {
+            opacity: 1;
         }
         
         .capture-media.recording {
@@ -367,123 +418,19 @@
             100% { opacity: 1; }
         }
         
-        .switch-camera {
-            display: none;
-        }
-        
-        /* Image upload and camera styles */
-        #imagePreviewContainer {
-            margin: 15px -5px 0;
-            display: flex;
-            flex-wrap: wrap;
-        }
-        
-        #imagePreviewContainer .card {
-            border: 1px solid #e4e6ef;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            margin: 0 5px 10px;
-            width: calc(25% - 10px);
-        }
-        
-        #imagePreviewContainer .card:hover {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        #imagePreviewContainer .card-img-top {
-            height: 120px;
-            width: 100%;
-            object-fit: cover;
-        }
-        
-        #imagePreviewContainer .card-body {
-            padding: 0.75rem;
-            background: #fff;
-        }
-        
-        #imagePreviewContainer .remove-image {
-            width: 30px;
-            height: 30px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-        
-        #imagePreviewContainer .remove-image:hover {
-            transform: scale(1.1);
-        }
-        
-        /* Camera modal styles */
-        #cameraPreview, #cameraCanvas {
-            max-width: 100%;
-            height: auto;
-            background: #000;
-            margin: 0 auto;
-            display: block;
-            border-radius: 6px;
-        }
-        
-        #cameraCanvas {
-            display: none;
-        }
-        
-        .camera-container {
-            position: relative;
-            margin-bottom: 15px;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            max-height: 60vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Loading indicator */
-        .loading-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            flex-direction: column;
-        }
-        
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            margin-bottom: 1rem;
-        }
-        
         /* Responsive adjustments */
-        @media (max-width: 992px) {
-            #imagePreviewContainer .card {
-                width: calc(33.333% - 10px);
-            }
-        }
-        
         @media (max-width: 768px) {
-            #imagePreviewContainer .card {
-                width: calc(50% - 10px);
-            }
-            
-            .camera-container {
-                max-height: 50vh;
-            }
-            
             .modal-dialog {
                 margin: 0.5rem;
+            }
+            
+            .btn-group .btn {
+                font-size: 0.875rem;
+            }
+            
+            .image-preview {
+                width: 100px;
+                height: 100px;
             }
         }
         
@@ -497,794 +444,760 @@
                 margin-bottom: 5px;
             }
             
-            .switch-camera {
-                flex: 1 0 100% !important;
-                margin-top: 5px;
-            }
-            
-            #imagePreviewContainer .card {
-                width: calc(50% - 10px);
-            }
-            
-            #imagePreviewContainer .card-img-top {
-                height: 100px;
-            }
-            
-            .modal-dialog {
-                margin: 0.25rem;
+            .image-preview {
+                width: 80px;
+                height: 80px;
             }
         }
     </style>
 @endpush
 
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" class="img-fluid" src="" alt="Preview">
+            </div>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
-    
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize media upload handlers if they exist
-        if (document.body) {
-            initializeMediaHandlers(document.body);
-        }
-        
-        // Add CSRF token to all AJAX requests
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
+<script>
+class OrderLogoutManager {
+    constructor() {
+        this.uploadedImages = [];
+        this.mediaRecorder = null;
+        this.mediaStream = null;
+        this.recordedChunks = [];
+        this.currentDeviceId = null;
+        this.devices = [];
+        this.recordingStartTime = null;
+        this.recordingTimers = new Map();
+        this.init();
+    }
+
+    init() {
+        this.loadExistingImages();
+        this.initializeImageUpload();
+        this.initializeExistingImageButtons();
+        this.initializeMediaHandlers();
+        this.initializeFormSubmission();
+        this.updateUploadedImagesInput();
+    }
+
+    // Load existing images from server
+    loadExistingImages() {
+        @if($order->preLogoutImages->isNotEmpty())
+            @foreach($order->preLogoutImages as $image)
+                this.uploadedImages.push({ 
+                    path: "{{ $image->image }}", 
+                    id: "existing-{{ $image->id }}",
+                    isExisting: true
+                });
+            @endforeach
+        @endif
+    }
+
+    // Initialize event listeners for existing image buttons
+    initializeExistingImageButtons() {
+        document.querySelectorAll('.remove-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const imageId = button.getAttribute('data-id');
+                const imageType = button.getAttribute('data-type');
+                const isExisting = imageType === 'existing';
+                
+                // For existing images, the imageId needs to be prefixed
+                const fullImageId = isExisting ? `existing-${imageId}` : imageId;
+                
+                this.removeImage(fullImageId, isExisting);
+            });
         });
-        
-        // Image upload and camera functionality
+    }
+
+    // Initialize image upload functionality
+    initializeImageUpload() {
+        const imageUploadArea = document.getElementById('imageUploadArea');
         const imageInput = document.getElementById('imageInput');
-        const uploadImageBtn = document.getElementById('uploadImageBtn');
-        const takePhotoBtn = document.getElementById('takePhotoBtn');
-        const cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
-        const cameraPreview = document.getElementById('cameraPreview');
-        const cameraCanvas = document.getElementById('cameraCanvas');
-        const captureBtn = document.getElementById('captureBtn');
-        const usePhotoBtn = document.getElementById('usePhotoBtn');
-        const switchCameraBtn = document.getElementById('switchCameraBtn');
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        const capturedImageData = document.getElementById('capturedImageData');
+
+        if (!imageUploadArea || !imageInput) return;
+
+        // Click handler
+        imageUploadArea.addEventListener('click', () => imageInput.click());
+
+        // Drag and drop handlers
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            imageUploadArea.addEventListener(eventName, this.preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            imageUploadArea.addEventListener(eventName, () => {
+                imageUploadArea.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            imageUploadArea.addEventListener(eventName, () => {
+                imageUploadArea.classList.remove('dragover');
+            }, false);
+        });
+
+        imageUploadArea.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            this.handleFiles(files);
+        }, false);
+
+        // File input change handler
+        imageInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                this.handleFiles(files);
+                e.target.value = ''; // Reset input
+            }
+        });
+
+        // Image preview click handlers
+        document.addEventListener('click', (e) => {
+            const img = e.target.closest('.image-preview img');
+            if (img) {
+                this.openImageModal(img.src);
+            }
+        });
+    }
+
+    preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    handleFiles(files) {
+        if (!files || files.length === 0) return;
         
-        let stream = null;
-        let currentFacingMode = 'environment'; // Start with back camera
-        let capturedImage = null;
-
-        // Handle upload image button click
-        uploadImageBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            imageInput.click();
-        });
-
-        // Handle file selection
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    addImagePreview(event.target.result, file.name);
-                };
-                reader.readAsDataURL(file);
+        Array.from(files).forEach(file => {
+            if (file.type.startsWith('image/')) {
+                this.uploadImage(file);
             }
         });
+    }
 
-        // Handle take photo button click
-        takePhotoBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            startCamera();
-            cameraModal.show();
-        });
-
-        // Handle camera modal hide event
-        document.getElementById('cameraModal').addEventListener('hidden.bs.modal', function() {
-            stopCamera();
-            resetCameraUI();
-        });
-
-        // Handle capture button click
-        captureBtn.addEventListener('click', function() {
-            captureImage();
-        });
-
-        // Handle use photo button click
-        usePhotoBtn.addEventListener('click', function() {
-            if (capturedImage) {
-                addImagePreview(capturedImage, 'captured_photo_' + new Date().getTime() + '.jpg');
-                cameraModal.hide();
-            }
-        });
-
-        // Handle switch camera button click
-        if (switchCameraBtn) {
-            switchCameraBtn.addEventListener('click', function() {
-                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-                stopCamera();
-                startCamera();
-            });
-        }
-
-        // Start camera function
-        async function startCamera() {
-            try {
-                const constraints = {
-                    video: {
-                        facingMode: currentFacingMode,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                };
-
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                cameraPreview.srcObject = stream;
-                
-                // Show switch camera button if multiple cameras are available
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                if (videoDevices.length > 1) {
-                    switchCameraBtn.style.display = 'inline-block';
-                }
-                
-                // Enable capture button once camera is ready
-                captureBtn.disabled = false;
-                
-            } catch (err) {
-                console.error('Error accessing camera:', err);
-                alert('Could not access the camera. Please check your permissions.');
-            }
-        }
-
-        // Stop camera function
-        function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                cameraPreview.srcObject = null;
-                stream = null;
-            }
-        }
-
-        // Capture image from camera
-        function captureImage() {
-            if (!stream) return;
-
-            const context = cameraCanvas.getContext('2d');
-            cameraCanvas.width = cameraPreview.videoWidth;
-            cameraCanvas.height = cameraPreview.videoHeight;
-            context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
+    async uploadImage(file) {
+        try {
+            // Validate file type and size
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+            const maxSize = 20 * 1024 * 1024; // 20MB to match backend validation
             
-            // Convert canvas to data URL
-            capturedImage = cameraCanvas.toDataURL('image/jpeg');
-            
-            // Show preview and enable use photo button
-            cameraPreview.style.display = 'none';
-            cameraCanvas.style.display = 'block';
-            captureBtn.style.display = 'none';
-            usePhotoBtn.disabled = false;
-            
-            // Show the captured image
-            cameraCanvas.classList.remove('d-none');
-        }
-
-        // Reset camera UI
-        function resetCameraUI() {
-            cameraPreview.style.display = 'block';
-            cameraCanvas.style.display = 'none';
-            captureBtn.style.display = 'inline-block';
-            usePhotoBtn.disabled = true;
-            capturedImage = null;
-            
-            // Clear the canvas
-            const context = cameraCanvas.getContext('2d');
-            context.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
-        }
-
-        // Add image preview to the container
-        function addImagePreview(imageData, fileName) {
-            const previewId = 'preview-' + Math.random().toString(36).substr(2, 9);
-            const previewHtml = `
-                <div class="col-md-3 mb-3" id="${previewId}">
-                    <div class="card">
-                        <img src="${imageData}" class="card-img-top" alt="Preview">
-                        <div class="card-body p-2 text-center">
-                            <small class="text-muted d-block text-truncate">${fileName}</small>
-                            <button type="button" class="btn btn-sm btn-danger mt-2 remove-image" data-preview-id="${previewId}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            imagePreviewContainer.insertAdjacentHTML('beforeend', previewHtml);
-            
-            // Add event listener for remove button
-            document.querySelector(`#${previewId} .remove-image`).addEventListener('click', function() {
-                document.getElementById(previewId).remove();
-                // TODO: Handle removal from server if needed
-            });
-            
-            // Store the image data in a hidden field for form submission
-            updateHiddenImageData();
-        }
-        
-        // Update hidden field with all image data
-        function updateHiddenImageData() {
-            const images = [];
-            document.querySelectorAll('#imagePreviewContainer img').forEach(img => {
-                images.push(img.src);
-            });
-            capturedImageData.value = JSON.stringify(images);
-        }
-
-        // Media recording variables
-        let mediaRecorder;
-        let mediaStream;
-        let recordedChunks = [];
-        let currentDeviceId = null;
-        let devices = [];
-        let recordingStartTime;
-        let recordingTimer;
-
-        // Function to handle media uploads and recordings
-        function initializeMediaHandlers(container) {
-            // Handle upload media button click
-            container.querySelectorAll('.upload-media').forEach(button => {
-                button.addEventListener('click', function() {
-                    const mediaContainer = this.closest('.media-upload-container');
-                    const input = mediaContainer.querySelector('.media-input');
-                    if (input) {
-                        input.click();
-                    }
-                });
-            });
-
-            // Handle capture/record media button click
-            container.querySelectorAll('.capture-media').forEach(button => {
-                button.addEventListener('click', async function() {
-                    const mediaContainer = this.closest('.media-upload-container');
-                    const mediaType = mediaContainer.getAttribute('data-type');
-                    
-                    // Store button reference on container for easier access
-                    mediaContainer.captureBtn = this;
-                    
-                    if (this.classList.contains('recording')) {
-                        // Stop recording
-                        await stopMediaRecording(mediaType, mediaContainer);
-                        this.classList.remove('recording');
-                        this.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> Record`;
-                        
-                        // Hide switch camera button when not recording
-                        if (mediaType === 'video') {
-                            const switchBtn = mediaContainer.querySelector('.switch-camera');
-                            if (switchBtn) {
-                                switchBtn.classList.add('d-none');
-                            }
-                        }
-                    } else {
-                        // Start recording
-                        const success = await startMediaRecording(mediaType, mediaContainer);
-                        if (success) {
-                            this.classList.add('recording');
-                            this.innerHTML = '<i class="fas fa-stop me-2"></i> Stop';
-                        }
-                    }
-                });
-            });
-            
-            // Handle switch camera button click
-            container.querySelectorAll('.switch-camera').forEach(button => {
-                button.addEventListener('click', async function() {
-                    const mediaContainer = this.closest('.media-upload-container');
-                    const mediaType = mediaContainer.getAttribute('data-type');
-                    await switchCamera(mediaType, mediaContainer);
-                });
-            });
-
-            // Handle file input change
-            container.querySelectorAll('.media-input').forEach(input => {
-                input.addEventListener('change', function(e) {
-                    const file = this.files[0];
-                    if (!file) return;
-
-                    const mediaContainer = this.closest('.media-upload-container');
-                    const mediaType = mediaContainer.getAttribute('data-type');
-                    const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
-                    const previewElement = mediaContainer.querySelector(`.preview-${mediaType}`);
-                    const dataInput = mediaContainer.querySelector('.media-data');
-
-                    if (previewElement) {
-                        if (mediaType === 'video' || mediaType === 'audio') {
-                            // For video/audio, create a preview with controls
-                            const url = URL.createObjectURL(file);
-                            
-                            // Clear previous sources
-                            previewElement.innerHTML = '';
-                            
-                            const source = document.createElement('source');
-                            source.src = url;
-                            source.type = file.type;
-                            previewElement.appendChild(source);
-                            
-                            // Show preview
-                            previewElement.style.display = 'block';
-                            previewContainer.style.display = 'block';
-                            
-                            // Load the media to ensure it plays
-                            previewElement.load();
-                            
-                            // Store file data
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                dataInput.value = e.target.result.split(',')[1]; // Store base64 data
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    }
-                });
-            });
-
-            // Handle remove media button click
-            container.querySelectorAll('.remove-media').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const mediaContainer = this.closest('.media-upload-container');
-                    const mediaType = mediaContainer.getAttribute('data-type');
-                    const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
-                    const fileInput = mediaContainer.querySelector('.media-input');
-                    const dataInput = mediaContainer.querySelector('.media-data');
-                    
-                    // Reset file input
-                    if (fileInput) {
-                        fileInput.value = '';
-                    }
-                    
-                    // Clear data input
-                    if (dataInput) {
-                        dataInput.value = '';
-                    }
-                    
-                    // Hide preview
-                    if (previewContainer) {
-                        previewContainer.style.display = 'none';
-                    }
-                    
-                    // Create a hidden input to flag deletion to backend
-                    const deleteFlag = document.createElement('input');
-                    deleteFlag.type = 'hidden';
-                    deleteFlag.name = `delete_${mediaType}_flag`;
-                    deleteFlag.value = '1';
-                    mediaContainer.appendChild(deleteFlag);
-                });
-            });
-        }
-
-        // Get available video devices
-        async function getVideoDevices() {
-            try {
-                const deviceInfos = await navigator.mediaDevices.enumerateDevices();
-                return deviceInfos.filter(device => device.kind === 'videoinput');
-            } catch (error) {
-                console.error('Error getting video devices:', error);
-                return [];
-            }
-        }
-
-        // Switch camera
-        async function switchCamera(mediaType, container) {
-            if (!devices || devices.length < 2) return;
-            
-            // Get current device index and calculate next
-            const currentIndex = currentDeviceId ? 
-                devices.findIndex(device => device.deviceId === currentDeviceId) : 0;
-            const nextIndex = (currentIndex + 1) % devices.length;
-            currentDeviceId = devices[nextIndex].deviceId;
-            
-            // Stop current stream
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
+            if (!validImageTypes.includes(file.type)) {
+                throw new Error('Invalid file type. Please upload an image (JPEG, PNG, GIF, WebP, or SVG).');
             }
             
-            // Restart recording with new device if recording
-            if (container.captureBtn && container.captureBtn.classList.contains('recording')) {
-                // Get new constraints with the selected device
-                const constraints = {
-                    audio: true,
-                    video: mediaType === 'video' ? {
-                        deviceId: { exact: currentDeviceId },
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } : false
-                };
-
-                try {
-                    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    
-                    // Update live preview
-                    if (container.livePreview) {
-                        container.livePreview.srcObject = mediaStream;
-                    }
-                } catch (error) {
-                    console.error('Error switching camera:', error);
-                }
-            }
-        }
-
-        // Update recording timer
-        function updateTimer(container) {
-            if (!recordingStartTime) return;
-            
-            const now = new Date();
-            const elapsed = Math.floor((now - recordingStartTime) / 1000);
-            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-            const seconds = (elapsed % 60).toString().padStart(2, '0');
-            
-            const timerElement = container.querySelector('.recording-timer');
-            if (timerElement) {
-                const span = timerElement.querySelector('span');
-                if (span) {
-                    span.textContent = `${minutes}:${seconds}`;
-                }
-            }
-        }
-
-        // Start media recording
-        async function startMediaRecording(mediaType, container) {
-            try {
-                recordedChunks = [];
-                
-                // Get video devices if not already loaded
-                if (mediaType === 'video' && devices.length === 0) {
-                    devices = await getVideoDevices();
-                    console.log('Available devices:', devices);
-                    
-                    // Show switch camera button if multiple devices available
-                    const switchBtn = container.querySelector('.switch-camera');
-                    if (devices.length > 1 && switchBtn) {
-                        switchBtn.classList.remove('d-none');
-                    }
-                }
-
-                const constraints = {
-                    audio: true,
-                    video: mediaType === 'video' ? {
-                        ...(currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'environment' }),
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } : false
-                };
-
-                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                
-                // For video, show live preview
-                if (mediaType === 'video') {
-                    const previewContainer = container.querySelector('.preview-video-container');
-                    const existingVideo = container.querySelector('.preview-video');
-                    
-                    // Create or update live preview
-                    let videoPreview = container.livePreview;
-                    if (!videoPreview) {
-                        videoPreview = document.createElement('video');
-                        videoPreview.className = 'preview-video w-100';
-                        videoPreview.autoplay = true;
-                        videoPreview.muted = true;
-                        videoPreview.controls = false;
-                        videoPreview.style.maxHeight = '300px';
-                        container.livePreview = videoPreview;
-                        
-                        // Replace existing video with live preview
-                        if (existingVideo) {
-                            existingVideo.parentNode.replaceChild(videoPreview, existingVideo);
-                        } else {
-                            previewContainer.appendChild(videoPreview);
-                        }
-                    }
-                    
-                    videoPreview.srcObject = mediaStream;
-                    previewContainer.style.display = 'block';
-                }
-
-                // Setup MediaRecorder with better options
-                let options = {};
-                
-                // Try different MIME types based on browser support
-                const possibleTypes = [
-                    mediaType === 'video' ? 'video/webm;codecs=vp9' : 'audio/webm;codecs=opus',
-                    mediaType === 'video' ? 'video/webm;codecs=vp8' : 'audio/webm',
-                    mediaType === 'video' ? 'video/webm' : 'audio/webm',
-                    mediaType === 'video' ? 'video/mp4' : 'audio/mp4'
-                ];
-
-                for (const type of possibleTypes) {
-                    if (MediaRecorder.isTypeSupported(type)) {
-                        options.mimeType = type;
-                        break;
-                    }
-                }
-
-                // Add bitrate if supported
-                if (options.mimeType) {
-                    if (mediaType === 'video') {
-                        options.videoBitsPerSecond = 2500000;
-                        options.audioBitsPerSecond = 128000;
-                    } else {
-                        options.audioBitsPerSecond = 128000;
-                    }
-                }
-
-                try {
-                    mediaRecorder = new MediaRecorder(mediaStream, options);
-                } catch (e) {
-                    console.warn('Using default MediaRecorder options:', e);
-                    mediaRecorder = new MediaRecorder(mediaStream);
-                }
-
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = () => {
-                    handleRecordingComplete(mediaType, container);
-                };
-
-                mediaRecorder.onerror = (event) => {
-                    console.error('MediaRecorder error:', event.error);
-                };
-
-                // Start recording
-                mediaRecorder.start(100); // Collect data every 100ms
-                
-                // Start recording timer
-                recordingStartTime = new Date();
-                const timerElement = container.querySelector('.recording-timer');
-                if (timerElement) {
-                    timerElement.classList.remove('d-none');
-                    container.timerInterval = setInterval(() => updateTimer(container), 1000);
-                }
-                
-                // Auto-stop recording after 5 minutes (safety measure)
-                container.recordingTimeout = setTimeout(() => {
-                    if (mediaRecorder && mediaRecorder.state === 'recording') {
-                        stopMediaRecording(mediaType, container);
-                        const button = container.querySelector('.capture-media');
-                        if (button) {
-                            button.classList.remove('recording');
-                            button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> Record`;
-                        }
-                    }
-                }, 5 * 60 * 1000); // 5 minutes
-
-                return true;
-
-            } catch (error) {
-                console.error('Error accessing media devices:', error);
-                alert(`Error accessing ${mediaType === 'audio' ? 'microphone' : 'camera'}. Please check permissions and try again.`);
-                
-                // Reset the record button
-                const button = container.querySelector('.capture-media');
-                if (button) {
-                    button.classList.remove('recording');
-                    button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> Record`;
-                }
-                
-                return false;
-            }
-        }
-
-        // Handle recording completion
-        function handleRecordingComplete(mediaType, container) {
-            const blob = new Blob(recordedChunks, {
-                type: mediaRecorder.mimeType || (mediaType === 'video' ? 'video/webm' : 'audio/webm')
-            });
-
-            console.log('Recording completed, blob size:', blob.size);
-
-            // Clean up live preview if it exists
-            if (container.livePreview && mediaType === 'video') {
-                container.livePreview.srcObject = null;
-                // Don't remove the element, just change it back to recorded video
+            if (file.size > maxSize) {
+                throw new Error('File is too large. Maximum size is 20MB.');
             }
             
-            // Stop all tracks in the stream
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-            }
+            const formData = new FormData();
+            formData.append('pre_login_image[]', file);
+            formData.append('order_id', '{{ $order->id }}');
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('type', 'logout');
 
-            // Create a file from the blob
-            const timestamp = Date.now();
-            const file = new File([blob], `${mediaType}_${timestamp}.webm`, {
-                type: blob.type
-            });
-
-            // Create a data transfer object to simulate file input
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-
-            // Set the file input files to the recorded file
-            const fileInput = container.querySelector('.media-input');
-            if (fileInput) {
-                fileInput.files = dataTransfer.files;
-            }
-
-            // Update the preview
-            const previewElement = container.querySelector(`.preview-${mediaType}`);
-            const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
-            
-            if (previewElement && previewContainer) {
-                // Clear previous sources
-                previewElement.innerHTML = '';
-                
-                // Create new source
-                const source = document.createElement('source');
-                source.src = URL.createObjectURL(blob);
-                source.type = blob.type;
-                previewElement.appendChild(source);
-                
-                // Ensure preview element has controls and is visible
-                previewElement.controls = true;
-                previewElement.style.display = 'block';
-                previewContainer.style.display = 'block';
-                
-                // Load the media
-                previewElement.load();
-                
-                // For video, replace live preview with recorded video
-                if (mediaType === 'video' && container.livePreview) {
-                    container.livePreview.parentNode.replaceChild(previewElement, container.livePreview);
-                    container.livePreview = null;
-                }
-            }
-            
-            // Store file data in hidden input
+            // Show loading preview
+            const tempId = 'temp_' + Date.now();
             const reader = new FileReader();
             reader.onload = (e) => {
-                const dataInput = container.querySelector('.media-data');
-                if (dataInput) {
-                    dataInput.value = e.target.result.split(',')[1]; // Store base64 data
-                }
+                this.addImagePreview(e.target.result, tempId, false, true);
             };
-            reader.readAsDataURL(blob);
-        }
+            reader.readAsDataURL(file);
 
-        // Stop media recording
-        async function stopMediaRecording(mediaType, container) {
-            // Clear recording timer
-            if (container.timerInterval) {
-                clearInterval(container.timerInterval);
-                container.timerInterval = null;
-            }
-            
-            const timerElement = container.querySelector('.recording-timer');
-            if (timerElement) {
-                timerElement.classList.add('d-none');
-            }
-            
-            // Clear auto-stop timeout
-            if (container.recordingTimeout) {
-                clearTimeout(container.recordingTimeout);
-                container.recordingTimeout = null;
-            }
-            
-            // Stop MediaRecorder if it's recording
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-            }
-        }
-        
-        // Clean up on page unload
-        window.addEventListener('beforeunload', function() {
-            // Stop all media streams
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-            }
-            
-            // Stop recording if active
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-            }
-        });
-
-        // Initialize Dropzone for pre-login images
-        Dropzone.autoDiscover = false;
-        
-        // Initialize Dropzone for pre-login image upload if the element exists
-        var preLoginDropzone = document.getElementById('preLoginImageDropzone');
-        if (preLoginDropzone) {
-            window.myDropzone = new Dropzone("#preLoginImageDropzone", {
-                url: "{{ route('orders.uploadTemporaryImage') }}",
+            const response = await fetch('{{ route("orders.uploadTemporaryImage") }}', {
+                method: 'POST',
+                body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                paramName: "pre_login_image",
-                maxFiles: 5,
-                acceptedFiles: 'image/*',
-                autoProcessQueue: true,
-                addRemoveLinks: true,
-                uploadMultiple: false,
-                timeout: 0,
-                previewsContainer: "#preLoginImageDropzone",
-                dictDefaultMessage: "{{ __('dashboard.pre_logout_image') }}",
-                init: function() {
-                    var dropzone = this;
-                    
-                    this.on("error", function(file, message) {
-                        console.error('Upload error:', message);
-                        if (message && typeof message === 'object' && message.message) {
-                            alert('Upload error: ' + message.message);
-                        } else if (typeof message === 'string' && message.startsWith('<!DOCTYPE')) {
-                            // Handle HTML response (likely a login page)
-                            alert('Session expired. Please refresh the page and log in again.');
-                            window.location.reload();
-                        } else {
-                            alert('An error occurred during upload. Please try again.');
-                        }
-                        this.removeFile(file);
-                    });
-                    
-                    this.on("success", function(file, response) {
-                        console.log("Upload successful:", response);
-                        if (response && response[0]) {
-                            file.serverId = response[0].id;
-                            uploadedImages.push({ path: response[0].filePath, id: response[0].id });
-                            document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
-                        }
-                    });
-                    
-                    this.on("removedfile", function(file) {
-                        if (!file.serverId) return;
-                        
-                        $.ajax({
-                            url: "{{ route('orders.removeImage', ['id' => '']) }}/" + file.serverId + "?type=logout",
-                            type: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            success: function(response) {
-                                uploadedImages = uploadedImages.filter(function(image) {
-                                    return image.id != file.serverId;
-                                });
-                                document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
-                                console.log('File removed successfully');
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error removing file:', error);
-                                alert('Error removing file. Please try again.');
-                            }
-                        });
-                    });
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
             });
-        }
+
+            const data = await response.json();
+
+            // Remove temp preview
+            const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
+            if (tempPreview) {
+                tempPreview.remove();
+            }
+
+            if (response.ok && data && data.length > 0) {
+                data.forEach(uploadedFile => {
+                    if (uploadedFile && uploadedFile.filePath) {
+                        this.uploadedImages.push({ 
+                            path: uploadedFile.filePath, 
+                            id: uploadedFile.id,
+                            isExisting: false 
+                        });
+                        this.addImagePreview(uploadedFile.filePath, uploadedFile.id, false);
                     }
                 });
+                this.updateUploadedImagesInput();
+            } else {
+                throw new Error(data.message || 'Upload failed');
             }
-        });
+        } catch (error) {
+            console.error('Upload error:', error);
+            // Remove temp preview on error
+            const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
+            if (tempPreview) {
+                tempPreview.remove();
+            }
+            alert('Error uploading image: ' + error.message);
+        }
+    }
 
-        // Update uploaded images on form submit
-        $("form#kt_ecommerce_add_product_form").on("submit", function (e) {
-            document.querySelector("#uploaded_images").value = JSON.stringify(uploadedImages);
-        });
+    addImagePreview(src, imageId, isExisting = false, isLoading = false) {
+        const imagePreviewsContainer = document.getElementById('imagePreviews');
+        if (!imagePreviewsContainer) return;
 
-        // Camera functionality for dropzone (if needed)
-        var openCameraBtn = document.getElementById('openCamera');
-        var cameraInput = document.getElementById('cameraInput');
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'image-preview';
+        previewDiv.setAttribute('data-image-id', imageId);
         
-        if (openCameraBtn && cameraInput) {
-            openCameraBtn.addEventListener('click', function() {
-                cameraInput.click();
-            });
-
-            // Handle the camera input change (if camera input exists)
-            cameraInput.addEventListener('change', function(event) {
-                var files = event.target.files;
-                if (files.length > 0 && window.myDropzone) {
-                    window.myDropzone.addFile(files[0]);
-                }
+        const img = document.createElement('img');
+        img.src = src.startsWith('data:') ? src : `${src}`;
+        img.alt = 'Preview';
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = isLoading ? '<i class="fas fa-spinner fa-spin"></i>' : '<i class="fas fa-times"></i>';
+        removeBtn.type = 'button';
+        
+        if (!isLoading) {
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.removeImage(imageId, isExisting);
             });
         }
-    }); // End of DOMContentLoaded
-    </script>
+        
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(removeBtn);
+        imagePreviewsContainer.appendChild(previewDiv);
+    }
 
+    async removeImage(imageId, isExisting) {
+        const preview = document.querySelector(`[data-image-id="${imageId}"]`);
+        if (preview) {
+            preview.remove();
+        }
+
+        if (isExisting) {
+            const id = imageId.replace('existing-', '');
+            try {
+                const response = await fetch(`{{ route('orders.removeImage', ['id' => '__ID__']) }}`.replace('__ID__', id) + '?type=logout', {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.error('Failed to remove image from server');
+                }
+            } catch (error) {
+                console.error('Error removing image:', error);
+            }
+        }
+
+        this.uploadedImages = this.uploadedImages.filter(img => img.id !== imageId);
+        this.updateUploadedImagesInput();
+    }
+
+    updateUploadedImagesInput() {
+        const uploadedImagesInput = document.getElementById('uploaded_images');
+        if (uploadedImagesInput) {
+            uploadedImagesInput.value = JSON.stringify(this.uploadedImages);
+        }
+    }
+
+    openImageModal(src) {
+        const modalEl = document.getElementById('imageModal');
+        if (!modalEl) return;
+        
+        const modal = new bootstrap.Modal(modalEl);
+        const modalImg = document.getElementById('modalImage');
+        if (modalImg) {
+            modalImg.src = src;
+            modal.show();
+        }
+    }
+
+    // Initialize media recording handlers
+    initializeMediaHandlers() {
+        // Upload media buttons
+        document.querySelectorAll('.upload-media').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const mediaContainer = button.closest('.media-upload-container');
+                const mediaType = mediaContainer.dataset.type;
+                const fileInput = mediaContainer.querySelector('.media-input');
+                
+                if (fileInput) {
+                    fileInput.value = '';
+                    fileInput.click();
+                    
+                    fileInput.onchange = (e) => {
+                        const files = e.target.files;
+                        if (!files || files.length === 0) return;
+                        
+                        const file = files[0];
+                        const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
+                        const previewElement = mediaContainer.querySelector(`.preview-${mediaType}`);
+                        
+                        if (previewElement) {
+                            const url = URL.createObjectURL(file);
+                            
+                            if (mediaType === 'audio') {
+                                previewElement.src = url;
+                                previewElement.controls = true;
+                            } else if (mediaType === 'video') {
+                                previewElement.src = url;
+                                previewElement.controls = true;
+                            }
+                            
+                            if (previewContainer) {
+                                previewContainer.style.display = 'block';
+                            }
+                            
+                            // Store the file in the form data
+                            const dataInput = mediaContainer.querySelector('.media-data');
+                            if (dataInput) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    dataInput.value = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        }
+                    };
+                }
+            });
+        });
+
+        // Capture/Record media buttons
+        document.querySelectorAll('.capture-media').forEach(button => {
+            button.addEventListener('click', async () => {
+                const mediaContainer = button.closest('.media-upload-container');
+                const mediaType = mediaContainer.getAttribute('data-type');
+                
+                if (button.classList.contains('recording')) {
+                    await this.stopMediaRecording(mediaType, mediaContainer);
+                    button.classList.remove('recording');
+                    button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> Record`;
+                    
+                    if (mediaType === 'video') {
+                        const switchBtn = mediaContainer.querySelector('.switch-camera');
+                        if (switchBtn) {
+                            switchBtn.classList.add('d-none');
+                        }
+                    }
+                } else {
+                    const success = await this.startMediaRecording(mediaType, mediaContainer);
+                    if (success) {
+                        button.classList.add('recording');
+                        button.innerHTML = '<i class="fas fa-stop me-2"></i> Stop';
+                    }
+                }
+            });
+        });
+
+        // Switch camera buttons
+        document.querySelectorAll('.switch-camera').forEach(button => {
+            button.addEventListener('click', async () => {
+                const mediaContainer = button.closest('.media-upload-container');
+                const mediaType = mediaContainer.getAttribute('data-type');
+                await this.switchCamera(mediaType, mediaContainer);
+            });
+        });
+
+        // File input change handlers
+        document.querySelectorAll('.media-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const mediaContainer = input.closest('.media-upload-container');
+                const mediaType = mediaContainer.getAttribute('data-type');
+                this.handleMediaFileSelect(file, mediaType, mediaContainer);
+            });
+        });
+    }
+
+    handleMediaFileSelect(file, mediaType, mediaContainer) {
+        const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
+        const previewElement = mediaContainer.querySelector(`.preview-${mediaType}`);
+        const dataInput = mediaContainer.querySelector('.media-data');
+
+        if (previewElement && previewContainer) {
+            const url = URL.createObjectURL(file);
+            
+            previewElement.innerHTML = '';
+            const source = document.createElement('source');
+            source.src = url;
+            source.type = file.type;
+            previewElement.appendChild(source);
+            
+            previewElement.style.display = 'block';
+            previewContainer.style.display = 'block';
+            previewElement.load();
+            
+            // Store file data
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (dataInput) {
+                    dataInput.value = e.target.result.split(',')[1];
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async getVideoDevices() {
+        try {
+            const deviceInfos = await navigator.mediaDevices.enumerateDevices();
+            return deviceInfos.filter(device => device.kind === 'videoinput');
+        } catch (error) {
+            console.error('Error getting video devices:', error);
+            return [];
+        }
+    }
+
+    async switchCamera(mediaType, container) {
+        if (!this.devices || this.devices.length < 2) return;
+        
+        const currentIndex = this.currentDeviceId ? 
+            this.devices.findIndex(device => device.deviceId === this.currentDeviceId) : 0;
+        const nextIndex = (currentIndex + 1) % this.devices.length;
+        this.currentDeviceId = this.devices[nextIndex].deviceId;
+        
+        if (this.mediaStream) {
+            this.mediaStream.getTracks().forEach(track => track.stop());
+        }
+        
+        const captureBtn = container.querySelector('.capture-media');
+        if (captureBtn && captureBtn.classList.contains('recording')) {
+            const constraints = {
+                audio: true,
+                video: mediaType === 'video' ? {
+                    deviceId: { exact: this.currentDeviceId },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } : false
+            };
+
+            try {
+                this.mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                if (container.livePreview) {
+                    container.livePreview.srcObject = this.mediaStream;
+                }
+            } catch (error) {
+                console.error('Error switching camera:', error);
+            }
+        }
+    }
+
+    updateTimer(container) {
+        if (!this.recordingStartTime) return;
+        
+        const now = new Date();
+        const elapsed = Math.floor((now - this.recordingStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        
+        const timerElement = container.querySelector('.recording-timer span');
+        if (timerElement) {
+            timerElement.textContent = `${minutes}:${seconds}`;
+        }
+    }
+
+    async startMediaRecording(mediaType, container) {
+        try {
+            this.recordedChunks = [];
+            
+            // Check if we have video devices if this is a video recording
+            if (mediaType === 'video') {
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    if (videoDevices.length === 0) {
+                        throw new Error('No video devices found');
+                    }
+                    
+                    this.devices = videoDevices;
+                    
+                    const switchBtn = container.querySelector('.switch-camera');
+                    if (this.devices.length > 1 && switchBtn) {
+                        switchBtn.classList.remove('d-none');
+                    }
+                } catch (error) {
+                    console.error('Error checking video devices:', error);
+                    throw new Error('Could not access camera. Please check your device permissions.');
+                }
+            }
+
+            const constraints = {
+                audio: true,
+                video: mediaType === 'video' ? {
+                    ...(this.currentDeviceId ? { deviceId: { exact: this.currentDeviceId } } : { facingMode: 'environment' }),
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } : false
+            };
+
+            this.mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+            
+            // For video, show live preview
+            if (mediaType === 'video') {
+                const previewContainer = container.querySelector('.preview-video-container');
+                const existingVideo = container.querySelector('.preview-video');
+                
+                let videoPreview = container.livePreview;
+                if (!videoPreview) {
+                    videoPreview = document.createElement('video');
+                    videoPreview.className = 'preview-video w-100';
+                    videoPreview.autoplay = true;
+                    videoPreview.muted = true;
+                    videoPreview.controls = false;
+                    videoPreview.style.maxHeight = '300px';
+                    container.livePreview = videoPreview;
+                    
+                    if (existingVideo) {
+                        existingVideo.parentNode.replaceChild(videoPreview, existingVideo);
+                    } else {
+                        previewContainer.appendChild(videoPreview);
+                    }
+                }
+                
+                videoPreview.srcObject = this.mediaStream;
+                previewContainer.style.display = 'block';
+            }
+
+            // Setup MediaRecorder
+            let options = {};
+            const possibleTypes = [
+                mediaType === 'video' ? 'video/webm;codecs=vp9' : 'audio/webm;codecs=opus',
+                mediaType === 'video' ? 'video/webm;codecs=vp8' : 'audio/webm',
+                mediaType === 'video' ? 'video/webm' : 'audio/webm',
+                mediaType === 'video' ? 'video/mp4' : 'audio/mp4'
+            ];
+
+            for (const type of possibleTypes) {
+                if (MediaRecorder.isTypeSupported(type)) {
+                    options.mimeType = type;
+                    break;
+                }
+            }
+
+            try {
+                this.mediaRecorder = new MediaRecorder(this.mediaStream, options);
+            } catch (e) {
+                console.warn('Using default MediaRecorder options:', e);
+                this.mediaRecorder = new MediaRecorder(this.mediaStream);
+            }
+
+            this.mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.recordedChunks.push(event.data);
+                }
+            };
+
+            this.mediaRecorder.onstop = () => {
+                this.handleRecordingComplete(mediaType, container);
+            };
+
+            this.mediaRecorder.onerror = (event) => {
+                console.error('MediaRecorder error:', event.error);
+            };
+
+            this.mediaRecorder.start(100);
+            
+            // Start recording timer
+            this.recordingStartTime = new Date();
+            const timerElement = container.querySelector('.recording-timer');
+            if (timerElement) {
+                timerElement.classList.remove('d-none');
+                const timerId = setInterval(() => this.updateTimer(container), 1000);
+                this.recordingTimers.set(container, timerId);
+            }
+            
+            // Auto-stop after 5 minutes
+            container.recordingTimeout = setTimeout(() => {
+                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                    this.stopMediaRecording(mediaType, container);
+                    const button = container.querySelector('.capture-media');
+                    if (button) {
+                        button.classList.remove('recording');
+                        button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> Record`;
+                    }
+                }
+            }, 5 * 60 * 1000);
+
+            return true;
+
+        } catch (error) {
+            console.error('Error accessing media devices:', error);
+            alert(`Error accessing ${mediaType === 'audio' ? 'microphone' : 'camera'}. Please check permissions and try again.`);
+            
+            const button = container.querySelector('.capture-media');
+            if (button) {
+                button.classList.remove('recording');
+                button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> Record`;
+            }
+            
+            return false;
+        }
+    }
+
+    handleRecordingComplete(mediaType, container) {
+        const blob = new Blob(this.recordedChunks, {
+            type: this.mediaRecorder.mimeType || (mediaType === 'video' ? 'video/webm' : 'audio/webm')
+        });
+
+        // Clean up live preview
+        if (container.livePreview && mediaType === 'video') {
+            container.livePreview.srcObject = null;
+        }
+        
+        if (this.mediaStream) {
+            this.mediaStream.getTracks().forEach(track => track.stop());
+        }
+
+        // Create file from blob
+        const timestamp = Date.now();
+        const file = new File([blob], `${mediaType}_${timestamp}.webm`, {
+            type: blob.type
+        });
+
+        // Set file input
+        const fileInput = container.querySelector('.media-input');
+        if (fileInput) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+        }
+
+        // Update preview
+        const previewElement = container.querySelector(`.preview-${mediaType}`);
+        const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
+        
+        if (previewElement && previewContainer) {
+            previewElement.innerHTML = '';
+            
+            const source = document.createElement('source');
+            source.src = URL.createObjectURL(blob);
+            source.type = blob.type;
+            previewElement.appendChild(source);
+            
+            previewElement.controls = true;
+            previewElement.style.display = 'block';
+            previewContainer.style.display = 'block';
+            previewElement.load();
+            
+            if (mediaType === 'video' && container.livePreview) {
+                container.livePreview.parentNode.replaceChild(previewElement, container.livePreview);
+                container.livePreview = null;
+            }
+        }
+        
+        // Store file data
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataInput = container.querySelector('.media-data');
+            if (dataInput) {
+                dataInput.value = e.target.result.split(',')[1];
+            }
+        };
+        reader.readAsDataURL(blob);
+    }
+
+    async stopMediaRecording(mediaType, container) {
+        // Clear timer
+        const timerId = this.recordingTimers.get(container);
+        if (timerId) {
+            clearInterval(timerId);
+            this.recordingTimers.delete(container);
+        }
+        
+        const timerElement = container.querySelector('.recording-timer');
+        if (timerElement) {
+            timerElement.classList.add('d-none');
+        }
+        
+        // Clear timeout
+        if (container.recordingTimeout) {
+            clearTimeout(container.recordingTimeout);
+            container.recordingTimeout = null;
+        }
+        
+        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+            this.mediaRecorder.stop();
+        }
+    }
+
+    initializeFormSubmission() {
+        const form = document.getElementById('kt_ecommerce_add_product_form');
+        if (form) {
+            form.addEventListener('submit', () => {
+                this.updateUploadedImagesInput();
+            });
+        }
+    }
+
+    // Cleanup on page unload
+    cleanup() {
+        if (this.mediaStream) {
+            this.mediaStream.getTracks().forEach(track => track.stop());
+        }
+        
+        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+            this.mediaRecorder.stop();
+        }
+        
+        // Clear all timers
+        this.recordingTimers.forEach(timerId => clearInterval(timerId));
+        this.recordingTimers.clear();
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add CSRF token to all AJAX requests
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (token) {
+        const csrfToken = token.getAttribute('content');
+        // Set default headers for fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            if (typeof args[1] === 'object' && args[1].headers) {
+                args[1].headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+            return originalFetch.apply(this, args);
+        };
+    }
+
+    // Initialize the main manager
+    window.orderLogoutManager = new OrderLogoutManager();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (window.orderLogoutManager) {
+        window.orderLogoutManager.cleanup();
+    }
+});
+</script>
 @endsection

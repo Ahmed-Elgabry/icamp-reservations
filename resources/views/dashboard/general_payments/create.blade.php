@@ -19,6 +19,7 @@
             </div>
             <!--begin::Card header-->
             <!--begin::Content-->
+            
             <div id="kt_account_settings_profile_details" class="collapse show">
                 <form id="kt_ecommerce_add_product_form"
                     data-kt-redirect="{{  isset($payment) ? route('general_payments.edit', $payment->id) : route('general_payments.create') }}"

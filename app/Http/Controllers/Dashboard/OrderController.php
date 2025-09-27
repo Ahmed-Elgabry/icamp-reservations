@@ -252,7 +252,7 @@ class OrderController extends Controller
             'delivery_time' => 'nullable',
             'image_after_delivery' => 'nullable',
             'status' => 'required|in:pending_and_show_price,pending_and_Initial_reservation,approved,canceled,delayed,completed',
-            'expired_price_offer' => 'required_if:status,pending_and_show_price,pending_and_Initial_reservation',
+            'expired_price_offer' => 'required_if:status,pending_and_show_price',
             'created_by' => 'required|exists:users,id',
             'agree' => 'nullable|in:1,0',
             'internal_note_id' => 'nullable|exists:internal_notes,id',

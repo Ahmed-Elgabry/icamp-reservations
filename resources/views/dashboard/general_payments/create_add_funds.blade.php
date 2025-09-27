@@ -257,7 +257,7 @@
                                             @can('general_payments.destroy_add_funds')
                                             <!--begin::Menu item-->
                                             <div class="menu-item px-3">
-                                                <a  class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-url="{{route('general_payments.destroy', $payment->id)}}" data-id="{{$payment->id}}"> @lang('dashboard.delete')</a>
+                                                <a href="#" class="menu-link px-3 delete-payment" data-url="{{ route('general_payments.destroy', $payment->id) }}">@lang('dashboard.delete')</a>
                                             </div>
                                             @endcan
                                         <!--end::Menu item-->
@@ -687,17 +687,62 @@
             });
         });
 
-        // Delete functionality using global confirmDelete
+        // Handle delete with AJAX
         $(document).on('click', '.delete-payment', function(e) {
             e.preventDefault();
             
             const deleteUrl = $(this).data('url');
-            const csrfToken = $('meta[name="csrf-token"]').attr('content');
             const row = $(this).closest('tr');
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
             
-            // Use the global confirmDelete function
-            window.confirmDelete(deleteUrl, csrfToken);
-            
+            Swal.fire({
+                title: '@lang('dashboard.are_you_sure')',
+                text: '@lang('dashboard.you_wont_be_able_to_revert_this')',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '@lang('dashboard.yes_delete_it')',
+                cancelButtonText: '@lang('dashboard.cancel')',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: csrfToken,
+                            _method: 'DELETE'
+                        },
+                        beforeSend: function() {
+                            // Show loading state
+                            row.addClass('table-active');
+                        },
+                        success: function(response) {
+                            // Remove the row with animation
+                            row.fadeOut(400, function() {
+                                $(this).remove();
+                                
+                                // If no more rows, show empty state
+                                if ($('#kt_ecommerce_category_table tbody tr').length === 0) {
+                                    $('#kt_ecommerce_category_table tbody').html(
+                                        '<tr><td colspan="10" class="text-center text-muted">@lang('dashboard.no_data_found')</td></tr>'
+                                    );
+                                }
+                            });
+                            
+                            // Show success message
+                            toastr.success('@lang('dashboard.deleted_successfully')');
+                        },
+                        error: function(xhr) {
+                            console.error(xhr);
+                            // Show error message
+                            toastr.error('@lang('dashboard.error_occurred_while_deleting')');
+                            row.removeClass('table-active');
+                        }
+                    });
+                }
+            });
+        });
+        
             // Listen for the form submission to handle the response
             $(document).on('submit', 'form[action="' + deleteUrl + '"]', function(e) {
                 e.preventDefault();

@@ -588,9 +588,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="fw-bolder">@lang('dashboard.additional_notes')</h2>
-                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
-                        <span class="svg-icon svg-icon-2x"></span>
-                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-10 px-lg-15">
                     <form id="additionalNotesForm" class="form">

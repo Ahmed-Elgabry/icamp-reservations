@@ -573,14 +573,16 @@ class GeneralPaymentsController extends Controller
      * @param  \App\Models\Payment  $payment
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $payment ,Request $request)
+    public function destroy($payment, Request $request)
     {
         $payment = GeneralPayment::findOrFail($payment);
         if ($payment->verified) {
             $bankAccount = BankAccount::find($payment->account_id);
+            if ($bankAccount) {
             $bankAccount->update([
                 'balance' => $bankAccount->balance - $payment->price
             ]);
+        }
         }
         // Delete image if it exists
         if ($payment->image_path) {
