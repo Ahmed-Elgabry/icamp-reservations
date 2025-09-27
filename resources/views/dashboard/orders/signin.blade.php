@@ -507,7 +507,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Upload image to server
     function uploadImage(file) {
         const formData = new FormData();
-        // Append the file as an array element
         formData.append('pre_login_image[]', file);
         formData.append('order_id', '{{ $order->id }}');
         formData.append('_token', '{{ csrf_token() }}');
@@ -528,7 +527,6 @@ document.addEventListener('DOMContentLoaded', function() {
             processData: false,
             contentType: false,
             success: function(response) {
-                console.log('Server response:', response);
                 if (response && response.length > 0) {
                     // Remove temp preview
                     const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
@@ -552,13 +550,12 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             error: function(xhr, status, error) {
                 console.error('Upload error:', error);
-                // Remove temp preview on error
                 const tempPreview = document.querySelector(`[data-image-id="${tempId}"]`);
                 if (tempPreview) {
                     tempPreview.remove();
                 }
                 
-                if (xhr.status === 419) { // CSRF token mismatch
+                if (xhr.status === 419) {
                     alert('Your session has expired. Please refresh the page and try again.');
                     window.location.reload();
                 } else if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -582,7 +579,6 @@ document.addEventListener('DOMContentLoaded', function() {
         img.className = 'img-fluid';
         img.style.cursor = 'pointer';
         
-        // Add click handler to open modal
         img.addEventListener('click', function() {
             const modal = new bootstrap.Modal(document.getElementById('imageModal'));
             const modalImg = document.getElementById('modalImage');
@@ -612,7 +608,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (isExisting) {
-            // Remove from server
             fetch(`{{ url('dashboard/orders/remove-image') }}/${imageId}`, {
                 method: 'DELETE',
                 headers: {
@@ -628,7 +623,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Remove from array
         uploadedImages = uploadedImages.filter(img => img.id !== imageId);
         updateUploadedImagesInput();
     }
@@ -652,28 +646,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (cameraInput) {
         cameraInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            uploadImage(file);
-        }
-    });
+            const file = e.target.files[0];
+            if (file) {
+                uploadImage(file);
+            }
+        });
     }
 
-    // Media recording variables
-    let mediaRecorder;
-    let mediaStream;
-    let recordedChunks = [];
+    // Media recording variables and state management
+    let mediaRecorders = {
+        video: null,
+        audio: null
+    };
+    let mediaStreams = {
+        video: null,
+        audio: null
+    };
+    let recordedChunks = {
+        video: [],
+        audio: []
+    };
     let currentDeviceId = null;
-    let devices = [];
-    let recordingStartTime;
-    let recordingTimer;
+    let videoDevices = [];
+    let recordingStartTime = {
+        video: null,
+        audio: null
+    };
+    let recordingTimers = {
+        video: null,
+        audio: null
+    };
+    let currentlyRecording = null;
 
     // Initialize media upload handlers
-    initializeMediaHandlers(document.body);
+    initializeMediaHandlers();
 
-    function initializeMediaHandlers(container) {
-        // Handle upload media button click
-        container.querySelectorAll('.upload-media').forEach(button => {
+    async function initializeMediaHandlers() {
+        // Get video devices and show switch camera button always
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            // Show switch camera button if multiple devices available
+            const switchCameraBtn = document.querySelector('.switch-camera');
+            if (switchCameraBtn && videoDevices.length > 1) {
+                switchCameraBtn.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.warn('Could not enumerate devices:', error);
+        }
+
+        // Handle upload media button clicks
+        document.querySelectorAll('.upload-media').forEach(button => {
             button.addEventListener('click', function() {
                 const mediaContainer = this.closest('.media-upload-container');
                 const input = mediaContainer.querySelector('.media-input');
@@ -683,160 +707,133 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Handle capture/record media button click
-        container.querySelectorAll('.capture-media').forEach(button => {
+        // Handle capture/record media button clicks
+        document.querySelectorAll('.capture-media').forEach(button => {
             button.addEventListener('click', async function() {
                 const mediaContainer = this.closest('.media-upload-container');
-                const mediaType = mediaContainer.getAttribute('data-type');
-                
-                mediaContainer.captureBtn = this;
+                const mediaType = this.getAttribute('data-media-type');
                 
                 if (this.classList.contains('recording')) {
-                    // Stop recording
-                    stopMediaRecording(mediaType, mediaContainer);
-                    this.classList.remove('recording');
-                    this.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> {{ __('dashboard.record') }}`;
+                    // Stop current recording
+                    await stopMediaRecording(mediaType);
                 } else {
-                    // Start recording
+                    // Stop any other recording first
+                    if (currentlyRecording && currentlyRecording !== mediaType) {
+                        await stopMediaRecording(currentlyRecording);
+                    }
+                    // Start new recording
                     await startMediaRecording(mediaType, mediaContainer);
-                    this.classList.add('recording');
-                    this.innerHTML = '<i class="fas fa-stop me-2"></i> {{ __("dashboard.stop") }}';
                 }
             });
         });
         
-        // Handle switch camera button click
-        container.querySelectorAll('.switch-camera').forEach(button => {
+        // Handle switch camera button clicks
+        document.querySelectorAll('.switch-camera').forEach(button => {
             button.addEventListener('click', async function() {
-                const mediaContainer = this.closest('.media-upload-container');
-                const mediaType = mediaContainer.getAttribute('data-type');
-                await switchCamera(mediaType, mediaContainer);
+                await switchCamera();
             });
         });
 
-        // Handle file input change
-        container.querySelectorAll('.media-input').forEach(input => {
+        // Handle file input changes
+        document.querySelectorAll('.media-input').forEach(input => {
             input.addEventListener('change', function(e) {
                 const file = this.files[0];
                 if (!file) return;
 
                 const mediaContainer = this.closest('.media-upload-container');
                 const mediaType = mediaContainer.getAttribute('data-type');
-                const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
-                const previewElement = mediaContainer.querySelector(`.preview-${mediaType}`);
-                const dataInput = mediaContainer.querySelector('.media-data');
-
-                if (previewElement) {
-                    const url = URL.createObjectURL(file);
-                    
-                    // Clear previous sources
-                    while (previewElement.firstChild) {
-                        previewElement.removeChild(previewElement.firstChild);
-                    }
-                    
-                    const source = document.createElement('source');
-                    source.src = url;
-                    source.type = file.type;
-                    previewElement.appendChild(source);
-                    previewContainer.style.display = 'block';
-                    
-                    previewElement.load();
-                    
-                    // Store file data
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        dataInput.value = e.target.result.split(',')[1];
-                    };
-                    reader.readAsDataURL(file);
-                }
+                
+                displayMediaPreview(file, mediaType, mediaContainer);
             });
         });
 
-        // Handle remove media button click
-        container.querySelectorAll('.remove-media').forEach(button => {
+        // Handle remove media button clicks
+        document.querySelectorAll('.remove-media').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const mediaContainer = this.closest('.media-upload-container');
                 const mediaType = mediaContainer.getAttribute('data-type');
-                const previewContainer = mediaContainer.querySelector(`.preview-${mediaType}-container`);
-                const fileInput = mediaContainer.querySelector('.media-input');
-                const dataInput = mediaContainer.querySelector('.media-data');
                 
-                // Reset inputs
-                if (fileInput) fileInput.value = '';
-                if (dataInput) dataInput.value = '';
-                
-                // Hide preview
-                if (previewContainer) previewContainer.style.display = 'none';
-                
-                // Stop any ongoing recording
-                if (mediaContainer.captureBtn && mediaContainer.captureBtn.classList.contains('recording')) {
-                    stopMediaRecording(mediaType, mediaContainer);
-                    mediaContainer.captureBtn.classList.remove('recording');
-                    mediaContainer.captureBtn.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> {{ __('dashboard.record') }}`;
-                }
+                removeMediaPreview(mediaType, mediaContainer);
             });
         });
     }
 
-    // Get available video devices
-    async function getVideoDevices() {
-        try {
-            const deviceInfos = await navigator.mediaDevices.enumerateDevices();
-            return deviceInfos.filter(device => device.kind === 'videoinput');
-        } catch (error) {
-            console.error('Error getting video devices:', error);
-            return [];
+    // Display media preview
+    function displayMediaPreview(file, mediaType, container) {
+        const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
+        const previewElement = container.querySelector(`.preview-${mediaType}`);
+        const dataInput = container.querySelector('.media-data');
+
+        if (previewElement) {
+            const url = URL.createObjectURL(file);
+            
+            // Clear previous sources
+            previewElement.innerHTML = '';
+            
+            const source = document.createElement('source');
+            source.src = url;
+            source.type = file.type;
+            previewElement.appendChild(source);
+            
+            previewContainer.style.display = 'block';
+            previewElement.load();
+            
+            // Store file data for form submission
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                dataInput.value = e.target.result.split(',')[1];
+            };
+            reader.readAsDataURL(file);
         }
     }
 
-    // Switch camera
-    async function switchCamera(mediaType, container) {
-        if (!devices || devices.length < 2) return;
+    // Remove media preview
+    function removeMediaPreview(mediaType, container) {
+        const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
+        const fileInput = container.querySelector('.media-input');
+        const dataInput = container.querySelector('.media-data');
+        
+        // Reset inputs
+        if (fileInput) fileInput.value = '';
+        if (dataInput) dataInput.value = '';
+        
+        // Hide preview
+        if (previewContainer) previewContainer.style.display = 'none';
+        
+        // Stop recording if active
+        if (currentlyRecording === mediaType) {
+            stopMediaRecording(mediaType);
+        }
+    }
+
+    // Switch camera function
+    async function switchCamera() {
+        if (videoDevices.length < 2) return;
         
         const currentIndex = currentDeviceId ? 
-            devices.findIndex(device => device.deviceId === currentDeviceId) : 0;
-        const nextIndex = (currentIndex + 1) % devices.length;
-        currentDeviceId = devices[nextIndex].deviceId;
+            videoDevices.findIndex(device => device.deviceId === currentDeviceId) : 0;
+        const nextIndex = (currentIndex + 1) % videoDevices.length;
+        currentDeviceId = videoDevices[nextIndex].deviceId;
         
-        // Restart recording with new device if currently recording
-        if (container.captureBtn && container.captureBtn.classList.contains('recording')) {
-            stopMediaRecording(mediaType, container);
+        // If video is currently recording, restart with new camera
+        if (currentlyRecording === 'video') {
+            const videoContainer = document.querySelector('[data-type="video"]');
+            await stopMediaRecording('video');
+            // Small delay to ensure cleanup
             setTimeout(() => {
-                startMediaRecording(mediaType, container);
+                startMediaRecording('video', videoContainer);
             }, 500);
-        }
-    }
-
-    // Update recording timer
-    function updateTimer(container) {
-        if (!recordingStartTime) return;
-        
-        const now = new Date();
-        const elapsed = Math.floor((now - recordingStartTime) / 1000);
-        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-        const seconds = (elapsed % 60).toString().padStart(2, '0');
-        
-        const timerElement = container.querySelector('.recording-timer');
-        if (timerElement) {
-            timerElement.querySelector('span').textContent = `${minutes}:${seconds}`;
         }
     }
 
     // Start media recording
     async function startMediaRecording(mediaType, container) {
         try {
-            recordedChunks = [];
+            // Reset recorded chunks
+            recordedChunks[mediaType] = [];
             
-            // Check if we have video devices if this is a video recording
-            if (mediaType === 'video') {
-                devices = await getVideoDevices();
-                const switchBtn = container.querySelector('.switch-camera');
-                if (devices.length > 1 && switchBtn) {
-                    switchBtn.classList.remove('d-none');
-                }
-            }
-
+            // Set up constraints
             const constraints = {
                 audio: true,
                 video: mediaType === 'video' ? {
@@ -846,168 +843,256 @@ document.addEventListener('DOMContentLoaded', function() {
                 } : false
             };
 
-            mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+            // Get media stream
+            mediaStreams[mediaType] = await navigator.mediaDevices.getUserMedia(constraints);
             
-            // For video, show live preview
+            // Show live preview for video
             if (mediaType === 'video') {
-                const videoPreview = document.createElement('video');
-                videoPreview.srcObject = mediaStream;
-                videoPreview.autoplay = true;
-                videoPreview.muted = true;
-                videoPreview.controls = false;
-                videoPreview.style.width = '100%';
-                videoPreview.style.maxHeight = '300px';
-                videoPreview.classList.add('live-preview');
-
-                const previewContainer = container.querySelector('.preview-video-container');
-                // Clear existing content but keep the remove button
-                const removeBtn = previewContainer.querySelector('.remove-media');
-                previewContainer.innerHTML = '';
-                previewContainer.appendChild(videoPreview);
-                if (removeBtn) previewContainer.appendChild(removeBtn);
-                previewContainer.style.display = 'block';
-                container.livePreview = videoPreview;
+                showLiveVideoPreview(container, mediaStreams[mediaType]);
             }
 
+            // Set up media recorder
             const options = {
                 audioBitsPerSecond: 128000,
                 videoBitsPerSecond: mediaType === 'video' ? 2500000 : 0,
-                mimeType: mediaType === 'video' ? 'video/webm' : 'audio/webm'
+                mimeType: getSupportedMimeType(mediaType)
             };
 
             try {
-                mediaRecorder = new MediaRecorder(mediaStream, options);
+                mediaRecorders[mediaType] = new MediaRecorder(mediaStreams[mediaType], options);
             } catch (e) {
-                console.warn('Using default media recorder due to:', e);
-                mediaRecorder = new MediaRecorder(mediaStream);
+                mediaRecorders[mediaType] = new MediaRecorder(mediaStreams[mediaType]);
             }
 
-            mediaRecorder.ondataavailable = (event) => {
+            // Handle data available
+            mediaRecorders[mediaType].ondataavailable = (event) => {
                 if (event.data.size > 0) {
-                    recordedChunks.push(event.data);
+                    recordedChunks[mediaType].push(event.data);
                 }
             };
 
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, {
-                    type: mediaRecorder.mimeType || 
-                        (mediaType === 'video' ? 'video/webm' : 'audio/webm')
-                });
-
-                // Clean up live preview
-                if (container.livePreview) {
-                    container.livePreview.remove();
-                    container.livePreview = null;
-                }
-                
-                // Stop all tracks
-                if (mediaStream) {
-                    mediaStream.getTracks().forEach(track => track.stop());
-                }
-
-                // Create file
-                const file = new File([blob], `${mediaType}_${Date.now()}.webm`, {
-                    type: blob.type || (mediaType === 'video' ? 'video/webm' : 'audio/webm')
-                });
-
-                // Set file input
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                const fileInput = container.querySelector('.media-input');
-                fileInput.files = dataTransfer.files;
-
-                // Update preview
-                const previewElement = container.querySelector(`.preview-${mediaType}`);
-                const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
-                
-                // Clear previous content but keep remove button
-                const removeBtn = previewContainer.querySelector('.remove-media');
-                previewElement.innerHTML = '';
-                
-                // Add new source
-                const source = document.createElement('source');
-                source.src = URL.createObjectURL(blob);
-                source.type = blob.type || (mediaType === 'video' ? 'video/webm' : 'audio/webm');
-                previewElement.appendChild(source);
-                
-                // Show preview
-                previewContainer.style.display = 'block';
-                previewElement.load();
-                
-                // Store file data
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const dataInput = container.querySelector('.media-data');
-                    dataInput.value = e.target.result.split(',')[1];
-                };
-                reader.readAsDataURL(blob);
+            // Handle recording stop
+            mediaRecorders[mediaType].onstop = () => {
+                handleRecordingStop(mediaType, container);
             };
 
-            mediaRecorder.start(100);
+            // Start recording
+            mediaRecorders[mediaType].start(100);
+            currentlyRecording = mediaType;
+            
+            // Update UI
+            updateRecordingUI(mediaType, true);
             
             // Start timer
-            recordingStartTime = new Date();
-            container.timerInterval = setInterval(() => updateTimer(container), 1000);
-            container.querySelector('.recording-timer')?.classList.remove('d-none');
+            startRecordingTimer(mediaType, container);
             
             // Auto-stop after 5 minutes
-            container.recordingTimeout = setTimeout(() => {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                    const button = container.querySelector('.capture-media');
-                    if (button) {
-                        button.classList.remove('recording');
-                        button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> {{ __('dashboard.record') }}`;
-                    }
+            setTimeout(() => {
+                if (currentlyRecording === mediaType) {
+                    stopMediaRecording(mediaType);
                 }
-            }, 60 * 60 * 1000);
+            }, 5 * 60 * 1000);
 
         } catch (error) {
-            console.error('Error accessing media devices:', error);
+            console.error(`Error starting ${mediaType} recording:`, error);
             alert(`Error accessing ${mediaType === 'audio' ? 'microphone' : 'camera'}. Please check permissions and try again.`);
-            
-            const button = container.querySelector('.capture-media');
-            if (button) {
-                button.classList.remove('recording');
-                button.innerHTML = `<i class="fas fa-${mediaType === 'audio' ? 'microphone' : 'video'} me-2"></i> {{ __('dashboard.record') }}`;
-            }
+            updateRecordingUI(mediaType, false);
         }
     }
 
     // Stop media recording
-    function stopMediaRecording(mediaType, container) {
-        // Clear timer
-        if (container.timerInterval) {
-            clearInterval(container.timerInterval);
+    async function stopMediaRecording(mediaType) {
+        if (mediaRecorders[mediaType] && mediaRecorders[mediaType].state === 'recording') {
+            mediaRecorders[mediaType].stop();
         }
-        container.querySelector('.recording-timer')?.classList.add('d-none');
         
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-            if (container.recordingTimeout) {
-                clearTimeout(container.recordingTimeout);
+        // Clean up stream
+        if (mediaStreams[mediaType]) {
+            mediaStreams[mediaType].getTracks().forEach(track => track.stop());
+            mediaStreams[mediaType] = null;
+        }
+        
+        // Clean up timer
+        if (recordingTimers[mediaType]) {
+            clearInterval(recordingTimers[mediaType]);
+            recordingTimers[mediaType] = null;
+        }
+        
+        // Hide timer
+        const container = document.querySelector(`[data-type="${mediaType}"]`);
+        const timerElement = container?.querySelector('.recording-timer');
+        if (timerElement) {
+            timerElement.classList.add('d-none');
+        }
+        
+        // Update UI
+        updateRecordingUI(mediaType, false);
+        
+        // Clear current recording state
+        if (currentlyRecording === mediaType) {
+            currentlyRecording = null;
+        }
+    }
+
+    // Handle recording stop
+    function handleRecordingStop(mediaType, container) {
+        // Remove live preview for video
+        if (mediaType === 'video') {
+            removeLiveVideoPreview(container);
+        }
+        
+        // Create blob from recorded chunks
+        const mimeType = mediaRecorders[mediaType].mimeType || getSupportedMimeType(mediaType);
+        const blob = new Blob(recordedChunks[mediaType], { type: mimeType });
+        
+        // Create file
+        const extension = mimeType.includes('webm') ? 'webm' : (mimeType.includes('mp4') ? 'mp4' : 'wav');
+        const file = new File([blob], `${mediaType}_${Date.now()}.${extension}`, { type: mimeType });
+        
+        // Set file input
+        const fileInput = container.querySelector('.media-input');
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+        
+        // Show preview
+        displayRecordedMediaPreview(blob, mediaType, container);
+        
+        // Store data for form submission
+        const dataInput = container.querySelector('.media-data');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            dataInput.value = e.target.result.split(',')[1];
+        };
+        reader.readAsDataURL(blob);
+    }
+
+    // Show live video preview
+    function showLiveVideoPreview(container, stream) {
+        const previewContainer = container.querySelector('.preview-video-container');
+        
+        // Remove existing content but keep remove button
+        const removeBtn = previewContainer.querySelector('.remove-media');
+        previewContainer.innerHTML = '';
+        
+        // Create live preview video element
+        const liveVideo = document.createElement('video');
+        liveVideo.srcObject = stream;
+        liveVideo.autoplay = true;
+        liveVideo.muted = true;
+        liveVideo.controls = false;
+        liveVideo.style.width = '100%';
+        liveVideo.style.maxHeight = '300px';
+        liveVideo.classList.add('live-preview');
+        
+        previewContainer.appendChild(liveVideo);
+        if (removeBtn) {
+            previewContainer.appendChild(removeBtn);
+        }
+        
+        previewContainer.style.display = 'block';
+    }
+
+    // Remove live video preview
+    function removeLiveVideoPreview(container) {
+        const livePreview = container.querySelector('.live-preview');
+        if (livePreview) {
+            livePreview.remove();
+        }
+    }
+
+    // Display recorded media preview
+    function displayRecordedMediaPreview(blob, mediaType, container) {
+        const previewContainer = container.querySelector(`.preview-${mediaType}-container`);
+        const previewElement = container.querySelector(`.preview-${mediaType}`);
+        
+        // Clear existing content but preserve remove button
+        const removeBtn = previewContainer.querySelector('.remove-media');
+        previewElement.innerHTML = '';
+        
+        // Create source element
+        const source = document.createElement('source');
+        source.src = URL.createObjectURL(blob);
+        source.type = blob.type;
+        previewElement.appendChild(source);
+        
+        // Show preview
+        previewContainer.style.display = 'block';
+        previewElement.load();
+        
+        // Ensure remove button is still there
+        if (removeBtn && !previewContainer.contains(removeBtn)) {
+            previewContainer.appendChild(removeBtn);
+        }
+    }
+
+    // Update recording UI
+    function updateRecordingUI(mediaType, isRecording) {
+        const button = document.querySelector(`.capture-media[data-media-type="${mediaType}"]`);
+        if (!button) return;
+        
+        if (isRecording) {
+            button.classList.add('recording');
+            button.innerHTML = '<i class="fas fa-stop me-2"></i> {{ __("dashboard.stop") }}';
+        } else {
+            button.classList.remove('recording');
+            const icon = mediaType === 'audio' ? 'microphone' : 'video';
+            button.innerHTML = `<i class="fas fa-${icon} me-2"></i> {{ __('dashboard.record') }}`;
+        }
+    }
+
+    // Start recording timer
+    function startRecordingTimer(mediaType, container) {
+        const timerElement = container.querySelector('.recording-timer');
+        if (!timerElement) return;
+        
+        recordingStartTime[mediaType] = new Date();
+        timerElement.classList.remove('d-none');
+        
+        recordingTimers[mediaType] = setInterval(() => {
+            const elapsed = Math.floor((new Date() - recordingStartTime[mediaType]) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            
+            const timerSpan = timerElement.querySelector('span');
+            if (timerSpan) {
+                timerSpan.textContent = `${minutes}:${seconds}`;
+            }
+        }, 1000);
+    }
+
+    // Get supported MIME type
+    function getSupportedMimeType(mediaType) {
+        const types = mediaType === 'video' 
+            ? ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4']
+            : ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/wav'];
+            
+        for (const type of types) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                return type;
             }
         }
         
-        // Stop tracks
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop());
-        }
+        return mediaType === 'video' ? 'video/webm' : 'audio/webm';
     }
     
     // Clean up on page unload
     window.addEventListener('beforeunload', function() {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        }
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop());
-        }
+        ['video', 'audio'].forEach(mediaType => {
+            if (mediaRecorders[mediaType] && mediaRecorders[mediaType].state === 'recording') {
+                mediaRecorders[mediaType].stop();
+            }
+            if (mediaStreams[mediaType]) {
+                mediaStreams[mediaType].getTracks().forEach(track => track.stop());
+            }
+            if (recordingTimers[mediaType]) {
+                clearInterval(recordingTimers[mediaType]);
+            }
+        });
     });
 
     // Form validation before submit
     document.getElementById('kt_ecommerce_add_product_form').addEventListener('submit', function(e) {
-        // Add any form validation logic here if needed
         console.log('Form submitted with uploaded images:', uploadedImages);
     });
 });
