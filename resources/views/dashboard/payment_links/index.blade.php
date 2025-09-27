@@ -169,7 +169,7 @@
                                     </td>
                                     <td>
                                         <span class="text-dark fw-bolder text-h6 d-block fs-6">
-                                            {{ $paymentLink->handled_by ?? '-' }}
+                                            {{ $paymentLink->handledBy->name ?? '-' }}
                                         </span>
                                     </td>
                                     <td>
