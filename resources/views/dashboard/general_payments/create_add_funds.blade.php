@@ -263,7 +263,7 @@
                                             <!--begin::Menu item-->
                                             <div class="menu-item px-3">
                                                 <a href="#" class="menu-link px-3 text-danger" data-kt-ecommerce-category-filter="delete_row" data-url="{{ route('general_payments.destroy', $payment->id) }}">
-                                                    <i class="fas fa-trash me-2"></i>@lang('dashboard.delete')
+                                                    @lang('dashboard.delete')
                                                 </a>
                                             </div>
                                             @endcan
