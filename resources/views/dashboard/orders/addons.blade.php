@@ -93,7 +93,6 @@
                                 @endif
                                 @endcan
                                 </td>
-                                {{dd($orderAddon->pivot)}}
                                 <td>{{ App\Models\User::find($orderAddon->pivot->handled_by)?->name ?? '-' }}</td>
                                 <td>{{ $orderAddon->pivot->description }}</td>
 
