@@ -41,10 +41,12 @@ use App\Repositories\ICategoryRepository;
 use Illuminate\Support\Facades\DB as FacadesDB;
 use App\Models\Transaction;
 use App\Models\StockAdjustment;
+use App\Models\OrderAsset;
 use App\Services\StockAdjustmentService;
 //use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use App\Http\Requests\UpdateOrderSignInRequest;
 
 class OrderController extends Controller
 {
@@ -850,54 +852,35 @@ class OrderController extends Controller
             'formAction' => route('pages.reservations.board.upcoming'),
         ]);
     }
+    
+    /**
+     * Update the sign-in information for an order
+     *
+     * @param  \App\Http\Requests\UpdateOrderSignInRequest  $request
+     * @param  int  $orderId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+ 
 
-    public function updatesignin(Request $request, $orderId)
+    public function updatesignin(UpdateOrderSignInRequest $request, $orderId)
     {
-        $validatedData = $request->validate([
-            'time_of_receipt' => 'nullable',
-            'time_of_receipt_notes' => 'nullable|string',
-            'delivery_time' => 'nullable',
-            'delivery_time_notes' => 'nullable|string',
-            'voice_note' => 'nullable|file',
-            'video_note' => 'nullable|file', // تأكد من إضافة هذا السطر
-            'delete_voice_note' => 'nullable|boolean',
-            'delete_video_note' => 'nullable|boolean',
-            'voice_note_logout' => 'nullable|file',
-            'video_note_logout' => 'nullable|file',
-
-        ]);
-
         $order = Order::findOrFail($orderId);
-
-        // معالجة صوتيات
-        if ($request->delete_voice_note) {
-            $order->voice_note = null;
-        } elseif ($request->hasFile('voice_note')) {
-            $order->voice_note = $request->file('voice_note')->store('voice_notes');
-        } elseif ($request->hasFile('voice_note_logout')) {
-            $order->voice_note_logout = $request->file('voice_note_logout')->store('voice_notes');
-        } elseif ($request->delete_voice_note_logout) {
-            if ($order->voice_note_logout) {
-                Storage::disk('public')->delete($order->voice_note_logout);
-            }
-            $order->voice_note_logout = null;
+        
+        // Find or create order asset record
+        $orderAsset = OrderAsset::firstOrNew(['order_id' => $order->id]);
+        
+        // Update notes if provided
+        if ($request->filled('notes')) {
+            $orderAsset->notes = $request->notes;
         }
-
-        // معالجة الفيديو
-        if ($request->delete_video_note) {
-            $order->video_note = null; // Clear the video note
-        } elseif ($request->hasFile('video_note')) {
-            $order->video_note = $request->file('video_note')->store('video_notes');
-        } elseif ($request->hasFile('video_note_logout')) {
-            $order->video_note_logout = $request->file('video_note_logout')->store('video_notes');
-        } elseif ($request->delete_video_note_logout) {
-            if ($order->video_note_logout) {
-                Storage::disk('public')->delete($order->video_note_logout);
-            }
-            $order->video_note_logout = null;
-        }
-
-        // تحديث تفاصيل الطلب الأخرى
+        
+        // Save the order asset to get an ID before handling file uploads
+        $orderAsset->save();
+        
+        // Handle file uploads and removals
+        $this->handleItemAttachments($request, $orderAsset);
+        
+        // Update order details
         $order->update([
             'time_of_receipt' => $request->time_of_receipt ?: $order->time_of_receipt,
             'time_of_receipt_notes' => $request->time_of_receipt_notes ?: $order->time_of_receipt_notes,
@@ -906,6 +889,90 @@ class OrderController extends Controller
         ]);
 
         return redirect()->back()->with('success', __('dashboard.success'));
+    }
+    /**
+     * Handle file uploads and deletions for order item attachments
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param mixed $orderAsset
+     * @param string $type Type of attachment (video/audio/photo)
+     * @param string $fileInputName Name of the file input in the request
+     * @param string $pathColumn Name of the database column to store the path
+     * @param string $storagePath Storage path for the file
+     * @return void
+     */
+    protected function handleFileUpload($request, &$orderAsset, $type, $fileInputName, $pathColumn, $storagePath)
+    {
+        // Handle file upload
+        if ($request->hasFile($fileInputName)) {
+            // Delete old file if exists
+            if ($orderAsset->$pathColumn) {
+                Storage::disk('public')->delete($orderAsset->$pathColumn);
+            }
+            
+            try {
+                // Store new file
+                $path = $request->file($fileInputName)->store($storagePath, 'public');
+                $orderAsset->$pathColumn = $path;
+                $orderAsset->save();
+            } catch (\Exception $e) {
+                \Log::error('File upload failed: ' . $e->getMessage());
+                throw $e;
+            }
+        } 
+        // Handle file removal
+        elseif ($request->boolean('remove_' . $fileInputName)) {
+            if ($orderAsset->$pathColumn) {
+                try {
+                    Storage::disk('public')->delete($orderAsset->$pathColumn);
+                    $orderAsset->$pathColumn = null;
+                    $orderAsset->save();
+                } catch (\Exception $e) {
+                    \Log::error('File deletion failed: ' . $e->getMessage());
+                    // Continue even if deletion fails to prevent the whole operation from failing
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle all order item attachments (video, audio, photo)
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\OrderAsset $orderAsset
+     * @return void
+     */
+    protected function handleItemAttachments($request, $orderAsset)
+    {
+        // Handle video upload/removal
+        $this->handleFileUpload(
+            $request,
+            $orderAsset,
+            'video',
+            'video',
+            'video_path',
+            'orders/videos'
+        );
+
+        // Handle audio upload/removal
+        $this->handleFileUpload(
+            $request,
+            $orderAsset,
+            'audio',
+            'audio',
+            'audio_path',
+            'orders/audios'
+        );
+
+        // Handle photo upload/removal
+        $this->handleFileUpload(
+            $request,
+            $orderAsset,
+            'photo',
+            'photo',
+            'image_path',
+            'orders/photos'
+        );
     }
 
 

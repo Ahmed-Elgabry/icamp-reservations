@@ -20,6 +20,7 @@ use App\Models\OrderInternalNote;
 use App\Models\InternalNote;
 use App\Models\PreLoginImage;
 use App\Models\PreLogoutImage;
+use App\Models\OrderAsset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
