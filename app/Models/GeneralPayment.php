@@ -21,7 +21,6 @@ class GeneralPayment extends Model
         'image_path',
         'handled_by'
     ];
-
     public function order()
     {
         return $this->belongsTo(Order::class);

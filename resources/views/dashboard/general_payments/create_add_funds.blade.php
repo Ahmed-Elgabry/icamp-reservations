@@ -88,7 +88,7 @@
                             <div class="col-6">
                                 <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.date') }}</label>
                                 <div class="col-lg-12">
-                                    <input type="date" name="date" id="date" value="{{ isset($payment) ? $payment->date : date('Y-m-d') }}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
+                                    <input type="datetime-local" name="date" id="date" value="{{ isset($payment) ? $payment->date : date('Y-m-d H:i') }}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" required>
                                 </div>
                             </div>
                         </div>
@@ -231,9 +231,9 @@
                                         {{ $payment->description ?? $payment->notes ?? '-' }}
                                     </td>
                                     <!--begin::Date-->
-                                    <td>{{ $payment->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($payment->date)->format('Y-m-d') }}</td>
                                     <!--begin::Time-->
-                                    <td>{{ $payment->created_at->format('h:i A') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($payment->date)->format('h:i A') }}</td>
                                     <!--begin::Actions-->
                                     <td class="text-end">
                                         <a href="#" class="btn btn-sm btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -334,7 +334,7 @@
                         <div class="col-6">
                             <label class="col-lg-12 col-form-label fw-bold fs-6 required">{{ __('dashboard.date') }}</label>
                             <div class="col-lg-12">
-                                <input type="date" name="date" id="editDate" class="form-control form-control-lg form-control-solid" required>
+                                <input type="datetime-local" name="date" id="editDate" class="form-control form-control-lg form-control-solid" required>
                             </div>
                         </div>
                     </div>
@@ -522,6 +522,7 @@
             
             // Fill form fields with the passed data
             $('#editAmount').val(price || '');
+            console.log(date)
             $('#editDate').val(date || '');
             $('#editPaymentMethod').val(paymentMethod || '');
             $('#editDescription').val(description || '');
@@ -742,3 +743,5 @@
             });
         });
     </script>
+
+@endpush
