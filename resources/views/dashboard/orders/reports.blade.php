@@ -161,11 +161,11 @@
                                 </td>
                                 <td class="text-center">
                                     {{ $stock->pivot->where('stock_id', $stock->id)->count() }}
-                                    <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}">
+                                    <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" readonly>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">
-                                        <input type="number" value="{{ $stock->pivot->where('stock_id', $stock->id)->count() }}" name="required_qty_stock[{{ $stock->pivot->id }}]" class="form-control" style="width:80px" readonly>
+                                        <input type="number" value="{{ $stock->pivot->where('stock_id', $stock->id)->count() }}" name="required_qty_stock[{{ $stock->pivot->id }}]" class="form-control" style="width:80px" >
                                         <div class="d-flex flex-column">
                                             <button type="button" class="btn btn-sm btn-danger btn-decrement" data-order-id="{{ $order->id }}" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="decrement"><i class="fa fa-minus"></i></button>
                                             @if ($stock->pivot->latest_activity)
