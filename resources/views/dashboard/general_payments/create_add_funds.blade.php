@@ -528,6 +528,7 @@
             $('#editDescription').val(description || '');
             $('#editAccountId').val(accountId || '');
             $('#editAccountId option[value="' + accountId + '"]').attr('selected', true);
+            $('#editAccountId').trigger('change');
             
             // Show the modal using Bootstrap's jQuery plugin
             new bootstrap.Modal($modal[0]).show();
