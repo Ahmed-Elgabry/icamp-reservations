@@ -31,9 +31,9 @@ class Stock extends Model
         return $value ? asset('storage/' . $value) : null;
     }
     //calucate the required stock count in service stock
-    public function service_stock_count (){
-        return $this->service_stocks->sum('count');
-    }
+    //public function service_stock_count (){
+        //return $this->service_stocks->sum('count');
+   // }
 
     // دالة لحفظ الملفات
     protected function StoreFile($directory, $file)
