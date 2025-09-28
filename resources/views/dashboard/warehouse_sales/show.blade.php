@@ -171,8 +171,8 @@
                                                 <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
                                                 <select name="account_id" id="" class="form-select" required>
                                                     <option value="">{{ __('dashboard.select') }}</option>
-                                                    @foreach($bankAccounts as $id => $name)
-                                                    <option @selected($item->account_id == $id) value="{{$id}}">{{ $name }}</option>
+                                                    @foreach($bankAccounts as $bankAccount)
+                                                    <option @selected($item->account_id == $bankAccount->id) value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -259,8 +259,8 @@
                                         <label class="required form-label">{{ __('dashboard.bank_account') }}</label>
                                         <select name="account_id" id="" class="form-select" required>
                                             <option value="">{{ __('dashboard.select') }}</option>
-                                            @foreach($bankAccounts as $id => $name)
-                                            <option value="{{$id}}">{{ $name }}</option>
+                                            @foreach($bankAccounts as $bankAccount)
+                                            <option value="{{$bankAccount->id}}">{{ $bankAccount->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
