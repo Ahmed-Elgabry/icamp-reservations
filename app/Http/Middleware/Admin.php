@@ -8,8 +8,14 @@ use Illuminate\Support\Facades\Auth;
 
 class Admin{
     public function handle($request, Closure $next){
-        if (Page::where('url', $request->url())->exists()) {
-            return $next($request);
+        if ($page = Page::where('url', $request->url())->first()) {
+            if ($page->is_available) {
+                if (!$page->is_authenticated) {
+                    return $next($request);
+                }
+            }else{
+                abort(404);
+            }
         }
         if(Auth::check() && Auth::user()->isAdmin() && Auth::user()->isActive()){
             return $next($request);
