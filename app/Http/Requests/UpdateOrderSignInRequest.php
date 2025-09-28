@@ -30,18 +30,21 @@ class UpdateOrderSignInRequest extends FormRequest
     public function rules()
     {
         return [
-            'time_of_receipt' => 'nullable',
-            'time_of_receipt_notes' => 'nullable|string|max:500',
-            'delivery_time' => 'nullable',
-            'delivery_time_notes' => 'nullable|string|max:500',
-            'order_id' => 'required|exists:orders,id',
-            'notes' => 'nullable|string|max:1000',
-            'photo' => 'nullable|image|max:20048',
-            'audio' => 'nullable|file|max:50120',
-            'video' => 'nullable|file|max:500240',
-            'remove_photo' => 'nullable|boolean',
-            'remove_audio' => 'nullable|boolean',
-            'remove_video' => 'nullable|boolean',
+ 	'time_of_receipt' => 'nullable|date_format:H:i',
+        'time_of_receipt_notes' => 'nullable|string|max:500',
+        'delivery_time' => 'nullable|date_format:H:i',
+        'delivery_time_notes' => 'nullable|string|max:500',
+        'order_id' => 'required|exists:orders,id',
+        'notes' => 'nullable|string|max:1000',
+        'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'audio' => 'nullable|file|mimes:mp3,wav,ogg,webm|max:51200', // 50MB
+        'video' => 'nullable|file|mimes:mp4,mov,avi,webm|max:102400', // Reduced to 100MB
+        'remove_photo' => 'nullable|boolean',
+        'remove_audio' => 'nullable|boolean',
+        'remove_video' => 'nullable|boolean',
+        'existing_photo' => 'nullable|string',
+        'existing_audio' => 'nullable|string',
+        'existing_video' => 'nullable|string',
         ];
     }
     

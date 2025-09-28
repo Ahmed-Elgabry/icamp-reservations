@@ -138,6 +138,8 @@
 @push('js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            let isSubmitting = false;
+            
             function initializeMediaHandlers() {
                 const mediaContainers = {
                     photo: {
@@ -146,8 +148,8 @@
                         preview: document.querySelector('[data-type="photo"] .preview-image'),
                         captureBtn: document.querySelector('[data-type="photo"] .capture-media'),
                         uploadBtn: document.querySelector('[data-type="photo"] .upload-media'),
-                        dataInput: document.querySelector('[data-type="photo"] .media-data'),
-                        removeFlag: document.querySelector('[data-type="photo"] .remove-flag')
+                        removeFlag: document.querySelector('[data-type="photo"] .remove-flag'),
+                        container: document.querySelector('[data-type="photo"]')
                     },
                     audio: {
                         input: document.querySelector('[data-type="audio"] .media-input'),
@@ -155,8 +157,8 @@
                         preview: document.querySelector('[data-type="audio"] .preview-audio source'),
                         captureBtn: document.querySelector('[data-type="audio"] .capture-media'),
                         uploadBtn: document.querySelector('[data-type="audio"] .upload-media'),
-                        dataInput: document.querySelector('[data-type="audio"] .media-data'),
-                        removeFlag: document.querySelector('[data-type="audio"] .remove-flag')
+                        removeFlag: document.querySelector('[data-type="audio"] .remove-flag'),
+                        container: document.querySelector('[data-type="audio"]')
                     },
                     video: {
                         input: document.querySelector('[data-type="video"] .media-input'),
@@ -164,14 +166,15 @@
                         preview: document.querySelector('[data-type="video"] .preview-video source'),
                         captureBtn: document.querySelector('[data-type="video"] .capture-media'),
                         uploadBtn: document.querySelector('[data-type="video"] .upload-media'),
-                        dataInput: document.querySelector('[data-type="video"] .media-data'),
-                        removeFlag: document.querySelector('[data-type="video"] .remove-flag')
+                        removeFlag: document.querySelector('[data-type="video"] .remove-flag'),
+                        container: document.querySelector('[data-type="video"]')
                     }
                 };
 
                 // Initialize all media types
                 Object.keys(mediaContainers).forEach(type => {
                     const container = mediaContainers[type];
+                    if (!container.input) return;
 
                     // Handle upload button click
                     if (container.uploadBtn) {
@@ -181,11 +184,9 @@
                     }
 
                     // Handle file selection
-                    if (container.input) {
-                        container.input.addEventListener('change', function(e) {
-                            handleFileUpload(e, type, container);
-                        });
-                    }
+                    container.input.addEventListener('change', function(e) {
+                        handleFileUpload(e, type, container);
+                    });
 
                     // Handle capture/record button click
                     if (container.captureBtn) {
@@ -198,10 +199,10 @@
                         });
                     }
 
-                    // Handle remove media button
-                    const removeBtn = container.previewContainer.querySelector('.remove-media');
-                    if (removeBtn) {
-                        removeBtn.addEventListener('click', function() {
+                    // Handle existing remove media buttons
+                    const existingRemoveBtn = container.previewContainer.querySelector('.remove-media');
+                    if (existingRemoveBtn) {
+                        existingRemoveBtn.addEventListener('click', function() {
                             clearMediaPreview(type, container);
                         });
                     }
@@ -210,16 +211,25 @@
 
             initializeMediaHandlers();
 
+            // Handle form submission to prevent double-submit during large file uploads
+            document.getElementById('media-form').addEventListener('submit', function() {
+                if (isSubmitting) {
+                    return false;
+                }
+                isSubmitting = true;
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            });
+
             function toggleMediaRecording(type, container) {
                 if (container.captureBtn.classList.contains('recording')) {
-                    // Stop recording
                     stopMediaRecording(type, container);
                     container.captureBtn.classList.remove('recording');
                     container.captureBtn.innerHTML = `<i class="bi bi-${type === 'audio' ? 'mic' : 'camera-video'}"></i> ${type === 'audio' ? 'Record' : 'Record Video'}`;
                     container.captureBtn.classList.remove('btn-danger');
                     container.captureBtn.classList.add('btn-primary');
                 } else {
-                    // Start recording
                     startMediaRecording(type, container);
                     container.captureBtn.classList.add('recording');
                     container.captureBtn.innerHTML = `<i class="bi bi-stop"></i> Stop`;
@@ -233,8 +243,8 @@
                     audio: true,
                     video: type === 'video' ? {
                         facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        width: { ideal: 640 }, // Reduced size to avoid ModSecurity issues
+                        height: { ideal: 480 }
                     } : false
                 };
 
@@ -242,7 +252,6 @@
                     .then(function(stream) {
                         container.mediaStream = stream;
 
-                        // For video, show live preview
                         if (type === 'video') {
                             const videoPreview = document.createElement('video');
                             videoPreview.srcObject = stream;
@@ -257,10 +266,10 @@
                             container.livePreview = videoPreview;
                         }
 
+                        // Use more conservative settings to avoid large files
                         const options = {
-                            audioBitsPerSecond: 128000,
-                            videoBitsPerSecond: type === 'video' ? 2500000 : 0,
-                            mimeType: type === 'video' ? 'video/webm' : 'audio/webm'
+                            audioBitsPerSecond: 64000, // Reduced bitrate
+                            videoBitsPerSecond: type === 'video' ? 1000000 : 0, // Reduced bitrate
                         };
 
                         try {
@@ -280,11 +289,9 @@
 
                         container.mediaRecorder.onstop = function() {
                             const blob = new Blob(container.recordedChunks, {
-                                type: container.mediaRecorder.mimeType ||
-                                    (type === 'video' ? 'video/webm' : 'audio/webm')
+                                type: container.mediaRecorder.mimeType || (type === 'video' ? 'video/webm' : 'audio/webm')
                             });
 
-                            // Clean up
                             if (container.livePreview) {
                                 container.livePreview.srcObject = null;
                             }
@@ -293,12 +300,12 @@
                             createMediaPreview(blob, type, container);
                         };
 
-                        container.mediaRecorder.start(100); // Collect data every 100ms
+                        container.mediaRecorder.start(1000); // Collect data every 1 second
                     })
                     .catch(function(err) {
                         console.error('Error accessing media devices:', err);
                         alert('Could not access media devices: ' + err.message);
-                        toggleMediaRecording(type, container);
+                        resetRecordingButton(type, container);
                     });
             }
 
@@ -314,6 +321,12 @@
                 }
             }
 
+            function resetRecordingButton(type, container) {
+                container.captureBtn.classList.remove('recording', 'btn-danger');
+                container.captureBtn.classList.add('btn-primary');
+                container.captureBtn.innerHTML = `<i class="bi bi-${type === 'audio' ? 'mic' : 'camera-video'}"></i> ${type === 'audio' ? 'Record' : 'Record Video'}`;
+            }
+
             function capturePhoto(container) {
                 container.input.click();
             }
@@ -322,26 +335,18 @@
                 const file = event.target.files[0];
                 if (!file) return;
 
-                if (type === 'photo') {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        createMediaPreview(file, type, container);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    createMediaPreview(file, type, container);
-                }
+                createMediaPreview(file, type, container);
             }
 
             function createMediaPreview(blob, type, container) {
-                // Clear previous preview and any delete flags
                 container.previewContainer.innerHTML = '';
-                const flagsContainer = container.previewContainer.closest('.media-upload-container')
-                    .querySelector('.delete-flags-container');
-                flagsContainer.innerHTML = '';
-
-                // Reset remove flag
                 container.removeFlag.value = '0';
+
+                // Remove existing file input if present
+                const existingInput = container.container.querySelector('input[name^="existing_"]');
+                if (existingInput) {
+                    existingInput.remove();
+                }
 
                 const url = URL.createObjectURL(blob);
                 let mediaElement;
@@ -352,17 +357,12 @@
                     mediaElement.className = 'preview-image img-thumbnail';
                     mediaElement.style.maxWidth = '100%';
                 } else {
-                    // For audio/video, create proper element
                     mediaElement = document.createElement(type);
                     mediaElement.controls = true;
                     mediaElement.className = `preview-${type} w-100`;
-                    const source = document.createElement('source');
-                    source.src = url;
-                    source.type = blob.type || (type === 'audio' ? 'audio/webm' : 'video/webm');
-                    mediaElement.appendChild(source);
+                    mediaElement.src = url;
                 }
 
-                // Create remove button
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'btn btn-sm btn-danger mt-2 remove-media';
@@ -375,44 +375,36 @@
                 container.previewContainer.appendChild(removeBtn);
                 container.previewContainer.style.display = 'block';
 
-                // Convert to blob for form submission
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // Create a new Blob with the correct MIME type
-                    const recordedBlob = new Blob([blob], { 
-                        type: blob.type || (type === 'audio' ? 'audio/webm' : 'video/webm') 
-                    });
-
-                    // Create a File object with proper name and type
-                    const fileName = `${type}-recording-${Date.now()}.webm`;
-                    const file = new File([recordedBlob], fileName, {
-                        type: recordedBlob.type,
+                // Handle file assignment
+                if (blob instanceof File) {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(blob);
+                    container.input.files = dataTransfer.files;
+                } else {
+                    // For recorded media, create a proper file
+                    const fileName = `${type}-${Date.now()}.webm`;
+                    const file = new File([blob], fileName, {
+                        type: blob.type || (type === 'audio' ? 'audio/webm' : 'video/webm'),
                         lastModified: Date.now()
                     });
 
-                    // Create a new DataTransfer and add the file
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
-
-                    // Assign the file to the file input
                     container.input.files = dataTransfer.files;
-
-                    // Store the file data for form submission
-                    container.dataInput.value = e.target.result;
-                };
-                reader.readAsDataURL(blob);
+                }
             }
 
             function clearMediaPreview(type, container) {
                 container.previewContainer.style.display = 'none';
                 container.previewContainer.innerHTML = '';
-
-                // Set remove flag to 1
                 container.removeFlag.value = '1';
-
-                // Clear all media inputs
                 container.input.value = '';
-                container.dataInput.value = '';
+
+                // Remove existing file reference
+                const existingInput = container.container.querySelector('input[name^="existing_"]');
+                if (existingInput) {
+                    existingInput.remove();
+                }
 
                 // Stop any ongoing recording
                 if (container.mediaRecorder && container.mediaRecorder.state !== 'inactive') {
@@ -421,6 +413,8 @@
                 if (container.mediaStream) {
                     container.mediaStream.getTracks().forEach(track => track.stop());
                 }
+
+                resetRecordingButton(type, container);
             }
         });
     </script>
@@ -436,6 +430,10 @@
         }
         .remove-media {
             width: 100%;
+        }
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
         }
     </style>
 @endpush
