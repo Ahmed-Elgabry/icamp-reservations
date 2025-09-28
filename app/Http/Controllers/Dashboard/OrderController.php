@@ -951,7 +951,7 @@ class OrderController extends Controller
             'video',
             'video',
             'video_path',
-            'orders/videos'
+            'camp-reports'
         );
 
         // Handle audio upload/removal
