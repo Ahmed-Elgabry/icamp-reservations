@@ -447,8 +447,7 @@
                 });
 
                 // Confirm before sending
-                if (!confirm('{{ __('
-                        dashboard.confirm_resend_email ') }} ' + customerName + '?')) {
+                if (!confirm('{{ __("dashboard.confirm_resend_email") }} ' + customerName + '?')) {
                     return;
                 }
 
