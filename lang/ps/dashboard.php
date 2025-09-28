@@ -1844,5 +1844,6 @@ return [
     'amount_exceeds_remaining' => 'وليکل شوې اندازه د پاتې اندازې څخه ډېره ده',
     'enter_valid_confiscation_amount' => 'د ضبط شوې برخې لپاره سمه اندازه باید وليکل شي',
     'item_selling_price' => 'د توکي د پلورنې قیمت',
-    'handled_by' => 'لخوا'
+    'handled_by' => 'لخوا',
+    'form_code' => 'د فورم کوډ'
 ];

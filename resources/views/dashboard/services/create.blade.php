@@ -226,7 +226,7 @@
                                                     </td>
                                                     <td class="text-nowrap" data-label="@lang('dashboard.required_qty')">
                                                         <input type="number" name="reports_counts[]" min="1" class="form-control form-control-lg form-control-solid w-100"
-                                                               value="{{ $report->count }}" placeholder="@lang('dashboard.count')" required>
+                                                               value="{{ $report->count }}" placeholder="@lang('dashboard.count')" required style="min-width: 100px;">
                                                     </td>
                                                     <td class="text-nowrap" data-label="@lang('dashboard.upload_image')">
                                                         <input type="file" name="reports_images[{{ $index }}]" accept="image/*"
@@ -281,7 +281,7 @@
                                             @endif
                                             </div>
                                             <div class="table-cell" style="flex: 0 0 8.33%; padding: 0.5rem;">
-                                                <span class="d-flex flex-row">{{ $index + 1 }} (المخزن)</span>
+                                                <span class="d-flex flex-row text-nowrap">{{ $index + 1 }} (المخزن)</span>
                                             </div>
                                             <div class="table-cell" style="flex: 1 0 33.33%; padding: 0.5rem;">
                                                 <select name="stocks[]" class="form-select-stock select2-custome col-12 form-select-lg form-select-solid" required>
@@ -295,7 +295,8 @@
                                                 <input type="number" name="counts[]" min="1"
                                                        class="form-control form-control-lg form-control-solid"
                                                        placeholder="@lang('dashboard.count')"
-                                                       value="{{ $serviceStock->pivot->count }}" required>
+                                                       value="{{ $serviceStock->pivot->count }}" required
+                                                       style="min-width: 100px;">
                                             </div>
                                             <div class="table-cell" style="flex: 0 0 16.66%; padding: 0.5rem;">
                                                 @can('services.delete.internal')
@@ -411,7 +412,7 @@
                     <img src="{{ asset('images/logo.png') }}" alt="preview-image" class="preview-image" style="width:50px;height:50px;display:none;">
                 </div>
                 <div class="col-1">
-                    <span class="row-number">${newIndex} (المخزن)</span>
+                    <span class="row-number text-nowrap">${newIndex} (المخزن)</span>
                 </div>
                 <div class="col-4">
                     <select name="stocks[]" class="form-select-stock select2-custome col-12 form-select-lg form-select-solid" required>

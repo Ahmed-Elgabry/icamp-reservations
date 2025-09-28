@@ -144,7 +144,7 @@
                                 <th class="text-center">@lang('dashboard.serial')</th>
                                 <th class="text-center">@lang('dashboard.image')</th>
                                 <th>@lang('dashboard.item')</th>
-                                <th class="text-center">@lang('dashboard.available')</th>
+                                <th class="text-center">@lang('dashboard.required_qty')</th>
                                 <th class="text-center">@lang('dashboard.placed_qty')</th>
                                 <th class="text-center">@lang('dashboard.completion_status')</th>
                             </tr>
@@ -160,12 +160,12 @@
                                     <div><a href="{{ route('dashboard.stock.report', $stock->id) }}">{{ $stock->name }}</a></div>
                                 </td>
                                 <td class="text-center">
-                                    {{ $stock->service_stock_count ?? 0 }}
+                                    {{ $stock->pivot->where('stock_id', $stock->id)->count() }}
                                     <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}">
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">
-                                        <input type="number" value="{{ $stock->pivot->required_qty }}" name="required_qty_stock[{{ $stock->pivot->id }}]" class="form-control" style="width:80px">
+                                        <input type="number" value="{{ $stock->pivot->where('stock_id', $stock->id)->count() }}" name="required_qty_stock[{{ $stock->pivot->id }}]" class="form-control" style="width:80px" readonly>
                                         <div class="d-flex flex-column">
                                             <button type="button" class="btn btn-sm btn-danger btn-decrement" data-order-id="{{ $order->id }}" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="decrement"><i class="fa fa-minus"></i></button>
                                             @if ($stock->pivot->latest_activity)

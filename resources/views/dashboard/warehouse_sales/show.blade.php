@@ -51,7 +51,7 @@
                     <thead>
                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                             <th>{{ __('dashboard.items') }}</th>
-                            <th>{{ __('dashboard.item_price') }}</th>
+                            <th>{{ __('dashboard.item_selling_price') }}</th>
                             <th>{{ __('dashboard.quantity') }}</th>
                             <th>{{ __('dashboard.total_amount') }}</th>
                             <th>{{ __('dashboard.payment_method') }}</th>
@@ -231,7 +231,7 @@
                                         </select>
                                     </div>
                                     <div class="form-group mt-3">
-                                        <label>{{ __('dashboard.item_price') }}</label>
+                                        <label>{{ __('dashboard.item_selling_price') }}</label>
                                         <input type="number" step="0.01" disabled class="form-control js-total" value="{{ $stock->selling_price }}">
                                     </div>
                                     <div class="form-group mt-3">

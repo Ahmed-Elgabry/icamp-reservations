@@ -1848,6 +1848,8 @@ return [
     'error' => 'خطأ',
     'ok' => 'موافق',
     'payment_not_found' => 'المدفعة غير موجودة',
-    'payment_deleted_successfully' => 'تم حذف المدفعة بنجاح'
+    'payment_deleted_successfully' => 'تم حذف المدفعة بنجاح',
+    'form_code' => 'كود الاستمارة',
+    
 ];
 

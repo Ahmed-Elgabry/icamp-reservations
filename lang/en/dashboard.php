@@ -269,6 +269,7 @@ return [
     'terms' => 'Terms and Conditions',
     'edit' => 'Edit',
     'delete' => 'Delete',
+    'form_code' => 'Form Code',
     'confirm_delete' => 'Confirm Delete',
     'delete_warning_message' => 'Are you sure you want to delete this item? This action cannot be undone.',
     'yes_delete' => 'Yes, Delete',

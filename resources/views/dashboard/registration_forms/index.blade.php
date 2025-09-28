@@ -32,7 +32,7 @@
                             <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_ecommerce_category_table">
                                 <thead>
                                     <tr class="text-center text-gray-400 fw-bolder fs-6 text-uppercase gs-0" style="background-color: #f8f9fa; font-weight: 900 !important;">
-                                        <th class="min-w-120px fw-bolder">{{ __('dashboard.form_no') }}</th>
+                                        <th class="min-w-120px fw-bolder">{{ __('dashboard.form_code') }}</th>
                                         <th class="min-w-180px fw-bolder">{{ __('dashboard.mobile_phone') }}</th>
                                         <th class="min-w-200px fw-bolder">{{ __('dashboard.full_name') }}</th>
                                         <th class="min-w-210px fw-bolder">{{ __('dashboard.email') }}</th>
