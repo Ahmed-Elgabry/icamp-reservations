@@ -160,12 +160,12 @@
                                     <div><a href="{{ route('dashboard.stock.report', $stock->id) }}">{{ $stock->name }}</a></div>
                                 </td>
                                 <td class="text-center">
-                                    {{ $stock->pivot->where('stock_id', $stock->id)->count() }}
-                                    <input type="hidden" name="count_stock[{{ $stock->pivot->id }}]" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}" readonly>
+                                    {{ $stock->pivot->count }}
+                                    <!-- <input type="hidden" class="form-control text-muted" value="{{ $stock->pivot->count ?? '' }}"> -->
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">
-                                        <input type="number" value="{{ $stock->pivot->where('stock_id', $stock->id)->count() }}" name="required_qty_stock[{{ $stock->pivot->id }}]" class="form-control" style="width:80px" >
+                                        <input type="number" value="{{ $stock->pivot->placed_qty ? $stock->pivot->placed_qty : $stock->pivot->count }}" name="placed_qty[{{ $stock->pivot->id }}]" class="form-control" >
                                         <div class="d-flex flex-column">
                                             <button type="button" class="btn btn-sm btn-danger btn-decrement" data-order-id="{{ $order->id }}" data-pivot-id="{{ $stock->pivot->id }}" data-stock-id="{{ $stock->id }}" data-stock-name="{{ $stock->name }}" data-status="decrement"><i class="fa fa-minus"></i></button>
                                             @if ($stock->pivot->latest_activity)
@@ -275,10 +275,10 @@
             stockName = $btn.data('stockName') || '',
             available = parseInt($btn.data('available') || '0', 10),
             status = $btn.data('status') || 'decrement';
-        orderId = $btn.data('orderId');
+            orderId = $btn.data('orderId');
 
         var $input = $('#required-qty-' + pivotId);
-        if (!$input.length) $input = $('[name="required_qty_stock[' + pivotId + ']"]');
+        if (!$input.length) $input = $('[name="placed_qty[' + pivotId + ']"]');
 
         var qty = parseInt(($input.val() || '').trim(), 10);
         if (isNaN(qty) || qty <= 0) {

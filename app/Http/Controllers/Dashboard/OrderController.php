@@ -751,8 +751,9 @@ class OrderController extends Controller
                 $pivot->update([
                     'is_completed' => ($status === 'completed') ? true : false,
                     'not_completed_reason' => $data['not_completed_reason_stock'][$stockId] ?? null,
-                    'required_qty' => $data['required_qty_stock'][$stockId] ?? null,
-                    'count' => $data['count_stock'][$stockId] ?? null,
+                    //'required_qty' => $data['required_qty_stock'][$stockId] ?? null,
+                    //'count' => $data['count_stock'][$stockId] ?? null,
+                    'placed_qty' => $data['placed_qty'][$stockId] ?? null,
                 ]);
             }
         }

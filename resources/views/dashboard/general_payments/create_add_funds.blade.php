@@ -522,11 +522,12 @@
             
             // Fill form fields with the passed data
             $('#editAmount').val(price || '');
-            console.log(date)
+            
             $('#editDate').val(date || '');
             $('#editPaymentMethod').val(paymentMethod || '');
             $('#editDescription').val(description || '');
             $('#editAccountId').val(accountId || '');
+            $('#editAccountId option[value="' + accountId + '"]').attr('selected', true);
             
             // Show the modal using Bootstrap's jQuery plugin
             new bootstrap.Modal($modal[0]).show();

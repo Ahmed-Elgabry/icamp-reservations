@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->foreignId('stock_id')->constrained()->onDelete('cascade');
+            // the count is the count of the stock needed
             $table->integer('count');
             $table->timestamps();
         });
