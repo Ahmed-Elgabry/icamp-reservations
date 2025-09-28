@@ -452,8 +452,8 @@
                 }
 
                 button.disabled = true;
-                button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __(\"
-                dashboard.sending \") }}...' ;
+                button.innerHTML = `<i class="fa fa-spinner fa-spin"></i> {{ __("
+                dashboard.sending ") }}...`;
 
                 try {
                     console.log('Sending request to:', `/payment-links/${id}/resend-email`);
