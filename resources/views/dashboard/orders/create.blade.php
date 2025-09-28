@@ -880,13 +880,16 @@
                     // First, select the services
                     $('#service_id').val(payload.service_ids.map(String));
                     payload.service_ids.map(String).forEach(function(id){
-                        const $option = $('#service_id option[value="' + id + '"]');
+                        console.log(id);
+                        const $option = $(`#service_id option[value="${id}"]`);
+                        console.log($option);
                         $option.prop('selected', true);
+                        $('#service_id').trigger('change');
                     });
                 }
                 
                 // Always recalculate the price to ensure it's in the correct format
-                recalcPrice();                
+                 recalcPrice();  
                 // If a specific price was provided, use it after setting the services
                 if (payload.price) {
                     console.log('Overriding with provided price:', payload.price);
@@ -895,9 +898,16 @@
                     $('input[name="price"]').val(formattedPrice);
                 }
 
-                if (payload.date)      $('input[name="date"]').val(payload.date);
-                if (payload.time_from) $('input[name="time_from"]').val(payload.time_from);
-                if (payload.time_to)   $('input[name="time_to"]').val(payload.time_to);
+                if (payload.date) $('input[name="date"]').val(payload.date);
+                
+                // Format time values to HH:MM format
+                if (payload.time_from) {
+                    $('input[name="time_from"]').val(payload.time_from);
+                }
+                
+                if (payload.time_to) {
+                    $('input[name="time_to"]').val(payload.time_to);
+                }
                 if (payload.notes)     $('textarea[name="client_notes"]').val(payload.notes);
 
                 const $cust = $('select[name="customer_id"]');

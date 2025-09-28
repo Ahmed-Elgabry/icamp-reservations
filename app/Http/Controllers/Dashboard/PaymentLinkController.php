@@ -111,6 +111,7 @@ class PaymentLinkController extends Controller
                 'order_id' => $request->order_id ?? uniqid('ORD-'),
                 'currency' => 'AED',
                 'send_email' => filter_var($request->send_email, FILTER_VALIDATE_BOOLEAN),
+                // 'send_whatsapp' => filter_var($request->send_whatsapp, FILTER_VALIDATE_BOOLEAN),
                 'send_sms' => filter_var($request->send_sms, FILTER_VALIDATE_BOOLEAN),
                 'expires_in' => $request->expires_at ? now()->diffInMinutes($request->expires_at) : null,
                 'items' => [

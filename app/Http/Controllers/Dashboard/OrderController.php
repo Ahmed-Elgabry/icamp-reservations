@@ -464,7 +464,7 @@ class OrderController extends Controller
             'date' => 'nullable|date',
             'time_from' => 'nullable',
             'time_to' => 'nullable',
-            'expired_price_offer' => 'required_if:status,pending_and_show_price,pending_and_Initial_reservation',
+            'expired_price_offer' => 'required_if:status,pending_and_show_price',
             'time_of_receipt' => 'nullable',
             'image_before_receiving' => 'nullable|image',
             'delivery_time' => 'nullable',

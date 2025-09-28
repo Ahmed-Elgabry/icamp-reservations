@@ -186,7 +186,7 @@ class CampReportController extends Controller
             elseif (isset($itemData[$type]) && $itemData[$type]) {
                 // Delete old file if exists
                 if ($item->{"{$type}_path"}) {
-                    Storage::delete($item->{"{$type}_path"});wawre
+                    Storage::delete($item->{"{$type}_path"});
                 }
 
                 // Store new file
