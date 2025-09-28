@@ -470,20 +470,17 @@
                     console.log('Response result:', result);
 
                     if (result.success) {
-                        showToast(result.message || '{{ __('
-                            dashboard.payment_link_email_resent_success ') }}', 'success');
+                        showToast(result.message || `{{ __('dashboard.payment_link_email_resent_success') }}`, 'success');
                     } else {
-                        showToast(result.message || '{{ __('
-                            dashboard.payment_link_email_resent_error ') }}', 'error');
+                        showToast(result.message || `{{ __('dashboard.payment_link_email_resent_error') }}`, 'error');
                     }
                 } catch (error) {
                     console.error('Error in resend email:', error);
-                    showToast('{{ __('
-                        dashboard.payment_link_email_resent_error ') }}', 'error');
+                    showToast(`{{ __('dashboard.payment_link_email_resent_error') }}`, 'error');
                 } finally {
                     button.disabled = false;
-                    button.innerHTML = '<i class="fa fa-envelope"></i> {{ __('
-                    dashboard.resend_email ') }}';
+                    button.innerHTML = `<i class="fa fa-envelope"></i> {{ __('
+                    dashboard.resend_email ') }}`;
                 }
             }
 
@@ -501,14 +498,13 @@
                 });
 
                 // Confirm before sending
-                if (!confirm('{{ __('
-                        dashboard.confirm_resend_whatsapp ') }} ' + customerName + '?')) {
+                if (!confirm('{{ __("dashboard.confirm_resend_whatsapp") }} ' + customerName + '?')) {
                     return;
                 }
 
                 button.disabled = true;
-                button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ __('
-                dashboard.sending ') }}...';
+                button.innerHTML = `<i class="fa fa-spinner fa-spin"></i> {{ __(
+                "dashboard.sending") }}...`;
 
                 try {
                     console.log('Sending request to:', `/payment-links/${id}/resend-whatsapp`);
@@ -528,20 +524,17 @@
                     console.log('Response result:', result);
 
                     if (result.success) {
-                        showToast(result.message || '{{ __('
-                            dashboard.payment_link_whatsapp_resent_success ') }}', 'success');
+                        showToast(result.message || `{{ __('dashboard.payment_link_whatsapp_resent_success') }}`, 'success');
                     } else {
-                        showToast(result.message || '{{ __('
-                            dashboard.payment_link_whatsapp_resent_error ') }}', 'error');
+                        showToast(result.message || `{{ __('dashboard.payment_link_whatsapp_resent_error') }}`, 'error');
                     }
                 } catch (error) {
                     console.error('Error in resend WhatsApp:', error);
-                    showToast('{{ __('
-                        dashboard.payment_link_whatsapp_resent_error ') }}', 'error');
+                    showToast(`{{ __('dashboard.payment_link_whatsapp_resent_error') }}`, 'error');
                 } finally {
                     button.disabled = false;
-                    button.innerHTML = '<i class="fab fa-whatsapp"></i> {{ __('
-                    dashboard.resend_whatsapp ') }}';
+                    button.innerHTML = `<i class="fab fa-whatsapp"></i> {{ __(
+                    "dashboard.resend_whatsapp") }}`;
                 }
             }
         });
