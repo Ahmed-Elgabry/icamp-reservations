@@ -21,6 +21,9 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\VerificationStatusChanged::class => [
             \App\Listeners\ApplyVerificationBankAdjustment::class,
         ],
+        \App\Events\InsuranceVerified::class => [
+            \App\Listeners\ProcessInsuranceVerification::class,
+        ],
     ];
 
     /**

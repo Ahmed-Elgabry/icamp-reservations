@@ -103,85 +103,18 @@ class OrderController extends Controller
 
         return view('dashboard.orders.index', compact('orders'));
     }
+
     public function updateInsuranceStatusAndPrice($order, $price, $originalInsuranceAmount, $insuranceStatus, $confiscationDescription, $insuranceAmount)
     {
-        switch ($insuranceStatus) {
-            case 'returned':
-                foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
-                    $insurance->update([
-                        'insurance_status' => 'returned',
-                        'insurance_handled_by' => auth()->id()
-                    ]);
-                    // Set transaction amount to 0 since insurance is returned
-                    $insurance->transaction->update([
-                        'amount' => 0,
-                        'insurance_handled_by' => auth()->id()
-                    ]);
-                    
-                    BankAccount::find($insurance->account_id)->decrement('balance', $insurance->price);
-                }
-                $insuranceAmounts = 0; // No insurance remaining after return
-                break;
-
-            case 'confiscated_partial':
-                $remainingAmount = $originalInsuranceAmount - $insuranceAmount;
-                
-                foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
-                    //reset the tranaction 
-                    $insurance->transaction->update(['amount' => $insurance->price]);
-                    $insurance->update([
-                        'insurance_status' => 'confiscated_partial',
-                        'insurance_handled_by' => auth()->id()
-                    ]);
-                    // Set transaction to the confiscated amount (what system keeps)
-                    if ($insurance->transaction) {
-                        $confiscatedPortion = ($insurance->price / $originalInsuranceAmount) * $insuranceAmount;
-                        $insurance->transaction->update([
-                            'amount' => $confiscatedPortion,
-                            'insurance_handled_by' => auth()->id()
-                        ]);
-                    }
-
-                    // Deduct the confiscated portion from bank balance
-                    if ($insurance->account_id) {
-                        $confiscatedPortion = ($insurance->price / $originalInsuranceAmount) * $insuranceAmount;
-                        BankAccount::find($insurance->account_id)->decrement('balance', $confiscatedPortion);
-                    }
-                }
-                $insuranceAmounts = $remainingAmount;
-                break;
-
-            case 'confiscated_full':
-                foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
-                    $insurance->update([
-                        'insurance_status' => 'confiscated_full',
-                        'insurance_handled_by' => auth()->id()
-                    ]);
-
-                    // Set transaction to 0 since fully confiscated
-                    $insurance->transaction->update([
-                        'amount' => $insurance->price,
-                        'insurance_handled_by' => auth()->id()
-                    ]);
-                    // Deduct full amount from bank balance
-                    if ($insurance->account_id) {
-                        BankAccount::find($insurance->account_id)->increment('balance', $insurance->price);
-                    }
-                }
-                $insuranceAmounts = 0; // No insurance remaining after full confiscation
-                break;
-
-            default:
-                $insuranceAmounts = $originalInsuranceAmount;       
-        }
-
+        // Just update the order with the new status and amounts
+        // The actual processing will happen when the insurance is verified
         $order->update([
             'insurance_handled_by' => auth()->id(),
             'insurance_status' => $insuranceStatus,
             'confiscation_description' => $confiscationDescription,
-            'insurance_amount' => $insuranceAmounts,
+            'partial_confiscation_amount' => $insuranceStatus === 'confiscated_partial' ? $insuranceAmount : null,
+            'is_insurance_verified' => false, // Reset verification status when status changes
         ]);
-        \Log::info(json_encode($order));
     }
 
     public function create()
@@ -205,48 +138,47 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'insurance_status' => 'required|in:returned,confiscated_full,confiscated_partial',
             'confiscation_description' => 'nullable|string',
-            'partial_confiscation_amount' => 'required_if:insurance_status,confiscated_partial|min:0',
+            'partial_confiscation_amount' => 'required_if:insurance_status,confiscated_partial',
         ]);
+
         $order = Order::findOrFail($orderId);
+        
+        // Validate insurance exists
         if ($order->verifiedInsurance()->count() == 0) {
-            foreach ($order->verifiedInsurance()->get() as $key => $insurance) {
-                $insurance->update([
-                    'insurance_status' => null,
-                ]);
-            }
-            $order->update([
-                'insurance_status' => null,
-            ]);
             return redirect()->back()->withErrors(['insurance_amount' => __('dashboard.no_approved_insurance')]);
         }
 
-        if (!$order->insurance_approved) {
-            return redirect()->back();
-        }
-
-        if ($order->insurance_status == $validatedData["insurance_status"]) {
-            return redirect()->back();
-        }
         $originalInsuranceAmount = $order->verifiedInsuranceAmount();
-        $price = $order->price;
         
         if ($originalInsuranceAmount <= 0) {
             return back()->withErrors(['insurance_amount' => __('dashboard.no_insurance_to_return')]);
         }
         
+        // Handle partial confiscation amount validation
         $insuranceAmount = 0;
         if ($validatedData['insurance_status'] === 'confiscated_partial') {
             $insuranceAmount = (float)$request->input('partial_confiscation_amount');
-            // Ensure the partial amount is not greater than the original amount
+            
             if ($insuranceAmount > $originalInsuranceAmount) {
                 return back()->withErrors(['partial_confiscation_amount' => __('dashboard.confiscation_amount_exceeds_original')]);
             }
+            
             if ($insuranceAmount <= 0) {
                 return back()->withErrors(['partial_confiscation_amount' => __('dashboard.enter_valid_confiscation_amount')]);
             }
         }
-        $this->updateInsuranceStatusAndPrice($order, $price, $originalInsuranceAmount, $validatedData["insurance_status"], $validatedData["confiscation_description"],  $insuranceAmount);
-        return back()->with('success', __('dashboard.success'));
+
+        // Update the order with the new insurance status (not verified yet)
+        $this->updateInsuranceStatusAndPrice(
+            $order, 
+            $order->price, 
+            $originalInsuranceAmount, 
+            $validatedData['insurance_status'], 
+            $validatedData['confiscation_description'], 
+            $insuranceAmount
+        );
+
+        return back()->with('success', __('dashboard.insurance_status_updated'));
     }
 
     public function store(Request $request)
@@ -1076,7 +1008,21 @@ class OrderController extends Controller
                 $item = StockAdjustment::findOrFail($id);
             } elseif ($type == 'insurance') {
                 $item = Order::findOrFail($id);
-                event(new \App\Events\VerificationStatusChanged('insurance', $item, $item->insurance_approved));
+                
+                // If insurance is being approved, trigger the verification process
+                if($item->insurance_status && $item->is_insurance_verified){
+                    $item->update(["insurance_status" => null]);
+                }
+                else if ($item->insurance_status && !$item->is_insurance_verified) {
+                    $item->update(['is_insurance_verified' => true]);
+                    event(new \App\Events\InsuranceVerified($item));
+                }elseif ($item->is_insurance_verified) {
+                    $item->update(['is_insurance_verified' => false]);
+                    $item->update(["insurance_status" => null]);
+                }elseif(!$item->is_insurance_verified){
+                    $item->update(['is_insurance_verified' => true]);
+
+                }
                 return redirect()->back()->with('success', __('dashboard.success'));
             } elseif ($type == 'expense') {
                 $item = Expense::findOrFail($id);

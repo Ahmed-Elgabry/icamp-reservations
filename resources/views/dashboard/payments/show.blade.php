@@ -80,7 +80,7 @@
                     <th>{{ __('dashboard.price') }}</th>
                     <th class="">{{ __('dashboard.payment_method') }}</th>
                     <th class="">{{ __('dashboard.bank_account') }}</th>
-                    @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
+                    @if($order->insurance_status !== 'returned'  || $order->is_insurance_verified == "1")
                         <th class="">{{ __('dashboard.verified') }}</th>
                     @endif
                     <th class="">{{ __('dashboard.handled_by') }}</th>
@@ -133,7 +133,7 @@
 
                             @endif
                         @endforeach
-                        @if($order->insurance_status !== 'returned'  || $order->insurance_approved == "1")
+                        @if($order->insurance_status !== 'returned'  || $order->is_insurance_verified == "1")
                             <td>
                                 {{ $payment->verified ? __('dashboard.yes') : __('dashboard.no') }} <br>
                                 @can('payments.approve')

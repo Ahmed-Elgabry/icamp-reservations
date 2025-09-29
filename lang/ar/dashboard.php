@@ -1850,6 +1850,6 @@ return [
     'payment_not_found' => 'المدفعة غير موجودة',
     'payment_deleted_successfully' => 'تم حذف المدفعة بنجاح',
     'form_code' => 'كود الاستمارة',
-    
+    'confiscated_amount' => 'المبلغ المصادر',
 ];
 

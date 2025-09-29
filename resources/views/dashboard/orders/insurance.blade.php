@@ -32,8 +32,8 @@
                 <div class="d-flex flex-column align-items-center gap-1">
                     @can('bookings.insurance.approve')
                     <a href="{{ route('order.verified', ['Id' => $order->id, 'type' => 'insurance']) }}"
-                        class="btn btn-sm {{ $order->insurance_approved ? 'btn btn-sm btn-danger' : 'btn btn-sm btn-success' }}">
-                        {{ $order->insurance_approved ? __('dashboard.mark_unverify') : __('dashboard.mark_verify') }}
+                        class="btn btn-sm {{ $order->is_insurance_verified ? 'btn btn-sm btn-danger' : 'btn btn-sm btn-success' }}">
+                        {{ $order->is_insurance_verified ? __('dashboard.mark_unverify') : __('dashboard.mark_verify') }}
                     </a>
                     @endcan
                 </div>
@@ -70,10 +70,10 @@
                     </div>
 
                     <div class="form-group mt-3" id="partial_confiscation_amount_group" style="display: none;">
-                        <label for="partial_confiscation_amount">{{ __('dashboard.insurance_amount') }}</label>
+                        <label for="partial_confiscation_amount">{{ __('dashboard.confiscated_amount') }}</label>
                         <input type="number" name="partial_confiscation_amount" id="partial_confiscation_amount"
-                            value="{{ number_format($order->verifiedInsuranceAmount() - $order->insuranceFromTransaction(), 2) }}"
-                            class="form-control" step="0.01">
+                            value="{{ $order->insurance_status === 'confiscated_partial' ? $order->partial_confiscation_amount : '' }}"
+                            class="form-control" step="0.01" min="0" {{ $order->insurance_status === 'confiscated_partial' ? 'required' : '' }}>
                     </div>
                     @if($order->insurance_status === 'confiscated_partial' || $order->insurance_status === 'confiscated_full' || $order->insurance_status === 'returned')
                     <div class="mt-6">
@@ -103,7 +103,7 @@
                                     <br>
                                     @if($order->insuranceFromTransaction())
                                     <span class="text-gray-700">{{ __('dashboard.remaining_insurance') }}: </span>
-                                    <span class="fw-bold text-success">{{ number_format($order->verifiedInsuranceAmount() - $order->insuranceFromTransaction(), 2) }} AED</span>
+                                    <span class="fw-bold text-success">{{ number_format($order->verifiedInsuranceAmount() - ($order->partial_confiscation_amount ??$order->insuranceFromTransaction), 2) }} AED</span>
                                     @endif
                                 </div>
                                 @endif
@@ -140,11 +140,6 @@
     $(document).ready(function() {
         function renderStatus() {
             var insuranceStatus = $("#insurance_status").val();
-            var currentStatus = '{{ $order->insurance_status }}';
-            var verifiedAmount = parseFloat('{{ $order->verifiedInsuranceAmount() }}');
-            var currentAmount = parseFloat($('#partial_confiscation_amount').val());
-            var remainingAmount = Math.max(0, verifiedAmount - currentAmount);
-
             // Show/hide confiscation description based on selected status
             if (insuranceStatus === 'confiscated_full' || insuranceStatus === 'confiscated_partial') {
                 $('#confiscation_description_group').show();
@@ -153,35 +148,14 @@
             }
 
             // Show/hide partial confiscation amount field
+            var partialAmountInput = $('#partial_confiscation_amount');
             if (insuranceStatus === 'confiscated_partial') {
                 $('#partial_confiscation_amount_group').show();
-                
-                // Initialize the input field with the remaining amount if it's empty
-                if (isNaN(currentAmount) || currentAmount <= 0) {
-                    $('#partial_confiscation_amount').val(remainingAmount.toFixed(2));
-                }
-                
-                // Add validation to ensure amount doesn't exceed remaining amount
-                $('#partial_confiscation_amount').attr('max', remainingAmount);
-                
-                // Show error if amount is invalid
-                $('#partial_confiscation_amount').on('input', function() {
-                    var amount = parseFloat($(this).val());
-                    if (isNaN(amount) || amount <= 0) {
-                        $(this).addClass('is-invalid');
-                        $('#amount-error').remove();
-                        $(this).after('<div id="amount-error" class="invalid-feedback">' + '{{ __("dashboard.enter_valid_amount") }}' + '</div>');
-                    } else if (amount > remainingAmount) {
-                        $(this).addClass('is-invalid');
-                        $('#amount-error').remove();
-                        $(this).after('<div id="amount-error" class="invalid-feedback">' + '{{ __("dashboard.amount_exceeds_remaining") }} (' + remainingAmount.toFixed(2) + ')' + '</div>');
-                    } else {
-                        $(this).removeClass('is-invalid');
-                        $('#amount-error').remove();
-                    }
-                });
+                partialAmountInput.prop('required', true);
             } else {
                 $('#partial_confiscation_amount_group').hide();
+                partialAmountInput.prop('required', false);
+                partialAmountInput.val(''); // Clear the value when hidden
             }
         }
 
@@ -193,19 +167,7 @@
             renderStatus();
         });
 
-        // Form validation before submission
-        $('form').on('submit', function(e) {
-            var status = $('#insurance_status').val();
-            var amount = parseFloat($('#partial_confiscation_amount').val());
-            var remainingAmount = Math.max(0, verifiedAmount - currentAmount);
-            
-            if (status === 'confiscated_partial' && (isNaN(amount) || amount <= 0 || amount > remainingAmount)) {
-                e.preventDefault();
-                alert('{{ __("dashboard.enter_valid_confiscation_amount") }}');
-                return false;
-            }
-            return true;
-        });
+      
     });
 </script>
 
