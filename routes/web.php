@@ -708,7 +708,7 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     # order items Verified
     Route::get('order/verified/{Id}/{type?}', [
         'uses' => 'OrderController@updateVerified',
-        'as' => 'bookings.insurance.approve',
+        'as' => 'order.verified',
         'title' => ['actions.verified', 'dashboard.signin']
     ]);
 
