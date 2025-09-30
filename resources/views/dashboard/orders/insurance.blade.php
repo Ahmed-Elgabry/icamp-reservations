@@ -31,7 +31,7 @@
                 {{ __('dashboard.insurance') }}
                 <div class="d-flex flex-column align-items-center gap-1">
                     @can('bookings.insurance.approve')
-                    <a href="{{ route('order.verified', ['Id' => $order->id, 'type' => 'insurance']) }}"
+                    <a href="{{ route('bookings.insurance.approve', ['Id' => $order->id, 'type' => 'insurance']) }}"
                         class="btn btn-sm {{ $order->is_insurance_verified ? 'btn btn-sm btn-danger' : 'btn btn-sm btn-success' }}">
                         {{ $order->is_insurance_verified ? __('dashboard.mark_unverify') : __('dashboard.mark_verify') }}
                     </a>
@@ -167,7 +167,7 @@
             renderStatus();
         });
 
-      
+
     });
 </script>
 
