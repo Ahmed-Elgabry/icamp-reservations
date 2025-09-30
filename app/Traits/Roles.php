@@ -58,9 +58,10 @@ trait Roles
             'transactions' => ['title_ar' => 'المعاملات', 'title_en' => 'Transactions'],
             'pages' => ['title_ar' => 'الصفحات', 'title_en' => 'Pages'],
             'contact-guides' => ['title_ar' => 'جهات الاتصال', 'title_en' => 'Contact Guides'],
-            'meeting-locations' => ['title_ar'=> 'مواقع الاجتماعات', 'title_en'=>'Meetings Locations'],
-            'violation-types' => ['title_ar'=> 'انواع المخالفات', 'title_en'=>'Violation Types'],
-            'financial-reports' => ['title_ar'=> 'التقارير المالية', 'title_en'=>'Financial reports']
+            'meeting-locations' => ['title_ar' => 'مواقع الاجتماعات', 'title_en' => 'Meetings Locations'],
+            'violation-types' => ['title_ar' => 'انواع المخالفات', 'title_en' => 'Violation Types'],
+            'financial-reports' => ['title_ar' => 'التقارير المالية', 'title_en' => 'Financial reports'],
+            'attendance' => ['title_ar' => 'نظام الحضور و الانصراف', 'title_en' => 'Attendance System']
         ];
 
         // Special mappings for permissions that don't follow the standard prefix pattern

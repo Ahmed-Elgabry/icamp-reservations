@@ -2613,16 +2613,18 @@
     <!--end::Menu item-->
     @endcan
 
-<!--begin::Menu item-->
-<div class="menu-item">
-    <a href="{{ config('services.attendance.url', 'https://www.mawqoot.com/ar/login') }}" target="_blank" class="menu-link py-3">
-        <span class="menu-icon">
-            <img src="{{asset('images/attendance.png')}}" style="width:25px;height:25px" alt="Attendance">
-        </span>
-        <span class="menu-title">@lang('dashboard.attendance_departure_system')</span>
-    </a>
-</div>
-<!--end::Menu item-->
+    @can('attendance.index')
+    <!--begin::Menu item-->
+    <div class="menu-item">
+        <a href="{{ config('services.attendance.url', 'https://www.mawqoot.com/ar/login') }}" target="_blank" class="menu-link py-3">
+            <span class="menu-icon">
+                <img src="{{asset('images/attendance.png')}}" style="width:25px;height:25px" alt="Attendance">
+            </span>
+            <span class="menu-title">@lang('dashboard.attendance_departure_system')</span>
+        </a>
+    </div>
+    <!--end::Menu item-->
+    @endcan
 </div>
 
 @endauth
