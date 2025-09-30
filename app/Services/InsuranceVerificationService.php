@@ -90,7 +90,29 @@ class InsuranceVerificationService
             throw $e;
         }
     }
-
+    public function reset_insurance_status($order) {
+        $order->is_insurance_verified = false ; 
+        $order->partial_confiscation_amount = 0 ;
+        $order->insurance_handled_by = null ;
+        $order->insurance_status = null ;
+        $order->save();
+    }
+    //  reset the 
+     public function insurnaceDeleted($payment){
+        if ($transaction = $payment->transaction) {
+            $confiscatedAmount = $transaction->amount ;
+        }
+        if ($payment->insurance_status  === "returned") {
+            return ;
+        }elseif($payment->insurance_status  === "confiscated_full"){
+        $this->adjustBankBalance($payment->account_id, $confiscatedAmount, 'decrement');
+        }elseif($payment->insurance_status  === "confiscated_partial"){
+            $this->adjustBankBalance($payment->account_id, $confiscatedAmount, 'decrement');
+        }
+        if($payment->order->verifiedInsurance()->count() <= 1){
+            $this->reset_insurance_status($payment->order) ; 
+        }
+     }
     /**
      * Reset the confiscated amount for a payment
      */

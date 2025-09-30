@@ -11,6 +11,7 @@ use App\Models\Transaction;
 use App\Models\BankAccount;
 use App\Models\Expense;
 use App\Models\GeneralPayment;
+use App\Services\InsuranceVerificationService;
 use Illuminate\Http\Request;
 use PDF;
 use DB;
@@ -451,11 +452,14 @@ public function moneyTransfer(Request $request)
 
         try {
             // If payment is verified, discount from the bank account
-            if ($payment->verified) {
+            if ($payment->verified && $payment->statement !== "the_insurance") {
                 $bankAccount = BankAccount::find($payment->account_id);
                 if ($bankAccount) {
                     $bankAccount->decrement('balance', $payment->price);
                 }
+            }else if ($payment->verified && $payment->statement === "the_insurance") {
+                $insuranceService = new InsuranceVerificationService();
+                $insuranceService->insurnaceDeleted($payment);
             }
             $payment->delete();
             DB::commit();
@@ -481,11 +485,14 @@ public function moneyTransfer(Request $request)
             foreach ($requestIds as $id) {
                 $payment = Payment::findOrFail($id);
                     // If payment is verified, discount from the bank account
-                    if ($payment->verified) {
+                    if ($payment->verified && $payment->statement !== "the_insurance") {
                         $bankAccount = BankAccount::find($payment->account_id);
                         if ($bankAccount) {
                             $bankAccount->decrement('balance', $payment->price);
                         }
+                    }else if ($payment->verified && $payment->statement === "the_insurance") {
+                        $insuranceService = new InsuranceVerificationService();
+                        $insuranceService->insurnaceDeleted($payment);
                     }
                     $payment->delete();
             }
