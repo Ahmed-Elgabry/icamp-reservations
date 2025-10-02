@@ -90,7 +90,7 @@
         box-shadow : none !important; 
     }
         table tbody tr:hover {
-        background-color: unset;
+        background-color: unset unset !important;
     }
     table tbody tr td:hover {
 			background-color: #e3f2fd !important;
