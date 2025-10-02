@@ -1968,6 +1968,7 @@ return [
             'else' => 'Other',
             'non-consumption' => 'Non-consumption',
             'stockTaking' => 'Stock taking',
+     "for_warehouse_sale" => "warehouse sales"
         ],
     ],
     'item_status_report_title' => 'Item Status Report',
@@ -2014,6 +2015,7 @@ return [
             'else' => 'Other',
             'non-consumption' => 'Non-consumption',
             'stockTaking' => 'Stock taking',
+     "for_warehouse_sale" => "warehouse sales"
         ],
     ],
     'image_preview' => 'Image preview',
