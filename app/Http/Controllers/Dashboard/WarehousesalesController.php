@@ -57,7 +57,6 @@ class WarehousesalesController extends Controller
                 "stock_id" => $data['stock_id'],
                 'order_item_id' => $orderItem->id,
             ]);
-              // create snapshot record before mutating
               StockAdjustment::create([
                 'available_quantity_before' => $stock->quantity,
                 'available_quantity_after' => $stock->quantity - $data['quantity'],
@@ -117,6 +116,22 @@ class WarehousesalesController extends Controller
                 'source' => 'warehouse_sale',
                 "stock_id" => $data['stock_id'],
                 'verified' => 0
+            ]);
+          StockAdjustment::create([
+                'available_quantity_before' => $stock->quantity,
+                'available_quantity_after' => $stock->quantity - $data['quantity'],
+                'stock_id' => $data['stock_id'],
+                'quantity' => isset($data['quantity']) ? $data['quantity'] : null,
+                'order_item_id' => $orderItem->id,
+                "reason" => "for_warehouse_sale",
+                'type' => 'item_decrement',
+                'order_id' => $data['order_id'],
+                'source' => 'Warehouse Sale',
+                'percentage' => isset($stock->percentage) ? $stock->percentage - $data['quantity'] : null,
+                'available_percentage_before' => $stock->percentage,
+                'verified' => 0,
+                'date_time' => now(),
+                'employee_name' => auth()->user()->name ?? null,
             ]);
 
             DB::commit();
