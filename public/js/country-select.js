@@ -293,6 +293,7 @@
         });
 
         // inject compact CSS for inline selects and wide dropdown
+        
     var css = `
     .country-select-wrap .country-select{ width:65px !important; height:37px !important;padding: 9px 0 0 0; }
     .country-select-wrap .select2-container{ width:82px !important; }
@@ -320,8 +321,11 @@
         font-size:16px; 
         line-height:16px; 
     }
-    .country-select-wrap + .select2-container--open .select2-dropdown{ 
+    .country-select-wrap + .select2-container--open .-select2dropdown{ 
         min-width:300px !important; 
+    }
+    span.select2-dropdown.country-select-dropdown.select2-dropdown {
+    width: 230px !important;
     }
     .country-select-wrap .select2-container--default .select2-selection--single .country-label{ 
         font-size:12px; 
