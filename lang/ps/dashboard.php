@@ -1847,4 +1847,6 @@ return [
     'handled_by' => 'لخوا',
     'form_code' => 'د فورم کوډ',
     'confiscated_amount' => 'ضبط شوې اندازه',
+    "for_warehouse_sale" => "د زيرمتون پلورل"
+    
 ];

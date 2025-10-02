@@ -1561,6 +1561,7 @@ return [
             'else' => 'أخرى',
             'non-consumption' => 'عدم إستهلاك',
             'stockTaking' => 'جرد المخزون',
+            "for_warehouse_sale" => "مبيعات المخزون"
         ],
     ],
 "image_preview" => "معاينة الصورة",

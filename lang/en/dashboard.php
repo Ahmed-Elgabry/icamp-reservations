@@ -2158,4 +2158,6 @@ return [
     'payment_not_found' => 'Payment not found',
     'payment_deleted_successfully' => 'Payment deleted successfully',
     'confiscated_amount' => 'Confiscated Amount',
+    "for_warehouse_sale" => "warehouse sales"
+
 ];
