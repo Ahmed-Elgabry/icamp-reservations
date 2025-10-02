@@ -173,7 +173,7 @@ class StockController extends Controller
             ->where('verified', true)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        return view('dashboard.stocks.stockReport', compact('stock', 'stockAdjustments'));
+        return view('dashboard.stocks.stockReport', compact('transactions', 'stockAdjustments'));
     }
 
 }
