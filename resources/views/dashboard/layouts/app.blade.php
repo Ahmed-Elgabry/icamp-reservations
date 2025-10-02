@@ -373,6 +373,9 @@
 	.select2-container .select2-selection--single {
 		height: unset !important;
 	}
+	.select2-container--open .select2-dropdown.country-select-dropdown {
+		min-width: 230px !important;
+	}
 	</style>
 
 </head>

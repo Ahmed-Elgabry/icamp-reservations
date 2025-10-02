@@ -85,6 +85,9 @@
         .select2-container { direction: inherit; }
         .select2-container--bootstrap-5 .select2-selection { border-radius: .375rem; }
         .flatpickr-calendar { font-family: "Cairo", sans-serif; }
+        .select2-container--open .select2-dropdown.country-select-dropdown  {
+		min-width: 230px !important;
+	}
 	</style>
 </head>
 <body>
