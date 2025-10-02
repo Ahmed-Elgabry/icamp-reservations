@@ -164,16 +164,13 @@ class StockController extends Controller
         return response()->json($stocks);
     }
 
-    public function stockReport(Stock $stock)
+   public function stockReport(Stock $stock)
     {
         // $this->authorize('view', $stock);
 
-        // Get verified stock adjustments with pagination
-        $stockAdjustments = $stock->stockAdjustments()
-            ->where('verified', true)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        return view('dashboard.stocks.stockReport', compact('stock', 'stockAdjustments'));
+        $transactions = $stock->stockAdjustments()->where('verified', true)->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
     }
 
 }

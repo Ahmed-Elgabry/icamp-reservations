@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
 use App\Models\BankAccount;
+use App\Models\StockAdjustment;
 use DB;
 
 class WarehousesalesController extends Controller
