@@ -108,12 +108,16 @@
     $(document).ready(function() {
         $('table tbody td').hover(
             function() {
+                var date = $(this).data('date');
+                if(!date) return;
                 $(this).css({
                     'background-color': '#e3f2fd',
                     'transition': 'background-color 0.2s ease-in-out'
                 });
             },
             function() {
+                var date = $(this).data('date');
+                if(!date) return;
                 $(this).css('background-color', '');
             }
         );
