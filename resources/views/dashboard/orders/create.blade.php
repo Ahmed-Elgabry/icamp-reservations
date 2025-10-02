@@ -49,7 +49,7 @@
                                     <select name="customer_id"
                                             class="js-select2 form-select form-select-lg form-select-solid"
                                             required>
-                                        <option value="" @unless ($customers) selected @endunless disabled>{{ __('dashboard.choose') }}</option>
+                                        <option value="" @unless (isset($order)) selected @endunless disabled>{{ __('dashboard.choose') }}</option>
                                         @foreach ($customers as $customer)
                                             <option value="{{ $customer->id }}"
                                                     data-phone="{{ $customer->mobile_phone ?? '' }}"
@@ -183,7 +183,7 @@
                                 <div class="col-lg-8">
                                     <input type="date" name="date"
                                            class="form-control form-control-lg form-control-solid"
-                                           value="{{ isset($order) ? $order->date : old('date', request('date')) }}">
+                                           value="{{ isset($order) ? $order->date : isset($scheduledDate) ? $scheduledDate : old('date', request('date')) }}">
                                 </div>
                             </div>
 

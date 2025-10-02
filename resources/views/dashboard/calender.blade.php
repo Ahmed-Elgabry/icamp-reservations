@@ -1,5 +1,5 @@
 @extends('dashboard.layouts.app')
-@section('pageTitle' , __('dashboard.Calender'))
+@section('pageTitle' , __('dashboard.calender'))
 @section('content')
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-xxl">
@@ -82,6 +82,21 @@
         text-align: right;
         width: 100%;
     }
+    .fc .fc-col-header-cell .fc-col-header-cell-cushion { 
+        color: white !important; 
+    } 
+    table thead tr { 
+        background: linear-gradient(135deg, #ba7321 0%, #b16e17ff 100%) !important ; 
+        box-shadow : none !important; 
+    }
+        table tbody tr:hover {
+        background-color: unset;
+    }
+    table tbody tr td:hover {
+			background-color: #e3f2fd !important;
+			transition: background-color 0.2s ease-in-out !important;
+	}
+
 </style>
 @endsection
 
@@ -137,10 +152,10 @@
                 }
             },
             @can('scheduling.create')
-            dateClick: function (info) {
-                window.location.href = `{{ route('orders.create') }}?date=${info.dateStr}`;
-            }
-                @endcan
+                dateClick: function (info) {
+                    window.location.href = `{{ route('orders.create') }}?scheduledDate=${info.dateStr}`;
+                }
+            @endcan
         });
         calendar.render();
     });

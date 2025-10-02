@@ -168,7 +168,21 @@ class StockController extends Controller
     {
         // $this->authorize('view', $stock);
 
-        $transactions = $stock->stockAdjustments()->where('verified', true)->orderBy('created_at', 'desc')->paginate(10);
+        // Get verified stock adjustments
+        $stockAdjustments = $stock->stockAdjustments()
+            ->where('verified', true)
+            ->get();
+            
+        // Get verified warehouse sale transactions
+        $warehouseSales = $stock->transactions()
+            ->where('source', 'warehouse_sale')
+            ->where('verified', true)
+            ->get();
+            
+        // Merge and sort the collections
+        $transactions = $stockAdjustments->merge($warehouseSales)
+            ->sortByDesc('created_at')
+            ->paginate(10);
 
         return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
     }

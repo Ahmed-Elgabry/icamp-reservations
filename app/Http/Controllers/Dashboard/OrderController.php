@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Mail\OrderDocumentsMail;
 use App\Models\Notice;
-use App\Models\Payment;
 use App\Services\WhatsAppService;
 use App\Models\WhatsappMessageTemplate;
 use App\Models\ServiceSiteAndCustomerService;
 use DB;
 use Endroid\QrCode\Color\Color;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Mpdf\Mpdf;
@@ -36,7 +37,6 @@ use App\Models\OrderItem;
 use App\Models\OrderInternalNote;
 use App\Repositories\IUserRepository;
 use App\Repositories\IOrderRepository;
-use Illuminate\Support\Facades\Storage;
 use App\Repositories\ICategoryRepository;
 use Illuminate\Support\Facades\DB as FacadesDB;
 use App\Models\Transaction;
@@ -117,10 +117,11 @@ class OrderController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', Order::class);
-
+        $scheduledDate = $request->query('scheduledDate');
+        $request->query->replace([]);
         $customers = Customer::select('id', 'name')->get();
         $services = Service::select('id', 'name', 'price')->get();
 
@@ -130,6 +131,7 @@ class OrderController extends Controller
             'customers' => $customers,
             'services' => $services,
             'internalNotes' => $internalNotes, 
+            'scheduledDate' => $scheduledDate,
         ]);
     }
 
@@ -1382,7 +1384,6 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'فشل في إرسال البريد الإلكتروني: ' . $e->getMessage()], 500);
         }
     }
-
     // Add WhatsApp sending method
     public function sendWhatsApp(Request $request, $id)
     {
