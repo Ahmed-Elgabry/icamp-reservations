@@ -90,13 +90,18 @@
         box-shadow : none !important; 
     }
         table tbody tr:hover {
-        background-color: unset unset !important;
+        background-color: unset  !important;
+    }
+    table tbody tr {
+        background-color: unset  !important;
     }
     table tbody tr td:hover {
 			background-color: #e3f2fd !important;
 			transition: background-color 0.2s ease-in-out !important;
 	}
-
+    table tbody tr:nth-child(even) {
+			background-color: unset !important;
+		}
 </style>
 @endsection
 
