@@ -95,10 +95,7 @@
     table tbody tr {
         background-color: unset  !important;
     }
-    table tbody tr td:hover {
-			background-color: #e3f2fd !important;
-			transition: background-color 0.2s ease-in-out !important;
-	}
+    /* Hover effect removed - now handled by jQuery */
     table tbody tr:nth-child(even) {
 			background-color: unset !important;
 		}
@@ -108,6 +105,19 @@
 @section('scripts')
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 <script>
+    $(document).ready(function() {
+        $('table tbody td').hover(
+            function() {
+                $(this).css({
+                    'background-color': '#e3f2fd',
+                    'transition': 'background-color 0.2s ease-in-out'
+                });
+            },
+            function() {
+                $(this).css('background-color', '');
+            }
+        );
+    });
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
