@@ -168,21 +168,36 @@ class StockController extends Controller
     {
         // $this->authorize('view', $stock);
 
-        // Get verified stock adjustments
+        // Get verified stock adjustments with pagination
         $stockAdjustments = $stock->stockAdjustments()
             ->where('verified', true)
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
             
-        // Get verified warehouse sale transactions
+        // Get verified warehouse sale transactions with pagination
         $warehouseSales = $stock->transactions()
             ->where('source', 'warehouse_sale')
             ->where('verified', true)
-            ->get();
-            
-        // Merge and sort the collections
-        $transactions = $stockAdjustments->merge($warehouseSales)
-            ->sortByDesc('created_at')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        // Since we can't merge paginators, we'll need to fetch all results and create our own paginator
+        $page = request()->get('page', 1);
+        $perPage = 10;
+        
+        // Get all results from both queries
+        $allResults = $stockAdjustments->merge($warehouseSales)
+            ->sortByDesc('created_at')
+            ->values();
+            
+        // Create a custom paginator
+        $transactions = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allResults->forPage($page, $perPage),
+            $allResults->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         return view('dashboard.stocks.stockReport', compact('stock', 'transactions'));
     }
