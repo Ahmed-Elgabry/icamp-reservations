@@ -117,18 +117,16 @@ class WarehousesalesController extends Controller
                 "stock_id" => $data['stock_id'],
                 'verified' => 0
             ]);
-          StockAdjustment::create([
-                'available_quantity_before' => $stock->quantity,
-                'available_quantity_after' => $stock->quantity - $data['quantity'],
+            $stockAdjustment = StockAdjustment::where('order_item_id', $item->id)->first();
+            $stockAdjustment->update([
+                'available_quantity_after' => $stockAdjustment->available_quantity_before - $data['quantity'],
                 'stock_id' => $data['stock_id'],
                 'quantity' => isset($data['quantity']) ? $data['quantity'] : null,
-                'order_item_id' => $orderItem->id,
+                'order_item_id' => $item->id,
                 "reason" => "for_warehouse_sale",
                 'type' => 'item_decrement',
-                'order_id' => $data['order_id'],
                 'source' => 'Warehouse Sale',
-                'percentage' => isset($stock->percentage) ? $stock->percentage - $data['quantity'] : null,
-                'available_percentage_before' => $stock->percentage,
+                'percentage' => isset($stock->percentage) ? $stockAdjustment->available_percentage_before - $data['quantity'] : null,
                 'verified' => 0,
                 'date_time' => now(),
                 'employee_name' => auth()->user()->name ?? null,
