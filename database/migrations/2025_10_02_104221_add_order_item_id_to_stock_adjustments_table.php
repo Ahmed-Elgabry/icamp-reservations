@@ -14,6 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('stock_adjustments', function (Blueprint $table) {
+            $table->engine = "InnoDB";
             $table->unsignedBigInteger('order_item_id')->nullable();
             $table->foreign('order_item_id')->references('id')->on('order_items')->onDelete('cascade');
         });
