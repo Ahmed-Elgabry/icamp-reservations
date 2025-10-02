@@ -1500,6 +1500,7 @@ return [
             'else' => 'نور',
             'non-consumption' => 'نه کارول',
             'stockTaking' => 'د ذخیرو شمیرل',
+        "for_warehouse_sale" => "د زيرمتون پلورل"
         ],
     ],
 
@@ -1553,6 +1554,7 @@ return [
             'else' => 'نور',
             'non-consumption' => 'نه کارول',
             'stockTaking' => 'د ذخیرو شمیرل',
+        "for_warehouse_sale" => "د زيرمتون پلورل"
         ],
     ],
     "image_preview" => "د انځور لیدنه",
