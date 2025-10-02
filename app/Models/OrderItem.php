@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class OrderItem extends Model
 {
     protected $guarded = [];
@@ -28,4 +27,5 @@ class OrderItem extends Model
     public function stock() { return $this->belongsTo(Stock::class); }
     public function account() { return $this->belongsTo(BankAccount::class, 'account_id'); }
     public function handledBy() { return $this->belongsTo(User::class, 'handled_by'); }
+    public function stockAdjustment() { return $this->hasOne(StockAdjustment::class, 'order_item_id'); }
 }

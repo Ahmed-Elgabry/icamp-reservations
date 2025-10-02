@@ -1032,6 +1032,7 @@ class OrderController extends Controller
             } elseif ($type == 'warehouse_sales') {
                 $item = OrderItem::findOrFail($id);
                 $transaction = Transaction::where('order_item_id', $item->id)->first();
+                $stockAdjustment = $item->stockAdjustment();
             } else {
                 return redirect()->back()->with('error', __('dashboard.invalid_type'));
             }
@@ -1040,6 +1041,9 @@ class OrderController extends Controller
             $item->update(["verified" => $newVerifiedStatus]);
             if (isset($transaction)) {
                 $transaction->update(["verified" => $newVerifiedStatus]);
+            }
+            if (isset($stockAdjustment)) {
+                $stockAdjustment->update(["verified" => $newVerifiedStatus]);
             }
             // Fire event so bank balance is adjusted by listener
             event(new \App\Events\VerificationStatusChanged(match ($type) {

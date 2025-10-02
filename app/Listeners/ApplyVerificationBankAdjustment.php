@@ -81,6 +81,7 @@ class ApplyVerificationBankAdjustment
                         throw new \Exception(__('dashboard.insufficient_stock'));
                     }
                    $item->stock()->decrement('quantity', $item->quantity);
+                   
                 } else {
                    $item->stock()->increment('quantity', $item->quantity);
                 }

@@ -27,6 +27,7 @@ class StockAdjustment extends Model
         'image',
         'employee_name',
         'date_time',
+        'order_item_id',
     ];
 
     protected $casts = [

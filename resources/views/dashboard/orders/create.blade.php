@@ -177,13 +177,22 @@
                                     <textarea id="internalNoteField" name="notes" class="form-control d-none form-control-lg form-control-solid" placeholder="@lang('dashboard.notes')">{{ isset($order) ? $order->notes : old('notes', request('notes')) }}</textarea>
                                 </div>
                             </div>
-
+                            @php 
+                            
+                            $date = old('date', request('date'));
+                            if (isset($scheduledDate)) {
+                                $date = $scheduledDate;
+                            }
+                            if (isset($order)) {
+                                $date = $order->date;
+                            }
+                            @endphp
                             <div class="row mb-6">
                                 <label class="col-lg-4 col-form-label fw-bold fs-6">@lang('dashboard.booking_date')</label>
                                 <div class="col-lg-8">
                                     <input type="date" name="date"
                                            class="form-control form-control-lg form-control-solid"
-                                           value="{{ isset($order) ? $order->date : isset($scheduledDate) ? $scheduledDate : old('date', request('date')) }}">
+                                           value="{{ $date }}">
                                 </div>
                             </div>
 
