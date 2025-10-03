@@ -809,10 +809,18 @@ public function updatesignin(Request $request, $id)
 
     $request->validate([
         'time_of_receipt_notes' => 'nullable|string',
-        'image_before_receiving' => 'nullable|file|mimes:jpg,jpeg,png',
-        'voice_note'             => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a',
-        'video_note'             => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv',
+    
+        // الصور (أشهر الصيغ)
+        'image_before_receiving' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,bmp,tiff',
+    
+        // الصوت (توسيع يشمل iOS/Android/Safari)
+        'voice_note' => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a,mp4,3gp,amr',
+    
+        // الفيديو (يغطي أغلب الصيغ المستعملة)
+        'video_note' => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv,3gp,mpeg,mpg,wmv',
     ]);
+    
+    
 
     // هنا الشرط على الوقت
 if ($order->time_of_receipt) {
@@ -848,10 +856,18 @@ public function updatesignout(Request $request, $id)
 
     $request->validate([
         'delivery_time_notes'  => 'nullable|string',
-        'image_after_delivery' => 'nullable|file|mimes:jpg,jpeg,png',
-        'voice_note_logout'    => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a',
-        'video_note_logout'    => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv',
+    
+        // الصور (كل الامتدادات المنتشرة)
+        'image_after_delivery' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,bmp,tiff',
+    
+        // الصوت (توسيع النطاق)
+        'voice_note_logout'    => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a,mp4,3gp,amr',
+    
+        // الفيديو (توسيع النطاق)
+        'video_note_logout'    => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv,3gp,mpeg,mpg',
     ]);
+    
+    
 
         // هنا الشرط على الوقت
 if ($order->time_of_receipt) {
