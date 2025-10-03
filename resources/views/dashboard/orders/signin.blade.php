@@ -3,437 +3,353 @@
 @section('content')
 @include('dashboard.orders.nav')
 
-    <div class="card mb-5 mb-xl-10">
+<div class="card mb-5 mb-xl-10">
+    <form method="POST" id="media-form" action="{{ route('orders.updatesignin', $order->id) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
-            <form method="POST" id ="kt_ecommerce_add_product_form" action="{{ route('orders.updatesignin', $order->id)}}" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="order_id" value="{{ $order->id }}">
-                
-                <div class="mb-8">
-                      <!--begin::Category-->
-            <div class="card card-flush">
-                <div class="pt-5 px-9 gap-2 gap-md-5">
-                    <div class="row g-3 small">
-                        <div class="col-md-1 text-center">
-                            <div class="fw-semibold text-muted">{{ __('dashboard.order_id') }}</div>
-                            <div class="fw-bold">{{ $order->id }}</div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <div class="fw-semibold text-muted">{{ __('dashboard.customer_name') }}</div>
-                            <div class="fw-bold">{{ $order->customer->name }}</div>
-                        </div>
-                    </div>
-                </div>
-                <!--begin::Card header-->
-                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-                    <!--begin::Card title-->
-                    {{ __('dashboard.edit_time_and_image') }}
-                </div>
-                <!--end::Card header-->
-                <!--begin::Card body-->
-                <div class="card-body pt-0">
-                        <div class="form-group">
-                            <label for="delivery_time">{{ __('dashboard.delivery_time') }}</label>
-                            <input type="time" name="delivery_time" id="delivery_time" class="form-control"
-                                value="{{ old('delivery_time', $order->delivery_time) }}">
-                        </div>
-                        
-                        <div class="form-group mt-5">
-                            <label for="delivery_time_notes">{{ __('dashboard.delivery_time_notes') }}</label>
-                            <textarea name="delivery_time_notes" id="delivery_time_notes"
-                                class="form-control">{{ old('delivery_time_notes', $order->delivery_time_notes) }}</textarea>
-                        </div>
-                </div>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">@lang('dashboard.photo_attachment')</label>
-                            <div class="media-upload-container" data-type="photo">
-                                <div class="delete-flags-container"></div>
-                                <div class="preview-image-container mb-2" style="display: none;">
-                                    <img src="" class="preview-image img-thumbnail" style="max-width: 100%;">
-                                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
-                                        <i class="bi bi-trash"></i> Remove
-                                    </button>
-                                </div>
-                                <div class="btn-group w-100">
-                                    <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="photo">
-                                        <i class="bi bi-camera"></i> Capture
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-secondary upload-media">
-                                        <i class="bi bi-upload"></i> Upload
-                                    </button>
-                                </div>
-                                <input type="file" name="photo" class="media-input d-none" accept="image/*">
-                                <input type="hidden" name="photo_data" class="media-data">
-                                <input type="hidden" name="remove_photo" value="0" class="remove-flag">
-                            </div>
-                        </div>
+        <!--begin::Card header-->
+        <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+            {{ __('dashboard.edit_time_and_media') }}
+        </div>
+        <!--end::Card header-->
 
-                        <div class="col-md-4">
-                            <label class="form-label">@lang('dashboard.audio_attachment')</label>
-                            <div class="media-upload-container" data-type="audio">
-                                <div class="delete-flags-container"></div>
-                                <div class="preview-audio-container mb-2" style="display: none;">
-                                    <audio controls class="preview-audio w-100">
-                                        <source src="">
-                                    </audio>
-                                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
-                                        <i class="bi bi-trash"></i> Remove
-                                    </button>
-                                </div>
-                                <div class="btn-group w-100">
-                                    <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="audio">
-                                        <i class="bi bi-mic"></i> Record
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-secondary upload-media">
-                                        <i class="bi bi-upload"></i> Upload
-                                    </button>
-                                </div>
-                                <input type="file" name="audio" class="media-input d-none" accept="audio/*">
-                                <input type="hidden" name="audio_data" class="media-data">
-                                <input type="hidden" name="remove_audio" value="0" class="remove-flag">
-                            </div>
-                        </div>
+        <!--begin::Card body-->
+        <div class="card-body pt-0">
+            <div class="form-group mb-4">
+                <label for="time_of_receipt">{{ __('dashboard.signin_time') }}</label>
+                <input type="time" name="time_of_receipt" id="time_of_receipt" class="form-control"
+                       value="{{ old('time_of_receipt', $order->time_of_receipt) }}">
+            </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label">@lang('dashboard.video_attachment')</label>
-                            <div class="media-upload-container" data-type="video">
-                                <div class="delete-flags-container"></div>
-                                <div class="preview-video-container mb-2" style="display: none;">
-                                    <video controls class="preview-video w-100">
-                                        <source src="">
-                                    </video>
-                                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-media">
-                                        <i class="bi bi-trash"></i> Remove
-                                    </button>
-                                </div>
-                                <div class="btn-group w-100">
-                                    <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="video">
-                                        <i class="bi bi-camera-video"></i> Record
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-secondary upload-media">
-                                        <i class="bi bi-upload"></i> Upload
-                                    </button>
-                                </div>
-                                <input type="file" name="video" class="media-input d-none" accept="video/*">
-                                <input type="hidden" name="video_data" class="media-data">
-                                <input type="hidden" name="remove_video" value="0" class="remove-flag">
-                            </div>
+            <div class="form-group mb-5">
+                <label for="time_of_receipt_notes">{{ __('dashboard.receiving_time_notes') }}</label>
+                <textarea name="time_of_receipt_notes" id="time_of_receipt_notes" class="form-control"
+                >{{ old('time_of_receipt_notes', $order->time_of_receipt_notes) }}</textarea>
+            </div>
+
+            <div class="row g-3">
+                <!-- PHOTO (before receiving) -->
+                <div class="col-md-4">
+                    <label class="form-label">📷 @lang('dashboard.photo_attachment')</label>
+                    <div class="media-upload-container" data-type="photo">
+                        <div class="preview-image-container mb-2" style="{{ $order->image_before_receiving_url ? '' : 'display:none;' }}">
+                            @if($order->image_before_receiving_url)
+                                <img src="{{ $order->image_before_receiving_url }}" class="preview-image img-thumbnail" style="max-width: 100%;">
+                            @endif
+                            <button type="button" class="btn btn-sm btn-danger mt-2 remove-media w-100">
+                                <i class="bi bi-trash"></i> {{ __('dashboard.remove') }}
+                            </button>
                         </div>
+                        <div class="btn-group w-100">
+                            <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="photo">
+                                <i class="bi bi-camera"></i> {{ __('dashboard.capture_photo') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-secondary upload-media">
+                                <i class="bi bi-upload"></i> {{ __('dashboard.upload') }}
+                            </button>
+                        </div>
+                        <input type="file" name="image_before_receiving" class="media-input d-none" accept="image/*">
+                        <input type="hidden" name="remove_photo" value="0" class="remove-flag">
                     </div>
                 </div>
 
-                <div class="card-footer d-flex justify-content-end py-6 px-9">
-                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-light me-2">
-                        @lang('dashboard.cancel')
-                    </a>
-                            <button type="submit" id="kt_ecommerce_add_product_submit"
-                                class="btn btn-primary">{{ __('dashboard.save_changes') }}</button>
+                <!-- AUDIO (signin) -->
+                <div class="col-md-4">
+                    <label class="form-label">🎵 @lang('dashboard.audio_attachment')</label>
+                    <div class="media-upload-container" data-type="audio">
+                        <div class="preview-audio-container mb-2" style="{{ $order->voice_note_url ? '' : 'display:none;' }}">
+                            @if($order->voice_note_url)
+                                <audio controls class="preview-audio w-100">
+                                    <source src="{{ $order->voice_note_url }}">
+                                </audio>
+                            @endif
+                            <button type="button" class="btn btn-sm btn-danger mt-2 remove-media w-100">
+                                <i class="bi bi-trash"></i> {{ __('dashboard.remove') }}
+                            </button>
+                        </div>
+                        <div class="btn-group w-100">
+                            <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="audio">
+                                <i class="bi bi-mic"></i> {{ __('dashboard.record') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-secondary upload-media">
+                                <i class="bi bi-upload"></i> {{ __('dashboard.upload') }}
+                            </button>
+                        </div>
+                        <input type="file" name="voice_note" class="media-input d-none" accept="audio/*">
+                        <input type="hidden" name="remove_audio" value="0" class="remove-flag">
+                    </div>
                 </div>
-            </form>
-    </div>
 
+                <!-- VIDEO (signin) -->
+                <div class="col-md-4">
+                    <label class="form-label">🎬 @lang('dashboard.video_attachment')</label>
+                    <div class="media-upload-container" data-type="video">
+                        <div class="preview-video-container mb-2" style="{{ $order->video_note_url ? '' : 'display:none;' }}">
+                            @if($order->video_note_url)
+                                <video controls class="preview-video w-100" height="240">
+                                    <source src="{{ $order->video_note_url }}">
+                                </video>
+                            @endif
+                            <button type="button" class="btn btn-sm btn-danger mt-2 remove-media w-100">
+                                <i class="bi bi-trash"></i> {{ __('dashboard.remove') }}
+                            </button>
+                        </div>
+                        <div class="btn-group w-100">
+                            <button type="button" class="btn btn-sm btn-primary capture-media" data-media-type="video">
+                                <i class="bi bi-camera-video"></i> {{ __('dashboard.record_video') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-secondary upload-media">
+                                <i class="bi bi-upload"></i> {{ __('dashboard.upload') }}
+                            </button>
+                        </div>
+                        <input type="file" name="video_note" class="media-input d-none" accept="video/*">
+                        <input type="hidden" name="remove_video" value="0" class="remove-flag">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end::Card body-->
+
+        <div class="card-footer d-flex justify-content-end py-6 px-9">
+            <a href="{{ route('orders.show', $order->id) }}" class="btn btn-light me-2">⬅ {{ __('dashboard.cancel') }}</a>
+            <button type="submit" id="submit-btn" class="btn btn-success">💾 {{ __('dashboard.save_changes') }}</button>
+        </div>
+    </form>
+</div>
 @endsection
+
 @push('js')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let isSubmitting = false;
-            
-            function initializeMediaHandlers() {
-                const mediaContainers = {
-                    photo: {
-                        input: document.querySelector('[data-type="photo"] .media-input'),
-                        previewContainer: document.querySelector('[data-type="photo"] .preview-image-container'),
-                        preview: document.querySelector('[data-type="photo"] .preview-image'),
-                        captureBtn: document.querySelector('[data-type="photo"] .capture-media'),
-                        uploadBtn: document.querySelector('[data-type="photo"] .upload-media'),
-                        removeFlag: document.querySelector('[data-type="photo"] .remove-flag'),
-                        container: document.querySelector('[data-type="photo"]')
-                    },
-                    audio: {
-                        input: document.querySelector('[data-type="audio"] .media-input'),
-                        previewContainer: document.querySelector('[data-type="audio"] .preview-audio-container'),
-                        preview: document.querySelector('[data-type="audio"] .preview-audio source'),
-                        captureBtn: document.querySelector('[data-type="audio"] .capture-media'),
-                        uploadBtn: document.querySelector('[data-type="audio"] .upload-media'),
-                        removeFlag: document.querySelector('[data-type="audio"] .remove-flag'),
-                        container: document.querySelector('[data-type="audio"]')
-                    },
-                    video: {
-                        input: document.querySelector('[data-type="video"] .media-input'),
-                        previewContainer: document.querySelector('[data-type="video"] .preview-video-container'),
-                        preview: document.querySelector('[data-type="video"] .preview-video source'),
-                        captureBtn: document.querySelector('[data-type="video"] .capture-media'),
-                        uploadBtn: document.querySelector('[data-type="video"] .upload-media'),
-                        removeFlag: document.querySelector('[data-type="video"] .remove-flag'),
-                        container: document.querySelector('[data-type="video"]')
-                    }
-                };
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let isSubmitting = false;
 
-                // Initialize all media types
-                Object.keys(mediaContainers).forEach(type => {
-                    const container = mediaContainers[type];
-                    if (!container.input) return;
+    function initializeMediaHandlers() {
+        const mediaContainers = {
+            photo: {
+                input: document.querySelector('[data-type="photo"] .media-input'),
+                previewContainer: document.querySelector('[data-type="photo"] .preview-image-container'),
+                captureBtn: document.querySelector('[data-type="photo"] .capture-media'),
+                uploadBtn: document.querySelector('[data-type="photo"] .upload-media'),
+                removeFlag: document.querySelector('[data-type="photo"] .remove-flag'),
+                container: document.querySelector('[data-type="photo"]')
+            },
+            audio: {
+                input: document.querySelector('[data-type="audio"] .media-input'),
+                previewContainer: document.querySelector('[data-type="audio"] .preview-audio-container'),
+                captureBtn: document.querySelector('[data-type="audio"] .capture-media'),
+                uploadBtn: document.querySelector('[data-type="audio"] .upload-media'),
+                removeFlag: document.querySelector('[data-type="audio"] .remove-flag'),
+                container: document.querySelector('[data-type="audio"]')
+            },
+            video: {
+                input: document.querySelector('[data-type="video"] .media-input'),
+                previewContainer: document.querySelector('[data-type="video"] .preview-video-container'),
+                captureBtn: document.querySelector('[data-type="video"] .capture-media'),
+                uploadBtn: document.querySelector('[data-type="video"] .upload-media'),
+                removeFlag: document.querySelector('[data-type="video"] .remove-flag'),
+                container: document.querySelector('[data-type="video"]')
+            }
+        };
 
-                    // Handle upload button click
-                    if (container.uploadBtn) {
-                        container.uploadBtn.addEventListener('click', function() {
-                            container.input.click();
-                        });
-                    }
+        Object.keys(mediaContainers).forEach(type => {
+            const container = mediaContainers[type];
+            if (!container.input) return;
 
-                    // Handle file selection
-                    container.input.addEventListener('change', function(e) {
-                        handleFileUpload(e, type, container);
-                    });
+            if (container.uploadBtn) {
+                container.uploadBtn.addEventListener('click', () => container.input.click());
+            }
 
-                    // Handle capture/record button click
-                    if (container.captureBtn) {
-                        container.captureBtn.addEventListener('click', function() {
-                            if (type === 'photo') {
-                                capturePhoto(container);
-                            } else {
-                                toggleMediaRecording(type, container);
-                            }
-                        });
-                    }
+            container.input.addEventListener('change', e => handleFileUpload(e, type, container));
 
-                    // Handle existing remove media buttons
-                    const existingRemoveBtn = container.previewContainer.querySelector('.remove-media');
-                    if (existingRemoveBtn) {
-                        existingRemoveBtn.addEventListener('click', function() {
-                            clearMediaPreview(type, container);
-                        });
-                    }
+            if (container.captureBtn) {
+                container.captureBtn.addEventListener('click', function() {
+                    if (type === 'photo') startPhotoCapture(container);
+                    else toggleMediaRecording(type, container);
                 });
             }
 
-            initializeMediaHandlers();
-
-            // Handle form submission to prevent double-submit during large file uploads
-            document.getElementById('media-form').addEventListener('submit', function() {
-                if (isSubmitting) {
-                    return false;
-                }
-                isSubmitting = true;
-                const submitBtn = document.getElementById('submit-btn');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
-            });
-
-            function toggleMediaRecording(type, container) {
-                if (container.captureBtn.classList.contains('recording')) {
-                    stopMediaRecording(type, container);
-                    container.captureBtn.classList.remove('recording');
-                    container.captureBtn.innerHTML = `<i class="bi bi-${type === 'audio' ? 'mic' : 'camera-video'}"></i> ${type === 'audio' ? 'Record' : 'Record Video'}`;
-                    container.captureBtn.classList.remove('btn-danger');
-                    container.captureBtn.classList.add('btn-primary');
-                } else {
-                    startMediaRecording(type, container);
-                    container.captureBtn.classList.add('recording');
-                    container.captureBtn.innerHTML = `<i class="bi bi-stop"></i> Stop`;
-                    container.captureBtn.classList.remove('btn-primary');
-                    container.captureBtn.classList.add('btn-danger');
-                }
-            }
-
-            function startMediaRecording(type, container) {
-                const constraints = {
-                    audio: true,
-                    video: type === 'video' ? {
-                        facingMode: 'environment',
-                        width: { ideal: 640 }, // Reduced size to avoid ModSecurity issues
-                        height: { ideal: 480 }
-                    } : false
-                };
-
-                navigator.mediaDevices.getUserMedia(constraints)
-                    .then(function(stream) {
-                        container.mediaStream = stream;
-
-                        if (type === 'video') {
-                            const videoPreview = document.createElement('video');
-                            videoPreview.srcObject = stream;
-                            videoPreview.autoplay = true;
-                            videoPreview.muted = true;
-                            videoPreview.controls = false;
-                            videoPreview.style.width = '100%';
-
-                            container.previewContainer.innerHTML = '';
-                            container.previewContainer.appendChild(videoPreview);
-                            container.previewContainer.style.display = 'block';
-                            container.livePreview = videoPreview;
-                        }
-
-                        // Use more conservative settings to avoid large files
-                        const options = {
-                            audioBitsPerSecond: 64000, // Reduced bitrate
-                            videoBitsPerSecond: type === 'video' ? 1000000 : 0, // Reduced bitrate
-                        };
-
-                        try {
-                            container.mediaRecorder = new MediaRecorder(stream, options);
-                        } catch (e) {
-                            console.warn('Using default media recorder due to:', e);
-                            container.mediaRecorder = new MediaRecorder(stream);
-                        }
-
-                        container.recordedChunks = [];
-
-                        container.mediaRecorder.ondataavailable = function(event) {
-                            if (event.data.size > 0) {
-                                container.recordedChunks.push(event.data);
-                            }
-                        };
-
-                        container.mediaRecorder.onstop = function() {
-                            const blob = new Blob(container.recordedChunks, {
-                                type: container.mediaRecorder.mimeType || (type === 'video' ? 'video/webm' : 'audio/webm')
-                            });
-
-                            if (container.livePreview) {
-                                container.livePreview.srcObject = null;
-                            }
-                            stream.getTracks().forEach(track => track.stop());
-
-                            createMediaPreview(blob, type, container);
-                        };
-
-                        container.mediaRecorder.start(1000); // Collect data every 1 second
-                    })
-                    .catch(function(err) {
-                        console.error('Error accessing media devices:', err);
-                        alert('Could not access media devices: ' + err.message);
-                        resetRecordingButton(type, container);
-                    });
-            }
-
-            function stopMediaRecording(type, container) {
-                if (container.mediaRecorder && container.mediaRecorder.state !== 'inactive') {
-                    container.mediaRecorder.stop();
-                }
-                if (container.mediaStream) {
-                    container.mediaStream.getTracks().forEach(track => track.stop());
-                }
-                if (container.livePreview) {
-                    container.livePreview.srcObject = null;
-                }
-            }
-
-            function resetRecordingButton(type, container) {
-                container.captureBtn.classList.remove('recording', 'btn-danger');
-                container.captureBtn.classList.add('btn-primary');
-                container.captureBtn.innerHTML = `<i class="bi bi-${type === 'audio' ? 'mic' : 'camera-video'}"></i> ${type === 'audio' ? 'Record' : 'Record Video'}`;
-            }
-
-            function capturePhoto(container) {
-                container.input.click();
-            }
-
-            function handleFileUpload(event, type, container) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                createMediaPreview(file, type, container);
-            }
-
-            function createMediaPreview(blob, type, container) {
-                container.previewContainer.innerHTML = '';
-                container.removeFlag.value = '0';
-
-                // Remove existing file input if present
-                const existingInput = container.container.querySelector('input[name^="existing_"]');
-                if (existingInput) {
-                    existingInput.remove();
-                }
-
-                const url = URL.createObjectURL(blob);
-                let mediaElement;
-
-                if (type === 'photo') {
-                    mediaElement = document.createElement('img');
-                    mediaElement.src = url;
-                    mediaElement.className = 'preview-image img-thumbnail';
-                    mediaElement.style.maxWidth = '100%';
-                } else {
-                    mediaElement = document.createElement(type);
-                    mediaElement.controls = true;
-                    mediaElement.className = `preview-${type} w-100`;
-                    mediaElement.src = url;
-                }
-
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'btn btn-sm btn-danger mt-2 remove-media';
-                removeBtn.innerHTML = '<i class="bi bi-trash"></i> Remove';
-                removeBtn.addEventListener('click', function() {
-                    clearMediaPreview(type, container);
-                });
-
-                container.previewContainer.appendChild(mediaElement);
-                container.previewContainer.appendChild(removeBtn);
-                container.previewContainer.style.display = 'block';
-
-                // Handle file assignment
-                if (blob instanceof File) {
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(blob);
-                    container.input.files = dataTransfer.files;
-                } else {
-                    // For recorded media, create a proper file
-                    const fileName = `${type}-${Date.now()}.webm`;
-                    const file = new File([blob], fileName, {
-                        type: blob.type || (type === 'audio' ? 'audio/webm' : 'video/webm'),
-                        lastModified: Date.now()
-                    });
-
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    container.input.files = dataTransfer.files;
-                }
-            }
-
-            function clearMediaPreview(type, container) {
-                container.previewContainer.style.display = 'none';
-                container.previewContainer.innerHTML = '';
-                container.removeFlag.value = '1';
-                container.input.value = '';
-
-                // Remove existing file reference
-                const existingInput = container.container.querySelector('input[name^="existing_"]');
-                if (existingInput) {
-                    existingInput.remove();
-                }
-
-                // Stop any ongoing recording
-                if (container.mediaRecorder && container.mediaRecorder.state !== 'inactive') {
-                    container.mediaRecorder.stop();
-                }
-                if (container.mediaStream) {
-                    container.mediaStream.getTracks().forEach(track => track.stop());
-                }
-
-                resetRecordingButton(type, container);
+            const existingRemoveBtn = container.previewContainer.querySelector('.remove-media');
+            if (existingRemoveBtn) {
+                existingRemoveBtn.addEventListener('click', () => clearMediaPreview(type, container));
             }
         });
-    </script>
+    }
+
+    initializeMediaHandlers();
+
+    document.getElementById('media-form').addEventListener('submit', function() {
+        if (isSubmitting) return false;
+        isSubmitting = true;
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+    });
+
+    function toggleMediaRecording(type, container) {
+        if (container.captureBtn.classList.contains('recording')) {
+            stopMediaRecording(type, container);
+            container.captureBtn.classList.remove('recording', 'btn-danger');
+            container.captureBtn.classList.add('btn-primary');
+            container.captureBtn.innerHTML = `<i class="bi bi-${type === 'audio' ? 'mic' : 'camera-video'}"></i> ${type === 'audio' ? 'Record' : 'Record Video'}`;
+        } else {
+            startMediaRecording(type, container);
+            container.captureBtn.classList.add('recording', 'btn-danger');
+            container.captureBtn.classList.remove('btn-primary');
+            container.captureBtn.innerHTML = `<i class="bi bi-stop"></i> Stop`;
+        }
+    }
+
+    function startMediaRecording(type, container) {
+        const constraints = {
+            audio: true,
+            video: type === 'video' ? { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } } : false
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                container.mediaStream = stream;
+
+                if (type === 'video') {
+                    const videoPreview = document.createElement('video');
+                    videoPreview.srcObject = stream;
+                    videoPreview.autoplay = true;
+                    videoPreview.muted = true;
+                    videoPreview.controls = false;
+                    videoPreview.style.width = '100%';
+
+                    container.previewContainer.innerHTML = '';
+                    container.previewContainer.appendChild(videoPreview);
+                    container.previewContainer.style.display = 'block';
+                    container.livePreview = videoPreview;
+                }
+
+                container.mediaRecorder = new MediaRecorder(stream);
+                container.recordedChunks = [];
+
+                container.mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) container.recordedChunks.push(e.data);
+                };
+
+                container.mediaRecorder.onstop = () => {
+                    const blob = new Blob(container.recordedChunks, { type: container.mediaRecorder.mimeType });
+                    if (container.livePreview) container.livePreview.srcObject = null;
+                    stream.getTracks().forEach(track => track.stop());
+                    createMediaPreview(blob, type, container);
+                };
+
+                container.mediaRecorder.start();
+            })
+            .catch(err => {
+                console.error('Error accessing media devices:', err);
+                alert('Error: ' + err.message);
+            });
+    }
+
+    function stopMediaRecording(type, container) {
+        if (container.mediaRecorder && container.mediaRecorder.state !== 'inactive') container.mediaRecorder.stop();
+        if (container.mediaStream) container.mediaStream.getTracks().forEach(track => track.stop());
+        if (container.livePreview) container.livePreview.srcObject = null;
+    }
+
+    // ✅ NEW: Photo Capture using getUserMedia
+    function startPhotoCapture(container) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                video.style.width = '100%';
+
+                const snapBtn = document.createElement('button');
+                snapBtn.type = 'button';
+                snapBtn.className = 'btn btn-sm btn-success mt-2';
+                snapBtn.innerHTML = '<i class="bi bi-camera"></i> Snap';
+
+                container.previewContainer.innerHTML = '';
+                container.previewContainer.appendChild(video);
+                container.previewContainer.appendChild(snapBtn);
+                container.previewContainer.style.display = 'block';
+
+                snapBtn.addEventListener('click', function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+
+                    stream.getTracks().forEach(track => track.stop());
+
+                    canvas.toBlob(function(blob) {
+                        createMediaPreview(blob, 'photo', container);
+                    }, 'image/png');
+                });
+            })
+            .catch(err => {
+                console.error('Error accessing camera:', err);
+                alert('Error: ' + err.message);
+            });
+    }
+
+    function handleFileUpload(event, type, container) {
+        const file = event.target.files[0];
+        if (file) createMediaPreview(file, type, container);
+    }
+
+    function createMediaPreview(blob, type, container) {
+        container.previewContainer.innerHTML = '';
+        container.removeFlag.value = '0';
+
+        const url = URL.createObjectURL(blob);
+        let mediaElement;
+
+        if (type === 'photo') {
+            mediaElement = document.createElement('img');
+            mediaElement.src = url;
+            mediaElement.className = 'preview-image img-thumbnail';
+            mediaElement.style.maxWidth = '100%';
+        } else {
+            mediaElement = document.createElement(type);
+            mediaElement.controls = true;
+            mediaElement.className = `preview-${type} w-100`;
+            mediaElement.src = url;
+        }
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn btn-sm btn-danger mt-2 remove-media';
+        removeBtn.innerHTML = '<i class="bi bi-trash"></i> Remove';
+        removeBtn.addEventListener('click', () => clearMediaPreview(type, container));
+
+        container.previewContainer.appendChild(mediaElement);
+        container.previewContainer.appendChild(removeBtn);
+        container.previewContainer.style.display = 'block';
+
+        const dataTransfer = new DataTransfer();
+        if (blob instanceof File) {
+            dataTransfer.items.add(blob);
+        } else {
+            const fileName = `${type}-${Date.now()}.${type === 'photo' ? 'png' : 'webm'}`;
+            const file = new File([blob], fileName, { type: blob.type || (type === 'photo' ? 'image/png' : type === 'audio' ? 'audio/webm' : 'video/webm') });
+            dataTransfer.items.add(file);
+        }
+        container.input.files = dataTransfer.files;
+    }
+
+    function clearMediaPreview(type, container) {
+        container.previewContainer.style.display = 'none';
+        container.previewContainer.innerHTML = '';
+        container.removeFlag.value = '1';
+        container.input.value = '';
+        if (container.mediaRecorder) stopMediaRecording(type, container);
+    }
+});
+</script>
 @endpush
 
 @push('css')
-    <style>
-        .media-upload-container {
-            border: 1px dashed #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            background-color: #f9f9f9;
-        }
-        .remove-media {
-            width: 100%;
-        }
-        .spinner-border-sm {
-            width: 1rem;
-            height: 1rem;
-        }
-    </style>
+<style>
+.media-upload-container{border:1px dashed #ddd;border-radius:4px;padding:10px;background-color:#f9f9f9}
+.remove-media{width:100%}
+.spinner-border-sm{width:1rem;height:1rem}
+</style>
 @endpush

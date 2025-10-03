@@ -742,12 +742,11 @@ Route::group(['middleware' => ['auth', 'admin-lang', 'web', 'check-role'], 'name
     ]);
 
     # orders store
-    Route::put('orders/{id}/updatelogout', [
-        'uses' => 'OrderController@updatelogout',
-        'as' => 'orders.updatelogout',
+    Route::put('orders/{id}/updatesignout', [   // 👈 غيّرت من updatelogout إلى updatesignout
+        'uses' => 'OrderController@updatesignout',
+        'as' => 'orders.updatesignout',
         'title' => ['actions.add', 'dashboard.logout']
     ]);
-
 
     # orders store
     Route::get('orders/{id}/insurance', [

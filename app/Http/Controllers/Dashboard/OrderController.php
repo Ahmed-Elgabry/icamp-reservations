@@ -722,11 +722,16 @@ class OrderController extends Controller
         $mpdf->Output('terms.pdf', 'I');
     }
 
+
     public function signin($id)
-    {
-        $order = Order::findOrFail($id);
-        return view('dashboard.orders.signin', compact('order'));
-    }
+{
+    $order = Order::findOrFail($id);
+    return view('dashboard.orders.signin', compact('order'));
+
+}
+
+    
+
 
     public function logout($id)
     {
@@ -795,36 +800,89 @@ class OrderController extends Controller
      * @param  int  $orderId
      * @return \Illuminate\Http\RedirectResponse
      */
- 
+  /**
+ * ✅ Update the sign-in information for an order
+ */
+public function updatesignin(Request $request, $id)
+{
+    $order = Order::findOrFail($id);
 
-    public function updatesignin(UpdateOrderSignInRequest $request, $orderId)
-    {
-        $order = Order::findOrFail($orderId);
-        
-        // Find or create order asset record
-        $orderAsset = OrderAsset::firstOrNew(['order_id' => $order->id]);
-        
-        // Update notes if provided
-        if ($request->filled('notes')) {
-            $orderAsset->notes = $request->notes;
-        }
-        
-        // Save the order asset to get an ID before handling file uploads
-        $orderAsset->save();
-        
-        // Handle file uploads and removals
-        $this->handleItemAttachments($request, $orderAsset);
-        
-        // Update order details
-        $order->update([
-            'time_of_receipt' => $request->time_of_receipt ?: $order->time_of_receipt,
-            'time_of_receipt_notes' => $request->time_of_receipt_notes ?: $order->time_of_receipt_notes,
-            'delivery_time' => $request->delivery_time ?: $order->delivery_time,
-            'delivery_time_notes' => $request->delivery_time_notes ?: $order->delivery_time_notes,
-        ]);
+    $request->validate([
+        'time_of_receipt_notes' => 'nullable|string',
+        'image_before_receiving' => 'nullable|file|mimes:jpg,jpeg,png',
+        'voice_note'             => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a',
+        'video_note'             => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv',
+    ]);
 
-        return redirect()->back()->with('success', __('dashboard.success'));
-    }
+    // هنا الشرط على الوقت
+if ($order->time_of_receipt) {
+    // موجود مسبقا → فقط تأكد من صيغة الوقت لو أُرسل
+    $rules['time_of_receipt'] = ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'];
+} else {
+    // غير موجود → مطلوب إدخاله
+    $rules['time_of_receipt'] = ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'];
+
+}
+
+$request->validate($rules);
+
+    // تحديث الحقول النصية
+    $order->update([
+        'time_of_receipt'       => $request->time_of_receipt,
+        'time_of_receipt_notes' => $request->time_of_receipt_notes,
+    ]);
+
+    // رفع/حذف الملفات
+    $this->handleSigninAttachments($request, $order);
+
+    return redirect()->back()->with('success', __('dashboard.success'));
+}
+
+
+/**
+ * ✅ Update the sign-out information for an order
+ */
+public function updatesignout(Request $request, $id)
+{
+    $order = Order::findOrFail($id);
+
+    $request->validate([
+        'delivery_time_notes'  => 'nullable|string',
+        'image_after_delivery' => 'nullable|file|mimes:jpg,jpeg,png',
+        'voice_note_logout'    => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a',
+        'video_note_logout'    => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv',
+    ]);
+
+        // هنا الشرط على الوقت
+if ($order->time_of_receipt) {
+    // موجود مسبقا → فقط تأكد من صيغة الوقت لو أُرسل
+    $rules['delivery_time'] = ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'];
+} else {
+    // غير موجود → مطلوب إدخاله
+    $rules['delivery_time'] = ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'];
+}
+
+$request->validate($rules);
+
+
+
+    // تحديث الحقول النصية
+    $order->update([
+        'delivery_time'       => $request->delivery_time,
+        'delivery_time_notes' => $request->delivery_time_notes,
+    ]);
+
+    // رفع/حذف الملفات
+    $this->handleSignoutAttachments($request, $order);
+
+    return redirect()->back()->with('success', __('dashboard.success'));
+}
+
+
+    
+
+
+     
     /**
      * Handle file uploads and deletions for order item attachments
      *
@@ -836,39 +894,33 @@ class OrderController extends Controller
      * @param string $storagePath Storage path for the file
      * @return void
      */
-    protected function handleFileUpload($request, &$orderAsset, $type, $fileInputName, $pathColumn, $storagePath)
-    {
-        // Handle file upload
-        if ($request->hasFile($fileInputName)) {
-            // Delete old file if exists
-            if ($orderAsset->$pathColumn) {
-                Storage::disk('public')->delete($orderAsset->$pathColumn);
-            }
-            
-            try {
-                // Store new file
-                $path = $request->file($fileInputName)->store($storagePath, 'public');
-                $orderAsset->$pathColumn = $path;
-                $orderAsset->save();
-            } catch (\Exception $e) {
-                \Log::error('File upload failed: ' . $e->getMessage());
-                throw $e;
-            }
-        } 
-        // Handle file removal
-        elseif ($request->boolean('remove_' . $fileInputName)) {
-            if ($orderAsset->$pathColumn) {
-                try {
-                    Storage::disk('public')->delete($orderAsset->$pathColumn);
-                    $orderAsset->$pathColumn = null;
-                    $orderAsset->save();
-                } catch (\Exception $e) {
-                    \Log::error('File deletion failed: ' . $e->getMessage());
-                    // Continue even if deletion fails to prevent the whole operation from failing
-                }
-            }
-        }
-    }
+
+     protected function handleFileUpload($request, $order, $inputName, $removeFlag, $column, $path)
+     {
+         // ✅ حذف الملف
+         if ($request->input("remove_{$removeFlag}") == "1") {
+             if ($order->$column) {
+                 Storage::disk('hetzner')->delete($order->$column);
+             }
+             $order->$column = null;
+         }
+     
+         // ✅ رفع جديد
+         if ($request->hasFile($inputName)) {
+             if ($order->$column) {
+                 Storage::disk('hetzner')->delete($order->$column);
+             }
+             $order->$column = $request->file($inputName)->store($path, 'hetzner');
+         }
+     
+         $order->save();
+     }
+     
+
+
+
+    
+
 
     /**
      * Handle all order item attachments (video, audio, photo)
@@ -877,38 +929,37 @@ class OrderController extends Controller
      * @param \App\Models\OrderAsset $orderAsset
      * @return void
      */
-    protected function handleItemAttachments($request, $orderAsset)
+    protected function handleSigninAttachments($request, $order)
     {
-        // Handle video upload/removal
-        $this->handleFileUpload(
-            $request,
-            $orderAsset,
-            'video',
-            'video',
-            'video_path',
-            'camp-reports'
-        );
-
-        // Handle audio upload/removal
-        $this->handleFileUpload(
-            $request,
-            $orderAsset,
-            'audio',
-            'audio',
-            'audio_path',
-            'orders/audios'
-        );
-
-        // Handle photo upload/removal
-        $this->handleFileUpload(
-            $request,
-            $orderAsset,
-            'photo',
-            'photo',
-            'image_path',
-            'orders/photos'
-        );
+        // Video
+        $this->handleFileUpload($request, $order, 'video_note', 'video', 'video_note', 'uploads/signin/videos');
+    
+        // Audio
+        $this->handleFileUpload($request, $order, 'voice_note', 'audio', 'voice_note', 'uploads/signin/audios');
+    
+        // Photo
+        $this->handleFileUpload($request, $order, 'image_before_receiving', 'photo', 'image_before_receiving', 'uploads/signin/images');
     }
+    
+    protected function handleSignoutAttachments($request, $order)
+    {
+        // Video
+        $this->handleFileUpload($request, $order, 'video_note_logout', 'video_logout', 'video_note_logout', 'uploads/signout/videos');
+    
+        // Audio
+        $this->handleFileUpload($request, $order, 'voice_note_logout', 'audio_logout', 'voice_note_logout', 'uploads/signout/audios');
+    
+        // Photo
+        $this->handleFileUpload($request, $order, 'image_after_delivery', 'photo_logout', 'image_after_delivery', 'uploads/signout/images');
+    }
+    
+
+
+    
+
+    
+
+
 
 
     public function uploadTemporaryImage(Request $request)
