@@ -49,7 +49,8 @@
                                 <i class="bi bi-upload"></i> {{ __('dashboard.upload') }}
                             </button>
                         </div>
-                        <input type="file" name="image_after_delivery" class="media-input d-none" accept="image/*">
+                        <!-- 📱 يفتح الكاميرا مباشرة في الهاتف -->
+                        <input type="file" name="image_after_delivery" class="media-input d-none" accept="image/*" capture="environment">
                         <input type="hidden" name="remove_photo_logout" value="0" class="remove-flag">
                     </div>
                 </div>
@@ -160,8 +161,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (container.captureBtn) {
             container.captureBtn.addEventListener('click', function() {
-                if (type === 'photo') capturePhoto(container);
-                else toggleMediaRecording(type, container);
+                if (type === 'photo') {
+                    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                        container.input.click(); // 📱 الهاتف
+                    } else {
+                        startPhotoCapture(container); // 💻 الحاسوب
+                    }
+                } else {
+                    toggleMediaRecording(type, container);
+                }
             });
         }
 
@@ -241,8 +249,42 @@ document.addEventListener('DOMContentLoaded', function() {
         if (container.livePreview) container.livePreview.srcObject = null;
     }
 
-    function capturePhoto(container) {
-        container.input.click();
+    // ✅ NEW: Photo Capture for Desktop
+    function startPhotoCapture(container) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                video.style.width = '100%';
+
+                const snapBtn = document.createElement('button');
+                snapBtn.type = 'button';
+                snapBtn.className = 'btn btn-sm btn-success mt-2';
+                snapBtn.innerHTML = '<i class="bi bi-camera"></i> Snap';
+
+                container.previewContainer.innerHTML = '';
+                container.previewContainer.appendChild(video);
+                container.previewContainer.appendChild(snapBtn);
+                container.previewContainer.style.display = 'block';
+
+                snapBtn.addEventListener('click', function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+
+                    stream.getTracks().forEach(track => track.stop());
+
+                    canvas.toBlob(function(blob) {
+                        createMediaPreview(blob, 'photo', container);
+                    }, 'image/png');
+                });
+            })
+            .catch(err => {
+                console.error('Error accessing camera:', err);
+                alert('Error: ' + err.message);
+            });
     }
 
     function handleFileUpload(event, type, container) {
@@ -283,8 +325,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (blob instanceof File) {
             dataTransfer.items.add(blob);
         } else {
-            const fileName = `${type}-${Date.now()}.webm`;
-            const file = new File([blob], fileName, { type: blob.type || (type === 'audio' ? 'audio/webm' : 'video/webm') });
+            const fileName = `${type}-${Date.now()}.${type === 'photo' ? 'png' : 'webm'}`;
+            const file = new File([blob], fileName, { type: blob.type || (type === 'photo' ? 'image/png' : type === 'audio' ? 'audio/webm' : 'video/webm') });
             dataTransfer.items.add(file);
         }
         container.input.files = dataTransfer.files;

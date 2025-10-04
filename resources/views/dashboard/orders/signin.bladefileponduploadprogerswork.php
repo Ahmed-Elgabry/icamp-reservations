@@ -95,7 +95,7 @@
 
                     <div class="btn-group w-100 mb-2">
                         <button type="button" id="capture-video-btn" class="btn btn-sm btn-primary">
-                            🎥 {{ __('dashboard.start_recording_video') }}
+                            🎥 {{ __('dashboard.capture_video') }}
                         </button>
                     </div>
 
@@ -225,88 +225,60 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
   })();
-// ================== AUDIO ==================
-(function initAudio(){
-  const box = document.querySelector('[data-type="audio"]');
-  if (!box) return;
-  const input = box.querySelector('.media-input');
-  const preview = box.querySelector('.preview-audio-container');
-  const captureBtn = box.querySelector('.capture-media');
-  const uploadBtn = box.querySelector('.upload-media');
-  const removeFlag = box.querySelector('.remove-flag');
-  let recorder=null, chunks=[], indicator=null;
 
-  uploadBtn?.addEventListener('click', ()=> input?.click());
+  // ================== AUDIO ==================
+  (function initAudio(){
+    const box = document.querySelector('[data-type="audio"]');
+    if (!box) return;
+    const input = box.querySelector('.media-input');
+    const preview = box.querySelector('.preview-audio-container');
+    const captureBtn = box.querySelector('.capture-media');
+    const uploadBtn = box.querySelector('.upload-media');
+    const removeFlag = box.querySelector('.remove-flag');
+    let recorder=null, chunks=[];
 
-  captureBtn?.addEventListener('click', async ()=>{
-    if (recorder && recorder.state==='recording'){
-      // إيقاف التسجيل
-      recorder.stop();
-      captureBtn.className='btn btn-sm btn-primary';
-      captureBtn.innerHTML='<i class="bi bi-mic"></i> {{ __("dashboard.record") }}';
-      if(indicator){ indicator.remove(); indicator=null; }
-      return;
-    }
-    try {
-      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      chunks=[];
-      recorder=new MediaRecorder(stream);
-      recorder.ondataavailable=e=>{ if(e.data.size>0) chunks.push(e.data); };
+    uploadBtn?.addEventListener('click', ()=> input?.click());
 
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(chunks, { type: 'audio/webm' });
-        const file = new File([blob], 'audio_' + Date.now() + '.webm', { type: 'audio/webm' });
-        setInputFile(input, file);
-
-        preview.style.display = 'block';
-        preview.innerHTML = '';
-
-        const audio = document.createElement('audio');
-        audio.controls = true;
-        audio.className = 'w-100';
-        audio.src = URL.createObjectURL(file);
-
-        preview.appendChild(audio);
-        removeFlag.value = '0';
-      };
-
-      recorder.start();
-
-      captureBtn.className='btn btn-sm btn-danger';
-      captureBtn.innerHTML='<i class="bi bi-stop"></i> {{ __("dashboard.stop") }}';
-
-      // نخلي preview ظاهر من البداية
-      preview.style.display = 'block';
-      indicator=document.createElement('div');
-      indicator.className='text-danger mt-2 small';
-      indicator.innerText='🔴 Recording...';
-      preview.innerHTML='';
-      preview.appendChild(indicator);
-
-    }catch(e){ alert("Mic error: "+e.message); }
-  });
-
-  input?.addEventListener('change',(e)=>{
-    const f=e.target.files?.[0]; if(!f) return;
-    preview.style.display='block';
-    preview.innerHTML='<audio controls class="w-100" src="'+URL.createObjectURL(f)+'"></audio>';
-    removeFlag.value='0';
-  });
-
-  // زر الحذف
-  const removeBtn = box.querySelector('.remove-media');
-  if(removeBtn){
-    removeBtn.addEventListener('click', ()=>{
-      preview.style.display='none';
-      preview.innerHTML = '';
-      input.value='';
-      removeFlag.value='1';
+    captureBtn?.addEventListener('click', async ()=>{
+      if (recorder && recorder.state==='recording'){
+        recorder.stop();
+        captureBtn.className='btn btn-sm btn-primary';
+        captureBtn.innerHTML='<i class="bi bi-mic"></i> {{ __("dashboard.record") }}';
+        return;
+      }
+      try {
+        const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+        chunks=[];
+        recorder=new MediaRecorder(stream);
+        recorder.ondataavailable=e=>{ if(e.data.size>0) chunks.push(e.data); };
+        recorder.onstop=()=>{
+          stream.getTracks().forEach(t=>t.stop());
+          const blob=new Blob(chunks,{type:'audio/webm'});
+          const file=new File([blob],'audio_'+Date.now()+'.webm',{type:'audio/webm'});
+          setInputFile(input,file);
+          preview.innerHTML='<audio controls class="w-100" src="'+URL.createObjectURL(file)+'"></audio>';
+          removeFlag.value='0';
+        };
+        recorder.start();
+        captureBtn.className='btn btn-sm btn-danger';
+        captureBtn.innerHTML='<i class="bi bi-stop"></i> {{ __("dashboard.stop") }}';
+      }catch(e){ alert("Mic error: "+e.message); }
     });
-  }
-})();
 
+    input?.addEventListener('change',(e)=>{
+      const f=e.target.files?.[0]; if(!f) return;
+      preview.innerHTML='<audio controls class="w-100" src="'+URL.createObjectURL(f)+'"></audio>';
+      removeFlag.value='0';
+    });
 
+    // زر الحذف
+    const removeBtn = box.querySelector('.remove-media');
+    if(removeBtn){
+      removeBtn.addEventListener('click', ()=>{
+        preview.style.display='none'; input.value=''; removeFlag.value='1';
+      });
+    }
+  })();
 
   // ================== VIDEO (FilePond) ==================
   if (window.FilePond) {
@@ -326,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function () {
       allowMultiple:false,
       credits:false,
       acceptedFileTypes:ACCEPTED_VIDEOS,
-      labelIdle:'🎬 {{ __("dashboard.upload") }}',
+      labelIdle:'🎬 {{ __("dashboard.capture_video") }} أو <span class="filepond--label-action">تصفح</span>',
       server:{
         process:(fieldName,file,metadata,load,error,progress,abort)=>{
           let cancelled=false,currentXhr=null,uploadId='',key='';

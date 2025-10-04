@@ -13,6 +13,7 @@ use App\Http\Controllers\Dashboard\MeetingLocationController;
 use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\OrderController as rateOrderController;
 use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\S3MultipartUploadController;
 use App\Http\Controllers\Dashboard\OrderStatusController;
 use App\Http\Controllers\Dashboard\QuestionController;
 use App\Http\Controllers\Dashboard\SurveyController;
@@ -1964,4 +1965,11 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::resource('pages', PageController::class)->except(['show']);
+});
+
+Route::prefix('uploads/multipart')->name('multipart.')->group(function () {
+    Route::post('/create',   [S3MultipartUploadController::class, 'createMultipart'])->name('create');   // multipart.create
+    Route::post('/sign',     [S3MultipartUploadController::class, 'signPart'])->name('sign');           // multipart.sign
+    Route::post('/complete', [S3MultipartUploadController::class, 'completeMultipart'])->name('complete'); // multipart.complete
+    Route::post('/abort',    [S3MultipartUploadController::class, 'abortMultipart'])->name('abort');    // multipart.abort
 });

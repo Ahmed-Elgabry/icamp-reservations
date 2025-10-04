@@ -130,7 +130,7 @@ class OrderController extends Controller
         return view('dashboard.orders.create', [
             'customers' => $customers,
             'services' => $services,
-            'internalNotes' => $internalNotes, 
+            'internalNotes' => $internalNotes,
             'scheduledDate' => $scheduledDate,
         ]);
     }
@@ -144,27 +144,27 @@ class OrderController extends Controller
         ]);
 
         $order = Order::findOrFail($orderId);
-        
+
         // Validate insurance exists
         if ($order->verifiedInsurance()->count() == 0) {
             return redirect()->back()->withErrors(['insurance_amount' => __('dashboard.no_approved_insurance')]);
         }
 
         $originalInsuranceAmount = $order->verifiedInsuranceAmount();
-        
+
         if ($originalInsuranceAmount <= 0) {
             return back()->withErrors(['insurance_amount' => __('dashboard.no_insurance_to_return')]);
         }
-        
+
         // Handle partial confiscation amount validation
         $insuranceAmount = 0;
         if ($validatedData['insurance_status'] === 'confiscated_partial') {
             $insuranceAmount = (float)$request->input('partial_confiscation_amount');
-            
+
             if ($insuranceAmount > $originalInsuranceAmount) {
                 return back()->withErrors(['partial_confiscation_amount' => __('dashboard.confiscation_amount_exceeds_original')]);
             }
-            
+
             if ($insuranceAmount <= 0) {
                 return back()->withErrors(['partial_confiscation_amount' => __('dashboard.enter_valid_confiscation_amount')]);
             }
@@ -172,11 +172,11 @@ class OrderController extends Controller
 
         // Update the order with the new insurance status (not verified yet)
         $this->updateInsuranceStatusAndPrice(
-            $order, 
-            $order->price, 
-            $originalInsuranceAmount, 
-            $validatedData['insurance_status'], 
-            $validatedData['confiscation_description'], 
+            $order,
+            $order->price,
+            $originalInsuranceAmount,
+            $validatedData['insurance_status'],
+            $validatedData['confiscation_description'],
             $insuranceAmount
         );
 
@@ -244,15 +244,15 @@ class OrderController extends Controller
         if ($request->filled('time_from')) {
             $validatedData['time_from'] = Carbon::parse($request->time_from)->format('H:i:s');
         }
-        
+
         if ($request->filled('time_to')) {
             $timeTo = Carbon::parse($request->time_to)->format('H:i:s');
-            
+
             // If time_from is set and time_to is before time_from, set time_to to 24:00:00
             if (isset($validatedData['time_from']) && $validatedData['time_from'] > $timeTo) {
                 $timeTo = '24:00:00';
             }
-            
+
             $validatedData['time_to'] = $timeTo;
         }
 
@@ -575,7 +575,7 @@ class OrderController extends Controller
             'account_id' => 'nullable|exists:bank_accounts,id',
             'payment_method' => 'nullable|string',
             'description' => 'nullable|string',
-        
+
         ]);
 
         // Get the existing addon data to find the transaction
@@ -730,7 +730,7 @@ class OrderController extends Controller
 
 }
 
-    
+
 
 
     public function logout($id)
@@ -792,7 +792,7 @@ class OrderController extends Controller
             'formAction' => route('pages.reservations.board.upcoming'),
         ]);
     }
-    
+
     /**
      * Update the sign-in information for an order
      *
@@ -803,48 +803,58 @@ class OrderController extends Controller
   /**
  * ✅ Update the sign-in information for an order
  */
+/**
+ * ✅ Update the sign-in information for an order
+ */
 public function updatesignin(Request $request, $id)
 {
     $order = Order::findOrFail($id);
 
-    $request->validate([
-        'time_of_receipt_notes' => 'nullable|string',
-    
-        // الصور (أشهر الصيغ)
-        'image_before_receiving' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,bmp,tiff',
-    
-        // الصوت (توسيع يشمل iOS/Android/Safari)
-        'voice_note' => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a,mp4,3gp,amr',
-    
-        // الفيديو (يغطي أغلب الصيغ المستعملة)
-        'video_note' => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv,3gp,mpeg,mpg,wmv',
-    ]);
-    
-    
+    // تحديث وقت الاستلام + ملاحظات
+    $order->time_of_receipt = $request->input('time_of_receipt');
+    $order->time_of_receipt_notes = $request->input('time_of_receipt_notes');
 
-    // هنا الشرط على الوقت
-if ($order->time_of_receipt) {
-    // موجود مسبقا → فقط تأكد من صيغة الوقت لو أُرسل
-    $rules['time_of_receipt'] = ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'];
-} else {
-    // غير موجود → مطلوب إدخاله
-    $rules['time_of_receipt'] = ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'];
+    // ================== PHOTO ==================
+    if ($request->input('remove_photo') == '1' && $order->image_before_receiving) {
+        Storage::disk('hetzner')->delete($order->image_before_receiving);
+        $order->image_before_receiving = null;
+    } elseif ($request->hasFile('image_before_receiving')) {
+        if ($order->image_before_receiving) {
+            Storage::disk('hetzner')->delete($order->image_before_receiving);
+        }
+        $order->image_before_receiving = $request->file('image_before_receiving')
+            ->store('uploads/signin/photos', 'hetzner');
+    }
 
+    // ================== AUDIO ==================
+    if ($request->input('remove_audio') == '1' && $order->voice_note) {
+        Storage::disk('hetzner')->delete($order->voice_note);
+        $order->voice_note = null;
+    } elseif ($request->hasFile('voice_note')) {
+        if ($order->voice_note) {
+            Storage::disk('hetzner')->delete($order->voice_note);
+        }
+        $order->voice_note = $request->file('voice_note')
+            ->store('uploads/signin/audios', 'hetzner');
+    }
+
+    // ================== VIDEO ==================
+    if ($request->input('remove_video') == '1' && $order->video_note_direct_key) {
+        Storage::disk('hetzner')->delete($order->video_note_direct_key);
+        $order->video_note_direct_key = null;
+    } elseif ($request->filled('video_note_direct_key')) {
+        // إذا فيه فيديو جديد جا من FilePond
+        if ($order->video_note_direct_key && $order->video_note_direct_key !== $request->video_note_direct_key) {
+            Storage::disk('hetzner')->delete($order->video_note_direct_key);
+        }
+        $order->video_note_direct_key = $request->video_note_direct_key;
+    }
+
+    $order->save();
+return redirect()->back()->with('success', __('dashboard.success'));
 }
 
-$request->validate($rules);
 
-    // تحديث الحقول النصية
-    $order->update([
-        'time_of_receipt'       => $request->time_of_receipt,
-        'time_of_receipt_notes' => $request->time_of_receipt_notes,
-    ]);
-
-    // رفع/حذف الملفات
-    $this->handleSigninAttachments($request, $order);
-
-    return redirect()->back()->with('success', __('dashboard.success'));
-}
 
 
 /**
@@ -856,18 +866,18 @@ public function updatesignout(Request $request, $id)
 
     $request->validate([
         'delivery_time_notes'  => 'nullable|string',
-    
+
         // الصور (كل الامتدادات المنتشرة)
         'image_after_delivery' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,bmp,tiff',
-    
+
         // الصوت (توسيع النطاق)
         'voice_note_logout'    => 'nullable|file|mimes:mp3,wav,ogg,webm,aac,m4a,mp4,3gp,amr',
-    
+
         // الفيديو (توسيع النطاق)
         'video_note_logout'    => 'nullable|file|mimes:mp4,webm,avi,mov,mkv,flv,3gp,mpeg,mpg',
     ]);
-    
-    
+
+
 
         // هنا الشرط على الوقت
 if ($order->time_of_receipt) {
@@ -895,10 +905,10 @@ $request->validate($rules);
 }
 
 
-    
 
 
-     
+
+
     /**
      * Handle file uploads and deletions for order item attachments
      *
@@ -920,7 +930,7 @@ $request->validate($rules);
              }
              $order->$column = null;
          }
-     
+
          // ✅ رفع جديد
          if ($request->hasFile($inputName)) {
              if ($order->$column) {
@@ -928,14 +938,14 @@ $request->validate($rules);
              }
              $order->$column = $request->file($inputName)->store($path, 'hetzner');
          }
-     
+
          $order->save();
      }
-     
 
 
 
-    
+
+
 
 
     /**
@@ -949,31 +959,31 @@ $request->validate($rules);
     {
         // Video
         $this->handleFileUpload($request, $order, 'video_note', 'video', 'video_note', 'uploads/signin/videos');
-    
+
         // Audio
         $this->handleFileUpload($request, $order, 'voice_note', 'audio', 'voice_note', 'uploads/signin/audios');
-    
+
         // Photo
         $this->handleFileUpload($request, $order, 'image_before_receiving', 'photo', 'image_before_receiving', 'uploads/signin/images');
     }
-    
+
     protected function handleSignoutAttachments($request, $order)
     {
         // Video
         $this->handleFileUpload($request, $order, 'video_note_logout', 'video_logout', 'video_note_logout', 'uploads/signout/videos');
-    
+
         // Audio
         $this->handleFileUpload($request, $order, 'voice_note_logout', 'audio_logout', 'voice_note_logout', 'uploads/signout/audios');
-    
+
         // Photo
         $this->handleFileUpload($request, $order, 'image_after_delivery', 'photo_logout', 'image_after_delivery', 'uploads/signout/images');
     }
-    
 
 
-    
 
-    
+
+
+
 
 
 
@@ -1077,7 +1087,7 @@ $request->validate($rules);
                 $item = StockAdjustment::findOrFail($id);
             } elseif ($type == 'insurance') {
                 $item = Order::findOrFail($id);
-                
+
                 // If insurance is being approved, trigger the verification process
                 if($item->insurance_status && $item->is_insurance_verified){
                     $item->update(["insurance_status" => null]);
